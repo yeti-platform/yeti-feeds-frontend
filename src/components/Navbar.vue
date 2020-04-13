@@ -37,3 +37,10 @@
     </template>
   </b-navbar>
 </template>
+
+<style>
+.router-link-exact-active {
+  background-color: #292929;
+  color: whitesmoke;
+}
+</style>

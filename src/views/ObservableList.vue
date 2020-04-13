@@ -6,11 +6,12 @@
         :hoverable="true"
         :narrowed="true"
         :total="tableTotal"
-        :perPage="perPage"
+        :perPage="tablePerPage"
         backend-pagination
         @page-change="onPageChange"
         :loading="loading"
         paginated
+        class="observable-table"
       >
         <template v-slot:default="observable">
           <b-table-column field="value" label="Value">
@@ -53,6 +54,7 @@
     <div class="column">
       <section>
         <b-tabs v-model="activeTab" position="is-centered" :animated="false">
+          <!-- Search tab item -->
           <b-tab-item label="Search">
             <div class="search">
               <div class="field">
@@ -70,6 +72,42 @@
                 </b-checkbox>
               </div>
             </div>
+            <br />
+            <section>
+              <article class="message tip">
+                <div class="message-body content">
+                  <p>
+                    You can run complex queries against the database using the
+                    input field above.
+                  </p>
+                  <p>
+                    By default, the query will be matched against the
+                    <code>value</code> attribute of the observables. To match
+                    against other attributes, use <code>attribute=query</code>.
+                  </p>
+
+                  <p>Examples:</p>
+                  <ul>
+                    <li>
+                      <strong>Generic tag query</strong>:
+                      <code>tags=crimeware</code>
+                    </li>
+                    <li>
+                      <strong>Gate URLs</strong>:
+                      <code>tags=zeus .php$</code> (regex <code>on</code>)
+                    </li>
+                    <li>
+                      <strong>Ransomware C2s</strong>:
+                      <code>tags=c2,ransomware</code>
+                    </li>
+                    <li>
+                      <strong>Context</strong>:
+                      <code>context.source=FeodoTracker</code>
+                    </li>
+                  </ul>
+                </div>
+              </article>
+            </section>
           </b-tab-item>
 
           <b-tab-item label="Export">
@@ -96,8 +134,8 @@ export default {
       regexSearch: false,
       observables: [],
       activeTab: 0,
-      page: 1,
-      perPage: 50,
+      tablePage: 1,
+      tablePerPage: 50,
       tableTotal: 10000,
       loading: false
     };
@@ -106,8 +144,8 @@ export default {
     this.searchObservables();
   },
   methods: {
-    onPageChange(page) {
-      this.page = page;
+    onPageChange(tablePage) {
+      this.tablePage = tablePage;
       this.searchObservables();
     },
     searchObservables() {
@@ -115,7 +153,7 @@ export default {
         filter: this.generateSearchParams(this.searchQuery),
         params: {
           regex: this.regexSearch,
-          page: this.page
+          page: this.tablePage
         }
       };
       console.log(params);
@@ -150,3 +188,9 @@ export default {
   }
 };
 </script>
+
+<style>
+.observable-table {
+  margin-top: 0.4em;
+}
+</style>
