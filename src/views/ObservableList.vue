@@ -1,7 +1,17 @@
 <template>
   <div class="observable-list columns">
     <div class="column is-three-quarters">
-      <b-table :data="observables" :hoverable="true" :narrowed="true">
+      <b-table
+        :data="observables"
+        :hoverable="true"
+        :narrowed="true"
+        :total="tableTotal"
+        :perPage="perPage"
+        backend-pagination
+        @page-change="onPageChange"
+        :loading="loading"
+        paginated
+      >
         <template v-slot:default="observable">
           <b-table-column field="value" label="Value">
             <a href="#"> {{ observable.row.value }} </a>
@@ -51,6 +61,7 @@
                   type="text"
                   placeholder="Search query + ⏎"
                   icon="search"
+                  v-on:keyup.native.enter="searchObservables"
                 />
               </div>
               <div class="field">
@@ -84,15 +95,31 @@ export default {
       searchQuery: "",
       regexSearch: false,
       observables: [],
-      activeTab: 0
+      activeTab: 0,
+      page: 1,
+      perPage: 50,
+      tableTotal: 10000,
+      loading: false
     };
   },
   mounted() {
     this.searchObservables();
   },
   methods: {
+    onPageChange(page) {
+      this.page = page;
+      this.searchObservables();
+    },
     searchObservables() {
-      var params = {};
+      var params = {
+        filter: this.generateSearchParams(this.searchQuery),
+        params: {
+          regex: this.regexSearch,
+          page: this.page
+        }
+      };
+      console.log(params);
+      this.loading = true;
       axios
         .post("http://localhost:5000/api/observablesearch/", params)
         .then(response => {
@@ -100,7 +127,25 @@ export default {
         })
         .catch(error => {
           return console.log(error);
+        })
+        .finally(() => {
+          this.loading = false;
         });
+    },
+    generateSearchParams(searchQuery) {
+      var filter = {};
+      var queries = searchQuery.split(" ");
+      var default_field = "value";
+
+      for (var i in queries) {
+        var splitted = queries[i].split("=");
+        if (splitted.length == 2) {
+          filter[splitted[0]] = splitted[1].split(",");
+        } else if (queries[i] !== "") {
+          filter[default_field] = queries[i];
+        }
+      }
+      return filter;
     }
   }
 };
