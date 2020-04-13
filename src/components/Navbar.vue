@@ -7,6 +7,9 @@
       <b-navbar-item tag="router-link" :to="{ path: '/' }">
         Search
       </b-navbar-item>
+      <b-navbar-item tag="router-link" :to="{ path: '/browse' }">
+        Browse observables
+      </b-navbar-item>
       <b-navbar-item tag="router-link" :to="{ path: '/feeds' }">
         Feeds
       </b-navbar-item>
