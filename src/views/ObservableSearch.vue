@@ -1,6 +1,6 @@
 <template>
-  <div class="home">
-    Homepage
+  <div class="observable-search">
+    Observable search, WIP
   </div>
 </template>
 
@@ -8,6 +8,6 @@
 // @ is an alias to /src
 
 export default {
-  name: "Home"
+  name: "ObservableSearch"
 };
 </script>

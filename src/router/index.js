@@ -1,20 +1,20 @@
 import Vue from "vue";
 import VueRouter from "vue-router";
-import Home from "../views/Home.vue";
+import ObservableSearch from "../views/ObservableSearch.vue";
+import FeedList from "../views/FeedList.vue";
 
 Vue.use(VueRouter);
 
 const routes = [
   {
     path: "/",
-    name: "Home",
-    component: Home
+    name: "ObservableSearch",
+    component: ObservableSearch
   },
   {
     path: "/feeds",
     name: "Feeds",
-    component: () =>
-      import(/* webpackChunkName: "about" */ "../views/FeedList.vue")
+    component: FeedList
   }
 ];
 
