@@ -110,7 +110,20 @@
           </b-tab-item>
 
           <b-tab-item label="Export">
-            Export
+            <b-field label="Select template">
+              <b-select placeholder="Select a template" expanded v-model="selectedExportTemplate">
+                <option v-for="template in exportTemplates" :value="template.id" :key="template.id">
+                  {{ template.name }}
+                </option>
+              </b-select>
+            </b-field>
+            <p>{{ tableSelectedItems.length }} items will be exported.</p>
+
+            <div class="buttons">
+              <b-button type="is-primary" @click="downloadExport">
+                Export selection
+              </b-button>
+            </div>
           </b-tab-item>
 
           <b-tab-item label="Manage tags">
@@ -162,12 +175,15 @@ export default {
       tablePerPage: 50,
       tableTotal: 10000,
       loading: false,
-      tableSelectedItems: []
+      tableSelectedItems: [],
+      exportTemplates: [],
+      selectedExportTemplate: null
     };
   },
   mounted() {
     this.searchObservables();
     this.getExistingTags();
+    this.getExportTemplates();
   },
   methods: {
     onPageChange(tablePage) {
@@ -239,6 +255,39 @@ export default {
         })
         .catch(error => {
           return console.log(error);
+        });
+    },
+    getExportTemplates() {
+      var params = {};
+      axios
+        .get("http://localhost:5000/api/exporttemplate/", params)
+        .then(response => {
+          this.exportTemplates = response.data;
+        })
+        .catch(error => {
+          console.log(error);
+        });
+    },
+    downloadExport() {
+      var params = {
+        id: this.selectedExportTemplate,
+        observables: this.tableSelectedItems.map(row => row.id)
+      };
+      console.log(params);
+      axios
+        .post("http://localhost:5000/api/exporttemplate/export", params)
+        .then(response => {
+          var fileURL = window.URL.createObjectURL(new Blob([response.data]));
+          var fileLink = document.createElement("a");
+          var fileName = response.headers["content-disposition"].split("filename=")[1];
+          fileLink.href = fileURL;
+          fileLink.setAttribute("download", fileName);
+          document.body.appendChild(fileLink);
+
+          fileLink.click();
+        })
+        .catch(error => {
+          console.log(error);
         });
     }
   },
