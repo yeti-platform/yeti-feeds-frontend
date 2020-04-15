@@ -1,11 +1,6 @@
 <template>
   <div class="home">
-    <b-table
-      :data="feeds"
-      :hoverable="true"
-      :narrowed="true"
-      :row-class="(row, index) => !row.enabled && 'disabled'"
-    >
+    <b-table :data="feeds" :hoverable="true" :narrowed="true" :row-class="(row, index) => !row.enabled && 'disabled'">
       <template v-slot:default="feed">
         <b-table-column field="name" label="Name">
           {{ feed.row.name }}
@@ -28,11 +23,7 @@
           </div>
         </b-table-column>
         <b-table-column field="refresh" label="">
-          <b-button
-            :disabled="feed.row.status === 'Updating...'"
-            @click="refresh(feed.row)"
-            size="is-small"
-          >
+          <b-button :disabled="feed.row.status === 'Updating...'" @click="refresh(feed.row)" size="is-small">
             <b-icon
               v-if="feed.row.enabled"
               pack="fas"
@@ -59,7 +50,7 @@ export default {
   },
   mounted() {
     this.listFeeds();
-    // this.timer = setInterval(this.listFeeds, 1000);
+    this.timer = setInterval(this.listFeeds, 5000);
   },
   methods: {
     toggle(feed) {
@@ -77,7 +68,11 @@ export default {
     listFeeds() {
       axios
         .get("http://localhost:5000/api/feed/")
-        .then(response => (this.feeds = response.data));
+        .then(response => (this.feeds = response.data))
+        .catch(error => {
+          console.log(error);
+        })
+        .finally(() => {});
     },
     refresh(feed) {
       var url = "http://localhost:5000/api/feed/" + feed.id + "/refresh";
