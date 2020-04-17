@@ -1,5 +1,5 @@
 <template>
-  <b-navbar class="is-dark">
+  <b-navbar class="is-dark navbar">
     <template slot="brand">
       <b-navbar-item tag="router-link" :to="{ path: '/' }"> </b-navbar-item>
     </template>
@@ -42,5 +42,9 @@
 .router-link-exact-active {
   background-color: #292929;
   color: whitesmoke;
+}
+
+.navbar {
+  margin-bottom: 1em;
 }
 </style>
