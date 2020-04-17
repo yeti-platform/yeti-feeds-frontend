@@ -179,7 +179,6 @@ export default {
   },
   mounted() {
     this.searchObservables();
-    this.getExistingTags();
     this.getExportTemplates();
   },
   methods: {
