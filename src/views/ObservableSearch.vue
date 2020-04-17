@@ -73,7 +73,7 @@ export default {
   },
   data() {
     return {
-      addMissing: true,
+      addMissing: false,
       addTags: [],
       defaultTypes: defaultTypes,
       addType: null,
