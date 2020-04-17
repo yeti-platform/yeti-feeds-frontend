@@ -12,7 +12,7 @@
           <b-field>
             <b-checkbox v-model="addMissing" class="add-missing-control">Add and tag missing observables</b-checkbox>
           </b-field>
-          <b-field :class="{ hidden: !addMissing }"><yeti-form-field v-model="addTags"></yeti-form-field></b-field>
+          <b-field :class="{ hidden: !addMissing }"><yeti-tag-input v-model="addTags"></yeti-tag-input></b-field>
           <b-field :class="{ hidden: !addMissing }">
             <b-select v-model="addType" placeholder="Force observable type">
               <option :value="null">Guess type</option>
@@ -48,7 +48,7 @@
 </template>
 
 <script>
-import YetiFormField from "@/components/TagInput";
+import YetiTagInput from "@/components/YetiTagInput";
 
 var defaultTypes = {
   Ip: "Ip",
@@ -69,7 +69,7 @@ var defaultTypes = {
 export default {
   name: "ObservableSearch",
   components: {
-    YetiFormField
+    YetiTagInput
   },
   data() {
     return {

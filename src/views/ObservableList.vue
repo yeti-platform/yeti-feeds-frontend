@@ -110,14 +110,13 @@
           </b-tab-item>
 
           <b-tab-item label="Export">
-            <b-field label="Select template">
+            <b-field label="Select template" :message="tableSelectedItems.length + ' items will be exported.'">
               <b-select placeholder="Select a template" expanded v-model="selectedExportTemplate">
                 <option v-for="template in exportTemplates" :value="template.id" :key="template.id">
                   {{ template.name }}
                 </option>
               </b-select>
             </b-field>
-            <p>{{ tableSelectedItems.length }} items will be exported.</p>
 
             <div class="buttons">
               <b-button type="is-primary" @click="downloadExport">
@@ -126,22 +125,14 @@
             </div>
           </b-tab-item>
 
-          <b-tab-item label="Manage tags">
-            <b-field label="Tag observables">
-              <b-taginput
-                v-model="selectedTags"
-                :data="filterTags"
-                autocomplete
-                icon="tag"
-                placeholder="e.g. Zeus"
-                field="name"
-              >
-              </b-taginput>
+          <b-tab-item label="Bulk tag">
+            <b-field
+              label="Select tags"
+              :message="selectedTags.length + ' tags will be applied to ' + tableSelectedItems.length + ' observables'"
+            >
+              <yeti-tag-input v-model="selectedTags"></yeti-tag-input>
             </b-field>
-            <div v-if="selectedTags">
-              <strong>{{ selectedTags.length }}</strong> tags will be applied to
-              <strong>{{ tableSelectedItems.length }}</strong> observables
-            </div>
+
             <div class="buttons">
               <b-button type="is-primary" @click="changeTags('tag')">
                 Add tag
@@ -159,25 +150,31 @@
 
 <script>
 import axios from "axios";
+import YetiTagInput from "@/components/YetiTagInput";
 
 export default {
   name: "ObservableList",
+  components: {
+    YetiTagInput
+  },
   data() {
     return {
+      // Table
       searchQuery: "",
       regexSearch: false,
       observables: [],
-      activeTab: 0,
-      existingTags: [],
-      tagName: "",
-      selectedTags: [],
       tablePage: 1,
       tablePerPage: 50,
       tableTotal: 10000,
       loading: false,
+      // Exports
       tableSelectedItems: [],
       exportTemplates: [],
-      selectedExportTemplate: null
+      selectedExportTemplate: null,
+      // Tags
+      selectedTags: [],
+      // Panel
+      activeTab: 0
     };
   },
   mounted() {
@@ -227,17 +224,6 @@ export default {
       }
       return filter;
     },
-    getExistingTags() {
-      axios
-        .get("http://localhost:5000/api/tag/")
-        .then(response => {
-          return (this.existingTags = response.data);
-        })
-        .catch(error => {
-          return console.log(error);
-        });
-    },
-
     changeTags(action) {
       var params = {
         tags: this.selectedTags.map(tag => tag.name),
