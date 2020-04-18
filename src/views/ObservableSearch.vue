@@ -40,15 +40,30 @@
         </small>
         <br /><br />
         <b-field>
-          <b-button icon-left="search" type="is-primary">Launch search</b-button>
+          <b-button icon-left="search" type="is-primary" @click="searchObservables">Launch search</b-button>
         </b-field>
+      </div>
+    </div>
+    <div class="columns" v-if="searching">
+      <div class="column is-4 is-offset-4">
+        <b-progress size="is-medium" show-value>
+          Searching...
+        </b-progress>
+      </div>
+    </div>
+    <div class="columns">
+      <div class="column">
+        <search-results v-if="searchResults" :searchResults="searchResults"></search-results>
       </div>
     </div>
   </div>
 </template>
 
 <script>
+import axios from "axios";
+
 import YetiTagInput from "@/components/YetiTagInput";
+import SearchResults from "@/components/SearchResults";
 
 var defaultTypes = {
   Ip: "Ip",
@@ -69,7 +84,8 @@ var defaultTypes = {
 export default {
   name: "ObservableSearch",
   components: {
-    YetiTagInput
+    YetiTagInput,
+    SearchResults
   },
   data() {
     return {
@@ -78,8 +94,31 @@ export default {
       defaultTypes: defaultTypes,
       addType: null,
       uploadFile: null,
-      textSearch: ""
+      textSearch: "",
+      searchResults: null,
+      searching: false
     };
+  },
+  methods: {
+    searchObservables() {
+      this.searching = true;
+      this.searchResults = null;
+      var params = {
+        "bulk-text": this.textSearch
+      };
+      axios
+        .post("http://localhost:5000/api/observable/search", params)
+        .then(response => {
+          console.log(response);
+          this.searchResults = response.data;
+        })
+        .catch(error => {
+          return console.log(error);
+        })
+        .finally(() => {
+          this.searching = false;
+        });
+    }
   }
 };
 </script>
@@ -88,7 +127,12 @@ export default {
 .add-tags label {
   vertical-align: middle;
 }
+
 .hidden {
   opacity: 0;
+}
+
+.searching.column {
+  margin-top: 5em;
 }
 </style>
