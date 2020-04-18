@@ -110,7 +110,7 @@
           </b-tab-item>
 
           <b-tab-item label="Export">
-            <b-field label="Select template" :message="tableSelectedItems.length + ' items will be exported.'">
+            <b-field label="Select template" :message="totalSelectedItems + ' items will be exported.'">
               <b-select placeholder="Select a template" expanded v-model="selectedExportTemplate">
                 <option v-for="template in exportTemplates" :value="template.id" :key="template.id">
                   {{ template.name }}
@@ -243,9 +243,8 @@ export default {
         });
     },
     getExportTemplates() {
-      var params = {};
       axios
-        .get("http://localhost:5000/api/exporttemplate/", params)
+        .get("http://localhost:5000/api/exporttemplate/")
         .then(response => {
           this.exportTemplates = response.data;
         })
@@ -255,9 +254,18 @@ export default {
     },
     downloadExport() {
       var params = {
-        id: this.selectedExportTemplate,
-        observables: this.tableSelectedItems.map(row => row.id)
+        id: this.selectedExportTemplate
       };
+      if (this.tableSelectedItems.length) {
+        params["observables"] = this.tableSelectedItems.map(row => row.id);
+      } else {
+        params["query"] = { filter: this.generateSearchParams(this.searchQuery) };
+        params["query"]["params"] = {
+          regex: this.regexSearch,
+          page: this.tablePage
+        };
+      }
+
       console.log(params);
       axios
         .post("http://localhost:5000/api/exporttemplate/export", params)
@@ -286,6 +294,9 @@ export default {
             .indexOf(this.tagName.toLowerCase()) >= 0
         );
       });
+    },
+    totalSelectedItems() {
+      return this.tableSelectedItems.length > 0 ? this.tableSelectedItems.length : this.tableTotal;
     }
   }
 };
