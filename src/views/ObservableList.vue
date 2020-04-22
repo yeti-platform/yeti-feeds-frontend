@@ -76,37 +76,35 @@
               </div>
             </div>
             <br />
-            <section>
-              <article class="message tip">
-                <div class="message-body content">
-                  <p>
-                    You can run complex queries against the database using the input field above.
-                  </p>
-                  <p>
-                    By default, the query will be matched against the
-                    <code>value</code> attribute of the observables. To match against other attributes, use
-                    <code>attribute=query</code>.
-                  </p>
+            <article class="message tip">
+              <div class="message-body content">
+                <p>
+                  You can run complex queries against the database using the input field above.
+                </p>
+                <p>
+                  By default, the query will be matched against the
+                  <code>value</code> attribute of the observables. To match against other attributes, use
+                  <code>attribute=query</code>.
+                </p>
 
-                  <p>Examples:</p>
-                  <ul>
-                    <li>
-                      <strong>Generic tag query</strong>:
-                      <code>tags=crimeware</code>
-                    </li>
-                    <li><strong>Gate URLs</strong>: <code>tags=zeus .php$</code> (regex <code>on</code>)</li>
-                    <li>
-                      <strong>Ransomware C2s</strong>:
-                      <code>tags=c2,ransomware</code>
-                    </li>
-                    <li>
-                      <strong>Context</strong>:
-                      <code>context.source=FeodoTracker</code>
-                    </li>
-                  </ul>
-                </div>
-              </article>
-            </section>
+                <p>Examples:</p>
+                <ul>
+                  <li>
+                    <strong>Generic tag query</strong>:
+                    <code>tags=crimeware</code>
+                  </li>
+                  <li><strong>Gate URLs</strong>: <code>tags=zeus .php$</code> (regex <code>on</code>)</li>
+                  <li>
+                    <strong>Ransomware C2s</strong>:
+                    <code>tags=c2,ransomware</code>
+                  </li>
+                  <li>
+                    <strong>Context</strong>:
+                    <code>context.source=FeodoTracker</code>
+                  </li>
+                </ul>
+              </div>
+            </article>
           </b-tab-item>
 
           <b-tab-item label="Export">
