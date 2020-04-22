@@ -8,10 +8,10 @@
             <header class="card-header is-warning">
               <p class="card-header-title">
                 <b-icon pack="fas" icon="crosshairs" size="is-small"></b-icon>
-                Indicator matches
+                Indicator matches <b-tag rounded type="is-dark">{{ searchResults["matches"].length }}</b-tag>
               </p>
             </header>
-            <div class="card-content">
+            <div class="card-content" v-if="searchResults['matches'].length">
               <b-table :data="searchResults['matches']" :narrowed="true">
                 <template v-slot:default="match">
                   <b-table-column field="name" label="Name">
@@ -43,10 +43,10 @@
             <header class="card-header is-danger">
               <p class="card-header-title">
                 <b-icon pack="fas" icon="project-diagram" size="is-small"></b-icon>
-                Related entities
+                Related entities <b-tag rounded type="is-dark">{{ searchResults["entities"].length }}</b-tag>
               </p>
             </header>
-            <div class="card-content">
+            <div class="card-content" v-if="searchResults['entities'].length">
               <b-table :data="searchResults['entities']" :narrowed="true">
                 <template v-slot:default="entity">
                   <b-table-column field="name" label="Name">
@@ -68,10 +68,10 @@
             <header class="card-header is-info">
               <p class="card-header-title">
                 <b-icon pack="fas" icon="database" size="is-small"></b-icon>
-                Observables found in database
+                Observables found in database <b-tag rounded type="is-dark">{{ searchResults["known"].length }}</b-tag>
               </p>
             </header>
-            <div class="card-content">
+            <div class="card-content" v-if="searchResults['known'].length">
               <b-table :data="searchResults['known']" :narrowed="true">
                 <template v-slot:default="known">
                   <b-table-column field="value" label="Value">
@@ -96,6 +96,24 @@
                   </b-table-column>
                 </template>
               </b-table>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Unkown -->
+      <div class="tile">
+        <div class="tile is-parent">
+          <div class="tile is-child card">
+            <header class="card-header is-light">
+              <p class="card-header-title">
+                <b-icon pack="fas" icon="question" size="is-small"></b-icon>
+                Unknown observables <b-tag rounded type="is-dark">{{ searchResults["unknown"].length }}</b-tag>
+              </p>
+            </header>
+            <div class="card-content" v-if="searchResults['unknown'].length">
+              <ul>
+                <li v-for="observable in searchResults['unknown']" v-bind:key="observable">{{ observable }}</li>
+              </ul>
             </div>
           </div>
         </div>
@@ -131,5 +149,13 @@ p .icon {
 
 .card-header.is-info {
   background: $info;
+}
+
+.card-header.is-light {
+  background: $light;
+}
+
+span.tag {
+  margin-left: 0.5rem;
 }
 </style>
