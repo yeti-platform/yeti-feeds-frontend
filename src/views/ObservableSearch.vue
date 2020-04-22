@@ -14,13 +14,9 @@
           <div class="card-content">
             <div class="search">
               <div class="field">
-                <b-input
-                  v-model="searchQuery"
-                  type="text"
-                  placeholder="Search query + ⏎"
-                  icon="search"
-                  v-on:keyup.native.enter="searchObservables"
-                />
+                <form v-on:submit="advancedSearchSubmit">
+                  <b-input v-model="searchQuery" type="text" placeholder="Search query + ⏎" icon="search" />
+                </form>
               </div>
             </div>
             <br />
@@ -169,6 +165,10 @@ export default {
         .finally(() => {
           this.searching = false;
         });
+    },
+    advancedSearchSubmit(e) {
+      this.$router.push({ path: "/browse", query: { q: this.searchQuery } });
+      e.preventDefault();
     }
   }
 };

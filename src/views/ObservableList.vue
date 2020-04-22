@@ -176,8 +176,12 @@ export default {
     };
   },
   mounted() {
-    this.searchObservables();
     this.getExportTemplates();
+    console.log(this.$route.query.q);
+    if (this.$route.query.q !== "") {
+      this.searchQuery = this.$route.query.q;
+    }
+    this.searchObservables();
   },
   methods: {
     onPageChange(tablePage) {
