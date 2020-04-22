@@ -167,7 +167,10 @@ export default {
         });
     },
     advancedSearchSubmit(e) {
-      this.$router.push({ path: "/browse", query: { q: this.searchQuery } });
+      this.$router.push({
+        name: "ObservableList",
+        query: { q: this.searchQuery }
+      });
       e.preventDefault();
     }
   }

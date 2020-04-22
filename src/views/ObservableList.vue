@@ -155,10 +155,15 @@ export default {
   components: {
     YetiTagInput
   },
+  props: {
+    searchQuery: {
+      type: String,
+      default: ""
+    }
+  },
   data() {
     return {
       // Table
-      searchQuery: "",
       regexSearch: false,
       observables: [],
       tablePage: 1,
@@ -177,10 +182,6 @@ export default {
   },
   mounted() {
     this.getExportTemplates();
-    console.log(this.$route.query.q);
-    if (this.$route.query.q !== "") {
-      this.searchQuery = this.$route.query.q;
-    }
     this.searchObservables();
   },
   methods: {

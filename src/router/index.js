@@ -15,7 +15,11 @@ const routes = [
   {
     path: "/browse",
     name: "ObservableList",
-    component: ObservableList
+    component: ObservableList,
+    props: route => {
+      return { searchQuery: route.query.q };
+    }
+  },
   },
   {
     path: "/feeds",
