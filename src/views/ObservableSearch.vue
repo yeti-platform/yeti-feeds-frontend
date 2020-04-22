@@ -2,9 +2,55 @@
   <div class="observable-search">
     <div class="columns">
       <div class="column is-one-third">
-        <h1>Search & add</h1>
+        <h1 class="is-size-2">Search & add</h1>
         <div class="content">
-          Blah
+          <p><strong>Format</strong>: one observable per line (for both text and file)</p>
+          <p>
+            Use the checkbox to automatically <strong>add</strong> unknown observables to the database (write operation)
+          </p>
+        </div>
+        <div class="card">
+          <div class="card-header is-info"><p class="card-header-title">Advanced search</p></div>
+          <div class="card-content">
+            <div class="search">
+              <div class="field">
+                <b-input
+                  v-model="searchQuery"
+                  type="text"
+                  placeholder="Search query + ⏎"
+                  icon="search"
+                  v-on:keyup.native.enter="searchObservables"
+                />
+              </div>
+            </div>
+            <br />
+            <article class="message tip">
+              <div class="message-body content ">
+                <p>
+                  By default, the query will be matched against the
+                  <code>value</code> attribute of the observables. To match against other attributes, use
+                  <code>attribute=query</code>.
+                </p>
+
+                <p>Examples:</p>
+                <ul>
+                  <li>
+                    <strong>Generic tag query</strong>:
+                    <code>tags=crimeware</code>
+                  </li>
+                  <li><strong>Gate URLs</strong>: <code>tags=zeus .php$</code> (regex <code>on</code>)</li>
+                  <li>
+                    <strong>Ransomware C2s</strong>:
+                    <code>tags=c2,ransomware</code>
+                  </li>
+                  <li>
+                    <strong>Context</strong>:
+                    <code>context.source=FeodoTracker</code>
+                  </li>
+                </ul>
+              </div>
+            </article>
+          </div>
         </div>
       </div>
       <div class="column is-two-thirds ">
@@ -52,8 +98,10 @@
       </div>
     </div>
     <div class="columns">
-      <div class="column">
-        <search-results v-if="searchResults" :searchResults="searchResults"></search-results>
+      <div class="column" v-if="searchResults">
+        <h1 class="is-size-2">Search results</h1>
+        <br />
+        <search-results :searchResults="searchResults"></search-results>
       </div>
     </div>
   </div>
@@ -96,7 +144,9 @@ export default {
       uploadFile: null,
       textSearch: "",
       searchResults: null,
-      searching: false
+      searchQuery: null,
+      searching: false,
+      notFound: false
     };
   },
   methods: {
@@ -104,10 +154,11 @@ export default {
       this.searching = true;
       this.searchResults = null;
       var params = {
-        "bulk-text": this.textSearch
+        observables: this.textSearch.split("\n"),
+        add_unknown: this.addMissing
       };
       axios
-        .post("http://localhost:5000/api/observable/search", params)
+        .post("http://localhost:5000/api/analysis/match", params)
         .then(response => {
           console.log(response);
           this.searchResults = response.data;
@@ -123,7 +174,13 @@ export default {
 };
 </script>
 
-<style>
+<style lang="scss">
+@import "@/style.scss";
+
+.card-header.is-info {
+  background: $info;
+}
+
 .add-tags label {
   vertical-align: middle;
 }
