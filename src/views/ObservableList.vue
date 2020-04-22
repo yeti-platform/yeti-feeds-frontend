@@ -17,7 +17,9 @@
       >
         <template v-slot:default="observable">
           <b-table-column field="value" label="Value">
-            <a href="#"> {{ observable.row.value }} </a>
+            <router-link :to="{ name: 'ObservableDetails', params: { id: observable.row.id } }">
+              {{ observable.row.value }}
+            </router-link>
           </b-table-column>
 
           <b-table-column field="tags" label="Tags">
