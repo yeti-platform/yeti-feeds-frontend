@@ -163,7 +163,7 @@ export default {
       observables: [],
       tablePage: 1,
       tablePerPage: 50,
-      tableTotal: 10000,
+      tableTotal: 500, // 5 pages worth should be enough to have time to get a more accurate count
       loading: false,
       // Exports
       tableSelectedItems: [],
@@ -197,6 +197,7 @@ export default {
         }
       };
       console.log(params);
+      this.countTotal(params);
       this.loading = true;
       axios
         .post("http://localhost:5000/api/observablesearch/", params)
@@ -280,6 +281,16 @@ export default {
           document.body.appendChild(fileLink);
 
           fileLink.click();
+        })
+        .catch(error => {
+          console.log(error);
+        });
+    },
+    countTotal(params) {
+      axios
+        .post("http://localhost:5000/api/observablesearch/total", params)
+        .then(response => {
+          this.tableTotal = response.data.total;
         })
         .catch(error => {
           console.log(error);
