@@ -1,7 +1,7 @@
 <template>
   <b-taginput
     label="tags"
-    v-model="selectedTags"
+    v-model="value"
     :data="filterTags"
     autocomplete
     icon="tag"
@@ -18,8 +18,7 @@ export default {
   data() {
     return {
       existingTags: [],
-      tagName: "",
-      selectedTags: []
+      tagName: ""
     };
   },
   props: ["value"],
@@ -38,7 +37,7 @@ export default {
         });
     },
     updateSelected() {
-      this.$emit("input", this.selectedTags);
+      this.$emit("input", this.value);
     }
   },
   computed: {
@@ -54,7 +53,7 @@ export default {
     }
   },
   watch: {
-    selectedTags: "updateSelected"
+    value: "updateSelected"
   }
 };
 </script>
