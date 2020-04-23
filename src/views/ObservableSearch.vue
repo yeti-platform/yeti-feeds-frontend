@@ -154,7 +154,7 @@ export default {
         add_unknown: this.addMissing
       };
       axios
-        .post("http://localhost:5000/api/analysis/match", params)
+        .post("/api/analysis/match", params)
         .then(response => {
           console.log(response);
           this.searchResults = response.data;
