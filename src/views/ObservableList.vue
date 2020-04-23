@@ -203,7 +203,7 @@ export default {
       this.countTotal(params);
       this.loading = true;
       axios
-        .post("http://localhost:5000/api/observablesearch/", params)
+        .post("/api/observablesearch/", params)
         .then(response => {
           return (this.observables = response.data);
         })
@@ -235,7 +235,7 @@ export default {
         ids: this.tableSelectedItems.map(item => item.id)
       };
       axios
-        .post(`http://localhost:5000/api/observable/bulk-${action}`, params)
+        .post(`/api/observable/bulk-${action}`, params)
         .then(() => {
           this.searchObservables();
           this.$buefy.notification.open(
@@ -250,7 +250,7 @@ export default {
     },
     getExportTemplates() {
       axios
-        .get("http://localhost:5000/api/exporttemplate/")
+        .get("/api/exporttemplate/")
         .then(response => {
           this.exportTemplates = response.data;
         })
@@ -274,7 +274,7 @@ export default {
 
       console.log(params);
       axios
-        .post("http://localhost:5000/api/exporttemplate/export", params)
+        .post("/api/exporttemplate/export", params)
         .then(response => {
           var fileURL = window.URL.createObjectURL(new Blob([response.data]));
           var fileLink = document.createElement("a");
@@ -291,7 +291,7 @@ export default {
     },
     countTotal(params) {
       axios
-        .post("http://localhost:5000/api/observablesearch/total", params)
+        .post("/api/observablesearch/total", params)
         .then(response => {
           this.tableTotal = response.data.total;
         })

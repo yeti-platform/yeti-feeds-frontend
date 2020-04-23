@@ -29,7 +29,7 @@ export default {
   methods: {
     getExistingTags() {
       axios
-        .get("http://localhost:5000/api/tag/")
+        .get("/api/tag/")
         .then(response => {
           return (this.existingTags = response.data);
         })

@@ -21,7 +21,7 @@ export default {
   methods: {
     getObservableDetails() {
       axios
-        .get(`http://localhost:5000/api/observable/${this.id}`)
+        .get(`/api/observable/${this.id}`)
         .then(response => {
           this.observable = response.data;
         })

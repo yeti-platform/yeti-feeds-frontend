@@ -55,7 +55,7 @@ export default {
   methods: {
     toggle(feed) {
       console.log(feed);
-      var url = "http://localhost:5000/api/feed/" + feed.id + "/toggle";
+      var url = "/api/feed/" + feed.id + "/toggle";
       axios
         .post(url)
         .then(() => {
@@ -67,7 +67,7 @@ export default {
     },
     listFeeds() {
       axios
-        .get("http://localhost:5000/api/feed/")
+        .get("/api/feed/")
         .then(response => (this.feeds = response.data))
         .catch(error => {
           console.log(error);
@@ -75,7 +75,7 @@ export default {
         .finally(() => {});
     },
     refresh(feed) {
-      var url = "http://localhost:5000/api/feed/" + feed.id + "/refresh";
+      var url = "/api/feed/" + feed.id + "/refresh";
       axios
         .post(url)
         .then(() => {})
