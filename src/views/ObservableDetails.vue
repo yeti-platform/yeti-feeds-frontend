@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="tile is-ancestor">
+    <div class="tile is-ancestor" v-if="observable">
       <div class="tile is-vertical is-8 is-parent">
         <nav class="tile panel is-child">
           <p class="panel-heading">
@@ -19,7 +19,8 @@
               <template slot="header">
                 <b-icon icon="info"></b-icon>
                 <span>
-                  Context <b-tag rounded> {{ observable.context.length }} </b-tag>
+                  Context
+                  <b-tag rounded>{{ observable.context.length }}</b-tag>
                 </span>
               </template>
               <nav class="panel" v-for="(context, index) in observable.context" v-bind:key="index">
@@ -39,18 +40,19 @@
             <b-tab-item>
               <template slot="header">
                 <b-icon icon="sitemap"></b-icon>
-                <span> Related observables <b-tag rounded> 0 </b-tag> </span>
+                <span>
+                  Related observables
+                  <b-tag rounded>0</b-tag>
+                </span>
               </template>
-              <div>TBD</div>
+              <related-observables :id="id"></related-observables>
             </b-tab-item>
           </b-tabs>
         </div>
       </div>
       <div class="tile is-vertical is-parent">
         <nav class="tile panel is-child">
-          <p class="panel-heading">
-            Info
-          </p>
+          <p class="panel-heading">Info</p>
           <div class="panel-block">
             <table class="table is-fullwidth">
               <tbody v-if="observable['type'] == 'Hostname'">
@@ -71,9 +73,7 @@
           </div>
         </nav>
         <nav class="tile panel is-child">
-          <p class="panel-heading">
-            Tags
-          </p>
+          <p class="panel-heading">Tags</p>
           <div class="panel-block">
             <b-field>
               <yeti-tag-input v-model="newTags"></yeti-tag-input>
@@ -91,15 +91,17 @@
 <script>
 import axios from "axios";
 import YetiTagInput from "@/components/YetiTagInput";
+import RelatedObservables from "@/components/RelatedObservables";
 
 export default {
   props: ["id"],
   components: {
-    YetiTagInput
+    YetiTagInput,
+    RelatedObservables
   },
   data() {
     return {
-      observable: {},
+      observable: null,
       newTags: [],
       activeTab: null
     };
@@ -135,6 +137,9 @@ export default {
         })
         .finally();
     }
+  },
+  watch: {
+    id: "getObservableDetails"
   }
 };
 </script>
