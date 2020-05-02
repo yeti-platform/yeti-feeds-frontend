@@ -22,7 +22,7 @@ const routes = [
     }
   },
   {
-    path: "/:id",
+    path: "/observable/:id([a-z0-9]{24})",
     name: "ObservableDetails",
     component: ObservableDetails,
     props: true
