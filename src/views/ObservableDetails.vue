@@ -59,22 +59,7 @@
           <nav class="tile panel is-child">
             <p class="panel-heading">Info</p>
             <div class="panel-block">
-              <table class="table is-fullwidth">
-                <tbody v-if="observable['type'] == 'Hostname'">
-                  <tr>
-                    <th>Created</th>
-                    <td>{{ observable["created"] }}</td>
-                  </tr>
-                  <tr>
-                    <th>Domain?</th>
-                    <td>{{ observable["domain"] }}</td>
-                  </tr>
-                  <tr>
-                    <th>IDNA</th>
-                    <td>{{ observable["idna"] }}</td>
-                  </tr>
-                </tbody>
-              </table>
+              <observable-info-table :observable="observable"></observable-info-table>
             </div>
           </nav>
           <nav class="tile panel is-child">
@@ -98,12 +83,14 @@
 import axios from "axios";
 import YetiTagInput from "@/components/YetiTagInput";
 import RelatedObservables from "@/components/RelatedObservables";
+import ObservableInfoTable from "@/components/ObservableInfoTable";
 
 export default {
   props: ["id"],
   components: {
     YetiTagInput,
-    RelatedObservables
+    RelatedObservables,
+    ObservableInfoTable
   },
   data() {
     return {
