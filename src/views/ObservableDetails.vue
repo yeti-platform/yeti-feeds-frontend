@@ -1,5 +1,5 @@
 <template>
-  <div class="columns">
+  <div class="columns" v-if="observable">
     <div class="column is-8">
       <div class="tile is-ancestor">
         <div class="tile is-vertical is-parent">
@@ -43,10 +43,10 @@
                   <b-icon icon="sitemap"></b-icon>
                   <span>
                     Related observables
-                    <b-tag rounded>0</b-tag>
+                    <b-tag rounded> {{ totalRelated || "?" }}</b-tag>
                   </span>
                 </template>
-                <related-observables :id="id"></related-observables>
+                <related-observables :id="id" @totalUpdated="value => (totalRelated = value)"></related-observables>
               </b-tab-item>
             </b-tabs>
           </div>
@@ -109,7 +109,8 @@ export default {
     return {
       observable: null,
       newTags: [],
-      activeTab: null
+      activeTab: null,
+      totalRelated: 0
     };
   },
   mounted() {

@@ -1,6 +1,18 @@
 <template>
   <div>
-    <b-table :data="links" :hoverable="true" :narrowed="true" v-if="links">
+    <b-table
+      :data="links"
+      :hoverable="true"
+      :narrowed="true"
+      v-if="links"
+      :loading="loading"
+      paginated
+      backend-pagination
+      :total="total"
+      :per-page="perPage"
+      :current-page.sync="page"
+      @page-change="onPageChange"
+    >
       <template v-slot:default="link">
         <b-table-column field="value" label="Value">
           <router-link :to="{ name: 'ObservableDetails', params: { id: link.row.target.id } }">
@@ -38,23 +50,28 @@ export default {
   props: ["id"],
   data() {
     return {
-      links: null
+      links: [],
+      page: 1,
+      perPage: 10,
+      total: 500,
+      loading: false
     };
   },
   mounted() {
     this.fetchNeighbors();
+    this.countTotal();
   },
   methods: {
     fetchNeighbors() {
-      this.links = null;
-      var params = {
-        pagination: {
-          page: 0,
-          range: 50
+      var pagination = {
+        params: {
+          page: this.page,
+          range: this.perPage
         }
       };
+      this.loading = true;
       axios
-        .post(`/api/neighbors/tuples/Observable/${this.id}/Observable`, params)
+        .post(`/api/neighbors/tuples/Observable/${this.id}/Observable`, pagination)
         .then(response => {
           this.links = response.data.links;
           this.links.map(link => {
@@ -64,11 +81,31 @@ export default {
         .catch(error => {
           console.log(error);
         })
-        .finally(() => {});
+        .finally(() => (this.loading = false));
+    },
+    countTotal() {
+      axios
+        .get(`/api/neighbors/tuples/Observable/${this.id}/Observable/total`)
+        .then(response => {
+          this.total = response.data.total;
+          this.$emit("totalUpdated", this.total);
+        })
+        .catch(error => {
+          console.log(error);
+        });
+    },
+    onPageChange(page) {
+      this.page = page;
+      this.fetchNeighbors();
     }
   },
   watch: {
-    id: "fetchNeighbors"
+    id: function() {
+      this.page = 1;
+      this.total = 500;
+      this.fetchNeighbors();
+      this.countTotal();
+    }
   }
 };
 </script>
