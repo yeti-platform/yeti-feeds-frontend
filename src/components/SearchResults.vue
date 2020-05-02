@@ -8,7 +8,7 @@
             <header class="card-header is-warning">
               <p class="card-header-title">
                 <b-icon pack="fas" icon="crosshairs" size="is-small"></b-icon>
-                Indicator matches <b-tag rounded type="is-dark">{{ searchResults["matches"].length }}</b-tag>
+                Indicator matches <b-tag rounded type="is-dark">{{ searchResults.matches.length }}</b-tag>
               </p>
             </header>
             <div class="card-content" v-if="searchResults['matches'].length">
@@ -43,7 +43,7 @@
             <header class="card-header is-danger">
               <p class="card-header-title">
                 <b-icon pack="fas" icon="project-diagram" size="is-small"></b-icon>
-                Related entities <b-tag rounded type="is-dark">{{ searchResults["entities"].length }}</b-tag>
+                Related entities <b-tag rounded type="is-dark">{{ searchResults.entities.length }}</b-tag>
               </p>
             </header>
             <div class="card-content" v-if="searchResults['entities'].length">
@@ -68,7 +68,7 @@
             <header class="card-header is-info">
               <p class="card-header-title">
                 <b-icon pack="fas" icon="database" size="is-small"></b-icon>
-                Observables found in database <b-tag rounded type="is-dark">{{ searchResults["known"].length }}</b-tag>
+                Observables found in database <b-tag rounded type="is-dark">{{ searchResults.known.length }}</b-tag>
               </p>
             </header>
             <div class="card-content" v-if="searchResults['known'].length">
@@ -107,7 +107,7 @@
             <header class="card-header is-light">
               <p class="card-header-title">
                 <b-icon pack="fas" icon="question" size="is-small"></b-icon>
-                Unknown observables <b-tag rounded type="is-dark">{{ searchResults["unknown"].length }}</b-tag>
+                Unknown observables <b-tag rounded type="is-dark">{{ searchResults.unknown.length }}</b-tag>
               </p>
             </header>
             <div class="card-content" v-if="searchResults['unknown'].length">

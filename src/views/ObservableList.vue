@@ -239,7 +239,7 @@ export default {
         .then(() => {
           this.searchObservables();
           this.$buefy.notification.open(
-            `${params["tags"].length} tags succesfully ${action === "tag" ? "added" : "removed"}.`
+            `${params.tags.length} tags succesfully ${action === "tag" ? "added" : "removed"}.`
           );
           this.selectedTags = [];
           this.tableSelectedItems = [];
@@ -263,10 +263,10 @@ export default {
         id: this.selectedExportTemplate
       };
       if (this.tableSelectedItems.length) {
-        params["observables"] = this.tableSelectedItems.map(row => row.id);
+        params.observables = this.tableSelectedItems.map(row => row.id);
       } else {
-        params["query"] = { filter: this.generateSearchParams(this.searchQuery) };
-        params["query"]["params"] = {
+        params.query = { filter: this.generateSearchParams(this.searchQuery) };
+        params.query.params = {
           regex: this.regexSearch,
           page: this.tablePage
         };
