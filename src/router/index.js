@@ -4,11 +4,11 @@ import ObservableSearch from "../views/ObservableSearch.vue";
 import ObservableList from "../views/ObservableList.vue";
 import ObservableDetails from "../views/ObservableDetails.vue";
 import FeedList from "../views/FeedList.vue";
+import ExportList from "../views/ExportList.vue";
 
 Vue.use(VueRouter);
 
-const routes = [
-  {
+const routes = [{
     path: "/",
     name: "ObservableSearch",
     component: ObservableSearch
@@ -18,7 +18,9 @@ const routes = [
     name: "ObservableList",
     component: ObservableList,
     props: route => {
-      return { searchQuery: route.query.q };
+      return {
+        searchQuery: route.query.q
+      };
     }
   },
   {
@@ -31,6 +33,11 @@ const routes = [
     path: "/feeds",
     name: "Feeds",
     component: FeedList
+  },
+  {
+    path: "/exports",
+    name: "Exports",
+    component: ExportList
   }
 ];
 
