@@ -3,23 +3,23 @@
     <b-table :data="feeds" :hoverable="true" :narrowed="true" :row-class="getRowClass">
       <template v-slot:default="feed">
         <b-table-column field="name" label="Name">
-          {{ feed.row.name }}
+          <strong>{{ feed.row.name }}</strong>
         </b-table-column>
         <b-table-column field="frequency" label="Runs every">
           {{ feed.row.frequency }}
         </b-table-column>
         <b-table-column field="last_run" label="Last run">
-          {{ feed.row.last_run }}
+          {{ feed.row.last_run || "Never" }}
         </b-table-column>
         <b-table-column field="description" label="Description">
           {{ feed.row.description }}
         </b-table-column>
         <b-table-column field="status" label="Status">
-          {{ feed.row.status }}
+          {{ feed.row.status || "N/A" }}
         </b-table-column>
         <b-table-column field="toggle" label="Toggle">
           <div @click="toggle(feed.row)" class="toggle">
-            <b-switch v-model="feed.row.enabled"> </b-switch>
+            <b-switch v-model="feed.row.enabled" :disabled="feed.row.status === 'Updating...'"> </b-switch>
           </div>
         </b-table-column>
         <b-table-column field="refresh" label="">
