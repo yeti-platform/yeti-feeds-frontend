@@ -50,7 +50,12 @@ export default {
   },
   mounted() {
     this.listFeeds();
+  },
+  created() {
     this.timer = setInterval(this.listFeeds, 5000);
+  },
+  beforeDestroy() {
+    clearInterval(this.timer);
   },
   methods: {
     toggle(feed) {
