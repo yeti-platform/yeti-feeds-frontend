@@ -7,7 +7,7 @@
       </tr>
       <tr>
         <th>Domain?</th>
-        <td>{{ observable.domain }}</td>
+        <td>{{ observable.domain ? "Yes" : "No" }}</td>
       </tr>
       <tr>
         <th>IDNA</th>
