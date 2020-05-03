@@ -58,7 +58,9 @@
           <b-field :class="{ hidden: !addMissing }">
             <b-select v-model="addType" placeholder="Force observable type">
               <option :value="null">Guess type</option>
-              <option v-for="type in defaultTypes" v-bind:key="type">{{ type }}</option>
+              <option v-for="type in Object.keys(defaultTypes)" v-bind:key="type" :value="type">
+                {{ defaultType[type] }}
+              </option>
             </b-select>
           </b-field>
         </b-field>
@@ -110,19 +112,19 @@ import YetiTagInput from "@/components/YetiTagInput";
 import SearchResults from "@/components/SearchResults";
 
 var defaultTypes = {
-  Ip: "Ip",
-  AutonomousSystem: "AutonomousSystem",
-  Url: "Url",
+  Ip: "IP",
+  AutonomousSystem: "Autonomous System",
+  Url: "URL",
   Hostname: "Hostname",
   Hash: "Hash",
   File: "File",
   Certificate: "Certificate",
-  CertificateSubject: "CertificateSubject",
+  CertificateSubject: "Certificate Subject",
   Email: "Email",
   Text: "Text",
   Bitcoin: "Bitcoin",
   Path: "Path",
-  MacAddress: "MacAddress"
+  MacAddress: "MAC address"
 };
 
 export default {

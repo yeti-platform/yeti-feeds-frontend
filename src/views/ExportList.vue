@@ -147,7 +147,7 @@ import axios from "axios";
 import YetiTagInput from "@/components/YetiTagInput";
 
 var defaultTypes = {
-  Ip: "Ip",
+  Ip: "IP",
   AutonomousSystem: "Autonomous System",
   Url: "URL",
   Hostname: "Hostname",
@@ -159,7 +159,7 @@ var defaultTypes = {
   Text: "Text",
   Bitcoin: "Bitcoin address",
   Path: "Path",
-  MacAddress: "MAC Address"
+  MacAddress: "MAC address"
 };
 
 export default {
