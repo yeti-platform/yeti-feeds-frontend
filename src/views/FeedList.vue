@@ -1,6 +1,6 @@
 <template>
   <div class="home">
-    <b-table :data="feeds" :hoverable="true" :narrowed="true" :row-class="(row, index) => !row.enabled && 'disabled'">
+    <b-table :data="feeds" :hoverable="true" :narrowed="true" :row-class="getRowClass">
       <template v-slot:default="feed">
         <b-table-column field="name" label="Name">
           {{ feed.row.name }}
@@ -85,6 +85,14 @@ export default {
     },
     isRefreshing(feed) {
       return feed.status === "Updating...";
+    },
+    getRowClass(row) {
+      if (!row.enabled) {
+        return "disabled";
+      }
+      if (row.status === "OK") {
+        return "is-success";
+      }
     }
   }
 };
@@ -93,6 +101,10 @@ export default {
 <style>
 .disabled {
   opacity: 0.5;
+}
+
+.is-success {
+  background: rgb(172, 255, 172);
 }
 
 div.toggle {
