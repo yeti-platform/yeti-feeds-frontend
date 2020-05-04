@@ -12,65 +12,62 @@
           <b-table-column field="name" label="Name">
             <strong>{{ singleExport.row.name }}</strong>
           </b-table-column>
-          <b-table-column field="frequency" label="Runs every">
-            {{ singleExport.row.frequency }}
-          </b-table-column>
-          <b-table-column field="last_run" label="Last run">
-            {{ singleExport.row.last_run || "Never" }}
-          </b-table-column>
-          <b-table-column field="description" label="Description">
-            {{ singleExport.row.description }}
-          </b-table-column>
-          <b-table-column field="acts_on" label="Acts on">
-            {{ singleExport.row.acts_on }}
-          </b-table-column>
+          <b-table-column field="frequency" label="Runs every">{{ singleExport.row.frequency }}</b-table-column>
+          <b-table-column field="last_run" label="Last run">{{ singleExport.row.last_run || "Never" }}</b-table-column>
+          <b-table-column field="description" label="Description">{{ singleExport.row.description }}</b-table-column>
+          <b-table-column field="acts_on" label="Acts on">{{ singleExport.row.acts_on }}</b-table-column>
           <b-table-column field="ignore" label="Ignore">
             <b-taglist>
-              <b-tag v-for="tag in singleExport.row.ignore_tags" v-bind:key="tag">
-                {{ tag }}
-              </b-tag>
+              <b-tag v-for="tag in singleExport.row.ignore_tags" v-bind:key="tag">{{ tag }}</b-tag>
             </b-taglist>
           </b-table-column>
           <b-table-column field="include" label="include">
             <b-taglist>
-              <b-tag v-for="tag in singleExport.row.include_tags" v-bind:key="tag">
-                {{ tag }}
-              </b-tag>
+              <b-tag v-for="tag in singleExport.row.include_tags" v-bind:key="tag">{{ tag }}</b-tag>
             </b-taglist>
           </b-table-column>
           <b-table-column field="exclude" label="exclude">
             <b-taglist>
-              <b-tag v-for="tag in singleExport.row.exclude_tags" v-bind:key="tag">
-                {{ tag }}
-              </b-tag>
+              <b-tag v-for="tag in singleExport.row.exclude_tags" v-bind:key="tag">{{ tag }}</b-tag>
             </b-taglist>
           </b-table-column>
-          <b-table-column field="singleExport.template" label="Template">
-            {{ singleExport.row.template }}
-          </b-table-column>
-          <b-table-column field="status" label="Status">
-            {{ singleExport.row.status || "N/A" }}
-          </b-table-column>
+          <b-table-column field="singleExport.template" label="Template">{{
+            singleExport.row.template
+          }}</b-table-column>
+          <b-table-column field="status" label="Status">{{ singleExport.row.status || "N/A" }}</b-table-column>
           <b-table-column field="toggle" label="Toggle">
             <div @click="toggle(singleExport.row)" class="toggle">
-              <b-switch v-model="singleExport.row.enabled" :disabled="singleExport.row.status === 'Updating...'">
-              </b-switch>
+              <b-switch
+                v-model="singleExport.row.enabled"
+                :disabled="singleExport.row.status === 'Updating...'"
+              ></b-switch>
             </div>
           </b-table-column>
-          <b-table-column field="refresh" label="">
+
+          <b-table-column field="refresh" custom-key="refresh">
             <b-button
-              :disabled="singleExport.row.status === 'Updating...'"
+              :disabled="singleExport.row.status === 'Updating...' || !singleExport.row.enabled"
               @click="refresh(singleExport.row)"
               size="is-small"
             >
               <b-icon
-                v-if="singleExport.row.enabled"
+                :disabled="!singleExport.row.enabled"
                 pack="fas"
                 icon="sync"
                 size="is-small"
                 :custom-class="singleExport.row.status === 'Updating...' ? 'fa-spin' : ''"
               ></b-icon>
             </b-button>
+          </b-table-column>
+
+          <b-table-column field="download" custom-key="download">
+            <b-button
+              :disabled="!singleExport.row.enabled"
+              type="is-link"
+              icon-left="file-download"
+              size="is-small"
+              @click="downloadExport(singleExport.row)"
+            ></b-button>
           </b-table-column>
         </template>
       </b-table>
@@ -99,9 +96,9 @@
           ref="exportActsOn"
           expanded
         >
-          <option v-for="type in Object.keys(defaultTypes)" v-bind:key="type" :value="type">
-            {{ defaultTypes[type] }}
-          </option>
+          <option v-for="type in Object.keys(defaultTypes)" v-bind:key="type" :value="type">{{
+            defaultTypes[type]
+          }}</option>
         </b-select>
       </b-field>
       <b-field>
@@ -112,26 +109,18 @@
           ref="exportTemplate"
           expanded
         >
-          <option v-for="template in exportTemplates" v-bind:key="template">
-            {{ template }}
-          </option>
+          <option v-for="template in exportTemplates" v-bind:key="template">{{ template }}</option>
         </b-select>
       </b-field>
       <b-field grouped>
         <p class="control" v-if="selectedExport.id">
-          <button class="button is-primary" @click="updateExport">
-            Save changes
-          </button>
+          <button class="button is-primary" @click="updateExport">Save changes</button>
         </p>
         <p class="control" v-if="selectedExport.id">
-          <button class="button is-danger" @click="confirmDeleteExport">
-            Delete export
-          </button>
+          <button class="button is-danger" @click="confirmDeleteExport">Delete export</button>
         </p>
         <p class="control" v-if="!selectedExport.id">
-          <button class="button is-primary" @click="updateExport">
-            Add new export
-          </button>
+          <button class="button is-primary" @click="updateExport">Add new export</button>
         </p>
 
         <p class="control">
@@ -290,6 +279,22 @@ export default {
         })
         .catch(error => console.log(error))
         .finally(() => {});
+    },
+    downloadExport(singleExport) {
+      axios
+        .get(`/api/export/${singleExport.id}/content`)
+        .then(response => {
+          var fileURL = window.URL.createObjectURL(new Blob([response.data]));
+          var fileLink = document.createElement("a");
+          var fileName = response.headers["content-disposition"].split("filename=")[1];
+          fileLink.href = fileURL;
+          fileLink.setAttribute("download", fileName);
+          document.body.appendChild(fileLink);
+          fileLink.click();
+        })
+        .catch(error => {
+          console.log(error);
+        });
     }
   }
 };
