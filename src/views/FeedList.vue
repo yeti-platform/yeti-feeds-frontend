@@ -5,27 +5,22 @@
         <b-table-column field="name" label="Name">
           <strong>{{ feed.row.name }}</strong>
         </b-table-column>
-        <b-table-column field="frequency" label="Runs every">
-          {{ feed.row.frequency }}
-        </b-table-column>
-        <b-table-column field="last_run" label="Last run">
-          {{ feed.row.last_run || "Never" }}
-        </b-table-column>
-        <b-table-column field="description" label="Description">
-          {{ feed.row.description }}
-        </b-table-column>
-        <b-table-column field="status" label="Status">
-          {{ feed.row.status || "N/A" }}
-        </b-table-column>
+        <b-table-column field="frequency" label="Runs every">{{ feed.row.frequency }}</b-table-column>
+        <b-table-column field="last_run" label="Last run">{{ feed.row.last_run || "Never" }}</b-table-column>
+        <b-table-column field="description" label="Description">{{ feed.row.description }}</b-table-column>
+        <b-table-column field="status" label="Status">{{ feed.row.status || "N/A" }}</b-table-column>
         <b-table-column field="toggle" label="Toggle">
           <div @click="toggle(feed.row)" class="toggle">
-            <b-switch v-model="feed.row.enabled" :disabled="feed.row.status === 'Updating...'"> </b-switch>
+            <b-switch v-model="feed.row.enabled" :disabled="feed.row.status === 'Updating...'"></b-switch>
           </div>
         </b-table-column>
-        <b-table-column field="refresh" label="">
-          <b-button :disabled="feed.row.status === 'Updating...'" @click="refresh(feed.row)" size="is-small">
+        <b-table-column field="refresh" label>
+          <b-button
+            :disabled="feed.row.status === 'Updating...' || !feed.row.enabled"
+            @click="refresh(feed.row)"
+            size="is-small"
+          >
             <b-icon
-              v-if="feed.row.enabled"
               pack="fas"
               icon="sync"
               size="is-small"
