@@ -16,6 +16,9 @@
       <b-navbar-item tag="router-link" :to="{ path: '/exports' }">
         Exports
       </b-navbar-item>
+      <b-navbar-item tag="router-link" :to="{ path: '/templates' }">
+        Templates
+      </b-navbar-item>
     </template>
 
     <template slot="end">
