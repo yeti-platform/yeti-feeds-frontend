@@ -59,7 +59,7 @@
             <b-select v-model="addType" placeholder="Force observable type">
               <option :value="null">Guess type</option>
               <option v-for="type in Object.keys(defaultTypes)" v-bind:key="type" :value="type">
-                {{ defaultType[type] }}
+                {{ defaultTypes[type] }}
               </option>
             </b-select>
           </b-field>
