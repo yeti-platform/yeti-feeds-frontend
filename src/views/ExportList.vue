@@ -171,10 +171,12 @@ export default {
     this.listExportTemplates();
   },
   created() {
-    this.timer = setInterval(this.listExports, 5000);
+    this.timerListExports = setInterval(this.listExports, 5000);
+    this.timerListTemplates = setInterval(this.listExportTemplates, 2000);
   },
   beforeDestroy() {
-    clearInterval(this.timer);
+    clearInterval(this.timerListExports);
+    clearInterval(this.timerListTemplates);
   },
   methods: {
     toggle(feed) {
