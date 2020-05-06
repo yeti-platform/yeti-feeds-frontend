@@ -5,6 +5,7 @@ import ObservableList from "../views/ObservableList.vue";
 import ObservableDetails from "../views/ObservableDetails.vue";
 import FeedList from "../views/FeedList.vue";
 import ExportList from "../views/ExportList.vue";
+import TemplateList from "../views/TemplateList.vue";
 
 Vue.use(VueRouter);
 
@@ -38,6 +39,11 @@ const routes = [{
     path: "/exports",
     name: "Exports",
     component: ExportList
+  },
+  {
+    path: "/templates",
+    name: "Templates",
+    component: TemplateList
   }
 ];
 
