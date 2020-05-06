@@ -6,6 +6,7 @@ import ObservableDetails from "../views/ObservableDetails.vue";
 import FeedList from "../views/FeedList.vue";
 import ExportList from "../views/ExportList.vue";
 import TemplateList from "../views/TemplateList.vue";
+import UserAdmin from "../views/UserAdmin.vue";
 
 Vue.use(VueRouter);
 
@@ -44,6 +45,11 @@ const routes = [{
     path: "/templates",
     name: "Templates",
     component: TemplateList
+  },
+  {
+    path: "/admin/users",
+    name: "UserAdmin",
+    component: UserAdmin
   }
 ];
 

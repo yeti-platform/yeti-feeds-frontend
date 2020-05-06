@@ -22,12 +22,12 @@
     </template>
 
     <template slot="end">
-      <b-navbar-dropdown label="Settings">
-        <b-navbar-item href="#">
-          About
+      <b-navbar-dropdown label="Admin">
+        <b-navbar-item tag="router-link" :to="{ path: '/admin/users' }">
+          Users
         </b-navbar-item>
         <b-navbar-item href="#">
-          Contact
+          Groups
         </b-navbar-item>
       </b-navbar-dropdown>
       <b-navbar-item tag="div">
