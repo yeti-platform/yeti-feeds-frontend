@@ -134,12 +134,19 @@ export default {
     addUser(e) {
       e.preventDefault();
       axios
-        .post("/api/createuser", { username: this.newUsername, password: this.newPassword })
+        .post("/api/createuser", { username: this.newUsername, password: this.newPassword, admin: this.newAdmin })
         .then(response => {
-          console.log(response);
+          this.listUsers();
+          this.$buefy.notification.open({
+            message: `Success! User ${response.data.username} succesfully added.`,
+            type: "is-success"
+          });
         })
         .catch(error => {
-          console.log(error);
+          this.$buefy.notification.open({
+            message: "Error: " + error.response.data.error,
+            type: "is-danger"
+          });
         })
         .finally(() => {});
     }
