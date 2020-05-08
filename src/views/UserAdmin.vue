@@ -14,7 +14,10 @@
             <b-checkbox v-model="user.row.enabled" @click.native="toggleUser(user.row)"></b-checkbox>
           </b-table-column>
           <b-table-column custom-key="remove" label="Remove">
-            <b-button size="is-small">Remove</b-button>
+            <b-button class="button is-warning" size="is-small" @click="confirmDeleteUser(user.row)">
+              <b-icon pack="fas" icon="trash-alt" size="is-small"></b-icon>
+              <span>Remove</span>
+            </b-button>
           </b-table-column>
         </template>
       </b-table>
@@ -131,14 +134,20 @@ export default {
         })
         .finally(() => {});
     },
+    clearForm() {
+      this.newUsername = this.newPassword = null;
+      this.newAdmin = false;
+    },
     addUser(e) {
       e.preventDefault();
       axios
         .post("/api/createuser", { username: this.newUsername, password: this.newPassword, admin: this.newAdmin })
         .then(response => {
+          this.getTotalUsers();
           this.listUsers();
+          this.clearForm();
           this.$buefy.notification.open({
-            message: `Success! User ${response.data.username} succesfully added.`,
+            message: `Success! User <strong>${response.data.username}</strong> succesfully added.`,
             type: "is-success"
           });
         })
@@ -156,6 +165,34 @@ export default {
         .then(() => {
           this.$buefy.notification.open({
             message: `Changes saved.`,
+            type: "is-success"
+          });
+        })
+        .catch(error => {
+          console.log(error);
+        })
+        .finally(() => {});
+    },
+    confirmDeleteUser(user) {
+      this.$buefy.dialog.confirm({
+        title: "Delete User",
+        message: `You're about to <strong>delete</strong> user <code>${user.username}</code>. Proceed?`,
+        confirmText: "Delete User",
+        type: "is-danger",
+        hasIcon: true,
+        onConfirm: () => {
+          this.deleteUser(user);
+        }
+      });
+    },
+    deleteUser(user) {
+      axios
+        .post(`/api/useradminsearch/remove/${user.id}`)
+        .then(() => {
+          this.getTotalUsers();
+          this.listUsers();
+          this.$buefy.notification.open({
+            message: `User <strong>${user.username}</strong> succesfully deleted.`,
             type: "is-success"
           });
         })
