@@ -1,11 +1,15 @@
 <template>
   <div class="columns">
     <div class="column is-8">
-      <b-table :data="users" paginated backend-pagination @page-change="onPageChange" :total="totalUsers">
+      <b-table
+        :data="users"
+        paginated
+        backend-pagination
+        @page-change="onPageChange"
+        :total="totalUsers"
+      >
         <template v-slot:default="user">
-          <b-table-column field="username" label="Username">
-            {{ user.row.username }}
-          </b-table-column>
+          <b-table-column field="username" label="Username">{{ user.row.username }}</b-table-column>
           <b-table-column field="api_key" label="API key">
             <code>{{ user.row.api_key }}</code>
           </b-table-column>
@@ -39,11 +43,14 @@
           <br />
           <article class="message tip">
             <div class="message-body content">
-              <p>You can reset a user's API key by clicking on the <code>reset</code> button.</p>
               <p>
-                To temporarily prevent a user from logging in, you can disable their account by clicking on the checkbox
+                You can reset a user's API key by clicking on the
+                <code>reset</code> button.
               </p>
-              <p><strong>Warning</strong>: Removing users cannot be undone</p>
+              <p>To temporarily prevent a user from logging in, you can disable their account by clicking on the checkbox</p>
+              <p>
+                <strong>Warning</strong>: Removing users cannot be undone
+              </p>
             </div>
           </article>
         </b-tab-item>
@@ -57,9 +64,7 @@
               <b-input v-model="newPassword"></b-input>
             </b-field>
             <b-field grouped>
-              <b-checkbox v-model="newAdmin" class="control">
-                Admin
-              </b-checkbox>
+              <b-checkbox v-model="newAdmin" class="control">Admin</b-checkbox>
               <p class="control">
                 <button class="button is-primary" @click="addUser">Add user</button>
               </p>
@@ -70,7 +75,8 @@
           <article class="message tip">
             <div class="message-body content">
               <p>
-                The <code>yeti</code> user exists to enable anonymous access to Yeti. Disable it after logging in as a
+                The
+                <code>yeti</code> user exists to enable anonymous access to Yeti. Disable it after logging in as a
                 new user if you only want to allow authenticated access.
               </p>
             </div>
