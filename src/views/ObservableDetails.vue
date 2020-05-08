@@ -43,7 +43,7 @@
                   <b-icon icon="sitemap"></b-icon>
                   <span>
                     Related observables
-                    <b-tag rounded> {{ totalRelated || "?" }}</b-tag>
+                    <b-tag rounded> {{ totalRelated == null ? "?" : totalRelated }}</b-tag>
                   </span>
                 </template>
                 <related-observables :id="id" @totalUpdated="value => (totalRelated = value)"></related-observables>
@@ -97,7 +97,7 @@ export default {
       observable: null,
       newTags: [],
       activeTab: null,
-      totalRelated: 0
+      totalRelated: null
     };
   },
   mounted() {
