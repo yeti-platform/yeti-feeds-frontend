@@ -43,7 +43,11 @@
           </b-table-column>
 
           <b-table-column field="sources" label="Sources">
-            {{ observable.row.sources }}
+            <b-taglist>
+              <b-tag v-for="source in observable.row.sources" v-bind:key="source">
+                {{ source }}
+              </b-tag>
+            </b-taglist>
           </b-table-column>
         </template>
         <template slot="bottom-left">
