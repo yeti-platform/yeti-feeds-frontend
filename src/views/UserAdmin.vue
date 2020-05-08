@@ -6,6 +6,9 @@
           <b-table-column field="username" label="Username">{{ user.row.username }}</b-table-column>
           <b-table-column field="api_key" label="API key">
             <code>{{ user.row.api_key }}</code>
+            <b-button class="button is-outline" size="is-small" @click="resetApiKey(user.row)">
+              <span>Reset key</span>
+            </b-button>
           </b-table-column>
           <b-table-column field="admin" label="Admin">
             <b-checkbox v-model="user.row.permissions.admin"></b-checkbox>
@@ -193,6 +196,21 @@ export default {
           this.listUsers();
           this.$buefy.notification.open({
             message: `User <strong>${user.username}</strong> succesfully deleted.`,
+            type: "is-success"
+          });
+        })
+        .catch(error => {
+          console.log(error);
+        })
+        .finally(() => {});
+    },
+    resetApiKey(user) {
+      axios
+        .get(`/api/useradmin/reset-api/${user.id}`)
+        .then(response => {
+          user.api_key = response.data.api_key;
+          this.$buefy.notification.open({
+            message: `API key for user <strong>${user.username}</strong> succesfully reset.`,
             type: "is-success"
           });
         })
