@@ -11,7 +11,7 @@
             <b-checkbox v-model="user.row.permissions.admin"></b-checkbox>
           </b-table-column>
           <b-table-column field="enabled" label="Enabled">
-            <b-checkbox v-model="user.row.enabled"></b-checkbox>
+            <b-checkbox v-model="user.row.enabled" @click.native="toggleUser(user.row)"></b-checkbox>
           </b-table-column>
           <b-table-column custom-key="remove" label="Remove">
             <b-button size="is-small">Remove</b-button>
@@ -147,6 +147,20 @@ export default {
             message: "Error: " + error.response.data.error,
             type: "is-danger"
           });
+        })
+        .finally(() => {});
+    },
+    toggleUser(user) {
+      axios
+        .post(`/api/useradminsearch/toggle/${user.id}`)
+        .then(() => {
+          this.$buefy.notification.open({
+            message: `Changes saved.`,
+            type: "is-success"
+          });
+        })
+        .catch(error => {
+          console.log(error);
         })
         .finally(() => {});
     }
