@@ -14,10 +14,10 @@
             <code>{{ user.row.api_key }}</code>
           </b-table-column>
           <b-table-column field="admin" label="Admin">
-            <b-icon pack="fas" icon="check" size="is-small" v-if="user.row.permissions.admin"></b-icon>
+            <b-checkbox v-model="user.row.permissions.admin"></b-checkbox>
           </b-table-column>
           <b-table-column field="enabled" label="Enabled">
-            <b-icon pack="fas" icon="check" size="is-small" v-if="user.row.enabled"></b-icon>
+            <b-checkbox v-model="user.row.enabled"></b-checkbox>
           </b-table-column>
           <b-table-column custom-key="remove" label="Remove">
             <b-button size="is-small">Remove</b-button>
