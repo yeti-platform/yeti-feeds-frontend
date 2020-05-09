@@ -90,8 +90,11 @@ export default {
     toggleGroup(group) {
       axios
         .post(`/api/groupadmin/toggle/${group.id}`)
-        .then(response => {
-          console.log(response);
+        .then(() => {
+          this.$buefy.notification.open({
+            message: `Changes saved.`,
+            type: "is-success"
+          });
         })
         .catch(error => {
           console.log(error);
