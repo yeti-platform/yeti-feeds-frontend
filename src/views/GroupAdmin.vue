@@ -101,7 +101,34 @@ export default {
         })
         .finally(() => {});
     },
-    confirmDeleteGroup() {},
+    confirmDeleteGroup(group) {
+      this.$buefy.dialog.confirm({
+        title: "Delete group",
+        message: `You're about to <strong>delete</strong> group <code>${group.groupname}</code>. Proceed?`,
+        confirmText: "Delete group",
+        type: "is-danger",
+        hasIcon: true,
+        onConfirm: () => {
+          this.deleteGroup(group);
+        }
+      });
+    },
+    deleteGroup(group) {
+      axios
+        .delete(`/api/groupadmin/${group.id}`)
+        .then(() => {
+          this.getTotalGroups();
+          this.listGroups();
+          this.$buefy.notification.open({
+            message: `Group <strong>${group.groupname}</strong> succesfully deleted.`,
+            type: "is-success"
+          });
+        })
+        .catch(error => {
+          console.log(error);
+        })
+        .finally(() => {});
+    },
     getTotalGroups() {
       axios
         .post("/api/groupadminsearch/total", this.searchParams)
