@@ -7,6 +7,7 @@ import FeedList from "../views/FeedList.vue";
 import ExportList from "../views/ExportList.vue";
 import TemplateList from "../views/TemplateList.vue";
 import UserAdmin from "../views/UserAdmin.vue";
+import GroupAdmin from "../views/GroupAdmin.vue";
 
 Vue.use(VueRouter);
 
@@ -50,6 +51,11 @@ const routes = [{
     path: "/admin/users",
     name: "UserAdmin",
     component: UserAdmin
+  },
+  {
+    path: "/admin/groups",
+    name: "GroupAdmin",
+    component: GroupAdmin
   }
 ];
 

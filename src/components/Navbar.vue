@@ -26,7 +26,7 @@
         <b-navbar-item tag="router-link" :to="{ path: '/admin/users' }">
           Users
         </b-navbar-item>
-        <b-navbar-item href="#">
+        <b-navbar-item tag="router-link" :to="{ path: '/admin/groups' }">
           Groups
         </b-navbar-item>
       </b-navbar-dropdown>
