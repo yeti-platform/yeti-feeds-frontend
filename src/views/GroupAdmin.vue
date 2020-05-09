@@ -83,8 +83,21 @@ export default {
         })
         .finally(() => {});
     },
-    onPageChange() {},
-    toggleGroup() {},
+    onPageChange(page) {
+      this.page = page;
+      this.listGroups();
+    },
+    toggleGroup(group) {
+      axios
+        .post(`/api/groupadmin/toggle/${group.id}`)
+        .then(response => {
+          console.log(response);
+        })
+        .catch(error => {
+          console.log(error);
+        })
+        .finally(() => {});
+    },
     confirmDeleteGroup() {},
     getTotalGroups() {
       axios
