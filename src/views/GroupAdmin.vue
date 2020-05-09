@@ -43,6 +43,9 @@
             <b-field label="Group name">
               <b-input v-model="newGroupName"></b-input>
             </b-field>
+            <p class="control">
+              <button class="button is-primary" @click="addGroup">Add group</button>
+            </p>
           </form>
           <br />
         </b-tab-item>
@@ -139,6 +142,30 @@ export default {
           console.log(error);
         })
         .finally(() => {});
+    },
+    addGroup(e) {
+      e.preventDefault();
+      axios
+        .post("/api/creategroup", { groupname: this.newGroupName })
+        .then(response => {
+          this.getTotalGroups();
+          this.listGroups();
+          this.clearForm();
+          this.$buefy.notification.open({
+            message: `Success! Group <strong>${response.data.groupname}</strong> succesfully added.`,
+            type: "is-success"
+          });
+        })
+        .catch(error => {
+          this.$buefy.notification.open({
+            message: "Error: " + error.response.data.error,
+            type: "is-danger"
+          });
+        })
+        .finally(() => {});
+    },
+    clearForm() {
+      this.newGroupName = null;
     }
   },
   computed: {
