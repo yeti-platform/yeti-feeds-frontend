@@ -6,12 +6,12 @@
           <b-table-column field="username" label="Username">{{ user.row.username }}</b-table-column>
           <b-table-column field="api_key" label="API key">
             <code>{{ user.row.api_key }}</code>
-            <b-button class="button is-outline" size="is-small" @click="resetApiKey(user.row)">
+            <b-button class="button is-outline reset-button" size="is-small" @click="resetApiKey(user.row)">
               <span>Reset key</span>
             </b-button>
           </b-table-column>
           <b-table-column field="admin" label="Admin">
-            <b-checkbox v-model="user.row.permissions.admin"></b-checkbox>
+            <b-checkbox v-model="user.row.permissions.admin" @click.native="toggleAdminUser(user.row)"></b-checkbox>
           </b-table-column>
           <b-table-column field="enabled" label="Enabled">
             <b-checkbox v-model="user.row.enabled" @click.native="toggleUser(user.row)"></b-checkbox>
@@ -164,7 +164,21 @@ export default {
     },
     toggleUser(user) {
       axios
-        .post(`/api/useradminsearch/toggle/${user.id}`)
+        .post(`/api/useradmin/toggle/${user.id}`)
+        .then(() => {
+          this.$buefy.notification.open({
+            message: `Changes saved.`,
+            type: "is-success"
+          });
+        })
+        .catch(error => {
+          console.log(error);
+        })
+        .finally(() => {});
+    },
+    toggleAdminUser(user) {
+      axios
+        .post(`/api/useradmin/toggle-admin/${user.id}`)
         .then(() => {
           this.$buefy.notification.open({
             message: `Changes saved.`,
@@ -206,7 +220,7 @@ export default {
     },
     resetApiKey(user) {
       axios
-        .get(`/api/useradmin/reset-api/${user.id}`)
+        .post(`/api/useradmin/reset-api/${user.id}`)
         .then(response => {
           user.api_key = response.data.api_key;
           this.$buefy.notification.open({
@@ -241,5 +255,9 @@ export default {
 <style>
 span.icon {
   vertical-align: middle;
+}
+
+.reset-button {
+  margin-left: 1rem;
 }
 </style>
