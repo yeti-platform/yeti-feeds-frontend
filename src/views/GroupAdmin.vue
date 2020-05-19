@@ -1,26 +1,30 @@
 <template>
   <div class="columns">
     <div class="column is-8">
-      <b-table :data="groups" paginated backend-pagination @page-change="onPageChange" :total="totalGroups">
+      <b-table
+        :data="groups"
+        paginated
+        backend-pagination
+        hoverable
+        @page-change="onPageChange"
+        :total="totalGroups"
+        class="group-table"
+      >
         <template v-slot:default="group">
-          <b-table-column field="groupname" label="Group name">
-            <router-link :to="{ name: 'GroupDetails', params: { id: group.row.id } }">
-              {{ group.row.groupname }}
-            </router-link>
-          </b-table-column>
+          <b-table-column field="groupname" label="Group name">{{ group.row.groupname }}</b-table-column>
           <b-table-column field="enabled" label="Enabled">
             <b-checkbox v-model="group.row.enabled" @click.native="toggleGroup(group.row)"></b-checkbox>
           </b-table-column>
-          <b-table-column custom-key="remove" label="Remove">
-            <b-button class="button is-warning" size="is-small" @click="confirmDeleteGroup(group.row)">
-              <b-icon pack="fas" icon="trash-alt" size="is-small"></b-icon>
-              <span>Remove</span>
-            </b-button>
+          <b-table-column custom-key="edit" label="" width="60">
+            <b-icon pack="fas" icon="edit" @click.native="editGroup(group.row)"></b-icon>
+          </b-table-column>
+          <b-table-column custom-key="remove" label="" width="60">
+            <b-icon pack="fas" icon="trash-alt" type="is-danger" @click.native="confirmDeleteGroup(group.row)"></b-icon>
           </b-table-column>
         </template>
       </b-table>
     </div>
-    <div class="column is-3">
+    <div class="column is-4">
       <b-tabs v-model="activeTab" position="is-centered" :animated="false">
         <!-- Search tab item -->
         <b-tab-item label="Search groups">
@@ -49,6 +53,9 @@
           </form>
           <br />
         </b-tab-item>
+        <b-tab-item label="Edit group">
+          <edit-group :groupId="selectedGroup"></edit-group>
+        </b-tab-item>
       </b-tabs>
     </div>
   </div>
@@ -56,9 +63,13 @@
 
 <script>
 import axios from "axios";
+import EditGroup from "@/views/EditGroup";
 
 export default {
   name: "GroupAdmin",
+  components: {
+    EditGroup
+  },
   data() {
     return {
       groups: [],
@@ -66,7 +77,8 @@ export default {
       page: 1,
       activeTab: 0,
       newGroupName: null,
-      groupFilter: null
+      groupFilter: null,
+      selectedGroup: null
     };
   },
   mounted() {
@@ -166,6 +178,10 @@ export default {
     },
     clearForm() {
       this.newGroupName = null;
+    },
+    editGroup(group) {
+      this.activeTab = 2;
+      this.selectedGroup = group.id;
     }
   },
   computed: {
@@ -186,4 +202,8 @@ export default {
 };
 </script>
 
-<style></style>
+<style scoped>
+.group-table span.icon {
+  cursor: pointer;
+}
+</style>
