@@ -11,7 +11,8 @@ import GroupAdmin from "../views/GroupAdmin.vue";
 
 Vue.use(VueRouter);
 
-const routes = [{
+const routes = [
+  {
     path: "/",
     name: "ObservableSearch",
     component: ObservableSearch
