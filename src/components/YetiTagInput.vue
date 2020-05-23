@@ -7,6 +7,7 @@
     icon="tag"
     placeholder="e.g. Zeus"
     field="name"
+    @typing="text => (this.tagName = text)"
   >
   </b-taginput>
 </template>
@@ -14,7 +15,7 @@
 <script>
 import axios from "axios";
 export default {
-  name: "TagSelector",
+  name: "YetiTagInput",
   data() {
     return {
       existingTags: [],
