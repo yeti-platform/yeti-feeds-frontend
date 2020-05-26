@@ -53,8 +53,9 @@
             </p>
           </b-field>
         </b-tab-item>
-        <b-tab-item label="Merge tag"> </b-tab-item>
-        <b-tab-item label="Add user"> </b-tab-item>
+        <b-tab-item label="Merge tag">
+          <tag-merge></tag-merge>
+        </b-tab-item>
       </b-tabs>
     </div>
   </div>
@@ -63,11 +64,13 @@
 <script>
 import axios from "axios";
 import YetiTagInput from "@/components/YetiTagInput";
+import TagMerge from "@/components/TagMerge";
 
 export default {
   name: "TagsAdmin",
   components: {
-    YetiTagInput
+    YetiTagInput,
+    TagMerge
   },
   data() {
     return {
