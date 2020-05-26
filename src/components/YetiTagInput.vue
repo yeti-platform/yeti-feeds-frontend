@@ -1,28 +1,38 @@
 <template>
   <b-taginput
     label="tags"
-    v-model="value"
+    v-model="selectedTags"
     :data="filterTags"
     autocomplete
     icon="tag"
     placeholder="e.g. Zeus"
     field="name"
     @typing="text => (this.tagName = text)"
+    @input="updateSelected"
+    :maxtags="maxtags"
   >
   </b-taginput>
 </template>
 
 <script>
 import axios from "axios";
+
 export default {
   name: "YetiTagInput",
   data() {
     return {
       existingTags: [],
-      tagName: ""
+      tagName: "",
+      selectedTags: this.value
     };
   },
-  props: ["value"],
+  props: {
+    value: Array,
+    maxtags: {
+      type: Number,
+      default: null
+    }
+  },
   mounted() {
     this.getExistingTags();
   },
@@ -38,7 +48,7 @@ export default {
         });
     },
     updateSelected() {
-      this.$emit("input", this.value);
+      this.$emit("input", this.selectedTags);
     }
   },
   computed: {
@@ -54,7 +64,9 @@ export default {
     }
   },
   watch: {
-    value: "updateSelected"
+    value: function(newValue) {
+      this.selectedTags = newValue;
+    }
   }
 };
 </script>
