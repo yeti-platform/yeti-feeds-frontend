@@ -84,4 +84,22 @@ export default {
 };
 </script>
 
-<style></style>
+<style scoped lang="scss">
+@import "@/style.scss";
+
+.card-header.is-warning {
+  background: $warning;
+}
+
+.card-header.is-danger {
+  background: $danger;
+}
+
+.card-header.is-info {
+  background: $info;
+}
+
+.card-header.is-light {
+  background: $light;
+}
+</style>
