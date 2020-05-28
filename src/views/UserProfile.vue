@@ -1,8 +1,8 @@
 <template>
   <div class="columns">
     <div class="column is-7">
-      <div class="is-child card">
-        <header class="card-header is-danger">
+      <div class="card">
+        <header class="card-header is-info">
           <p class="card-header-title">
             Profile info
           </p>
@@ -36,7 +36,24 @@
         </div>
       </div>
     </div>
-    <div class="column is-5">Authentication info</div>
+    <div class="column is-5">
+      <div class="card">
+        <header class="card-header is-warning">
+          <p class="card-header-title">
+            Change password
+          </p>
+        </header>
+        <div class="card-content">
+          <b-field>
+            <b-input v-model="currentPassword" type="password" placeholder="Current password"></b-input>
+          </b-field>
+          <b-field
+            ><b-input v-model="newPassword" type="password" placeholder="New password" password-reveal></b-input
+          ></b-field>
+          <p class="control"><b-button type="is-primary" @click="changeUserPassword()">Save</b-button></p>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -47,7 +64,9 @@ export default {
   name: "UserProfile",
   data() {
     return {
-      profile: null
+      profile: null,
+      currentPassword: null,
+      newPassword: null
     };
   },
   methods: {
@@ -64,7 +83,7 @@ export default {
     },
     resetApiKey(user) {
       axios
-        .post(`/api/useradmin/reset-api/${user.id}`)
+        .post(`/api/users/reset-api`)
         .then(response => {
           user.api_key = response.data.api_key;
           this.$buefy.notification.open({
@@ -76,6 +95,31 @@ export default {
           console.log(error);
         })
         .finally(() => {});
+    },
+    changeUserPassword() {
+      var params = {
+        current: this.currentPassword,
+        new: this.newPassword
+      };
+      axios
+        .post(`/api/change-password`, params)
+        .then(() => {
+          this.$buefy.notification.open({
+            message: `Password succesfully changed.`,
+            type: "is-success"
+          });
+        })
+        .catch(error => {
+          console.log(error.response.data.error);
+          this.$buefy.notification.open({
+            message: "Error: " + error.response.data.error,
+            type: "is-danger"
+          });
+        })
+        .finally(() => {
+          this.currentPassword = null;
+          this.newPassword = null;
+        });
     }
   },
   mounted() {
