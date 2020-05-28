@@ -6,6 +6,7 @@ import ObservableDetails from "../views/ObservableDetails.vue";
 import FeedList from "../views/FeedList.vue";
 import ExportList from "../views/ExportList.vue";
 import TemplateList from "../views/TemplateList.vue";
+import UserProfile from "../views/UserProfile.vue";
 import UserAdmin from "../views/UserAdmin.vue";
 import GroupAdmin from "../views/GroupAdmin.vue";
 import TagsAdmin from "../views/TagsAdmin.vue";
@@ -48,6 +49,11 @@ const routes = [
     path: "/templates",
     name: "Templates",
     component: TemplateList
+  },
+  {
+    path: "/profile",
+    name: "UserProfile",
+    component: UserProfile
   },
   {
     path: "/admin/users",
