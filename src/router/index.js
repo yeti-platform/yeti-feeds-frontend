@@ -8,6 +8,7 @@ import ExportList from "../views/ExportList.vue";
 import TemplateList from "../views/TemplateList.vue";
 import UserAdmin from "../views/UserAdmin.vue";
 import GroupAdmin from "../views/GroupAdmin.vue";
+import TagsAdmin from "../views/TagsAdmin.vue";
 
 Vue.use(VueRouter);
 
@@ -57,6 +58,11 @@ const routes = [
     path: "/admin/groups",
     name: "GroupAdmin",
     component: GroupAdmin
+  },
+  {
+    path: "/admin/tags",
+    name: "TagsAdmin",
+    component: TagsAdmin
   }
 ];
 
