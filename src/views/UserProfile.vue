@@ -28,8 +28,13 @@
               </tr>
               <tr>
                 <th>Groups</th>
-                <td>{{ profile.groups }}</td>
-                <td></td>
+                <td>
+                  <b-taglist>
+                    <b-tag type="is-info" v-bind:key="group.groupname" v-for="group in profile.groups">
+                      {{ group.groupname }}
+                    </b-tag>
+                  </b-taglist>
+                </td>
               </tr>
             </tbody>
           </table>
@@ -110,7 +115,6 @@ export default {
           });
         })
         .catch(error => {
-          console.log(error.response.data.error);
           this.$buefy.notification.open({
             message: "Error: " + error.response.data.error,
             type: "is-danger"
