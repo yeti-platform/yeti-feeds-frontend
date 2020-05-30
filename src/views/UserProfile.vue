@@ -103,7 +103,6 @@ export default {
         .get(`/api/users`)
         .then(response => {
           this.profile = response.data;
-          //   this.availableSettings = response.data.availableSettings.keys();
         })
         .catch(error => {
           console.log(error);
