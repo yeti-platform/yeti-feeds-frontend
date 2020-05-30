@@ -4,6 +4,7 @@ import ObservableSearch from "../views/ObservableSearch.vue";
 import ObservableList from "../views/ObservableList.vue";
 import ObservableDetails from "../views/ObservableDetails.vue";
 import FeedList from "../views/FeedList.vue";
+import AnalyticsList from "../views/AnalyticsList.vue";
 import ExportList from "../views/ExportList.vue";
 import TemplateList from "../views/TemplateList.vue";
 import UserProfile from "../views/UserProfile.vue";
@@ -39,6 +40,11 @@ const routes = [
     path: "/feeds",
     name: "Feeds",
     component: FeedList
+  },
+  {
+    path: "/analytics",
+    name: "Analytics",
+    component: AnalyticsList
   },
   {
     path: "/exports",
