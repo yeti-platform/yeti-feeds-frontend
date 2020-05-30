@@ -35,9 +35,9 @@
       </b-navbar-dropdown>
       <b-navbar-item tag="div">
         <div class="buttons">
-          <a class="button is-primary">
-            <strong>Admin</strong>
-          </a>
+          <b-button tag="router-link" to="/profile" type="is-primary">
+            Profile
+          </b-button>
           <a class="button is-light">
             Log in
           </a>

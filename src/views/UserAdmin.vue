@@ -204,7 +204,7 @@ export default {
     },
     deleteUser(user) {
       axios
-        .post(`/api/useradminsearch/remove/${user.id}`)
+        .post(`/api/useradmin/remove/${user.id}`)
         .then(() => {
           this.getTotalUsers();
           this.listUsers();
