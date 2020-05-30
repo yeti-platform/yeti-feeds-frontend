@@ -2,6 +2,7 @@
   <div>
     <div class="scheduled">
       <p class="title">Scheduled</p>
+      <p class="subtitle">Recurring analytics, triggered automatically on a fixed schedule.</p>
       <b-table :data="scheduled" default-sort="name" narrowed :row-class="getRowClass">
         <template v-slot:default="analytics">
           <b-table-column field="name" label="Name" sortable>
@@ -37,6 +38,7 @@
     <br />
     <div class="oneshot">
       <p class="title">One-shot</p>
+      <p class="subtitle">Analytics that are triggered manually on specific observable types.</p>
       <b-table :data="oneshot" default-sort="group" narrowed>
         <template v-slot:default="analytics">
           <b-table-column field="group" label="Grouping" sortable>
@@ -70,6 +72,7 @@
     <br />
     <div class="scheduled">
       <p class="title">Inline</p>
+      <p class="subtitle">Analytics that trigger when an observable is added to the Yeti database.</p>
       <b-table :data="inline" narrowed default-sort="name">
         <template v-slot:default="analytics">
           <b-table-column field="name" label="Name">
