@@ -1,6 +1,6 @@
 <template>
   <div class="columns">
-    <div class="column is-9">
+    <div class="column is-9 exportlist">
       <b-table
         :data="exports"
         :hoverable="true"
@@ -302,16 +302,19 @@ export default {
 };
 </script>
 
-<style>
-.disabled {
+<style scoped lang="scss">
+@import "@/style.scss";
+
+.exportlist ::v-deep .disabled {
   opacity: 0.5;
 }
 
-.is-success {
-  background: rgb(172, 255, 172);
+.exportlist ::v-deep .is-success {
+  background: $success;
 }
 
-div.toggle {
-  cursor: pointer;
+.exportlist ::v-deep .is-danger {
+  background: rgb(255, 211, 211);
+  color: rgb(243, 96, 96);
 }
 </style>
