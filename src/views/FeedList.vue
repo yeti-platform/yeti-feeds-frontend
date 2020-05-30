@@ -1,5 +1,5 @@
 <template>
-  <div class="home">
+  <div class="feedlist">
     <b-table :data="feeds" :hoverable="true" :narrowed="true" :row-class="getRowClass">
       <template v-slot:default="feed">
         <b-table-column field="name" label="Name">
@@ -98,16 +98,19 @@ export default {
 };
 </script>
 
-<style>
-.disabled {
+<style scoped lang="scss">
+@import "@/style.scss";
+
+.feedlist ::v-deep .disabled {
   opacity: 0.5;
 }
 
-.is-success {
-  background: rgb(172, 255, 172);
+.feedlist ::v-deep .is-success {
+  background: $success;
 }
 
-div.toggle {
-  cursor: pointer;
+.feedlist ::v-deep .is-danger {
+  background: rgb(255, 211, 211);
+  color: rgb(243, 96, 96);
 }
 </style>
