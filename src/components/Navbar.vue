@@ -13,6 +13,9 @@
       <b-navbar-item tag="router-link" :to="{ path: '/feeds' }">
         Feeds
       </b-navbar-item>
+      <b-navbar-item tag="router-link" :to="{ path: '/analytics' }">
+        Analytics
+      </b-navbar-item>
       <b-navbar-item tag="router-link" :to="{ path: '/exports' }">
         Exports
       </b-navbar-item>
