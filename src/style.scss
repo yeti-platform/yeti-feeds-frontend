@@ -13,6 +13,7 @@ $twitter-invert: findColorInvert($twitter);
 $danger: #f38484;
 $warning: #ffe89b;
 $info: #9fcbf0;
+$success: rgb(207, 255, 207);
 
 // Setup $colors to use as bulma classes (e.g. 'is-twitter')
 $colors: ("white": ($white,
