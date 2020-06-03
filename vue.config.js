@@ -5,6 +5,10 @@ module.exports = {
       "^/api": {
         autoRewrite: true,
         target: "http://localhost:5000/"
+      },
+      "^/log(in|out)": {
+        autoRewrite: true,
+        target: "http://localhost:5000/"
       }
     }
   }
