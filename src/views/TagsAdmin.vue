@@ -1,6 +1,6 @@
 <template>
   <div class="columns">
-    <div class="column is-8">
+    <div class="column is-9">
       <b-table :data="tags" @click="row => (this.selectedTag = JSON.parse(JSON.stringify(row)))">
         <template v-slot:default="tag">
           <b-table-column field="name" label="name">

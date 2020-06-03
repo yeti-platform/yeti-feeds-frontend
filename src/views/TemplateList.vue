@@ -1,6 +1,6 @@
 <template>
   <div class="columns">
-    <div class="column is-3">
+    <div class="column is-4">
       <b-table :data="templates" :hoverable="true" :narrowed="true" @click="selectTemplate">
         <template v-slot:default="template">
           <b-table-column field="name" label="Name">

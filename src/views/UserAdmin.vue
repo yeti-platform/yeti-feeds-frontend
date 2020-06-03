@@ -1,6 +1,6 @@
 <template>
   <div class="columns">
-    <div class="column is-8">
+    <div class="column is-9">
       <b-table :data="users" paginated backend-pagination @page-change="onPageChange" :total="totalUsers">
         <template v-slot:default="user">
           <b-table-column field="username" label="Username">{{ user.row.username }}</b-table-column>
