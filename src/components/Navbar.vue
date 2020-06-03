@@ -35,10 +35,10 @@
       </b-navbar-dropdown>
       <b-navbar-item tag="div">
         <div class="buttons">
-          <b-button tag="router-link" to="/profile" type="is-primary">
-            Profile
-          </b-button>
-          <a class="button is-light">
+          <a class="button is-light" to="/profile" type="is-primary" v-if="profile">
+            <span> {{ profile.username }} </span> <b-icon pack="fas" icon="user-cog" size="is-small"></b-icon>
+          </a>
+          <a class="button is-primary" href="/login" v-if="!profile">
             Log in
           </a>
         </div>
@@ -46,6 +46,35 @@
     </template>
   </b-navbar>
 </template>
+
+<script>
+import axios from "axios";
+
+export default {
+  name: "Navbar",
+  data() {
+    return {
+      profile: null
+    };
+  },
+  methods: {
+    getUserProfile() {
+      axios
+        .get(`/api/users`)
+        .then(response => {
+          this.profile = response.data;
+        })
+        .catch(error => {
+          console.log(error);
+        })
+        .finally(() => {});
+    }
+  },
+  mounted() {
+    this.getUserProfile();
+  }
+};
+</script>
 
 <style>
 .router-link-exact-active {
