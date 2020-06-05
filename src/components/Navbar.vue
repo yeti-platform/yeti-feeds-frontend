@@ -38,9 +38,9 @@
       </b-navbar-dropdown>
       <b-navbar-item tag="div">
         <div class="buttons">
-          <a class="button is-light" to="/profile" type="is-primary" v-if="profile">
+          <b-button tag="router-link" typ="is-light" to="/profile" v-if="profile">
             <span> {{ profile.username }} </span> <b-icon pack="fas" icon="user-cog" size="is-small"></b-icon>
-          </a>
+          </b-button>
           <a class="button is-primary" href="/login" v-if="!profile">
             Log in
           </a>
