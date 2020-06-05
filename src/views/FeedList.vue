@@ -40,7 +40,8 @@ export default {
   name: "FeedList",
   data() {
     return {
-      feeds: []
+      feeds: [],
+      timer: null
     };
   },
   mounted() {

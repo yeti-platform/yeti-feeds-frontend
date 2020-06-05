@@ -163,7 +163,8 @@ export default {
       exportTemplates: [],
       newExport: {},
       selectedExport: {},
-      timer: null
+      timerListExports: null,
+      timerListTemplates: null
     };
   },
   mounted() {
