@@ -4,9 +4,7 @@
       <div class="column is-7">
         <div class="card">
           <header class="card-header is-info">
-            <p class="card-header-title">
-              Profile info
-            </p>
+            <p class="card-header-title">Profile info</p>
           </header>
           <div class="card-content">
             <table class="table is-fullwidth" v-if="profile">
@@ -31,9 +29,9 @@
                   <th>Groups</th>
                   <td>
                     <b-taglist>
-                      <b-tag type="is-info" v-bind:key="group.groupname" v-for="group in profile.groups">
-                        {{ group.groupname }}
-                      </b-tag>
+                      <b-tag type="is-info" v-bind:key="group.groupname" v-for="group in profile.groups">{{
+                        group.groupname
+                      }}</b-tag>
                     </b-taglist>
                   </td>
                 </tr>
@@ -45,40 +43,89 @@
       <div class="column is-5">
         <div class="card">
           <header class="card-header is-warning">
-            <p class="card-header-title">
-              Change password
-            </p>
+            <p class="card-header-title">Change password</p>
           </header>
           <div class="card-content">
             <b-field>
               <b-input v-model="currentPassword" type="password" placeholder="Current password"></b-input>
             </b-field>
             <b-field>
-              <b-input v-model="newPassword" type="password" placeholder="New password" password-reveal> </b-input>
+              <b-input v-model="newPassword" type="password" placeholder="New password" password-reveal></b-input>
             </b-field>
-            <p class="control"><b-button type="is-primary" @click="changeUserPassword()">Save</b-button></p>
+            <p class="control">
+              <b-button type="is-primary" @click="changeUserPassword()">Save</b-button>
+            </p>
           </div>
         </div>
       </div>
     </div>
     <div class="columns">
       <div class="column" v-if="profile">
-        <p class="title is-4">Miscellaneous settings</p>
-        <p class="subtitle is-6">
-          Any Yeti object can register per-user settings for specific tweaking. This is especially useful for API keys
-          or individual credentials.
-        </p>
-        <b-field
-          v-for="setting_name in Object.keys(profile.available_settings)"
-          v-bind:key="profile.available_settings[setting_name].name"
-          :label="profile.available_settings[setting_name].name"
-        >
-          <b-input
-            :placeholder="profile.available_settings[setting_name].description"
-            v-model="profile.settings[setting_name]"
-          ></b-input>
-        </b-field>
-        <p class="control"><b-button type="is-primary" @click="saveUserSettings()">Save settings</b-button></p>
+        <b-tabs v-model="activeTab">
+          <b-tab-item label="Permissions">
+            <table class="table is-fullwidth">
+              <tbody>
+                <tr>
+                  <th>Permission type</th>
+                  <th>Read</th>
+                  <th>Write</th>
+                  <th>Refresh</th>
+                  <th>Toggle</th>
+                </tr>
+                <tr v-for="type in Object.keys(profile.permissions)" v-bind:key="type">
+                  <td>{{ type }}</td>
+                  <td>
+                    <b-checkbox
+                      :disabled="profile.permissions[type].read == null"
+                      v-model="profile.permissions[type].read"
+                    ></b-checkbox>
+                  </td>
+                  <td>
+                    <b-checkbox
+                      :disabled="profile.permissions[type].write == null"
+                      v-model="profile.permissions[type].write"
+                    ></b-checkbox>
+                  </td>
+                  <td>
+                    <b-checkbox
+                      :disabled="profile.permissions[type].refresh == null"
+                      v-model="profile.permissions[type].refresh"
+                    ></b-checkbox>
+                  </td>
+                  <td>
+                    <b-checkbox
+                      :disabled="profile.permissions[type].toggle == null"
+                      v-model="profile.permissions[type].toggle"
+                    ></b-checkbox>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <p class="control">
+              <b-button type="is-primary" @click="saveUserPermissions()">Save permissions</b-button>
+            </p>
+          </b-tab-item>
+          <b-tab-item label="Misc settings">
+            <p class="title is-4">Miscellaneous settings</p>
+            <p class="subtitle is-6">
+              Any Yeti object can register per-user settings for specific tweaking. This is especially useful for API
+              keys or individual credentials.
+            </p>
+            <b-field
+              v-for="setting_name in Object.keys(profile.available_settings)"
+              v-bind:key="profile.available_settings[setting_name].name"
+              :label="profile.available_settings[setting_name].name"
+            >
+              <b-input
+                :placeholder="profile.available_settings[setting_name].description"
+                v-model="profile.settings[setting_name]"
+              ></b-input>
+            </b-field>
+            <p class="control">
+              <b-button type="is-primary" @click="saveUserSettings()">Save settings</b-button>
+            </p>
+          </b-tab-item>
+        </b-tabs>
       </div>
     </div>
   </div>
@@ -94,9 +141,11 @@ export default {
       profile: null,
       currentPassword: null,
       newPassword: null,
-      availableSettings: []
+      availableSettings: [],
+      activeTab: 0
     };
   },
+  props: ["userId"],
   methods: {
     getUserProfile() {
       axios
@@ -154,6 +203,21 @@ export default {
         .then(() => {
           this.$buefy.notification.open({
             message: `Settings successfully updated.`,
+            type: "is-success"
+          });
+        })
+        .catch(error => {
+          console.log(error);
+        })
+        .finally(() => {});
+    },
+    saveUserPermissions() {
+      axios
+        .post(`/api/useradmin/permissions`, this.profile.permissions)
+        .then(response => {
+          this.profile.permissions = response.data.permissions;
+          this.$buefy.notification.open({
+            message: `Permissions successfully updated.`,
             type: "is-success"
           });
         })
