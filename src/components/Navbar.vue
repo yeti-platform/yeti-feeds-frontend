@@ -35,6 +35,9 @@
         <b-navbar-item tag="router-link" :to="{ path: '/admin/tags' }">
           Tags
         </b-navbar-item>
+        <b-navbar-item tag="router-link" :to="{ path: '/admin/system' }">
+          System
+        </b-navbar-item>
       </b-navbar-dropdown>
       <b-navbar-item tag="div">
         <div class="buttons">
