@@ -11,6 +11,7 @@ import UserProfile from "../views/UserProfile.vue";
 import UserAdmin from "../views/UserAdmin.vue";
 import GroupAdmin from "../views/GroupAdmin.vue";
 import TagsAdmin from "../views/TagsAdmin.vue";
+import System from "../views/System.vue";
 
 Vue.use(VueRouter);
 
@@ -75,6 +76,11 @@ const routes = [
     path: "/admin/tags",
     name: "TagsAdmin",
     component: TagsAdmin
+  },
+  {
+    path: "/admin/system",
+    name: "SystemView",
+    component: System
   }
 ];
 
