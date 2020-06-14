@@ -12,6 +12,7 @@ import UserAdmin from "../views/UserAdmin.vue";
 import GroupAdmin from "../views/GroupAdmin.vue";
 import TagsAdmin from "../views/TagsAdmin.vue";
 import System from "../views/System.vue";
+import Login from "../views/Login.vue";
 
 Vue.use(VueRouter);
 
@@ -81,6 +82,11 @@ const routes = [
     path: "/admin/system",
     name: "SystemView",
     component: System
+  },
+  {
+    path: "/login",
+    name: "Login",
+    component: Login
   }
 ];
 
@@ -88,6 +94,30 @@ const router = new VueRouter({
   mode: "history",
   base: process.env.BASE_URL,
   routes
+});
+
+import store from "@/store";
+router.beforeEach((to, from, next) => {
+  if (to.name == "Login") {
+    next();
+  }
+  if (store.state.user === null) {
+    store
+      .dispatch("refresh")
+      .then(() => {
+        console.log("redirecting to " + to.fullPath);
+        next({ path: to.fullPath });
+      })
+      .catch(() => {
+        console.log("redirecting to /login");
+        next({
+          path: "/login",
+          params: { nextUrl: to.fullPath }
+        });
+      });
+  } else {
+    next();
+  }
 });
 
 export default router;

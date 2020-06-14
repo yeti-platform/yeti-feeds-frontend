@@ -4,26 +4,8 @@ import axios from "axios";
 
 Vue.use(Vuex);
 
-function isValidJwt(jwt) {
-  if (!jwt || jwt.split(".").length < 3) {
-    return false;
-  }
-  const data = JSON.parse(atob(jwt.split(".")[1]));
-  const exp = new Date(data.exp * 1000); // JS deals with dates in milliseconds since epoch
-  const now = new Date();
-  return now < exp;
-}
-
-function getJwtSubject(jwt) {
-  if (isValidJwt(jwt)) {
-    return JSON.parse(atob(jwt.split(".")[1])).sub;
-  }
-  return "";
-}
-
-axios.defaults.headers.common["Authorization"] = `Bearer: ${localStorage.getItem("user-token")}`;
 const state = {
-  token: localStorage.getItem("user-token") || ""
+  user: null
 };
 
 const actions = {
@@ -31,11 +13,12 @@ const actions = {
     return new Promise((resolve, reject) => {
       commit("authRequest");
       axios
-        .post("/users/login/", params)
+        .post("/api/auth/login", params)
         .then(response => {
-          axios.defaults.headers.common["Authorization"] = `Bearer: ${response.data.token}`;
-          commit("authSuccess", response.data.token);
-          resolve(response);
+          if (response.data.authenticated === true) {
+            axios.get("/api/users").then(response => commit("authSuccess", response.data));
+            resolve(response);
+          }
         })
         .catch(err => {
           commit("authError", err);
@@ -45,39 +28,48 @@ const actions = {
   },
   logout({ commit }) {
     return new Promise(resolve => {
-      commit("logout");
-      delete axios.defaults.headers.common["Authorization"];
-      resolve();
+      axios.put(`/api/auth/logout/`).then(response => {
+        commit("logout");
+        resolve(response);
+      });
+    });
+  },
+  refresh({ commit }) {
+    return new Promise((resolve, reject) => {
+      axios
+        .get(`/api/users/`)
+        .then(response => {
+          console.log("Session refresh success");
+          commit("authSuccess", response.data);
+          resolve(response);
+        })
+        .catch(error => {
+          console.log("Session refresh fail");
+          reject(error);
+        });
     });
   }
 };
 
 const mutations = {
   authRequest(state) {
-    state.token = "";
-    localStorage.setItem("user-token", "");
-    delete axios.defaults.headers.common["Authorization"];
+    state.user = null;
   },
-  authSuccess(state, token) {
-    state.token = token;
-    localStorage.setItem("user-token", token);
+  authSuccess(state, data) {
+    state.user = data;
   },
   authError(state, error) {
     console.log(error);
-    state.token = "";
-    localStorage.removeItem("user-token");
-    delete axios.defaults.headers.common["Authorization"];
+    state.user = null;
   },
   logout(state) {
-    state.token = "";
-    localStorage.removeItem("user-token");
-    delete axios.defaults.headers.common["Authorization"];
+    state.user = null;
   }
 };
 
 const getters = {
-  isAuthenticated: state => !!state.token,
-  tokenSubject: state => getJwtSubject(state.token)
+  isAuthenticated: state => !!state.user,
+  tokenSubject: state => state.user.username
 };
 
 const store = new Vuex.Store({
