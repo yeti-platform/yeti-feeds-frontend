@@ -25,7 +25,7 @@
             <span>{{ tokenSubject }}</span>
             <b-icon pack="fas" icon="user-cog" size="is-small"></b-icon>
           </b-button>
-          <a class="button is-primary" href="/login" v-if="!isAuthenticated">Log in</a>
+          <a class="button is-primary" href="/auth/login" v-if="!isAuthenticated">Log in</a>
         </div>
       </b-navbar-item>
     </template>

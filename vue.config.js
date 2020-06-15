@@ -6,7 +6,7 @@ module.exports = {
         autoRewrite: true,
         target: "http://localhost:5000/"
       },
-      "^/log(in|out)": {
+      "^/auth/": {
         autoRewrite: true,
         target: "http://localhost:5000/"
       }

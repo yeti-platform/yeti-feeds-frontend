@@ -100,8 +100,7 @@ import store from "@/store";
 router.beforeEach((to, from, next) => {
   if (to.name == "Login") {
     next();
-  }
-  if (store.state.user === null) {
+  } else if (store.state.user === null) {
     store
       .dispatch("refresh")
       .then(() => {
@@ -109,11 +108,8 @@ router.beforeEach((to, from, next) => {
         next({ path: to.fullPath });
       })
       .catch(() => {
-        console.log("redirecting to /login");
-        next({
-          path: "/login",
-          params: { nextUrl: to.fullPath }
-        });
+        console.log("redirecting to /auth/login");
+        window.location.href = "/auth/login";
       });
   } else {
     next();
