@@ -3,7 +3,11 @@
     <div class="column is-9">
       <b-table :data="users" paginated backend-pagination @page-change="onPageChange" :total="totalUsers">
         <template v-slot:default="user">
-          <b-table-column field="username" label="Username">{{ user.row.username }}</b-table-column>
+          <b-table-column field="username" label="Username">
+            <router-link :to="{ name: 'UserProfileAdmin', params: { id: user.row.id } }">
+              {{ user.row.username }}
+            </router-link>
+          </b-table-column>
           <b-table-column field="api_key" label="API key">
             <code>{{ user.row.api_key }}</code>
             <b-button class="button is-outline reset-button" size="is-small" @click="resetApiKey(user.row)">

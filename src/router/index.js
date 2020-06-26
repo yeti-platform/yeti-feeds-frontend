@@ -59,6 +59,12 @@ const routes = [
     component: TemplateList
   },
   {
+    path: "/profile/:id([a-z0-9]{24})",
+    name: "UserProfileAdmin",
+    component: UserProfile,
+    props: true
+  },
+  {
     path: "/profile",
     name: "UserProfile",
     component: UserProfile

@@ -145,11 +145,17 @@ export default {
       activeTab: 0
     };
   },
-  props: ["userId"],
+  props: {
+    id: {
+      type: String,
+      default: null
+    }
+  },
   methods: {
     getUserProfile() {
+      console.log("userprofile");
       axios
-        .get(`/api/users`)
+        .get(this.getEndpoint(""))
         .then(response => {
           this.profile = response.data;
         })
@@ -160,7 +166,7 @@ export default {
     },
     resetApiKey(user) {
       axios
-        .post(`/api/users/reset-api`)
+        .post(this.getEndpoint("reset-api"))
         .then(response => {
           user.api_key = response.data.api_key;
           this.$buefy.notification.open({
@@ -179,7 +185,7 @@ export default {
         new: this.newPassword
       };
       axios
-        .post(`/api/change-password`, params)
+        .post(this.getEndpoint("change-password"), params)
         .then(() => {
           this.$buefy.notification.open({
             message: `Password succesfully changed.`,
@@ -199,7 +205,7 @@ export default {
     },
     saveUserSettings() {
       axios
-        .post(`/api/users/settings`, this.profile.settings)
+        .post(this.getEndpoint("settings"), this.profile.settings)
         .then(() => {
           this.$buefy.notification.open({
             message: `Settings successfully updated.`,
@@ -212,8 +218,12 @@ export default {
         .finally(() => {});
     },
     saveUserPermissions() {
+      var uri = `/api/useradmin/permissions`;
+      if (this.id !== null) {
+        uri += `/${this.id}`;
+      }
       axios
-        .post(`/api/useradmin/permissions`, this.profile.permissions)
+        .post(uri, this.profile.permissions)
         .then(response => {
           this.profile.permissions = response.data.permissions;
           this.$buefy.notification.open({
@@ -225,6 +235,13 @@ export default {
           console.log(error);
         })
         .finally(() => {});
+    },
+    getEndpoint(endpoint) {
+      if (this.id !== null) {
+        return `/api/useradmin/${endpoint}/${this.id}`.replace("//", "/");
+      } else {
+        return `/api/users/${endpoint}`;
+      }
     }
   },
   computed: {
@@ -234,6 +251,11 @@ export default {
   },
   mounted() {
     this.getUserProfile();
+  },
+  watch: {
+    id: function() {
+      this.getUserProfile();
+    }
   }
 };
 </script>
