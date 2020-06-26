@@ -29,9 +29,9 @@
                   <th>Groups</th>
                   <td>
                     <b-taglist>
-                      <b-tag type="is-info" v-bind:key="group.groupname" v-for="group in profile.groups">{{
-                        group.groupname
-                      }}</b-tag>
+                      <b-tag type="is-info" v-bind:key="group.groupname" v-for="group in profile.groups">
+                        {{ group.groupname }}
+                      </b-tag>
                     </b-taglist>
                   </td>
                 </tr>
@@ -76,25 +76,25 @@
                   <td>{{ type }}</td>
                   <td>
                     <b-checkbox
-                      :disabled="profile.permissions[type].read == null"
+                      :disabled="profile.permissions[type].read == null || !isAdmin"
                       v-model="profile.permissions[type].read"
                     ></b-checkbox>
                   </td>
                   <td>
                     <b-checkbox
-                      :disabled="profile.permissions[type].write == null"
+                      :disabled="profile.permissions[type].write == null || !isAdmin"
                       v-model="profile.permissions[type].write"
                     ></b-checkbox>
                   </td>
                   <td>
                     <b-checkbox
-                      :disabled="profile.permissions[type].refresh == null"
+                      :disabled="profile.permissions[type].refresh == null || !isAdmin"
                       v-model="profile.permissions[type].refresh"
                     ></b-checkbox>
                   </td>
                   <td>
                     <b-checkbox
-                      :disabled="profile.permissions[type].toggle == null"
+                      :disabled="profile.permissions[type].toggle == null || !isAdmin"
                       v-model="profile.permissions[type].toggle"
                     ></b-checkbox>
                   </td>
@@ -102,7 +102,7 @@
               </tbody>
             </table>
             <p class="control">
-              <b-button type="is-primary" @click="saveUserPermissions()">Save permissions</b-button>
+              <b-button type="is-primary" @click="saveUserPermissions()" v-if="isAdmin">Save permissions</b-button>
             </p>
           </b-tab-item>
           <b-tab-item label="Misc settings">
@@ -225,6 +225,11 @@ export default {
           console.log(error);
         })
         .finally(() => {});
+    }
+  },
+  computed: {
+    isAdmin() {
+      return this.$store.getters.isAdmin;
     }
   },
   mounted() {

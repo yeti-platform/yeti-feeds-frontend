@@ -13,7 +13,7 @@
     </template>
 
     <template slot="end">
-      <b-navbar-dropdown label="Admin" v-if="isAuthenticated">
+      <b-navbar-dropdown label="Admin" v-if="isAdmin">
         <b-navbar-item tag="router-link" :to="{ path: '/admin/users' }">Users</b-navbar-item>
         <b-navbar-item tag="router-link" :to="{ path: '/admin/groups' }">Groups</b-navbar-item>
         <b-navbar-item tag="router-link" :to="{ path: '/admin/tags' }">Tags</b-navbar-item>
@@ -38,6 +38,9 @@ export default {
   computed: {
     isAuthenticated() {
       return this.$store.getters.isAuthenticated;
+    },
+    isAdmin() {
+      return this.$store.getters.isAdmin;
     },
     tokenSubject() {
       return this.$store.getters.tokenSubject;

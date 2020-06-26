@@ -69,6 +69,7 @@ const mutations = {
 
 const getters = {
   isAuthenticated: state => !!state.user,
+  isAdmin: state => !!state.user.permissions.admin,
   tokenSubject: state => state.user.username
 };
 
