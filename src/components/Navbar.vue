@@ -19,12 +19,16 @@
         <b-navbar-item tag="router-link" :to="{ path: '/admin/tags' }">Tags</b-navbar-item>
         <b-navbar-item tag="router-link" :to="{ path: '/admin/system' }">System</b-navbar-item>
       </b-navbar-dropdown>
+      <b-navbar-dropdown :label="tokenSubject" v-if="isAuthenticated">
+        <b-navbar-item tag="router-link" :to="{ path: '/profile' }">
+          Profile
+        </b-navbar-item>
+        <b-navbar-item tag="a" @click="logout()" v-if="localAuth">
+          Logout
+        </b-navbar-item>
+      </b-navbar-dropdown>
       <b-navbar-item tag="div">
         <div class="buttons">
-          <b-button tag="router-link" typ="is-light" to="/profile" v-if="isAuthenticated">
-            <span>{{ tokenSubject }}</span>
-            <b-icon pack="fas" icon="user-cog" size="is-small"></b-icon>
-          </b-button>
           <a class="button is-primary" href="/auth/login" v-if="!isAuthenticated">Log in</a>
         </div>
       </b-navbar-item>
@@ -35,6 +39,14 @@
 <script>
 export default {
   name: "Navbar",
+  methods: {
+    logout() {
+      this.$store.dispatch("logout").then(() => {
+        window.location.href = "/login";
+      });
+      console.log("logout");
+    }
+  },
   computed: {
     isAuthenticated() {
       return this.$store.getters.isAuthenticated;
@@ -44,6 +56,9 @@ export default {
     },
     tokenSubject() {
       return this.$store.getters.tokenSubject;
+    },
+    localAuth() {
+      return this.$store.getters.appConfig.auth.module === "local";
     }
   }
 };
