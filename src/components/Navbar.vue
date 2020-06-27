@@ -1,5 +1,5 @@
 <template>
-  <b-navbar shadow="true" type="is-dark" class="yeti-navbar">
+  <b-navbar :shadow="true" type="is-dark" class="yeti-navbar">
     <template slot="brand">
       <b-navbar-item tag="router-link" :to="{ path: '/' }"></b-navbar-item>
     </template>
