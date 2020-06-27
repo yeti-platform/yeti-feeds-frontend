@@ -5,7 +5,8 @@ import axios from "axios";
 Vue.use(Vuex);
 
 const state = {
-  user: null
+  user: null,
+  appConfig: null
 };
 
 const actions = {
@@ -28,7 +29,7 @@ const actions = {
   },
   logout({ commit }) {
     return new Promise(resolve => {
-      axios.put(`/api/auth/logout/`).then(response => {
+      axios.post(`/api/auth/logout`).then(response => {
         commit("logout");
         resolve(response);
       });
@@ -48,6 +49,11 @@ const actions = {
           reject(error);
         });
     });
+  },
+  getAppConfig({ commit }) {
+    axios.get("/api/system/config").then(response => {
+      commit("setAppConfig", response.data);
+    });
   }
 };
 
@@ -64,13 +70,23 @@ const mutations = {
   },
   logout(state) {
     state.user = null;
+  },
+  setAppConfig(state, data) {
+    state.appConfig = data;
   }
 };
 
 const getters = {
   isAuthenticated: state => !!state.user,
-  isAdmin: state => !!state.user.permissions.admin,
-  tokenSubject: state => state.user.username
+  isAdmin: state => {
+    if (state.user) {
+      return !!state.user.permissions.admin;
+    } else {
+      return false;
+    }
+  },
+  tokenSubject: state => state.user.username,
+  appConfig: state => state.appConfig
 };
 
 const store = new Vuex.Store({
