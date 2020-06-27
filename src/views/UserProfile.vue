@@ -45,7 +45,7 @@
           <header class="card-header is-warning">
             <p class="card-header-title">Change password</p>
           </header>
-          <div class="card-content">
+          <div class="card-content" v-if="systemAuth === 'local'">
             <b-field>
               <b-input v-model="currentPassword" type="password" placeholder="Current password"></b-input>
             </b-field>
@@ -55,6 +55,9 @@
             <p class="control">
               <b-button type="is-primary" @click="changeUserPassword()">Save</b-button>
             </p>
+          </div>
+          <div class="card-content" v-if="systemAuth === 'oidc'">
+            Authentication is handled by Open ID Connect. There is no password to change.
           </div>
         </div>
       </div>
@@ -142,7 +145,8 @@ export default {
       currentPassword: null,
       newPassword: null,
       availableSettings: [],
-      activeTab: 0
+      activeTab: 0,
+      systemAuth: null
     };
   },
   props: {
@@ -236,6 +240,16 @@ export default {
         })
         .finally(() => {});
     },
+    getSystemAuth() {
+      axios
+        .get(`/api/system/config`)
+        .then(response => {
+          this.systemAuth = response.data.auth.module;
+        })
+        .catch(error => {
+          console.log(error);
+        });
+    },
     getEndpoint(endpoint) {
       if (this.id !== null) {
         return `/api/useradmin/${endpoint}/${this.id}`.replace("//", "/");
@@ -247,10 +261,14 @@ export default {
   computed: {
     isAdmin() {
       return this.$store.getters.isAdmin;
+    },
+    tokenSubject() {
+      return this.$store.getters.tokenSubject;
     }
   },
   mounted() {
     this.getUserProfile();
+    this.getSystemAuth();
   },
   watch: {
     id: function() {
