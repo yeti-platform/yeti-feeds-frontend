@@ -1,5 +1,5 @@
 <template>
-  <b-navbar class="is-dark navbar">
+  <b-navbar shadow="true" type="is-dark" class="yeti-navbar">
     <template slot="brand">
       <b-navbar-item tag="router-link" :to="{ path: '/' }"></b-navbar-item>
     </template>
@@ -66,12 +66,13 @@ export default {
 </script>
 
 <style>
-.router-link-exact-active {
-  background-color: #292929;
-  color: whitesmoke;
-}
-
 .navbar {
   margin-bottom: 1em;
+}
+
+.yeti-navbar .navbar-dropdown {
+  padding-top: 0rem;
+  margin-top: 0rem;
+  border-top: 0;
 }
 </style>
