@@ -52,7 +52,7 @@
       </div>
       <div class="column is-6">
         <h1 class="is-size-2">System config</h1>
-        <pre>{{ systemConfig }}</pre>
+        <pre>{{ appConfig }}</pre>
       </div>
     </div>
   </div>
@@ -66,13 +66,11 @@ export default {
   data() {
     return {
       info: null,
-      infoLoading: false,
-      systemConfig: null
+      infoLoading: false
     };
   },
   mounted() {
     this.getWorkerInfo();
-    this.getSystemConfig();
   },
   methods: {
     getWorkerInfo() {
@@ -99,16 +97,11 @@ export default {
         .catch(error => {
           console.log(error);
         });
-    },
-    getSystemConfig() {
-      axios
-        .get(`/api/system/config`)
-        .then(response => {
-          this.systemConfig = response.data;
-        })
-        .catch(error => {
-          console.log(error);
-        });
+    }
+  },
+  computed: {
+    appConfig() {
+      return this.$store.getters.appConfig;
     }
   }
 };

@@ -145,8 +145,7 @@ export default {
       currentPassword: null,
       newPassword: null,
       availableSettings: [],
-      activeTab: 0,
-      systemAuth: null
+      activeTab: 0
     };
   },
   props: {
@@ -240,16 +239,6 @@ export default {
         })
         .finally(() => {});
     },
-    getSystemAuth() {
-      axios
-        .get(`/api/system/config`)
-        .then(response => {
-          this.systemAuth = response.data.auth.module;
-        })
-        .catch(error => {
-          console.log(error);
-        });
-    },
     getEndpoint(endpoint) {
       if (this.id !== null) {
         return `/api/useradmin/${endpoint}/${this.id}`.replace("//", "/");
@@ -264,11 +253,13 @@ export default {
     },
     tokenSubject() {
       return this.$store.getters.tokenSubject;
+    },
+    systemAuth() {
+      return this.$store.getters.appConfig.auth.module;
     }
   },
   mounted() {
     this.getUserProfile();
-    this.getSystemAuth();
   },
   watch: {
     id: function() {
