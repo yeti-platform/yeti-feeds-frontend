@@ -58,7 +58,8 @@ export default {
       return this.$store.getters.tokenSubject;
     },
     localAuth() {
-      return this.$store.getters.appConfig.auth.module === "local";
+      var appConfig = this.$store.getters.appConfig;
+      return appConfig !== null ? appConfig.auth.module === "local" : null;
     }
   }
 };
