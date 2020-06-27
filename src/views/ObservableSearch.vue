@@ -10,7 +10,7 @@
           </p>
         </div>
         <div class="card">
-          <div class="card-header is-info"><p class="card-header-title">Advanced search</p></div>
+          <div class="card-header info"><p class="card-header-title">Advanced search</p></div>
           <div class="card-content">
             <div class="search">
               <div class="field">
@@ -181,10 +181,6 @@ export default {
 
 <style lang="scss">
 @import "@/style.scss";
-
-.card-header.is-info {
-  background: $info;
-}
 
 .add-tags label {
   vertical-align: middle;

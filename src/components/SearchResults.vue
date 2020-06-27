@@ -5,7 +5,7 @@
       <div class="tile">
         <div class="tile is-parent">
           <div class="tile is-child card">
-            <header class="card-header is-warning">
+            <header class="card-header warning">
               <p class="card-header-title">
                 <b-icon pack="fas" icon="crosshairs" size="is-small"></b-icon>
                 Indicator matches <b-tag rounded type="is-dark">{{ searchResults.matches.length }}</b-tag>
@@ -40,7 +40,7 @@
         </div>
         <div class="tile is-parent">
           <div class="tile is-child card">
-            <header class="card-header is-danger">
+            <header class="card-header danger">
               <p class="card-header-title">
                 <b-icon pack="fas" icon="project-diagram" size="is-small"></b-icon>
                 Related entities <b-tag rounded type="is-dark">{{ searchResults.entities.length }}</b-tag>
@@ -65,7 +65,7 @@
       <div class="tile">
         <div class="tile is-parent">
           <div class="tile is-child card">
-            <header class="card-header is-info">
+            <header class="card-header info">
               <p class="card-header-title">
                 <b-icon pack="fas" icon="database" size="is-small"></b-icon>
                 Observables found in database <b-tag rounded type="is-dark">{{ searchResults.known.length }}</b-tag>
@@ -104,7 +104,7 @@
       <div class="tile">
         <div class="tile is-parent">
           <div class="tile is-child card">
-            <header class="card-header is-light">
+            <header class="card-header light">
               <p class="card-header-title">
                 <b-icon pack="fas" icon="question" size="is-small"></b-icon>
                 Unknown observables <b-tag rounded type="is-dark">{{ searchResults.unknown.length }}</b-tag>
@@ -137,22 +137,6 @@ export default {
 
 p .icon {
   margin-right: 0.5em;
-}
-
-.card-header.is-warning {
-  background: $warning;
-}
-
-.card-header.is-danger {
-  background: $danger;
-}
-
-.card-header.is-info {
-  background: $info;
-}
-
-.card-header.is-light {
-  background: $light;
 }
 
 span.tag {

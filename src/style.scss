@@ -49,3 +49,28 @@ $card-shadow: 0 0.5em 1em -0.125em rgba(0, 0, 0, 0.1),
 // Import Bulma and Buefy styles
 @import "~bulma";
 @import "~buefy/src/scss/buefy";
+
+
+// We want nicer cards
+
+.card,
+.card-header {
+  border-radius: 10px;
+}
+
+.card-header.warning {
+  background: $warning;
+}
+
+.card-header.danger {
+  background: $danger;
+}
+
+.card-header.info {
+  border-radius: 5px;
+  background: $info;
+}
+
+.card-header.light {
+  background: $light;
+}
