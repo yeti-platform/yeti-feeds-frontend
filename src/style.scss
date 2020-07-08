@@ -10,61 +10,40 @@ $primary-invert: findColorInvert($primary);
 $twitter: #4099ff;
 $twitter-invert: findColorInvert($twitter);
 
-$danger: #e74c3c;
-$warning: #f1b70e;
-$info: #3298dc;
-$success: #2ecc71;
+$danger: #ee8074;
+$warning: #f7d56f;
+$info: #84bee6;
+$success: #7ee6a9;
 
 // Setup $colors to use as bulma classes (e.g. 'is-twitter')
-$colors: (
-  "white": (
-    $white,
-    $black
-  ),
-  "black": (
-    $black,
-    $white
-  ),
-  "light": (
-    $light,
-    $light-invert
-  ),
-  "dark": (
-    $dark,
-    $dark-invert
-  ),
-  "primary": (
-    $primary,
-    $primary-invert
-  ),
-  "info": (
-    $info,
-    $info-invert
-  ),
-  "success": (
-    $success,
-    $success-invert
-  ),
-  "warning": (
-    $warning,
-    $warning-invert
-  ),
-  "danger": (
-    $danger,
-    $danger-invert
-  ),
-  "twitter": (
-    $twitter,
-    $twitter-invert
-  )
-);
+$colors: ("white": ($white,
+    $black),
+  "black": ($black,
+    $white),
+  "light": ($light,
+    $light-invert),
+  "dark": ($dark,
+    $dark-invert),
+  "primary": ($primary,
+    $primary-invert),
+  "info": ($info,
+    $info-invert),
+  "success": ($success,
+    $success-invert),
+  "warning": ($warning,
+    $warning-invert),
+  "danger": ($danger,
+    $danger-invert),
+  "twitter": ($twitter,
+    $twitter-invert));
 
 // Links
 $link: $primary;
 $link-invert: $primary-invert;
 $link-focus-border: $primary;
 
-$card-shadow: 0 0.5em 1em -0.125em rgba(0, 0, 0, 0.1), 0 0px 0 1px rgba(0, 0, 0, 0.02);
+$card-shadow: 0 0.5em 1em -0.125em rgba(0, 0, 0, 0.1),
+0 0px 0 1px rgba(0, 0, 0, 0.02);
 
 // Import Bulma and Buefy styles
 @import "~bulma";
