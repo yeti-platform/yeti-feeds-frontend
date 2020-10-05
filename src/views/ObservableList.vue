@@ -193,9 +193,9 @@ export default {
   methods: {
     onPageChange(tablePage) {
       this.tablePage = tablePage;
-      this.searchObservables();
+      this.searchObservables(false);
     },
-    searchObservables() {
+    searchObservables(refreshTotal = true) {
       var params = {
         filter: this.generateSearchParams(this.searchQuery),
         params: {
@@ -204,7 +204,9 @@ export default {
         }
       };
       console.log(params);
-      this.countTotal(params);
+      if (refreshTotal) {
+        this.countTotal(params);
+      }
       this.loading = true;
       axios
         .post("/api/observablesearch/", params)
