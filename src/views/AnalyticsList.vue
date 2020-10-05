@@ -56,7 +56,7 @@
           </b-table-column>
           <b-table-column field="description" label="Description">
             {{ analytics.row.description }}
-            <span class="setting-warning" v-if="analytics.row.available">
+            <span class="setting-warning" v-if="!analytics.row.available">
               This plugin requires settings that are not yet defined.
             </span>
           </b-table-column>
