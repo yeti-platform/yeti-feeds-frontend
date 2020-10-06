@@ -110,6 +110,8 @@ export default {
         .then(response => {
           this.observable = response.data;
           this.newTags = [...this.observable.tags];
+          // Switch back to Context view when reloading the page.
+          this.activeTab = 0;
         })
         .catch(error => {
           console.log(error);
