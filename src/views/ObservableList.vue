@@ -32,8 +32,11 @@
 
           <b-table-column field="context" label="Context">
             <b-taglist>
-              <b-tag v-for="context in observable.row.context" v-bind:key="context.source">
-                {{ context.source }}
+              <b-tag
+                v-for="contextSource in new Set(observable.row.context.map(c => c.source))"
+                v-bind:key="contextSource"
+              >
+                {{ contextSource }}
               </b-tag>
             </b-taglist>
           </b-table-column>
@@ -296,6 +299,7 @@ export default {
         });
     },
     countTotal(params) {
+      this.tableTotal = 500;
       axios
         .post("/api/observablesearch/total", params)
         .then(response => {
