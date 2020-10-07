@@ -1,7 +1,19 @@
 <template>
   <div class="columns">
     <div class="column is-9">
-      <b-table :data="tags" @click="row => (this.selectedTag = JSON.parse(JSON.stringify(row)))">
+      <b-table
+        :data="tags"
+        @click="row => (this.selectedTag = JSON.parse(JSON.stringify(row)))"
+        :total="tableTotal"
+        backend-pagination
+        @page-change="onPageChange"
+        :loading="loading"
+        :perPage="50"
+        paginated
+        :hoverable="true"
+        :narrowed="true"
+        :current-page="tablePage"
+      >
         <template v-slot:default="tag">
           <b-table-column field="name" label="name">
             <b-tag>{{ tag.row.name }}</b-tag>
@@ -57,6 +69,13 @@
           <tag-merge></tag-merge>
         </b-tab-item>
       </b-tabs>
+      <b-tabs position="is-centered">
+        <b-tab-item label="Filter tags">
+          <b-field label="Name">
+            <b-input v-model="tagFilter" v-on:keyup.native.enter="searchTags"></b-input>
+          </b-field>
+        </b-tab-item>
+      </b-tabs>
     </div>
   </div>
 </template>
@@ -76,23 +95,60 @@ export default {
     return {
       tags: [],
       selectedTag: {},
-      activeTab: 0
+      activeTab: 0,
+      tablePage: 1,
+      tableTotal: 500,
+      loading: false,
+      tagFilter: ""
     };
   },
   mounted() {
-    this.getTags();
+    this.searchTags();
   },
   methods: {
-    getTags() {
+    searchTags(refreshTotal = true) {
+      var params = {
+        filter: { name: this.tagFilter },
+        params: {
+          regex: true,
+          page: this.tablePage
+        }
+      };
+      console.log(params);
+      if (refreshTotal) {
+        this.countTotal(params);
+      }
+      this.loading = true;
       axios
-        .get(`/api/tag/`)
+        .post(`/api/tagsearch/`, params)
         .then(response => {
           this.tags = response.data;
+          if (this.tags.length === 0) {
+            this.tablePage = 1;
+          }
+          return this.tags;
+        })
+        .catch(error => {
+          return console.log(error);
+        })
+        .finally(() => {
+          this.loading = false;
+        });
+    },
+    countTotal(params) {
+      this.tableTotal = 500;
+      axios
+        .post("/api/tagsearch/total", params)
+        .then(response => {
+          this.tableTotal = response.data.total;
         })
         .catch(error => {
           console.log(error);
-        })
-        .finally(() => {});
+        });
+    },
+    onPageChange(tablePage) {
+      this.tablePage = tablePage;
+      this.searchTags(false);
     },
     updateTag() {
       var params = {
