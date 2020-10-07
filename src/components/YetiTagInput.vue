@@ -2,12 +2,12 @@
   <b-taginput
     label="tags"
     v-model="selectedTags"
-    :data="filterTags"
+    :data="filteredTags"
     autocomplete
     icon="tag"
     placeholder="e.g. Zeus"
     field="name"
-    @typing="text => (this.tagName = text)"
+    @typing="getFilteredTags"
     @input="updateSelected"
     :maxtags="maxtags"
   >
@@ -16,14 +16,16 @@
 
 <script>
 import axios from "axios";
+import _ from "lodash";
 
 export default {
   name: "YetiTagInput",
   data() {
     return {
-      existingTags: [],
       tagName: "",
-      selectedTags: this.value
+      selectedTags: this.value,
+      filteredTags: [],
+      tablePage: 1
     };
   },
   props: {
@@ -32,9 +34,6 @@ export default {
       type: Number,
       default: null
     }
-  },
-  mounted() {
-    this.getExistingTags();
   },
   methods: {
     getExistingTags() {
@@ -49,19 +48,25 @@ export default {
     },
     updateSelected() {
       this.$emit("input", this.selectedTags);
-    }
-  },
-  computed: {
-    filterTags() {
-      return this.existingTags.filter(tag => {
-        return (
-          tag.name
-            .toString()
-            .toLowerCase()
-            .indexOf(this.tagName.toLowerCase()) >= 0
-        );
-      });
-    }
+    },
+    getFilteredTags: _.debounce(function(text) {
+      this.tagName = text;
+      var params = {
+        filter: { name: this.tagName },
+        params: {
+          regex: true,
+          page: this.tablePage
+        }
+      };
+      axios
+        .post(`/api/tagsearch/`, params)
+        .then(response => {
+          return (this.filteredTags = response.data);
+        })
+        .catch(error => {
+          return console.log(error);
+        });
+    }, 300)
   },
   watch: {
     value: function(newValue) {
