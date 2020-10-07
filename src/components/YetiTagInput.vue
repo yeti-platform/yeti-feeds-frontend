@@ -24,8 +24,7 @@ export default {
     return {
       tagName: "",
       selectedTags: this.value,
-      filteredTags: [],
-      tablePage: 1
+      filteredTags: []
     };
   },
   props: {
@@ -55,7 +54,7 @@ export default {
         filter: { name: this.tagName },
         params: {
           regex: true,
-          page: this.tablePage
+          page: 1
         }
       };
       axios
