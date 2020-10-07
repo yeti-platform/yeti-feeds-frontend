@@ -10,6 +10,7 @@
     @typing="getFilteredTags"
     @input="updateSelected"
     :maxtags="maxtags"
+    :allow-new="true"
   >
   </b-taginput>
 </template>
