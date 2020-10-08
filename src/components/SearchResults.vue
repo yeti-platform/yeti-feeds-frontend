@@ -75,7 +75,9 @@
               <b-table :data="searchResults['known']" :narrowed="true">
                 <template v-slot:default="known">
                   <b-table-column field="value" label="Value">
-                    <a href="#"> {{ known.row.value }} </a>
+                    <router-link :to="{ name: 'ObservableDetails', params: { id: known.row.id } }">
+                      {{ known.row.value }}
+                    </router-link>
                   </b-table-column>
                   <b-table-column field="tags" label="Tags">
                     <b-taglist>
