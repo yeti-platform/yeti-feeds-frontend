@@ -36,7 +36,11 @@
               </b-tag>
             </b-taglist>
           </b-table-column>
-          <b-table-column field="created" label="Created">{{ tag.row.created }}</b-table-column>
+          <b-table-column field="created" label="Created (UTC)" width="180"
+            ><span :title="'Localtime: ' + formatTimestamp(tag.row.created, true)">{{
+              formatTimestamp(tag.row.created)
+            }}</span>
+          </b-table-column>
         </template>
       </b-table>
     </div>
@@ -84,6 +88,7 @@
 import axios from "axios";
 import YetiTagInput from "@/components/YetiTagInput";
 import TagMerge from "@/components/TagMerge";
+import utils from "@/utils";
 
 export default {
   name: "TagsAdmin",
@@ -166,6 +171,9 @@ export default {
           console.log(error);
         })
         .finally(() => {});
+    },
+    formatTimestamp(timestamp, local) {
+      return utils.formatTimestamp(timestamp, local);
     }
   }
 };
