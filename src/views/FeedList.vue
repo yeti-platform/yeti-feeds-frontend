@@ -94,6 +94,12 @@ export default {
       if (row.status === "OK") {
         return "is-success";
       }
+      if (row.status === "Updating...") {
+        return "is-warning";
+      }
+      if (row.status === "ERROR") {
+        return "is-danger";
+      }
     }
   }
 };
@@ -102,16 +108,46 @@ export default {
 <style scoped lang="scss">
 @import "@/style.scss";
 
-.feedlist ::v-deep .disabled {
+.feedlist ::v-deep tbody .disabled {
   opacity: 0.5;
+}
+
+.feedlist .is-success strong {
+  color: $success-fontcolor;
+}
+
+.feedlist .is-danger strong {
+  color: $danger-fontcolor;
+}
+
+.feedlist .is-warning strong {
+  color: $warning-fontcolor;
 }
 
 .feedlist ::v-deep .is-success {
   background: $success;
+  color: $success-fontcolor;
+}
+
+.feedlist ::v-deep tbody tr.is-success:hover {
+  background-color: $success-hover;
 }
 
 .feedlist ::v-deep .is-danger {
-  background: rgb(255, 211, 211);
-  color: rgb(243, 96, 96);
+  background: $danger;
+  color: $danger-fontcolor;
+}
+
+.feedlist ::v-deep tbody tr.is-danger:hover {
+  background: $danger-hover;
+}
+
+.feedlist ::v-deep .is-warning {
+  background: $warning;
+  color: $warning-fontcolor;
+}
+
+.feedlist ::v-deep tbody tr.is-warning:hover {
+  background: $warning-hover;
 }
 </style>

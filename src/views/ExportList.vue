@@ -310,12 +310,42 @@ export default {
   opacity: 0.5;
 }
 
+.exportlist .is-success strong {
+  color: $success-fontcolor;
+}
+
+.exportlist .is-danger strong {
+  color: $danger-fontcolor;
+}
+
+.exportlist .is-warning strong {
+  color: $warning-fontcolor;
+}
+
 .exportlist ::v-deep .is-success {
   background: $success;
+  color: $success-fontcolor;
+}
+
+.exportlist ::v-deep tbody tr.is-success:hover {
+  background-color: $success-hover;
 }
 
 .exportlist ::v-deep .is-danger {
-  background: rgb(255, 211, 211);
-  color: rgb(243, 96, 96);
+  background: $danger;
+  color: $danger-fontcolor;
+}
+
+.exportlist ::v-deep tbody tr.is-danger:hover {
+  background: $danger-hover;
+}
+
+.exportlist ::v-deep .is-warning {
+  background: $warning;
+  color: $warning-fontcolor;
+}
+
+.exportlist ::v-deep tbody tr.is-warning:hover {
+  background: $warning-hover;
 }
 </style>
