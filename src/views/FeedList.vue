@@ -5,8 +5,12 @@
         <b-table-column field="name" label="Name">
           <strong>{{ feed.row.name }}</strong>
         </b-table-column>
-        <b-table-column field="frequency" label="Runs every">{{ feed.row.frequency }}</b-table-column>
-        <b-table-column field="last_run" label="Last run">{{ feed.row.last_run || "Never" }}</b-table-column>
+        <b-table-column field="frequency" label="Runs every" width="130">{{ feed.row.frequency }}</b-table-column>
+        <b-table-column field="last_run" label="Last run (UTC)" width="180"
+          ><span :title="'Localtime: ' + formatTimestamp(feed.row.last_run, true)">{{
+            formatTimestamp(feed.row.last_run)
+          }}</span>
+        </b-table-column>
         <b-table-column field="description" label="Description">{{ feed.row.description }}</b-table-column>
         <b-table-column field="status" label="Status">{{ feed.row.status || "N/A" }}</b-table-column>
         <b-table-column field="toggle" label="Toggle">
@@ -35,6 +39,7 @@
 
 <script>
 import axios from "axios";
+import utils from "@/utils";
 
 export default {
   name: "FeedList",
@@ -100,6 +105,9 @@ export default {
       if (row.status === "ERROR") {
         return "is-danger";
       }
+    },
+    formatTimestamp(timestamp, local) {
+      return utils.formatTimestamp(timestamp, local);
     }
   }
 };

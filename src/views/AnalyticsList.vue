@@ -8,8 +8,15 @@
           <b-table-column field="name" label="Name" sortable>
             <strong>{{ analytics.row.name }}</strong>
           </b-table-column>
-          <b-table-column field="frequency" label="Runs every">{{ analytics.row.frequency }}</b-table-column>
-          <b-table-column field="last_run" label="Last run">{{ analytics.row.last_run || "Never" }}</b-table-column>
+          <b-table-column field="frequency" label="Runs every" width="130">{{
+            analytics.row.frequency
+          }}</b-table-column>
+          <b-table-column field="last_run" label="Last run (UTC)" width="180"
+            ><span :title="'Localtime: ' + formatTimestamp(analytics.row.last_run, true)">{{
+              formatTimestamp(analytics.row.last_run)
+            }}</span></b-table-column
+          >
+          <!-- <b-table-column field="last_run" label="Last run">{{ analytics.row.last_run || "Never" }}</b-table-column> -->
           <b-table-column field="description" label="Description">{{ analytics.row.description }}</b-table-column>
           <b-table-column field="status" label="Status">{{ analytics.row.status || "N/A" }}</b-table-column>
           <b-table-column field="toggle" label="Toggle">
@@ -99,6 +106,7 @@
 
 <script>
 import axios from "axios";
+import utils from "@/utils";
 
 export default {
   name: "AnalyticsList",
@@ -158,6 +166,9 @@ export default {
       if (row.status === "ERROR") {
         return "is-danger";
       }
+    },
+    formatTimestamp(timestamp, local) {
+      return utils.formatTimestamp(timestamp, local);
     }
   },
   mounted() {

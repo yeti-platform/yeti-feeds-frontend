@@ -13,7 +13,11 @@
       </tr>
       <tr>
         <th>Created</th>
-        <td>{{ observable.created }}</td>
+        <td>
+          <span :title="'Localtime: ' + formatTimestamp(observable.created, true)"
+            >{{ formatTimestamp(observable.created) }} UTC</span
+          >
+        </td>
       </tr>
     </tbody>
 
@@ -65,8 +69,15 @@
 </template>
 
 <script>
+import utils from "@/utils";
+
 export default {
   name: "ObservableInfoTable",
-  props: ["observable"]
+  props: ["observable"],
+  methods: {
+    formatTimestamp(timestamp, local) {
+      return utils.formatTimestamp(timestamp, local);
+    }
+  }
 };
 </script>

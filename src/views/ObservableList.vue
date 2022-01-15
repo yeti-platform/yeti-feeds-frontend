@@ -40,9 +40,10 @@
               </b-tag>
             </b-taglist>
           </b-table-column>
-
-          <b-table-column field="created" label="Created on">
-            {{ new Date(observable.row.created).toISOString() }}
+          <b-table-column field="created" label="Created on (UTC)" width="180"
+            ><span :title="'Localtime: ' + formatTimestamp(observable.row.created, true)">{{
+              formatTimestamp(observable.row.created)
+            }}</span>
           </b-table-column>
 
           <b-table-column field="sources" label="Sources">
@@ -158,6 +159,7 @@
 <script>
 import axios from "axios";
 import YetiTagInput from "@/components/YetiTagInput";
+import utils from "@/utils";
 
 export default {
   name: "ObservableList",
@@ -308,6 +310,9 @@ export default {
         .catch(error => {
           console.log(error);
         });
+    },
+    formatTimestamp(timestamp, local) {
+      return utils.formatTimestamp(timestamp, local);
     }
   },
   computed: {
