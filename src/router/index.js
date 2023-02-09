@@ -2,6 +2,8 @@ import Vue from "vue";
 import VueRouter from "vue-router";
 import ObservableSearch from "../views/ObservableSearch.vue";
 import ObservableList from "../views/ObservableList.vue";
+import EntityList from "../views/EntityList.vue";
+import EntityDetails from "../views/EntityDetails.vue";
 import ObservableDetails from "../views/ObservableDetails.vue";
 import FeedList from "../views/FeedList.vue";
 import AnalyticsList from "../views/AnalyticsList.vue";
@@ -36,6 +38,22 @@ const routes = [
     path: "/observable/:id([a-z0-9]{24})",
     name: "ObservableDetails",
     component: ObservableDetails,
+    props: true
+  },
+  {
+    path: "/entities",
+    name: "EntityList",
+    component: EntityList,
+    props: route => {
+      return {
+        searchQuery: route.query.q
+      };
+    }
+  },
+  {
+    path: "/entity/:id([a-z0-9]{24})",
+    name: "EntityDetails",
+    component: EntityDetails,
     props: true
   },
   {
