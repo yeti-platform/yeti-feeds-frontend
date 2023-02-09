@@ -46,7 +46,40 @@
                     <b-tag rounded> {{ totalRelated == null ? "?" : totalRelated }}</b-tag>
                   </span>
                 </template>
-                <related-observables :id="id" @totalUpdated="value => (totalRelated = value)"></related-observables>
+                <related-objects
+                  :id="id"
+                  source-type="Observable"
+                  target-type="Observable"
+                  @totalUpdated="value => (totalRelated = value)"
+                ></related-objects>
+              </b-tab-item>
+              <b-tab-item>
+                <template slot="header">
+                  <b-icon icon="sitemap"></b-icon>
+                  <span>
+                    Related Entities
+                    <b-tag rounded> {{ totalRelated == null ? "?" : totalRelated }}</b-tag>
+                  </span>
+                </template>
+                <b-tabs v-model="activeSubTab" position="is-left" :animated="false">
+                  <b-tab-item>
+                    <template slot="header">
+                      <b-icon icon="sitemap"></b-icon>
+                      <span>
+                        Malware
+                        <b-tag rounded> {{ totalRelated == null ? "?" : totalRelated }}</b-tag>
+                      </span>
+                    </template>
+                    <related-objects
+                      :id="id"
+                      :fields="['name', 'family', 'tags']"
+                      source-type="Observable"
+                      target-type="malware"
+                      @totalUpdated="value => (totalRelated = value)"
+                    >
+                    </related-objects>
+                  </b-tab-item>
+                </b-tabs>
               </b-tab-item>
             </b-tabs>
           </div>
@@ -82,14 +115,14 @@
 <script>
 import axios from "axios";
 import YetiTagInput from "@/components/YetiTagInput";
-import RelatedObservables from "@/components/RelatedObservables";
+import RelatedObjects from "@/components/RelatedObjects";
 import ObservableInfoTable from "@/components/ObservableInfoTable";
 
 export default {
   props: ["id"],
   components: {
     YetiTagInput,
-    RelatedObservables,
+    RelatedObjects,
     ObservableInfoTable
   },
   data() {

@@ -14,28 +14,24 @@
       @page-change="onPageChange"
     >
       <template v-slot:default="link">
-        <b-table-column field="value" label="Value">
-          <router-link :to="{ name: 'ObservableDetails', params: { id: link.row.target.id } }">
-            {{ link.row.target.value }}
+        <b-table-column v-for="field in fields" :field="field" :label="getLabelForField(field)" v-bind:key="field">
+          <router-link
+            v-if="field === 'value' || field === 'name'"
+            :to="{
+              name: field === 'value' ? 'ObservableDetails' : 'EntityDetails',
+              params: { id: link.row.target.id }
+            }"
+          >
+            {{ link.row.target[field] }}
           </router-link>
-        </b-table-column>
 
-        <b-table-column field="description" label="Description">
-          {{ link.row.description }}
-        </b-table-column>
-
-        <b-table-column field="description" label="Tags">
-          <b-taglist>
-            <b-tag v-for="tag in link.row.target.tags" v-bind:key="tag.name" :type="tag.fresh ? 'is-primary' : ''">
-              {{ tag.name }}
+          <b-taglist v-else-if="field === 'tags'">
+            <b-tag v-for="tag in link.row.target.tags" v-bind:key="tag" :type="tag.fresh ? 'is-primary' : ''">
+              {{ tag.name ? tag.name : tag }}
             </b-tag>
           </b-taglist>
-        </b-table-column>
 
-        <b-table-column field="description" label="Context">
-          <b-tag v-for="context in link.row.target.context" v-bind:key="context.source">
-            {{ context.source }}
-          </b-tag>
+          <span v-else>{{ link.row.target[field] }}</span>
         </b-table-column>
       </template>
     </b-table>
@@ -46,8 +42,13 @@
 import axios from "axios";
 
 export default {
-  name: "RelatedObservables",
-  props: ["id"],
+  name: "RelatedEntities",
+  props: {
+    id: { type: String, required: true },
+    fields: { type: Array, default: () => ["value", "tags"] },
+    sourceType: { type: String, default: "Observable" },
+    targetType: { type: String, default: "Observable" }
+  },
   data() {
     return {
       links: [],
@@ -62,6 +63,22 @@ export default {
     this.countTotal();
   },
   methods: {
+    getLabelForField(field) {
+      switch (field) {
+        case "value":
+          return "Value";
+        case "name":
+          return "Name";
+        case "description":
+          return "Description";
+        case "tags":
+          return this.targetType === "Observable" ? "Tags" : "Relevant tags";
+        case "context":
+          return "Context";
+        default:
+          return field.charAt(0).toUpperCase() + field.slice(1);
+      }
+    },
     fetchNeighbors() {
       var pagination = {
         params: {
@@ -71,7 +88,7 @@ export default {
       };
       this.loading = true;
       axios
-        .post(`/api/neighbors/tuples/Observable/${this.id}/Observable`, pagination)
+        .post(`/api/neighbors/tuples/${this.sourceType}/${this.id}/${this.targetType}`, pagination)
         .then(response => {
           this.links = response.data.links;
           this.links.map(link => {
@@ -85,7 +102,7 @@ export default {
     },
     countTotal() {
       axios
-        .get(`/api/neighbors/tuples/Observable/${this.id}/Observable/total`)
+        .get(`/api/neighbors/tuples/${this.sourceType}/${this.id}/${this.targetType}/total`)
         .then(response => {
           this.total = response.data.total;
           this.$emit("totalUpdated", this.total);
