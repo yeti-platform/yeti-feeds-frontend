@@ -81,29 +81,12 @@
 <script>
 import axios from "axios";
 import YetiTagInput from "@/components/YetiTagInput";
-// import RelatedEntities from "@/components/RelatedEntities";
 import RelatedObjects from "@/components/RelatedObjects";
-// import entityInfoTable from "@/components/entityInfoTable";
-
-// const ENTITY_TYPES = [
-//   {
-//     name: "Malware",
-//     type: "malware",
-//     fields: [
-//       { field: "name", type: "text", label: "Name" },
-//       { field: "tags", type: "list", label: "Tags" },
-//       { field: "family", type: "list", label: "Family" },
-//       { field: "aliases", type: "list", label: "Aliases" },
-//       { field: "description", type: "longtext", label: "Description" }
-//     ]
-//   }
-// ];
 
 export default {
   props: ["id"],
   components: {
     YetiTagInput,
-    // RelatedEntities
     RelatedObjects
   },
   data() {
