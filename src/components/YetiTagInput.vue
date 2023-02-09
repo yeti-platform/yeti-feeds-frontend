@@ -47,6 +47,15 @@ export default {
         });
     },
     updateSelected() {
+      // we always want tags in the form {'name': 'tagname'}
+      this.selectedTags = this.selectedTags.map(tag => {
+        if (typeof tag === "string") {
+          return { name: tag };
+        } else {
+          return tag;
+        }
+      });
+
       this.$emit("input", this.selectedTags);
     },
     getFilteredTags: _.debounce(function(text) {
