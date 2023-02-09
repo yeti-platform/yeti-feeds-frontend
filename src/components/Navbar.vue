@@ -6,9 +6,12 @@
     <template slot="start" v-if="isAuthenticated">
       <b-navbar-item tag="router-link" :to="{ path: '/' }">Search</b-navbar-item>
       <b-navbar-item tag="router-link" :to="{ path: '/browse' }">Browse observables</b-navbar-item>
-      <b-navbar-item tag="router-link" :to="{ path: '/feeds' }">Feeds</b-navbar-item>
-      <b-navbar-item tag="router-link" :to="{ path: '/analytics' }">Analytics</b-navbar-item>
-      <b-navbar-item tag="router-link" :to="{ path: '/exports' }">Exports</b-navbar-item>
+      <b-navbar-item tag="router-link" :to="{ path: '/entities' }">Entities</b-navbar-item>
+      <b-navbar-dropdown label="Scheduling">
+        <b-navbar-item tag="router-link" :to="{ path: '/feeds' }">Feeds</b-navbar-item>
+        <b-navbar-item tag="router-link" :to="{ path: '/analytics' }">Analytics</b-navbar-item>
+        <b-navbar-item tag="router-link" :to="{ path: '/exports' }">Exports</b-navbar-item>
+      </b-navbar-dropdown>
       <b-navbar-item tag="router-link" :to="{ path: '/templates' }">Templates</b-navbar-item>
     </template>
 
