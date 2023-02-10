@@ -84,6 +84,7 @@
                 :id="id"
                 @totalUpdated="value => (totalRelatedEntities['malware'] = value)"
                 style="width: 100%"
+                ref="relatdEntitiesList"
               ></related-objects>
             </div>
             <div class="panel-block">
@@ -170,12 +171,13 @@ export default {
         type_dst: "entity",
         link_src: this.entity.id,
         link_dst: this.linkedEntity.id,
-        sources: "web"
+        source: "web"
       };
       axios
         .post("/api/link/", params)
-        .then(response => {
-          console.log(response);
+        .then(() => {
+          // Refresh neighbors list.
+          this.$refs.relatdEntitiesList.fetchNeighbors();
           this.linkedEntityNameFilter = "";
           this.linkedEntity = null;
         })
