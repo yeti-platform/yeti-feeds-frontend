@@ -63,14 +63,48 @@
           <nav class="tile panel is-child">
             <p class="panel-heading">Relevant tags</p>
             <div class="panel-block">
-              <b-field>
-                <b-taginput v-model="entity.tags" icon="tag" placeholder="e.g. CobaltStrike"></b-taginput>
+              <b-field class="expanded">
+                <b-taginput expanded v-model="entity.tags" icon="tag" placeholder="e.g. CobaltStrike"></b-taginput>
                 <p class="control">
                   <button class="button is-primary" @click="saveTags">Save</button>
                 </p>
               </b-field>
             </div>
             <small class="panel-block">Observables tagged with these tags will be linked to this entity.</small>
+          </nav>
+
+          <nav class="tile panel is-child">
+            <p class="panel-heading">Related entities</p>
+            <div class="panel-block">
+              <related-objects
+                v-show="totalRelatedEntities['malware'] > 0"
+                source-type="Entity"
+                :fields="['name', 'type']"
+                target-type="malware"
+                :id="id"
+                @totalUpdated="value => (totalRelatedEntities['malware'] = value)"
+                style="width: 100%"
+              ></related-objects>
+            </div>
+            <div class="panel-block">
+              <b-field class="expanded">
+                <b-autocomplete
+                  :open-on-focus="true"
+                  :keep-first="true"
+                  field="name"
+                  :clearable="true"
+                  :data="filteredEntities"
+                  placeholder="Link new entity..."
+                  v-model="linkedEntityNameFilter"
+                  @select="option => (linkedEntity = option)"
+                  expanded
+                >
+                </b-autocomplete>
+                <p class="control">
+                  <button class="button is-primary" @click="linkEntity">Link</button>
+                </p>
+              </b-field>
+            </div>
           </nav>
         </div>
       </div>
@@ -95,11 +129,15 @@ export default {
       totalRelatedObservables: null,
       totalRelatedEntities: {
         malware: null
-      }
+      },
+      linkedEntityNameFilter: "",
+      linkedEntity: null,
+      entities: []
     };
   },
   mounted() {
     this.getentityDetails();
+    this.getEntityAutocomplete();
   },
   methods: {
     getentityDetails() {
@@ -109,6 +147,37 @@ export default {
           this.entity = response.data;
           // Switch back to Context view when reloading the page.
           this.activeTab = 0;
+        })
+        .catch(error => {
+          console.log(error);
+        })
+        .finally();
+    },
+    getEntityAutocomplete() {
+      axios
+        .post("/api/entitysearch/", { name: "" })
+        .then(response => {
+          this.entities = response.data;
+        })
+        .catch(error => {
+          console.log(error);
+        })
+        .finally();
+    },
+    linkEntity() {
+      var params = {
+        type_src: "entity",
+        type_dst: "entity",
+        link_src: this.entity.id,
+        link_dst: this.linkedEntity.id,
+        sources: "web"
+      };
+      axios
+        .post("/api/link/", params)
+        .then(response => {
+          console.log(response);
+          this.linkedEntityNameFilter = "";
+          this.linkedEntity = null;
         })
         .catch(error => {
           console.log(error);
@@ -130,10 +199,23 @@ export default {
         .finally();
     }
   },
+  computed: {
+    filteredEntities() {
+      return this.entities.filter(entity => {
+        return (
+          entity.name.toLowerCase().includes(this.linkedEntityNameFilter.toLowerCase()) && entity.id != this.entity.id
+        );
+      });
+    }
+  },
   watch: {
     id: "getentityDetails"
   }
 };
 </script>
 
-<style scoped lang="css"></style>
+<style scoped lang="css">
+.expanded {
+  width: 100%;
+}
+</style>

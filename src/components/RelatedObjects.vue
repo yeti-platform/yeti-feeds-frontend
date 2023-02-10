@@ -6,7 +6,7 @@
       :narrowed="true"
       v-if="links"
       :loading="loading"
-      paginated
+      :paginated="total > perPage"
       backend-pagination
       :total="total"
       :per-page="perPage"
