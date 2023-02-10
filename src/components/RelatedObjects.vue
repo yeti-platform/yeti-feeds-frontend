@@ -26,7 +26,11 @@
           </router-link>
 
           <b-taglist v-else-if="field === 'tags'">
-            <b-tag v-for="tag in link.row.target.tags" v-bind:key="tag" :type="tag.fresh ? 'is-primary' : ''">
+            <b-tag
+              v-for="tag in link.row.target.tags"
+              v-bind:key="tag.name ? tag.name : tag"
+              :type="tag.fresh ? 'is-primary' : ''"
+            >
               {{ tag.name ? tag.name : tag }}
             </b-tag>
           </b-taglist>
