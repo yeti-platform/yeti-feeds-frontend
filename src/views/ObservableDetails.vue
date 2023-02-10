@@ -43,14 +43,14 @@
                   <b-icon icon="sitemap"></b-icon>
                   <span>
                     Related observables
-                    <b-tag rounded> {{ totalRelated == null ? "?" : totalRelated }}</b-tag>
+                    <b-tag rounded> {{ totalRelatedObservables == null ? "?" : totalRelatedObservables }}</b-tag>
                   </span>
                 </template>
                 <related-objects
                   :id="id"
                   source-type="Observable"
                   target-type="Observable"
-                  @totalUpdated="value => (totalRelated = value)"
+                  @totalUpdated="value => (totalRelatedObservables = value)"
                 ></related-objects>
               </b-tab-item>
               <b-tab-item>
@@ -58,7 +58,7 @@
                   <b-icon icon="sitemap"></b-icon>
                   <span>
                     Related Entities
-                    <b-tag rounded> {{ totalRelated == null ? "?" : totalRelated }}</b-tag>
+                    <b-tag rounded> {{ globalRelatedEntities }}</b-tag>
                   </span>
                 </template>
                 <b-tabs v-model="activeSubTab" position="is-left" :animated="false">
@@ -67,7 +67,9 @@
                       <b-icon icon="sitemap"></b-icon>
                       <span>
                         Malware
-                        <b-tag rounded> {{ totalRelated == null ? "?" : totalRelated }}</b-tag>
+                        <b-tag rounded>
+                          {{ totalRelatedEntities["malware"] == null ? "?" : totalRelatedEntities["malware"] }}</b-tag
+                        >
                       </span>
                     </template>
                     <related-objects
@@ -75,7 +77,7 @@
                       :fields="['name', 'family', 'tags']"
                       source-type="Observable"
                       target-type="malware"
-                      @totalUpdated="value => (totalRelated = value)"
+                      @totalUpdated="value => (totalRelatedEntities['malware'] = value)"
                     >
                     </related-objects>
                   </b-tab-item>
@@ -130,7 +132,10 @@ export default {
       observable: null,
       newTags: [],
       activeTab: null,
-      totalRelated: null
+      totalRelatedObservables: null,
+      totalRelatedEntities: {
+        malware: null
+      }
     };
   },
   mounted() {
@@ -165,6 +170,11 @@ export default {
           console.log(error);
         })
         .finally();
+    }
+  },
+  computed: {
+    globalRelatedEntities() {
+      return Object.values(this.totalRelatedEntities).reduce((a, b) => a + b, 0);
     }
   },
   watch: {

@@ -21,14 +21,14 @@
                   <b-icon icon="sitemap"></b-icon>
                   <span>
                     Observables
-                    <b-tag rounded> {{ totalRelated == null ? "?" : totalRelated }}</b-tag>
+                    <b-tag rounded> {{ totalRelatedObservables == null ? "?" : totalRelatedObservables }}</b-tag>
                   </span>
                 </template>
                 <related-objects
                   source-type="Entity"
                   target-type="Observable"
                   :id="id"
-                  @totalUpdated="value => (totalRelated = value)"
+                  @totalUpdated="value => (totalRelatedObservables = value)"
                 ></related-objects>
               </b-tab-item>
             </b-tabs>
@@ -94,7 +94,10 @@ export default {
       entity: null,
       newTags: [],
       activeTab: null,
-      totalRelated: null
+      totalRelatedObservables: null,
+      totalRelatedEntities: {
+        malware: null
+      }
     };
   },
   mounted() {
