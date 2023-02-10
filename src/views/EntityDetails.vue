@@ -64,7 +64,7 @@
             <p class="panel-heading">Relevant tags</p>
             <div class="panel-block">
               <b-field>
-                <yeti-tag-input v-model="entity.tags"></yeti-tag-input>
+                <b-taginput v-model="entity.tags" icon="tag" placeholder="e.g. CobaltStrike"></b-taginput>
                 <p class="control">
                   <button class="button is-primary" @click="saveTags">Save</button>
                 </p>
@@ -80,13 +80,11 @@
 
 <script>
 import axios from "axios";
-import YetiTagInput from "@/components/YetiTagInput";
 import RelatedObjects from "@/components/RelatedObjects";
 
 export default {
   props: ["id"],
   components: {
-    YetiTagInput,
     RelatedObjects
   },
   data() {

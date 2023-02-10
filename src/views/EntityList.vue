@@ -93,11 +93,15 @@
               </b-select>
             </b-field>
             <div v-if="selectedEntityType">
-              New {{ selectedEntityType.name }}
               <b-field :label="field.label" v-for="field in selectedEntityType.fields" :key="field.field">
                 <b-input v-model="newEntity[field.field]" v-if="field.type === 'text'" />
                 <b-input type="textarea" v-model="newEntity[field.field]" v-if="field.type === 'longtext'" />
-                <yeti-tag-input v-model="newEntity[field.field]" v-if="field.type === 'list'" />
+                <b-taginput
+                  label="Tags"
+                  v-model="newEntity[field.field]"
+                  v-if="field.type === 'list'"
+                  icon="tag"
+                ></b-taginput>
               </b-field>
               <div class="buttons">
                 <b-button type="is-primary" @click="saveEntity">
@@ -114,7 +118,6 @@
 
 <script>
 import axios from "axios";
-import YetiTagInput from "@/components/YetiTagInput";
 import utils from "@/utils";
 
 const ENTITY_TYPES = [
@@ -123,7 +126,7 @@ const ENTITY_TYPES = [
     type: "malware",
     fields: [
       { field: "name", type: "text", label: "Name" },
-      { field: "tags", type: "list", label: "Tags" },
+      { field: "tags", type: "list", label: "Relevant tags" },
       { field: "family", type: "text", label: "Family" },
       { field: "aliases", type: "list", label: "Aliases" },
       { field: "description", type: "longtext", label: "Description" }
@@ -133,9 +136,7 @@ const ENTITY_TYPES = [
 
 export default {
   name: "entityList",
-  components: {
-    YetiTagInput
-  },
+  components: {},
   props: {
     searchQuery: {
       type: String,
