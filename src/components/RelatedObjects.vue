@@ -37,6 +37,14 @@
 
           <span v-else>{{ link.row.target[field] }}</span>
         </b-table-column>
+
+        <b-table-column field="relation" label="Relation">
+          {{ link.row.description || "N/A" }}
+        </b-table-column>
+
+        <b-table-column field="unlink" label="Controls" width="10">
+          <b-button type="is-text" icon-left="unlink" size="is-small" @click="unlink(link.row.id)"> </b-button>
+        </b-table-column>
       </template>
     </b-table>
   </div>
@@ -103,6 +111,17 @@ export default {
           console.log(error);
         })
         .finally(() => (this.loading = false));
+    },
+    unlink(id) {
+      axios
+        .delete(`/api/link/${id}`)
+        .then(() => {
+          this.fetchNeighbors();
+          this.countTotal();
+        })
+        .catch(error => {
+          console.log(error);
+        });
     },
     countTotal() {
       axios
