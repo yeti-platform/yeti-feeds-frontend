@@ -23,6 +23,7 @@
             }"
           >
             {{ link.row.target[field] }}
+            <small v-if="link.row.target.type"> ({{ link.row.target.type }})</small>
           </router-link>
 
           <b-taglist v-else-if="field === 'tags'">

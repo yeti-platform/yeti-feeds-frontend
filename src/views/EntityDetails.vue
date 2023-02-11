@@ -79,7 +79,7 @@
               <related-objects
                 v-show="totalRelatedEntities['malware'] > 0"
                 source-type="Entity"
-                :fields="['name', 'type']"
+                :fields="['name']"
                 target-type="malware"
                 :id="id"
                 @totalUpdated="value => (totalRelatedEntities['malware'] = value)"
