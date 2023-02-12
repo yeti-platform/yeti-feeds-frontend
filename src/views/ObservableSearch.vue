@@ -54,7 +54,9 @@
           <b-field>
             <b-checkbox v-model="addMissing" class="add-missing-control">Add and tag missing observables</b-checkbox>
           </b-field>
-          <b-field :class="{ hidden: !addMissing }"><yeti-tag-input v-model="addTags"></yeti-tag-input></b-field>
+          <b-field :class="{ hidden: !addMissing }"
+            ><b-taginput v-model="addTags" icon="tag" placeholder="e.g. CobaltStrike"></b-taginput
+          ></b-field>
           <b-field :class="{ hidden: !addMissing }">
             <b-select v-model="addType" placeholder="Force observable type">
               <option :value="null">Guess type</option>
@@ -108,7 +110,6 @@
 <script>
 import axios from "axios";
 
-import YetiTagInput from "@/components/YetiTagInput";
 import SearchResults from "@/components/SearchResults";
 
 var defaultTypes = {
@@ -130,7 +131,6 @@ var defaultTypes = {
 export default {
   name: "ObservableSearch",
   components: {
-    YetiTagInput,
     SearchResults
   },
   data() {
@@ -153,7 +153,8 @@ export default {
       this.searchResults = null;
       var params = {
         observables: this.textSearch.split("\n"),
-        add_unknown: this.addMissing
+        add_unknown: this.addMissing,
+        add_tags: this.addTags
       };
       axios
         .post("/api/analysis/match", params)
