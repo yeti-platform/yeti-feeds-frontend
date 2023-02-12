@@ -132,6 +132,7 @@ export default {
       observable: null,
       newTags: [],
       activeTab: null,
+      activeSubTab: null,
       totalRelatedObservables: null,
       totalRelatedEntities: {
         malware: null
