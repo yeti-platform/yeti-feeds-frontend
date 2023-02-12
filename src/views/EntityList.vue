@@ -119,20 +119,7 @@
 <script>
 import axios from "axios";
 import utils from "@/utils";
-
-const ENTITY_TYPES = [
-  {
-    name: "Malware",
-    type: "malware",
-    fields: [
-      { field: "name", type: "text", label: "Name" },
-      { field: "tags", type: "list", label: "Relevant tags" },
-      { field: "family", type: "text", label: "Family" },
-      { field: "aliases", type: "list", label: "Aliases" },
-      { field: "description", type: "longtext", label: "Description" }
-    ]
-  }
-];
+import { ENTITY_TYPES } from "@/definitions/entityDefinitions.js";
 
 export default {
   name: "entityList",
