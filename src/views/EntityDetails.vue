@@ -87,7 +87,7 @@
                 v-show="totalRelatedEntities['malware'] > 0"
                 source-type="Entity"
                 :fields="['name']"
-                target-type="malware"
+                target-type="Entity"
                 :id="id"
                 @totalUpdated="value => (totalRelatedEntities['malware'] = value)"
                 style="width: 100%"
