@@ -62,22 +62,24 @@
                   </span>
                 </template>
                 <b-tabs v-model="activeSubTab" position="is-left" :animated="false">
-                  <b-tab-item>
+                  <b-tab-item v-for="entity in entityTypes" :key="entity.name">
                     <template slot="header">
-                      <b-icon icon="sitemap"></b-icon>
+                      <b-icon :icon="entity.icon"></b-icon>
                       <span>
-                        Malware
+                        {{ entity.name }}
                         <b-tag rounded>
-                          {{ totalRelatedEntities["malware"] == null ? "?" : totalRelatedEntities["malware"] }}</b-tag
+                          {{
+                            totalRelatedEntities[entity.type] == null ? "?" : totalRelatedEntities[entity.type]
+                          }}</b-tag
                         >
                       </span>
                     </template>
                     <related-objects
                       :id="id"
-                      :fields="['name', 'family', 'tags']"
+                      :fields="['name', 'tags']"
                       source-type="Observable"
-                      target-type="malware"
-                      @totalUpdated="value => (totalRelatedEntities['malware'] = value)"
+                      :target-type="entity.type"
+                      @totalUpdated="value => (totalRelatedEntities[entity.type] = value)"
                     >
                     </related-objects>
                   </b-tab-item>
@@ -120,6 +122,8 @@ import YetiTagInput from "@/components/YetiTagInput";
 import RelatedObjects from "@/components/RelatedObjects";
 import ObservableInfoTable from "@/components/ObservableInfoTable";
 
+import { ENTITY_TYPES } from "@/definitions/entityDefinitions.js";
+
 export default {
   props: ["id"],
   components: {
@@ -135,8 +139,13 @@ export default {
       activeSubTab: null,
       totalRelatedObservables: null,
       totalRelatedEntities: {
-        malware: null
-      }
+        malware: null,
+        ttp: null,
+        actor: null,
+        campaign: null,
+        exploit: null
+      },
+      entityTypes: ENTITY_TYPES
     };
   },
   mounted() {
