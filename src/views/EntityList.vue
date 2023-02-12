@@ -96,6 +96,11 @@
               <b-field :label="field.label" v-for="field in selectedEntityType.fields" :key="field.field">
                 <b-input v-model="newEntity[field.field]" v-if="field.type === 'text'" />
                 <b-input type="textarea" v-model="newEntity[field.field]" v-if="field.type === 'longtext'" />
+                <b-select v-if="field.type === 'option'" v-model="newEntity[field.field]">
+                  <option v-for="(option, index) in field.choices" :value="String(index + 1)" :key="option">
+                    {{ option }} {{ index }}</option
+                  >
+                </b-select>
                 <b-taginput
                   label="Tags"
                   v-model="newEntity[field.field]"
