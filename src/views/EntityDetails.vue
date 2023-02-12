@@ -57,6 +57,13 @@
                     </td>
                   </tr>
                 </tbody>
+
+                <tbody v-if="entity.type == 'ttp'">
+                  <tr>
+                    <th>Killchain stage</th>
+                    <td>{{ entity.killchain }}</td>
+                  </tr>
+                </tbody>
               </table>
             </div>
           </nav>
