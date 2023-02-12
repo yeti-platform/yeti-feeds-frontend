@@ -78,16 +78,8 @@ export default {
   methods: {
     getLabelForField(field) {
       switch (field) {
-        case "value":
-          return "Value";
-        case "name":
-          return "Name";
-        case "description":
-          return "Description";
         case "tags":
           return this.targetType === "Observable" ? "Tags" : "Relevant tags";
-        case "context":
-          return "Context";
         default:
           return field.charAt(0).toUpperCase() + field.slice(1);
       }
