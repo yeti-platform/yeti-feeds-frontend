@@ -59,6 +59,7 @@
 <script>
 import axios from "axios";
 import { ENTITY_TYPES } from "@/definitions/entityDefinitions.js";
+import { INDICATOR_TYPES } from "@/definitions/indicatorDefinitions.js";
 
 export default {
   name: "RelatedEntities",
@@ -76,7 +77,7 @@ export default {
       perPage: 10,
       total: 500,
       loading: false,
-      entityTypes: ENTITY_TYPES
+      objectTypes: ENTITY_TYPES.concat(INDICATOR_TYPES)
     };
   },
   mounted() {
@@ -136,7 +137,7 @@ export default {
         });
     },
     getIconForType(type) {
-      return this.entityTypes.find(entityType => entityType.type === type).icon;
+      return this.objectTypes.find(entityType => entityType.type === type).icon;
     },
     onPageChange(page) {
       this.page = page;
