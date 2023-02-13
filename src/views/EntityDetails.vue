@@ -84,13 +84,13 @@
             <p class="panel-heading">Related entities</p>
             <div class="panel-block">
               <related-objects
-                v-show="totalRelatedEntities['malware'] > 0"
+                v-show="totalRelatedEntities > 0"
                 source-type="Entity"
                 inline-icons
                 :fields="['name']"
                 target-type="Entity"
                 :id="id"
-                @totalUpdated="value => (totalRelatedEntities['malware'] = value)"
+                @totalUpdated="value => (totalRelatedEntities = value)"
                 style="width: 100%"
                 ref="relatdEntitiesList"
               ></related-objects>
@@ -136,9 +136,7 @@ export default {
       newTags: [],
       activeTab: null,
       totalRelatedObservables: null,
-      totalRelatedEntities: {
-        malware: null
-      },
+      totalRelatedEntities: 0,
       linkedEntityNameFilter: "",
       linkedEntity: null,
       entities: []
