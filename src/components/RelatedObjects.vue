@@ -15,16 +15,21 @@
     >
       <template v-slot:default="link">
         <b-table-column v-for="field in fields" :field="field" :label="getLabelForField(field)" v-bind:key="field">
-          <router-link
-            v-if="field === 'value' || field === 'name'"
-            :to="{
-              name: field === 'value' ? 'ObservableDetails' : 'EntityDetails',
-              params: { id: link.row.target.id }
-            }"
-          >
-            {{ link.row.target[field] }}
-            <small v-if="link.row.target.type"> ({{ link.row.target.type }})</small>
-          </router-link>
+          <span v-if="field === 'value' || field === 'name'">
+            <b-icon
+              size="is-small"
+              v-if="link.row.target.type && inlineIcons"
+              :icon="getIconForType(link.row.target.type)"
+            ></b-icon>
+            <router-link
+              :to="{
+                name: field === 'value' ? 'ObservableDetails' : 'EntityDetails',
+                params: { id: link.row.target.id }
+              }"
+            >
+              {{ link.row.target[field] }}
+            </router-link>
+          </span>
 
           <b-taglist v-else-if="field === 'tags'">
             <b-tag
@@ -53,6 +58,7 @@
 
 <script>
 import axios from "axios";
+import { ENTITY_TYPES } from "@/definitions/entityDefinitions.js";
 
 export default {
   name: "RelatedEntities",
@@ -60,7 +66,8 @@ export default {
     id: { type: String, required: true },
     fields: { type: Array, default: () => ["value", "tags"] },
     sourceType: { type: String, default: "Observable" },
-    targetType: { type: String, default: "Observable" }
+    targetType: { type: String, default: "Observable" },
+    inlineIcons: { type: Boolean, default: false }
   },
   data() {
     return {
@@ -68,7 +75,8 @@ export default {
       page: 1,
       perPage: 10,
       total: 500,
-      loading: false
+      loading: false,
+      entityTypes: ENTITY_TYPES
     };
   },
   mounted() {
@@ -126,6 +134,9 @@ export default {
         .catch(error => {
           console.log(error);
         });
+    },
+    getIconForType(type) {
+      return this.entityTypes.find(entityType => entityType.type === type).icon;
     },
     onPageChange(page) {
       this.page = page;
