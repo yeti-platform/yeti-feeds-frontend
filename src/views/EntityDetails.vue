@@ -86,6 +86,7 @@
               <related-objects
                 v-show="totalRelatedEntities['malware'] > 0"
                 source-type="Entity"
+                inline-icons
                 :fields="['name']"
                 target-type="Entity"
                 :id="id"
