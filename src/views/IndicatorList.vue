@@ -1,35 +1,11 @@
 <template>
   <div class="indicator-list columns">
     <div class="column is-three-quarters">
-      <b-table
-        :data="indicators"
-        :hoverable="true"
-        :narrowed="true"
-        checkable
-        :total="tableTotal"
-        :perPage="tablePerPage"
-        backend-pagination
-        @page-change="onPageChange"
-        :loading="loading"
-        paginated
-        class="indicator-table"
-      >
-        <template v-slot:default="indicator">
-          <b-table-column field="name" label="Name">
-            <router-link :to="{ name: 'IndicatorDetails', params: { id: indicator.row.id } }">
-              {{ indicator.row.name }}
-            </router-link>
-          </b-table-column>
-
-          <b-table-column field="tags" label="Tags">
-            <b-taglist>
-              <b-tag v-for="tag in indicator.row.tags" v-bind:key="tag.name" :type="tag.fresh ? 'is-primary' : ''">
-                {{ tag }}
-              </b-tag>
-            </b-taglist>
-          </b-table-column>
-        </template>
-      </b-table>
+      <b-tabs v-model="activeMainTab" position="is-left" :animated="false">
+        <b-tab-item :label="indicator.name" v-for="indicator in indicatorTypes" v-bind:key="indicator.type">
+          <object-list search-type="indicator" :search-subtype="indicator.type" :fields="indicator.fields" />
+        </b-tab-item>
+      </b-tabs>
     </div>
     <div class="column">
       <section>
@@ -132,9 +108,13 @@
 import axios from "axios";
 import utils from "@/utils";
 import { INDICATOR_TYPES } from "@/definitions/indicatorDefinitions.js";
+import ObjectList from "@/components/ObjectList";
 
 export default {
   name: "IndicatorList",
+  components: {
+    ObjectList
+  },
   props: {
     searchQuery: {
       type: String,
@@ -155,7 +135,8 @@ export default {
       selectedindicatorType: null,
       newIndicator: {},
       // Panel
-      activeTab: 0
+      activeTab: 0,
+      activeMainTab: 0
     };
   },
   mounted() {

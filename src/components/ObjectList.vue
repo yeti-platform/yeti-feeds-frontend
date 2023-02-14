@@ -15,7 +15,7 @@
     <template v-slot:default="object">
       <b-table-column
         v-for="field in fields.filter(field => field.displayList)"
-        :field="field"
+        :field="field.field"
         :label="field.label"
         v-bind:key="field.field"
       >
@@ -29,6 +29,9 @@
             {{ object.row[field.field] }}
           </router-link>
         </span>
+
+        <code v-else-if="field.type === 'code'"> {{ object.row[field.field] }} </code>
+        <code v-else-if="field.type === 'longcode'"> {{ object.row[field.field] }} </code>
 
         <b-taglist v-else-if="field.field === 'tags' || field.field === 'aliases'">
           <b-tag
