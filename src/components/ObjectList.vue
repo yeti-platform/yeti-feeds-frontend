@@ -3,7 +3,7 @@
     :data="objects"
     :hoverable="true"
     :narrowed="true"
-    checkable
+    :checkable="checkable"
     :total="tableTotal"
     :perPage="tablePerPage"
     backend-pagination
@@ -53,6 +53,7 @@
 import axios from "axios";
 import utils from "@/utils";
 // import { ENTITY_TYPES } from "@/definitions/entityDefinitions.js";
+import _ from "lodash";
 
 export default {
   name: "objectList",
@@ -73,6 +74,10 @@ export default {
     fields: {
       type: Array,
       default: () => []
+    },
+    checkable: {
+      type: Boolean,
+      default: false
     }
   },
   data() {
@@ -87,14 +92,24 @@ export default {
     };
   },
   mounted() {
-    this.searchEntities();
+    this.searchObjects();
+  },
+  created() {
+    // This has to come here because we want the debounce functions to be created
+    // within each component.
+    this.$watch(
+      "searchQuery",
+      _.debounce(function() {
+        this.searchObjects();
+      }, 300)
+    );
   },
   methods: {
     onPageChange(tablePage) {
       this.tablePage = tablePage;
-      this.searchEntities(false);
+      this.searchObjects(false);
     },
-    searchEntities(refreshTotal = true) {
+    searchObjects() {
       var params = {
         filter: this.generateSearchParams(this.searchQuery),
         params: {
@@ -103,9 +118,7 @@ export default {
           page: this.tablePage
         }
       };
-      if (refreshTotal) {
-        this.countTotal(params);
-      }
+      this.countTotal(params);
       this.loading = true;
       axios
         .post(`/api/${this.searchType}search/`, params)
