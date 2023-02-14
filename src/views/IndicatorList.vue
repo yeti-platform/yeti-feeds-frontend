@@ -134,8 +134,7 @@ import utils from "@/utils";
 import { INDICATOR_TYPES } from "@/definitions/indicatorDefinitions.js";
 
 export default {
-  name: "indicatorList",
-  components: {},
+  name: "IndicatorList",
   props: {
     searchQuery: {
       type: String,
