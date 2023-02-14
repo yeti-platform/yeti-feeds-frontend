@@ -138,7 +138,7 @@
 <script>
 import axios from "axios";
 import RelatedObjects from "@/components/RelatedObjects";
-import NewObject from "@/views/NewObject";
+import NewObject from "@/components/NewObject";
 
 export default {
   props: ["id"],
