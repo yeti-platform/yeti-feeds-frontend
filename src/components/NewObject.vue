@@ -38,7 +38,6 @@
 
 <script>
 import axios from "axios";
-// import utils from "@/utils";
 import { INDICATOR_TYPES } from "@/definitions/indicatorDefinitions.js";
 import { ENTITY_TYPES } from "@/definitions/entityDefinitions.js";
 
