@@ -13,6 +13,12 @@
     class="object-table"
   >
     <template v-slot:default="object">
+      <b-table-column field="created" label="Created on (UTC)" width="180"
+        ><span :title="'Localtime: ' + formatTimestamp(object.row.created, true)">{{
+          formatTimestamp(object.row.created)
+        }}</span>
+      </b-table-column>
+
       <b-table-column
         v-for="field in fields.filter(field => field.displayList)"
         :field="field.field"
