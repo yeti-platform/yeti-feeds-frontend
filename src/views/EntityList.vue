@@ -1,35 +1,11 @@
 <template>
   <div class="entity-list columns">
     <div class="column is-three-quarters">
-      <b-table
-        :data="entities"
-        :hoverable="true"
-        :narrowed="true"
-        checkable
-        :total="tableTotal"
-        :perPage="tablePerPage"
-        backend-pagination
-        @page-change="onPageChange"
-        :loading="loading"
-        paginated
-        class="entity-table"
-      >
-        <template v-slot:default="entity">
-          <b-table-column field="name" label="Name">
-            <router-link :to="{ name: 'EntityDetails', params: { id: entity.row.id } }">
-              {{ entity.row.name }}
-            </router-link>
-          </b-table-column>
-
-          <b-table-column field="tags" label="Tags">
-            <b-taglist>
-              <b-tag v-for="tag in entity.row.tags" v-bind:key="tag.name" :type="tag.fresh ? 'is-primary' : ''">
-                {{ tag }}
-              </b-tag>
-            </b-taglist>
-          </b-table-column>
-        </template>
-      </b-table>
+      <b-tabs v-model="activeMainTab" position="is-left" :animated="false">
+        <b-tab-item :label="entity.name" v-for="entity in entityTypes" v-bind:key="entity.type">
+          <object-list search-type="entity" :search-subtype="entity.type" :fields="entity.fields" />
+        </b-tab-item>
+      </b-tabs>
     </div>
     <div class="column">
       <section>
@@ -124,11 +100,14 @@
 <script>
 import axios from "axios";
 import utils from "@/utils";
+import ObjectList from "@/components/ObjectList";
 import { ENTITY_TYPES } from "@/definitions/entityDefinitions.js";
 
 export default {
   name: "entityList",
-  components: {},
+  components: {
+    ObjectList
+  },
   props: {
     searchQuery: {
       type: String,
@@ -149,7 +128,8 @@ export default {
       selectedEntityType: null,
       newEntity: {},
       // Panel
-      activeTab: 0
+      activeTab: 0,
+      activeMainTab: 0
     };
   },
   mounted() {
