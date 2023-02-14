@@ -40,7 +40,7 @@
       <div class="tile is-ancestor">
         <div class="tile is-vertical is-parent">
           <nav class="tile panel is-child">
-            <p class="panel-heading">Info</p>
+            <p class="panel-heading">Info <b-button size="is-small" @click="editEntity"> Edit </b-button></p>
             <div class="panel-block">
               <table class="table is-fullwidth">
                 <tbody v-if="entity.type == 'malware'">
@@ -124,6 +124,7 @@
 <script>
 import axios from "axios";
 import RelatedObjects from "@/components/RelatedObjects";
+import NewObject from "@/views/NewObject";
 
 export default {
   props: ["id"],
@@ -159,6 +160,26 @@ export default {
           console.log(error);
         })
         .finally();
+    },
+    editEntity() {
+      this.$buefy.modal.open({
+        parent: this,
+        component: NewObject,
+        hasModalCard: true,
+        customClass: "custom-class custom-class-2",
+        trapFocus: true,
+        props: {
+          objectTypeName: this.entity.type,
+          object: this.entity,
+          endpoint: "entity"
+        },
+        events: {
+          refresh: newEntity => {
+            console.log(newEntity);
+            this.entity = newEntity;
+          }
+        }
+      });
     },
     getEntityAutocomplete() {
       axios
