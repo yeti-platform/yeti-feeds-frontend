@@ -3,7 +3,13 @@
     <div class="column is-three-quarters">
       <b-tabs v-model="activeMainTab" position="is-left" :animated="false">
         <b-tab-item :label="entity.name" v-for="entity in entityTypes" v-bind:key="entity.type">
-          <object-list search-type="entity" :search-subtype="entity.type" :fields="entity.fields" />
+          <object-list
+            search-type="entity"
+            :search-subtype="entity.type"
+            :fields="entity.fields"
+            :search-query="searchQuery"
+            :ref="entity.type + 'ObjectList'"
+          />
         </b-tab-item>
       </b-tabs>
     </div>
@@ -14,18 +20,7 @@
           <b-tab-item label="Search">
             <div class="search">
               <div class="field">
-                <b-input
-                  v-model="searchQuery"
-                  type="text"
-                  placeholder="Search query + ⏎"
-                  icon="search"
-                  v-on:keyup.native.enter="searchEntities"
-                />
-              </div>
-              <div class="field">
-                <b-checkbox v-model="regexSearch">
-                  Use regex (slower)
-                </b-checkbox>
+                <b-input v-model="searchQuery" type="text" placeholder="Search query + ⏎" icon="search" />
               </div>
             </div>
             <br />
@@ -108,16 +103,9 @@ export default {
   components: {
     ObjectList
   },
-  props: {
-    searchQuery: {
-      type: String,
-      default: ""
-    }
-  },
   data() {
     return {
       // Table
-      regexSearch: false,
       entities: [],
       tablePage: 1,
       tablePerPage: 50,
@@ -129,43 +117,11 @@ export default {
       newEntity: {},
       // Panel
       activeTab: 0,
-      activeMainTab: 0
+      activeMainTab: 0,
+      searchQuery: ""
     };
   },
-  mounted() {
-    this.searchEntities();
-  },
   methods: {
-    onPageChange(tablePage) {
-      this.tablePage = tablePage;
-      this.searchEntities(false);
-    },
-    searchEntities(refreshTotal = true) {
-      var params = {
-        filter: this.generateSearchParams(this.searchQuery),
-        params: {
-          regex: this.regexSearch,
-          page: this.tablePage
-        }
-      };
-      console.log(params);
-      if (refreshTotal) {
-        this.countTotal(params);
-      }
-      this.loading = true;
-      axios
-        .post("/api/entitysearch/", params)
-        .then(response => {
-          this.entities = response.data;
-          this.loading = false;
-        })
-        .catch(error => {
-          console.log(error);
-        })
-        .finally(() => {
-          this.loading = false;
-        });
-    },
     saveEntity() {
       this.newEntity.type = this.selectedEntityType.type;
       axios
@@ -175,40 +131,16 @@ export default {
             message: `Entity ${response.name} saved`,
             type: "is-success"
           });
+          // TODO: think about replacing this by an EventBus
+          this.$refs[this.newEntity.type + "ObjectList"][0].searchObjects();
           this.newEntity = {};
-          this.searchEntities();
         })
         .catch(error => {
+          console.log(error);
           this.$buefy.toast.open({
             message: "Error saving entity: " + error,
             type: "is-danger"
           });
-        });
-    },
-    generateSearchParams(searchQuery) {
-      var filter = {};
-      var queries = searchQuery.split(" ");
-      var default_field = "name";
-
-      for (var i in queries) {
-        var splitted = queries[i].split("=");
-        if (splitted.length == 2) {
-          filter[splitted[0]] = splitted[1].split(",");
-        } else if (queries[i] !== "") {
-          filter[default_field] = queries[i];
-        }
-      }
-      return filter;
-    },
-    countTotal(params) {
-      this.tableTotal = 500;
-      axios
-        .post("/api/entitysearch/total", params)
-        .then(response => {
-          this.tableTotal = response.data.total;
-        })
-        .catch(error => {
-          console.log(error);
         });
     },
     formatTimestamp(timestamp, local) {

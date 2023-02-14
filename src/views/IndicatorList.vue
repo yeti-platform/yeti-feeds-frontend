@@ -3,7 +3,13 @@
     <div class="column is-three-quarters">
       <b-tabs v-model="activeMainTab" position="is-left" :animated="false">
         <b-tab-item :label="indicator.name" v-for="indicator in indicatorTypes" v-bind:key="indicator.type">
-          <object-list search-type="indicator" :search-subtype="indicator.type" :fields="indicator.fields" />
+          <object-list
+            search-type="indicator"
+            :search-subtype="indicator.type"
+            :fields="indicator.fields"
+            :search-query="searchQuery"
+            :ref="indicator.type + 'ObjectList'"
+          />
         </b-tab-item>
       </b-tabs>
     </div>
@@ -14,18 +20,7 @@
           <b-tab-item label="Search">
             <div class="search">
               <div class="field">
-                <b-input
-                  v-model="searchQuery"
-                  type="text"
-                  placeholder="Search query + ⏎"
-                  icon="search"
-                  v-on:keyup.native.enter="searchIndicators"
-                />
-              </div>
-              <div class="field">
-                <b-checkbox v-model="regexSearch">
-                  Use regex (slower)
-                </b-checkbox>
+                <b-input v-model="searchQuery" type="text" placeholder="Search query + ⏎" icon="search" />
               </div>
             </div>
             <br />
@@ -115,16 +110,9 @@ export default {
   components: {
     ObjectList
   },
-  props: {
-    searchQuery: {
-      type: String,
-      default: ""
-    }
-  },
   data() {
     return {
       // Table
-      regexSearch: false,
       indicators: [],
       tablePage: 1,
       tablePerPage: 50,
@@ -136,43 +124,11 @@ export default {
       newIndicator: {},
       // Panel
       activeTab: 0,
-      activeMainTab: 0
+      activeMainTab: 0,
+      searchQuery: ""
     };
   },
-  mounted() {
-    this.searchIndicators();
-  },
   methods: {
-    onPageChange(tablePage) {
-      this.tablePage = tablePage;
-      this.searchIndicators(false);
-    },
-    searchIndicators(refreshTotal = true) {
-      var params = {
-        filter: this.generateSearchParams(this.searchQuery),
-        params: {
-          regex: this.regexSearch,
-          page: this.tablePage
-        }
-      };
-      console.log(params);
-      if (refreshTotal) {
-        this.countTotal(params);
-      }
-      this.loading = true;
-      axios
-        .post("/api/indicatorsearch/", params)
-        .then(response => {
-          this.indicators = response.data;
-          this.loading = false;
-        })
-        .catch(error => {
-          console.log(error);
-        })
-        .finally(() => {
-          this.loading = false;
-        });
-    },
     saveIndicator() {
       this.newIndicator.type = this.selectedindicatorType.type;
       axios
@@ -182,6 +138,7 @@ export default {
             message: `indicator ${response.name} saved`,
             type: "is-success"
           });
+          this.$refs[this.newIndicator.type + "ObjectList"][0].searchObjects();
           this.newIndicator = {};
           this.searchIndicators();
         })
@@ -190,32 +147,6 @@ export default {
             message: "Error saving indicator: " + error,
             type: "is-danger"
           });
-        });
-    },
-    generateSearchParams(searchQuery) {
-      var filter = {};
-      var queries = searchQuery.split(" ");
-      var default_field = "name";
-
-      for (var i in queries) {
-        var splitted = queries[i].split("=");
-        if (splitted.length == 2) {
-          filter[splitted[0]] = splitted[1].split(",");
-        } else if (queries[i] !== "") {
-          filter[default_field] = queries[i];
-        }
-      }
-      return filter;
-    },
-    countTotal(params) {
-      this.tableTotal = 500;
-      axios
-        .post("/api/indicatorsearch/total", params)
-        .then(response => {
-          this.tableTotal = response.data.total;
-        })
-        .catch(error => {
-          console.log(error);
         });
     },
     formatTimestamp(timestamp, local) {
