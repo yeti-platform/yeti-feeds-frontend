@@ -81,3 +81,18 @@ $card-shadow: 0 0.5em 1em -0.125em rgba(0, 0, 0, 0.1),
 .card-header.light {
   background: $light;
 }
+
+.notices .toast.is-success {
+  background: $success;
+  color: $success-fontcolor;
+}
+
+.notices .toast.is-danger {
+  background: $danger;
+  color: $danger-fontcolor;
+}
+
+.notices .toast.is-warning {
+  background: $warning;
+  color: $warning-fontcolor;
+}
