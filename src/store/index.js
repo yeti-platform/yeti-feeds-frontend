@@ -51,7 +51,7 @@ const actions = {
     });
   },
   getAppConfig({ commit }) {
-    axios.get("/api/system/config").then(response => {
+    axios.get("/api/system/config/").then(response => {
       commit("setAppConfig", response.data);
     });
   }
