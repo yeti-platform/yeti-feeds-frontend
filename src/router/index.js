@@ -150,9 +150,10 @@ router.beforeEach((to, from, next) => {
         console.log("redirecting to " + to.fullPath);
         next({ path: to.fullPath });
       })
-      .catch(() => {
-        console.log("redirecting to /auth/login");
-        window.location.href = "/auth/login";
+      .catch(error => {
+        console.log(error);
+        console.log("redirecting to /login");
+        window.location.href = "/login";
       });
   } else {
     next();

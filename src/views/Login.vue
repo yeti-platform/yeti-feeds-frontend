@@ -6,7 +6,7 @@
           <p class="title">Log in to Yeti</p>
           <form @submit="logIn">
             <b-field label="Username">
-              <b-input v-model="user"></b-input>
+              <b-input v-model="username"></b-input>
             </b-field>
             <b-field label="Password">
               <b-input type="password" v-model="password"></b-input>
@@ -24,7 +24,7 @@ export default {
   name: "Login",
   data() {
     return {
-      user: null,
+      username: null,
       password: null,
       loading: false
     };
@@ -34,8 +34,11 @@ export default {
       console.log("submitted");
       e.preventDefault();
       this.loading = true;
+      let form = new FormData();
+      form.append("username", this.username);
+      form.append("password", this.password);
       this.$store
-        .dispatch("login", { user: this.user, password: this.password })
+        .dispatch("login", form)
         .then(() => {
           console.log("Successfully logged in!");
           this.$router.push("/");

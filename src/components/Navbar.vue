@@ -33,7 +33,7 @@
       </b-navbar-dropdown>
       <b-navbar-item tag="div">
         <div class="buttons">
-          <a class="button is-primary" href="/auth/login" v-if="!isAuthenticated">Log in</a>
+          <a class="button is-primary" href="/login" v-if="!isAuthenticated">Log in</a>
         </div>
       </b-navbar-item>
     </template>

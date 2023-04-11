@@ -10,16 +10,19 @@ const state = {
 };
 
 const actions = {
-  login({ commit }, params) {
+  login({ commit }, form) {
     return new Promise((resolve, reject) => {
+      console.log("authRequest");
       commit("authRequest");
       axios
-        .post("/api/auth/login", params)
+        .post("/api/v2/auth/token", form)
         .then(response => {
-          if (response.data.authenticated === true) {
-            axios.get("/api/users").then(response => commit("authSuccess", response.data));
-            resolve(response);
-          }
+          console.log("token yes");
+          axios.get("/api/v2/auth/me").then(response => {
+            console.log("authSuccess");
+            commit("authSuccess", response.data);
+          });
+          resolve(response);
         })
         .catch(err => {
           commit("authError", err);
@@ -38,7 +41,7 @@ const actions = {
   refresh({ commit }) {
     return new Promise((resolve, reject) => {
       axios
-        .get(`/api/users/`)
+        .get(`/api/v2/auth/me`)
         .then(response => {
           console.log("Session refresh success");
           commit("authSuccess", response.data);
@@ -62,6 +65,7 @@ const mutations = {
     state.user = null;
   },
   authSuccess(state, data) {
+    console.log("Logged in as " + data);
     state.user = data;
   },
   authError(state, error) {
@@ -80,7 +84,7 @@ const getters = {
   isAuthenticated: state => !!state.user,
   isAdmin: state => {
     if (state.user) {
-      return !!state.user.permissions.admin;
+      return !!state.user.admin;
     } else {
       return false;
     }
