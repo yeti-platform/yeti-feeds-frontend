@@ -202,11 +202,9 @@ export default {
     },
     searchObservables(refreshTotal = true) {
       var params = {
-        filter: this.generateSearchParams(this.searchQuery),
-        params: {
-          regex: this.regexSearch,
-          page: this.tablePage
-        }
+        value: this.searchQuery,
+        page: this.tablePage - 1,
+        count: this.tablePerPage
       };
       console.log(params);
       if (refreshTotal) {
@@ -214,7 +212,7 @@ export default {
       }
       this.loading = true;
       axios
-        .post("/api/observablesearch/", params)
+        .post("/api/v2/observables/search", params)
         .then(response => {
           return (this.observables = response.data);
         })
