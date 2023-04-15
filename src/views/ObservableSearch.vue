@@ -157,7 +157,7 @@ export default {
         add_tags: this.addTags
       };
       axios
-        .post("/api/analysis/match", params)
+        .post("/api/v2/graph/match", params)
         .then(response => {
           console.log(response);
           this.searchResults = response.data;
