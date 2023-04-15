@@ -15,4 +15,8 @@ if [[ "$1" =~ "dev" ]]; then
     npm run serve
 fi
 
+if [[ "$1" =~ "shell" ]]; then
+    /bin/bash
+fi
+
 exec "$@"
