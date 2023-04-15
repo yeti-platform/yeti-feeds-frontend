@@ -48,8 +48,8 @@
                 </template>
                 <related-objects
                   :id="id"
-                  source-type="Observable"
-                  target-type="Observable"
+                  source-type="observable"
+                  :target-types="['hostname']"
                   @totalUpdated="value => (totalRelatedObservables = value)"
                 ></related-objects>
               </b-tab-item>

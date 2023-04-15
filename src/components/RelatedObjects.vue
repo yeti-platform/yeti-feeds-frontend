@@ -24,16 +24,16 @@
             <router-link
               :to="{
                 name: field === 'value' ? 'ObservableDetails' : 'EntityDetails',
-                params: { id: link.row.target.id }
+                params: { id: vertices[link.row.target].id }
               }"
             >
-              {{ link.row.target[field] }}
+              {{ vertices[link.row.target][field] }}
             </router-link>
           </span>
 
           <b-taglist v-else-if="field === 'tags'">
             <b-tag
-              v-for="tag in link.row.target.tags"
+              v-for="tag in vertices[link.row.target].tags"
               v-bind:key="tag.name ? tag.name : tag"
               :type="tag.fresh ? 'is-primary' : ''"
             >
@@ -41,7 +41,7 @@
             </b-tag>
           </b-taglist>
 
-          <span v-else>{{ link.row.target[field] }}</span>
+          <span v-else>{{ vertices[link.row.target][field] }}</span>
         </b-table-column>
 
         <b-table-column field="relation" label="Relation">
@@ -62,17 +62,18 @@ import { ENTITY_TYPES } from "@/definitions/entityDefinitions.js";
 import { INDICATOR_TYPES } from "@/definitions/indicatorDefinitions.js";
 
 export default {
-  name: "RelatedEntities",
+  name: "RelatedObjects",
   props: {
     id: { type: String, required: true },
     fields: { type: Array, default: () => ["value", "tags"] },
-    sourceType: { type: String, default: "Observable" },
-    targetType: { type: String, default: "Observable" },
+    sourceType: { type: String, default: "observable" },
+    targetTypes: { type: Array, default: Array },
     inlineIcons: { type: Boolean, default: false }
   },
   data() {
     return {
       links: [],
+      vertices: {},
       page: 1,
       perPage: 10,
       total: 500,
@@ -87,27 +88,24 @@ export default {
   methods: {
     getLabelForField(field) {
       switch (field) {
-        case "tags":
-          return this.targetType === "Observable" ? "Tags" : "Relevant tags";
         default:
           return field.charAt(0).toUpperCase() + field.slice(1);
       }
     },
     fetchNeighbors() {
-      var pagination = {
-        params: {
-          page: this.page,
-          range: this.perPage
-        }
-      };
       this.loading = true;
+      let graphSearchRequest = {
+        source: `${this.sourceType}/${this.id}`,
+        target_types: this.targetTypes,
+        hops: 1,
+        direction: "any",
+        include_original: false
+      };
       axios
-        .post(`/api/neighbors/tuples/${this.sourceType}/${this.id}/${this.targetType}`, pagination)
+        .post(`/api/v2/graph/search/`, graphSearchRequest)
         .then(response => {
-          this.links = response.data.links;
-          this.links.map(link => {
-            link.target = link.dst.id === this.id ? link.src : link.dst;
-          });
+          this.links = response.data.edges;
+          this.vertices = response.data.vertices;
         })
         .catch(error => {
           console.log(error);
