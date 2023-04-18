@@ -37,8 +37,8 @@ export const ENTITY_TYPES = [
     icon: "bolt"
   },
   {
-    name: "Actor",
-    type: "actor",
+    name: "Threat actor",
+    type: "threat-actor",
     fields: [
       { field: "name", type: "text", label: "Name", displayList: true },
       { field: "tags", type: "list", label: "Relevant tags", displayList: true },
