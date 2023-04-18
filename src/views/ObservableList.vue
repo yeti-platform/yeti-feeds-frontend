@@ -198,23 +198,20 @@ export default {
   methods: {
     onPageChange(tablePage) {
       this.tablePage = tablePage;
-      this.searchObservables(false);
+      this.searchObservables();
     },
-    searchObservables(refreshTotal = true) {
+    searchObservables() {
       var params = {
         value: this.searchQuery,
         page: this.tablePage - 1,
         count: this.tablePerPage
       };
-      console.log(params);
-      if (refreshTotal) {
-        this.countTotal(params);
-      }
       this.loading = true;
       axios
         .post("/api/v2/observables/search", params)
         .then(response => {
-          return (this.observables = response.data);
+          this.observables = response.data.observables;
+          this.tableTotal = response.data.total;
         })
         .catch(error => {
           return console.log(error);
@@ -293,17 +290,6 @@ export default {
           document.body.appendChild(fileLink);
 
           fileLink.click();
-        })
-        .catch(error => {
-          console.log(error);
-        });
-    },
-    countTotal(params) {
-      this.tableTotal = 500;
-      axios
-        .post("/api/observablesearch/total", params)
-        .then(response => {
-          this.tableTotal = response.data.total;
         })
         .catch(error => {
           console.log(error);
