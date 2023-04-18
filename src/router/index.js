@@ -37,7 +37,7 @@ const routes = [
     }
   },
   {
-    path: "/observable/:id([a-z0-9]{24})",
+    path: "/observable/:id([0-9]{5,})",
     name: "ObservableDetails",
     component: ObservableDetails,
     props: true
@@ -53,7 +53,7 @@ const routes = [
     }
   },
   {
-    path: "/entity/:id([a-z0-9]{24})",
+    path: "/entity/:id([0-9]{5,})",
     name: "EntityDetails",
     component: EntityDetails,
     props: true
@@ -69,7 +69,7 @@ const routes = [
     }
   },
   {
-    path: "/indicator/:id([a-z0-9]{24})",
+    path: "/indicator/:id([0-9]{5,})",
     name: "IndicatorDetails",
     component: IndicatorDetails,
     props: true
@@ -95,7 +95,7 @@ const routes = [
     component: TemplateList
   },
   {
-    path: "/profile/:id([a-z0-9]{24})",
+    path: "/profile/:id([0-9]{5,})",
     name: "UserProfileAdmin",
     component: UserProfile,
     props: true

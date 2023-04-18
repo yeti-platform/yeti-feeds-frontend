@@ -18,22 +18,22 @@
           <span v-if="field === 'value' || field === 'name'">
             <b-icon
               size="is-small"
-              v-if="link.row.target.type && inlineIcons"
-              :icon="getIconForType(link.row.target.type)"
+              v-if="link.row.node.type && inlineIcons"
+              :icon="getIconForType(link.row.node.type)"
             ></b-icon>
             <router-link
               :to="{
                 name: field === 'value' ? 'ObservableDetails' : 'EntityDetails',
-                params: { id: vertices[link.row.target].id }
+                params: { id: link.row.node.id }
               }"
             >
-              {{ vertices[link.row.target][field] }}
+              {{ link.row.node[field] }}
             </router-link>
           </span>
 
-          <b-taglist v-else-if="field === 'tags'">
+          <b-taglist v-else-if="field === 'tags' || field === 'relevant_tags'">
             <b-tag
-              v-for="tag in vertices[link.row.target].tags"
+              v-for="tag in link.row.node[field]"
               v-bind:key="tag.name ? tag.name : tag"
               :type="tag.fresh ? 'is-primary' : ''"
             >
@@ -41,7 +41,7 @@
             </b-tag>
           </b-taglist>
 
-          <span v-else>{{ vertices[link.row.target][field] }}</span>
+          <span v-else>{{ link.row.node[field] }}</span>
         </b-table-column>
 
         <b-table-column field="relation" label="Relation">
@@ -87,10 +87,9 @@ export default {
   },
   methods: {
     getLabelForField(field) {
-      switch (field) {
-        default:
-          return field.charAt(0).toUpperCase() + field.slice(1);
-      }
+      let fieldName = field.charAt(0).toUpperCase() + field.slice(1);
+      fieldName = fieldName.replace(/_/g, " ");
+      return fieldName;
     },
     fetchNeighbors() {
       this.loading = true;
@@ -99,13 +98,21 @@ export default {
         target_types: this.targetTypes,
         hops: 1,
         direction: "any",
-        include_original: false
+        include_original: false,
+        count: this.perPage,
+        page: this.page - 1
       };
       axios
         .post(`/api/v2/graph/search/`, graphSearchRequest)
         .then(response => {
-          this.links = response.data.edges;
           this.vertices = response.data.vertices;
+          this.links = response.data.edges;
+          this.links.map(link => {
+            link.node = link.target.includes(this.id) ? this.vertices[link.source] : this.vertices[link.target];
+          });
+
+          this.total = response.data.count;
+          this.$emit("totalUpdated", this.links.length);
         })
         .catch(error => {
           console.log(error);
@@ -114,21 +121,9 @@ export default {
     },
     unlink(id) {
       axios
-        .delete(`/api/link/${id}`)
+        .delete(`/api/v2/graph/${id}`)
         .then(() => {
           this.fetchNeighbors();
-          this.countTotal();
-        })
-        .catch(error => {
-          console.log(error);
-        });
-    },
-    countTotal() {
-      axios
-        .get(`/api/neighbors/tuples/${this.sourceType}/${this.id}/${this.targetType}/total`)
-        .then(response => {
-          this.total = response.data.total;
-          this.$emit("totalUpdated", this.total);
         })
         .catch(error => {
           console.log(error);
@@ -147,7 +142,6 @@ export default {
       this.page = 1;
       this.total = 500;
       this.fetchNeighbors();
-      this.countTotal();
     }
   }
 };

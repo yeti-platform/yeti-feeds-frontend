@@ -76,9 +76,9 @@
                     </template>
                     <related-objects
                       :id="id"
-                      :fields="['name', 'tags']"
-                      source-type="Observable"
-                      :target-type="entity.type"
+                      :fields="['name', 'relevant_tags']"
+                      source-type="observable"
+                      :target-types="[entity.type]"
                       @totalUpdated="value => (totalRelatedEntities[entity.type] = value)"
                     >
                     </related-objects>
@@ -154,7 +154,7 @@ export default {
   methods: {
     getObservableDetails() {
       axios
-        .get(`/api/observable/${this.id}`)
+        .get(`/api/v2/observables/${this.id}`)
         .then(response => {
           this.observable = response.data;
           this.newTags = [...this.observable.tags];
@@ -172,7 +172,7 @@ export default {
         tags: this.newTags.map(tag => tag.name)
       };
       axios
-        .post(`/api/observable/${this.id}`, params)
+        .post(`/api/v2/observables/${this.id}`, params)
         .then(response => {
           this.observable = response.data;
         })
