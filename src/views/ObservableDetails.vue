@@ -49,7 +49,7 @@
                 <related-objects
                   :id="id"
                   source-type="observable"
-                  :target-types="['hostname']"
+                  :target-types="observableTypes.map(def => def.type)"
                   @totalUpdated="value => (totalRelatedObservables = value)"
                 ></related-objects>
               </b-tab-item>
@@ -123,6 +123,7 @@ import RelatedObjects from "@/components/RelatedObjects";
 import ObservableInfoTable from "@/components/ObservableInfoTable";
 
 import { ENTITY_TYPES } from "@/definitions/entityDefinitions.js";
+import { OBSERVABLE_TYPES } from "@/definitions/observableDefinitions.js";
 
 export default {
   props: ["id"],
@@ -145,7 +146,8 @@ export default {
         campaign: null,
         exploit: null
       },
-      entityTypes: ENTITY_TYPES
+      entityTypes: ENTITY_TYPES,
+      observableTypes: OBSERVABLE_TYPES
     };
   },
   mounted() {

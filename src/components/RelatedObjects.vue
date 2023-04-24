@@ -83,7 +83,6 @@ export default {
   },
   mounted() {
     this.fetchNeighbors();
-    this.countTotal();
   },
   methods: {
     getLabelForField(field) {
@@ -103,7 +102,7 @@ export default {
         page: this.page - 1
       };
       axios
-        .post(`/api/v2/graph/search/`, graphSearchRequest)
+        .post(`/api/v2/graph/search`, graphSearchRequest)
         .then(response => {
           this.vertices = response.data.vertices;
           this.links = response.data.edges;
@@ -111,7 +110,7 @@ export default {
             link.node = link.target.includes(this.id) ? this.vertices[link.source] : this.vertices[link.target];
           });
 
-          this.total = response.data.count;
+          this.total = response.data.total;
           this.$emit("totalUpdated", this.links.length);
         })
         .catch(error => {
