@@ -300,16 +300,6 @@ export default {
     }
   },
   computed: {
-    filterTags() {
-      return this.existingTags.filter(tag => {
-        return (
-          tag.name
-            .toString()
-            .toLowerCase()
-            .indexOf(this.tagName.toLowerCase()) >= 0
-        );
-      });
-    },
     totalSelectedItems() {
       return this.tableSelectedItems.length > 0 ? this.tableSelectedItems.length : this.tableTotal;
     }
