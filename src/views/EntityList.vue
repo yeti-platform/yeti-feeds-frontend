@@ -4,7 +4,7 @@
       <b-tabs v-model="activeMainTab" position="is-left" :animated="false">
         <b-tab-item :label="entity.name" v-for="entity in entityTypes" v-bind:key="entity.type">
           <object-list
-            search-type="entity"
+            search-type="entities"
             :search-subtype="entity.type"
             :fields="entity.fields"
             :search-query="searchQuery"

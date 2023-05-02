@@ -52,6 +52,9 @@
         <span v-else-if="field.type !== 'longtext'">{{ object.row[field.field] }}</span>
       </b-table-column>
     </template>
+    <template #empty>
+      <div class="has-text-centered">No records</div>
+    </template>
   </b-table>
 </template>
 
@@ -117,56 +120,23 @@ export default {
     },
     searchObjects() {
       var params = {
-        filter: this.generateSearchParams(this.searchQuery),
-        params: {
-          regex: this.regexSearch,
-          ignorecase: this.ignoreCase,
-          page: this.tablePage
-        }
+        name: this.searchQuery,
+        type: this.searchSubtype,
+        count: this.tablePerPage,
+        page: this.tablePage - 1
       };
-      this.countTotal(params);
       this.loading = true;
       axios
-        .post(`/api/${this.searchType}search/`, params)
+        .post(`/api/v2/${this.searchType}/search`, params)
         .then(response => {
-          this.objects = response.data;
-          this.loading = false;
+          this.objects = response.data[this.searchType];
+          this.tableTotal = response.data.total;
         })
         .catch(error => {
           console.log(error);
         })
         .finally(() => {
           this.loading = false;
-        });
-    },
-    generateSearchParams(searchQuery) {
-      var filter = {};
-      var queries = searchQuery.split(" ");
-      var default_field = "name";
-
-      for (var i in queries) {
-        var splitted = queries[i].split("=");
-        if (splitted.length == 2) {
-          filter[splitted[0]] = splitted[1].split(",");
-        } else if (queries[i] !== "") {
-          filter[default_field] = queries[i];
-        }
-      }
-
-      if (this.searchSubtype !== "") {
-        filter["_cls"] = `${this.searchSubtype}`;
-      }
-      return filter;
-    },
-    countTotal(params) {
-      this.tableTotal = 500;
-      axios
-        .post(`/api/${this.searchType}search/total`, params)
-        .then(response => {
-          this.tableTotal = response.data.total;
-        })
-        .catch(error => {
-          console.log(error);
         });
     },
     formatTimestamp(timestamp, local) {
