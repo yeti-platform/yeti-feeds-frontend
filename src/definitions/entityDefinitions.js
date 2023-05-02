@@ -12,26 +12,21 @@ export const ENTITY_TYPES = [
     icon: "bug"
   },
   {
-    name: "TTP",
-    type: "ttp",
+    name: "Tool",
+    type: "tool",
     fields: [
       { field: "name", type: "text", label: "Name", displayList: true },
       { field: "tags", type: "list", label: "Relevant tags", displayList: true },
-      {
-        field: "killchain",
-        type: "option",
-        label: "Killchain Stage",
-        choices: [
-          "reconnaissance",
-          "weaponization",
-          "delivery",
-          "exploitation",
-          "installation",
-          "command-and-control",
-          "actions-on-objectives"
-        ],
-        displayList: true
-      },
+      { field: "description", type: "longtext", label: "Description", displayList: false }
+    ],
+    icon: "bug"
+  },
+  {
+    name: "Attack pattern",
+    type: "attack-pattern",
+    fields: [
+      { field: "name", type: "text", label: "Name", displayList: true },
+      { field: "tags", type: "list", label: "Relevant tags", displayList: true },
       { field: "description", type: "longtext", label: "Description", displayList: false }
     ],
     icon: "bolt"
@@ -48,6 +43,16 @@ export const ENTITY_TYPES = [
     icon: "user-secret"
   },
   {
+    name: "Intrusion set",
+    type: "intrusion-set",
+    fields: [
+      { field: "name", type: "text", label: "Name", displayList: true },
+      { field: "tags", type: "list", label: "Relevant tags", displayList: true },
+      { field: "description", type: "longtext", label: "Description", displayList: false }
+    ],
+    icon: "user"
+  },
+  {
     name: "Campaign",
     type: "campaign",
     fields: [
@@ -59,19 +64,8 @@ export const ENTITY_TYPES = [
     icon: "bullhorn"
   },
   {
-    name: "Exploit",
-    type: "exploit",
-    fields: [
-      { field: "name", type: "text", label: "Name", displayList: true },
-      { field: "tags", type: "list", label: "Relevant tags", displayList: true },
-      { field: "aliases", type: "list", label: "Aliases", displayList: true },
-      { field: "description", type: "longtext", label: "Description", displayList: false }
-    ],
-    icon: "code"
-  },
-  {
-    name: "Company",
-    type: "company",
+    name: "Identity",
+    type: "identity",
     fields: [
       { field: "name", type: "text", label: "Name", displayList: true },
       { field: "tags", type: "list", label: "Relevant tags", displayList: true },
