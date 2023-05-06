@@ -13,7 +13,7 @@
     class="object-table"
   >
     <template v-slot:default="object">
-      <b-table-column field="created" label="Created on (UTC)" width="180"
+      <b-table-column field="created" label="Created" width="180"
         ><span :title="'Localtime: ' + formatTimestamp(object.row.created, true)">{{
           formatTimestamp(object.row.created)
         }}</span>
@@ -39,7 +39,7 @@
         <code v-else-if="field.type === 'code'"> {{ object.row[field.field] }} </code>
         <code v-else-if="field.type === 'longcode'"> {{ object.row[field.field] }} </code>
 
-        <b-taglist v-else-if="field.field === 'tags' || field.field === 'aliases'">
+        <b-taglist v-else-if="field.field === 'tags' || field.type == 'list'">
           <b-tag
             v-for="tag in object.row[field.field]"
             v-bind:key="tag.name ? tag.name : tag"
@@ -48,6 +48,12 @@
             {{ tag.name ? tag.name : tag }}
           </b-tag>
         </b-taglist>
+
+        <span
+          v-else-if="field.type === 'timestamp'"
+          :title="'Localtime: ' + formatTimestamp(object.row[field.field], true)"
+          >{{ formatTimestamp(object.row[field.field]) }}
+        </span>
 
         <span v-else-if="field.type !== 'longtext'">{{ object.row[field.field] }}</span>
       </b-table-column>
