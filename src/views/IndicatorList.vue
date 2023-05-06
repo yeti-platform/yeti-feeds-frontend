@@ -4,7 +4,7 @@
       <b-tabs v-model="activeMainTab" position="is-left" :animated="false">
         <b-tab-item :label="indicator.name" v-for="indicator in indicatorTypes" v-bind:key="indicator.type">
           <object-list
-            search-type="indicator"
+            search-type="indicators"
             :search-subtype="indicator.type"
             :fields="indicator.fields"
             :search-query="searchQuery"
@@ -132,15 +132,14 @@ export default {
     saveIndicator() {
       this.newIndicator.type = this.selectedindicatorType.type;
       axios
-        .post("/api/indicator/", this.newIndicator)
+        .post("/api/v2/indicators", { indicator: this.newIndicator })
         .then(response => {
           this.$buefy.toast.open({
-            message: `indicator ${response.name} saved`,
+            message: `Indicator ${response.data.name} saved`,
             type: "is-success"
           });
           this.$refs[this.newIndicator.type + "ObjectList"][0].searchObjects();
           this.newIndicator = {};
-          this.searchIndicators();
         })
         .catch(error => {
           this.$buefy.toast.open({
