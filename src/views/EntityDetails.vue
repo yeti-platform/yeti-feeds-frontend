@@ -25,8 +25,8 @@
                   </span>
                 </template>
                 <related-objects
-                  source-type="Entity"
-                  target-type="Observable"
+                  source-type="entity"
+                  target-type="observable"
                   :id="id"
                   @totalUpdated="value => (totalRelatedObservables = value)"
                 ></related-objects>
@@ -43,25 +43,20 @@
             <p class="panel-heading">Info <b-button size="is-small" @click="editEntity"> Edit </b-button></p>
             <div class="panel-block">
               <table class="table is-fullwidth">
-                <tbody v-if="entity.type == 'malware'">
-                  <tr>
-                    <th>Family</th>
-                    <td>{{ entity.family }}</td>
-                  </tr>
-                  <tr>
-                    <th>Aliases</th>
+                <tbody>
+                  <tr v-for="field in entityInfoFields" v-bind:key="field.name">
+                    <th>{{ field.label }}</th>
                     <td>
-                      <b-taglist>
-                        <b-tag v-for="alias in entity.aliases" v-bind:key="alias">{{ alias }}</b-tag>
+                      <b-taglist v-if="field.type == 'list'">
+                        <b-tag v-for="item in entity[field.field]" v-bind:key="item">
+                          {{ item }}
+                        </b-tag>
+                        <span v-if="!entity[field.field]">N/A</span>
                       </b-taglist>
+                      <span v-else>
+                        {{ entity[field.field] }}
+                      </span>
                     </td>
-                  </tr>
-                </tbody>
-
-                <tbody v-if="entity.type == 'ttp'">
-                  <tr>
-                    <th>Killchain stage</th>
-                    <td>{{ entity.killchain }}</td>
                   </tr>
                 </tbody>
               </table>
@@ -71,7 +66,12 @@
             <p class="panel-heading">Relevant tags</p>
             <div class="panel-block">
               <b-field class="expanded">
-                <b-taginput expanded v-model="entity.tags" icon="tag" placeholder="e.g. CobaltStrike"></b-taginput>
+                <b-taginput
+                  expanded
+                  v-model="entity.relevant_tags"
+                  icon="tag"
+                  placeholder="e.g. CobaltStrike"
+                ></b-taginput>
                 <p class="control">
                   <button class="button is-primary" @click="saveTags">Save</button>
                 </p>
@@ -85,10 +85,10 @@
             <div class="panel-block">
               <related-objects
                 v-show="totalRelatedEntities > 0"
-                source-type="Entity"
+                source-type="entity"
                 inline-icons
                 :fields="['name']"
-                target-type="Entity"
+                :target-types="['entity']"
                 :id="id"
                 @totalUpdated="value => (totalRelatedEntities = value)"
                 style="width: 100%"
@@ -125,6 +125,7 @@
 import axios from "axios";
 import RelatedObjects from "@/components/RelatedObjects";
 import NewObject from "@/components/NewObject";
+import { ENTITY_TYPES } from "@/definitions/entityDefinitions.js";
 
 export default {
   props: ["id"],
@@ -140,7 +141,8 @@ export default {
       totalRelatedEntities: 0,
       linkedEntityNameFilter: "",
       linkedEntity: null,
-      entities: []
+      entities: [],
+      entityTypes: ENTITY_TYPES
     };
   },
   mounted() {
@@ -150,7 +152,7 @@ export default {
   methods: {
     getentityDetails() {
       axios
-        .get(`/api/entity/${this.id}`)
+        .get(`/api/v2/entities/${this.id}`)
         .then(response => {
           this.entity = response.data;
           // Switch back to Context view when reloading the page.
@@ -175,7 +177,6 @@ export default {
         },
         events: {
           refresh: newEntity => {
-            console.log(newEntity);
             this.entity = newEntity;
           }
         }
@@ -183,7 +184,7 @@ export default {
     },
     getEntityAutocomplete() {
       axios
-        .post("/api/entitysearch/", { name: "" })
+        .get("/api/v2/entities")
         .then(response => {
           this.entities = response.data;
         })
@@ -215,10 +216,14 @@ export default {
     },
     saveTags() {
       var params = {
-        tags: this.entity.tags
+        entity: {
+          id: this.entity.id,
+          name: this.entity.name,
+          relevant_tags: this.entity.relevant_tags
+        }
       };
       axios
-        .post(`/api/entity/${this.id}`, params)
+        .patch(`/api/v2/entities/${this.id}`, params)
         .then(response => {
           this.entity = response.data;
         })
@@ -234,6 +239,14 @@ export default {
         return (
           entity.name.toLowerCase().includes(this.linkedEntityNameFilter.toLowerCase()) && entity.id != this.entity.id
         );
+      });
+    },
+    entityTypeDefinition() {
+      return this.entityTypes.find(entityType => entityType.type === this.entity.type);
+    },
+    entityInfoFields() {
+      return this.entityTypeDefinition.fields.filter(field => {
+        return !["name", "relevant_tags", "description"].includes(field.field);
       });
     }
   },
