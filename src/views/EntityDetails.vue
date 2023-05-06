@@ -88,7 +88,7 @@
                 source-type="entity"
                 inline-icons
                 :fields="['name']"
-                :target-types="['entity']"
+                :target-types="entityTypes.map(def => def.type)"
                 :id="id"
                 @totalUpdated="value => (totalRelatedEntities = value)"
                 style="width: 100%"
@@ -195,14 +195,13 @@ export default {
     },
     linkEntity() {
       var params = {
-        type_src: "entity",
-        type_dst: "entity",
-        link_src: this.entity.id,
-        link_dst: this.linkedEntity.id,
-        source: "web"
+        source: `entities/${this.entity.id}`,
+        target: `entities/${this.linkedEntity.id}`,
+        link_type: "web",
+        description: "Manual link."
       };
       axios
-        .post("/api/link/", params)
+        .post("/api/v2/graph/add", params)
         .then(() => {
           // Refresh neighbors list.
           this.$refs.relatdEntitiesList.fetchNeighbors();

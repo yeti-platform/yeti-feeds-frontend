@@ -125,10 +125,10 @@ export default {
     saveEntity() {
       this.newEntity.type = this.selectedEntityType.type;
       axios
-        .post("/api/entity/", this.newEntity)
+        .post("/api/v2/entities", { entity: this.newEntity })
         .then(response => {
           this.$buefy.toast.open({
-            message: `Entity ${response.name} saved`,
+            message: `Entity ${response.data.name} saved`,
             type: "is-success"
           });
           // TODO: think about replacing this by an EventBus
