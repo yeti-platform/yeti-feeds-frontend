@@ -26,7 +26,7 @@
                 </template>
                 <related-objects
                   source-type="entity"
-                  target-type="observable"
+                  :target-types="observableTypes.map(def => def.type)"
                   :id="id"
                   @totalUpdated="value => (totalRelatedObservables = value)"
                 ></related-objects>
@@ -126,6 +126,7 @@ import axios from "axios";
 import RelatedObjects from "@/components/RelatedObjects";
 import NewObject from "@/components/NewObject";
 import { ENTITY_TYPES } from "@/definitions/entityDefinitions.js";
+import { OBSERVABLE_TYPES } from "@/definitions/observableDefinitions.js";
 
 export default {
   props: ["id"],
@@ -142,7 +143,8 @@ export default {
       linkedEntityNameFilter: "",
       linkedEntity: null,
       entities: [],
-      entityTypes: ENTITY_TYPES
+      entityTypes: ENTITY_TYPES,
+      observableTypes: OBSERVABLE_TYPES
     };
   },
   mounted() {
