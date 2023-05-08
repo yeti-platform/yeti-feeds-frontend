@@ -31,7 +31,7 @@
                 </template>
                 <related-objects
                   source-type="indicator"
-                  target-type="Observable"
+                  :target-types="observableTypes.map(def => def.type)"
                   :id="id"
                   @totalUpdated="value => (totalRelatedObservables = value)"
                 ></related-objects>
@@ -63,10 +63,10 @@
             <div class="panel-block">
               <related-objects
                 v-show="totalRelatedIndicators > 0"
-                source-type="Indicator"
+                source-type="indicator"
                 inline-icons
                 :fields="['name']"
-                target-type="Indicator"
+                :target-types="indicatorTypes.map(def => def.type)"
                 :id="id"
                 @totalUpdated="value => (totalRelatedIndicators = value)"
                 style="width: 100%"
@@ -99,10 +99,10 @@
             <div class="panel-block">
               <related-objects
                 v-show="totalRelatedEntities > 0"
-                source-type="Indicator"
+                source-type="indicator"
                 inline-icons
                 :fields="['name']"
-                target-type="Entity"
+                :target-types="entityTypes.map(def => def.type)"
                 :id="id"
                 @totalUpdated="value => (totalRelatedEntities = value)"
                 style="width: 100%"
@@ -139,6 +139,9 @@
 import axios from "axios";
 import RelatedObjects from "@/components/RelatedObjects";
 import NewObject from "@/components/NewObject";
+import { ENTITY_TYPES } from "@/definitions/entityDefinitions.js";
+import { INDICATOR_TYPES } from "@/definitions/indicatorDefinitions.js";
+import { OBSERVABLE_TYPES } from "@/definitions/observableDefinitions.js";
 
 export default {
   props: ["id"],
@@ -157,7 +160,10 @@ export default {
       linkedEntityNameFilter: "",
       linkedIndicator: null,
       entities: [],
-      indicators: []
+      indicators: [],
+      entityTypes: ENTITY_TYPES,
+      indicatorTypes: INDICATOR_TYPES,
+      observableTypes: OBSERVABLE_TYPES
     };
   },
   mounted() {
@@ -168,8 +174,9 @@ export default {
   methods: {
     getindicatorDetails() {
       axios
-        .get(`/api/indicator/${this.id}`)
+        .get(`/api/v2/indicators/${this.id}`)
         .then(response => {
+          console.log(response.data);
           this.indicator = response.data;
           // Switch back to Context view when reloading the page.
           this.activeTab = 0;
@@ -201,7 +208,7 @@ export default {
     },
     getIndicatorAutocomplete() {
       axios
-        .post("/api/indicatorsearch/", { name: "" })
+        .get("/api/v2/indicators")
         .then(response => {
           this.indicators = response.data;
         })
@@ -212,7 +219,7 @@ export default {
     },
     getEntityAutocomplete() {
       axios
-        .post("/api/entitysearch/", { name: "" })
+        .get("/api/v2/entities")
         .then(response => {
           this.entities = response.data;
         })
@@ -223,18 +230,16 @@ export default {
     },
     linkIndicator() {
       var params = {
-        type_src: "indicator",
-        type_dst: "indicator",
-        link_src: this.indicator.id,
-        link_dst: this.linkedIndicator.id,
-        source: "web"
+        source: `indicators/${this.indicator.id}`,
+        target: `indicators/${this.linkedIndicator.id}`,
+        link_type: "web",
+        description: "Manual link."
       };
       axios
-        .post("/api/link/", params)
+        .post("/api/v2/graph/add", params)
         .then(() => {
           // Refresh neighbors list.
           this.$refs.relatdIndicatorsList.fetchNeighbors();
-          this.$refs.relatdIndicatorsList.countTotal();
           this.linkedIndicatorNameFilter = "";
           this.linkedIndicator = null;
         })
@@ -245,18 +250,16 @@ export default {
     },
     linkEntity() {
       var params = {
-        type_src: "indicator",
-        type_dst: "entity",
-        link_src: this.indicator.id,
-        link_dst: this.linkedEntity.id,
-        source: "web"
+        source: `indicators/${this.indicator.id}`,
+        target: `entities/${this.linkedEntity.id}`,
+        link_type: "web",
+        description: "Manual link."
       };
       axios
-        .post("/api/link/", params)
+        .post("/api/v2/graph/add", params)
         .then(() => {
           // Refresh neighbors list.
           this.$refs.relatdEntitiesList.fetchNeighbors();
-          this.$refs.relatdEntitiesList.countTotal();
           this.linkedEntityNameFilter = "";
           this.linkedEntity = null;
         })
@@ -267,10 +270,14 @@ export default {
     },
     saveTags() {
       var params = {
-        tags: this.indicator.tags
+        indicator: {
+          id: this.indicator.id,
+          name: this.indicator.name,
+          relevant_tags: this.indicator.relevant_tags
+        }
       };
       axios
-        .post(`/api/indicator/${this.id}`, params)
+        .post(`/api/v2/indicators/${this.id}`, params)
         .then(response => {
           this.indicator = response.data;
         })
