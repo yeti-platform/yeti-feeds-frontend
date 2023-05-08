@@ -26,12 +26,7 @@
         v-bind:key="field.field"
       >
         <span v-if="field.field === 'value' || field.field === 'name'">
-          <router-link
-            :to="{
-              name: field === 'value' ? 'ObservableDetails' : 'EntityDetails',
-              params: { id: object.row.id }
-            }"
-          >
+          <router-link :to="`/${object.row.root_type}/${object.row.id}`">
             {{ object.row[field.field] }}
           </router-link>
         </span>

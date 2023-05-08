@@ -21,12 +21,7 @@
               v-if="link.row.node.type && inlineIcons"
               :icon="getIconForType(link.row.node.type)"
             ></b-icon>
-            <router-link
-              :to="{
-                name: field === 'value' ? 'ObservableDetails' : 'EntityDetails',
-                params: { id: link.row.node.id }
-              }"
-            >
+            <router-link :to="`/${link.row.node.root_type}/${link.row.node.id}`">
               {{ link.row.node[field] }}
             </router-link>
           </span>
