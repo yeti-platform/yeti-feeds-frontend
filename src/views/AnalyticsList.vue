@@ -3,103 +3,21 @@
     <div class="scheduled">
       <p class="title">Scheduled</p>
       <p class="subtitle">Recurring analytics, triggered automatically on a fixed schedule.</p>
-      <b-table :data="scheduled" default-sort="name" narrowed :row-class="getRowClass">
-        <template v-slot:default="analytics">
-          <b-table-column field="name" label="Name" sortable>
-            <strong>{{ analytics.row.name }}</strong>
-          </b-table-column>
-          <b-table-column field="frequency" label="Runs every" width="130">{{
-            analytics.row.frequency
-          }}</b-table-column>
-          <b-table-column field="last_run" label="Last run (UTC)" width="180"
-            ><span :title="'Localtime: ' + formatTimestamp(analytics.row.last_run, true)">{{
-              formatTimestamp(analytics.row.last_run)
-            }}</span></b-table-column
-          >
-          <!-- <b-table-column field="last_run" label="Last run">{{ analytics.row.last_run || "Never" }}</b-table-column> -->
-          <b-table-column field="description" label="Description">{{ analytics.row.description }}</b-table-column>
-          <b-table-column field="status" label="Status">{{ analytics.row.status || "N/A" }}</b-table-column>
-          <b-table-column field="toggle" label="Toggle">
-            <div @click="toggle(analytics.row, 'scheduled')" class="toggle">
-              <b-switch v-model="analytics.row.enabled" :disabled="analytics.row.status === 'Running...'"></b-switch>
-            </div>
-          </b-table-column>
-          <b-table-column field="refresh" label>
-            <b-button
-              :disabled="analytics.row.status === 'Running...' || !analytics.row.enabled"
-              @click="refresh(analytics.row)"
-              size="is-small"
-            >
-              <b-icon
-                pack="fas"
-                icon="sync"
-                size="is-small"
-                :custom-class="analytics.row.status === 'Running...' ? 'fa-spin' : ''"
-              ></b-icon>
-            </b-button>
-          </b-table-column>
-        </template>
-      </b-table>
+      <task-list task-type="analytics"> </task-list>
     </div>
     <br />
     <br />
     <div class="oneshot">
       <p class="title">One-shot</p>
       <p class="subtitle">Analytics that are triggered manually on specific observable types.</p>
-      <b-table :data="oneshot" default-sort="group" narrowed>
-        <template v-slot:default="analytics">
-          <b-table-column field="group" label="Grouping" sortable>
-            {{ analytics.row.group }}
-          </b-table-column>
-          <b-table-column field="name" label="Name" sortable>
-            <strong>{{ analytics.row.name }}</strong>
-          </b-table-column>
-          <b-table-column field="acts_on" label="Acts on">
-            <b-taglist>
-              <b-tag v-for="type in analytics.row.acts_on" v-bind:key="type">
-                {{ type }}
-              </b-tag>
-            </b-taglist>
-          </b-table-column>
-          <b-table-column field="description" label="Description">
-            {{ analytics.row.description }}
-            <span class="setting-warning" v-if="!analytics.row.available">
-              This plugin requires settings that are not yet defined.
-            </span>
-          </b-table-column>
-          <b-table-column field="toggle" label="Toggle">
-            <div @click="toggle(analytics.row, 'oneshot')" class="toggle">
-              <b-switch v-model="analytics.row.enabled"></b-switch>
-            </div>
-          </b-table-column>
-        </template>
-      </b-table>
+      <task-list task-type="oneshot"> </task-list>
     </div>
     <br />
     <br />
-    <div class="scheduled">
+    <div class="inline">
       <p class="title">Inline</p>
       <p class="subtitle">Analytics that trigger when an observable is added to the Yeti database.</p>
-      <b-table :data="inline" narrowed default-sort="name">
-        <template v-slot:default="analytics">
-          <b-table-column field="name" label="Name">
-            <strong>{{ analytics.row.name }}</strong>
-          </b-table-column>
-          <b-table-column field="acts_on" label="Acts on">
-            <b-taglist>
-              <b-tag v-for="type in analytics.row.acts_on" v-bind:key="type">
-                {{ type }}
-              </b-tag>
-            </b-taglist>
-          </b-table-column>
-          <b-table-column field="description" label="Description">{{ analytics.row.description }}</b-table-column>
-          <b-table-column field="toggle" label="Toggle">
-            <div @click="toggle(analytics.row, 'inline')" class="toggle">
-              <b-switch v-model="analytics.row.enabled"></b-switch>
-            </div>
-          </b-table-column>
-        </template>
-      </b-table>
+      <task-list task-type="inline"> </task-list>
     </div>
   </div>
 </template>
@@ -107,8 +25,13 @@
 <script>
 import axios from "axios";
 import utils from "@/utils";
+// import TaskList
+import TaskList from "@/views/TaskList.vue";
 
 export default {
+  components: {
+    TaskList
+  },
   name: "AnalyticsList",
   data() {
     return {
