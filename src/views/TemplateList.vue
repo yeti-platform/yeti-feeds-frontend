@@ -27,7 +27,7 @@
           <button class="button is-danger" @click="confirmDeleteTemplate">Delete template</button>
         </p>
         <p class="control" v-if="!templateId">
-          <button class="button is-primary" @click="updateTemplate">Add new template</button>
+          <button class="button is-primary" @click="newTemplate">Add new template</button>
         </p>
         <p class="control">
           <button class="button is-light" @click="deselectTemplate">Clear form</button>
@@ -65,9 +65,9 @@ export default {
   methods: {
     listExportTemplates() {
       axios
-        .get("/api/exporttemplate/")
+        .post("/api/v2/templates/search", { name: "" })
         .then(response => {
-          this.templates = response.data;
+          this.templates = response.data.templates;
         })
         .catch(error => {
           console.log(error);
@@ -82,6 +82,29 @@ export default {
     deselectTemplate() {
       this.templateName = this.templateContent = this.templateId = null;
     },
+    newTemplate() {
+      var valid = this.$refs.templateName.checkHtml5Validity();
+      valid &= this.$refs.templateContent.checkHtml5Validity();
+      if (!valid) {
+        return;
+      }
+      var params = {
+        template: {
+          name: this.templateName,
+          template: this.templateContent
+        }
+      };
+      axios
+        .post(`/api/v2/templates/`, params)
+        .then(() => {
+          this.deselectTemplate();
+          this.listExportTemplates();
+        })
+        .catch(error => {
+          console.log(error);
+        })
+        .finally(() => {});
+    },
     updateTemplate() {
       var valid = this.$refs.templateName.checkHtml5Validity();
       valid &= this.$refs.templateContent.checkHtml5Validity();
@@ -89,11 +112,14 @@ export default {
         return;
       }
       var params = {
-        name: this.templateName,
-        template: this.templateContent
+        template: {
+          id: this.templateId,
+          name: this.templateName,
+          template: this.templateContent
+        }
       };
       axios
-        .post(`/api/exporttemplate/${this.templateId || ""}`, params)
+        .patch(`/api/v2/templates/${this.templateId}`, params)
         .then(() => {
           this.deselectTemplate();
           this.listExportTemplates();
@@ -115,7 +141,7 @@ export default {
     },
     deleteTemplate() {
       axios
-        .delete(`/api/exporttemplate/${this.templateId}`)
+        .delete(`/api/v2/templates/${this.templateId}`)
         .then(() => {
           this.deselectTemplate();
         })
