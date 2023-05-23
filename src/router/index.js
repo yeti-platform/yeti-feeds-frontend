@@ -7,7 +7,7 @@ import EntityDetails from "../views/EntityDetails.vue";
 import IndicatorList from "../views/IndicatorList.vue";
 import IndicatorDetails from "../views/IndicatorDetails.vue";
 import ObservableDetails from "../views/ObservableDetails.vue";
-import FeedList from "../views/FeedList.vue";
+import TaskList from "../views/TaskList.vue";
 import AnalyticsList from "../views/AnalyticsList.vue";
 import ExportList from "../views/ExportList.vue";
 import TemplateList from "../views/TemplateList.vue";
@@ -77,7 +77,8 @@ const routes = [
   {
     path: "/feeds",
     name: "Feeds",
-    component: FeedList
+    component: TaskList,
+    props: { taskType: "feed" }
   },
   {
     path: "/analytics",
