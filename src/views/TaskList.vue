@@ -41,7 +41,7 @@
         </b-table-column>
       </template>
       <template #empty>
-        <div class="has-text-centered">No records</div>
+        <div class="has-text-centered">No tasks</div>
       </template>
     </b-table>
   </div>
