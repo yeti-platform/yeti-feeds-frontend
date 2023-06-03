@@ -1,7 +1,7 @@
 <template>
   <div class="columns">
     <div class="column is-9 exportlist">
-      <task-list task-type="export" ref="exportList"> </task-list>
+      <task-list task-type="export" ref="exportList" @taskSelected="task => (this.selectedExport = task)"> </task-list>
     </div>
     <div class="column is-3">
       <b-field label="Name">
@@ -19,22 +19,20 @@
       <b-field label="Exclude tags">
         <b-taginput label="Exclude tags" v-model="selectedExport.exclude_tags" icon="tag"></b-taginput>
       </b-field>
-      <b-field>
-        <b-select
+      <b-field label="Acts on">
+        <b-taginput
+          label="Acts on"
           v-model="selectedExport.acts_on"
-          placeholder="Select type to export"
-          required
-          ref="exportActsOn"
-          expanded
-        >
-          <option v-for="type in Object.keys(defaultTypes)" v-bind:key="type" :value="type">{{
-            defaultTypes[type]
-          }}</option>
-        </b-select>
+          icon="tag"
+          autocomplete
+          :allow-new="false"
+          placeholder="Add observable types"
+          :data="Object.keys(defaultTypes)"
+        ></b-taginput>
       </b-field>
       <b-field>
         <b-select
-          v-model="selectedExport.template"
+          v-model="selectedExport.template_name"
           placeholder="Select template to use"
           required
           ref="exportTemplate"
@@ -68,10 +66,10 @@ import utils from "@/utils";
 import TaskList from "@/views/TaskList.vue";
 
 var defaultTypes = {
-  Ip: "IP",
+  ip: "IP",
   // AutonomousSystem: "Autonomous System",
-  Url: "URL",
-  Hostname: "Hostname"
+  url: "URL",
+  hostname: "Hostname"
   // Hash: "Hash",
   // File: "File",
   // Certificate: "Certificate",
@@ -94,7 +92,6 @@ export default {
       exports: [],
       exportTemplates: [],
       selectedExport: {},
-      timerListExports: null,
       timerListTemplates: null
     };
   },
@@ -118,51 +115,32 @@ export default {
         .finally(() => {});
     },
     updateExport() {
-      var valid = this.$refs.exportActsOn.checkHtml5Validity();
-      valid &= this.$refs.exportTemplate.checkHtml5Validity();
-      valid &= this.$refs.exportName.checkHtml5Validity();
-      if (!valid) {
-        return false;
-      }
       let exportTask = {
         id: this.selectedExport.id,
         name: this.selectedExport.name,
-        acts_on: this.selectedExport.acts_on,
         description: this.selectedExport.description,
-        template_name: this.selectedExport.template
+        include_tags: this.selectedExport.include_tags,
+        ignore_tags: this.selectedExport.ignore_tags,
+        exclude_tags: this.selectedExport.exclude_tags,
+        acts_on: this.selectedExport.acts_on,
+        template_name: this.selectedExport.template_name
       };
 
-      if (!this.selectedExport.exclude_tags) {
-        this.selectedExport.exclude_tags = [];
-      }
-      if (!this.selectedExport.ignore_tags) {
-        this.selectedExport.ignore_tags = [];
-      }
-      if (!this.selectedExport.include_tags) {
-        this.selectedExport.include_tags = [];
-      }
-
-      exportTask.exclude_tags = this.selectedExport.exclude_tags.map(tag => tag.name || tag);
-      exportTask.ignore_tags = this.selectedExport.ignore_tags.map(tag => tag.name || tag);
-      exportTask.include_tags = this.selectedExport.include_tags.map(tag => tag.name || tag);
       axios
-        .post(`/api/v2/export/${this.selectedExport.id}`, { export: exportTask })
-        .then(() => this.listExports())
+        .patch(`/api/v2/tasks/export/${this.selectedExport.name}`, { export: exportTask })
+        .then(() => {
+          this.$refs.exportList.listTasks();
+          this.selectedExport = {};
+        })
         .catch(error => console.log(error))
         .finally(() => {});
     },
     newExport() {
-      var valid = this.$refs.exportActsOn.checkHtml5Validity();
-      valid &= this.$refs.exportTemplate.checkHtml5Validity();
-      valid &= this.$refs.exportName.checkHtml5Validity();
-      if (!valid) {
-        return false;
-      }
       let exportTask = {
         name: this.selectedExport.name,
         acts_on: this.selectedExport.acts_on,
         description: this.selectedExport.description,
-        template_name: this.selectedExport.template,
+        template_name: this.selectedExport.template_name,
         exclude_tags: this.selectedExport.exclude_tags,
         ignore_tags: this.selectedExport.ignore_tags,
         include_tags: this.selectedExport.include_tags

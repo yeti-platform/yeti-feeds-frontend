@@ -1,6 +1,12 @@
 <template>
   <div class="tasklist">
-    <b-table :data="tasks" :hoverable="true" :narrowed="true" :row-class="getRowClass">
+    <b-table
+      :data="tasks"
+      :hoverable="true"
+      :narrowed="true"
+      :row-class="getRowClass"
+      @click="task => $emit('taskSelected', task)"
+    >
       <template v-slot:default="task">
         <b-table-column field="name" label="Name">
           <strong>{{ task.row.name }}</strong>
@@ -61,7 +67,8 @@ export default {
   data() {
     return {
       tasks: [],
-      timer: null
+      timer: null,
+      selected: null
     };
   },
   mounted() {
