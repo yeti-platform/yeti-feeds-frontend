@@ -15,13 +15,26 @@
             </b-button>
           </b-table-column>
           <b-table-column field="admin" label="Admin">
-            <b-checkbox v-model="user.row.permissions.admin" @click.native="toggleAdminUser(user.row)"></b-checkbox>
+            <b-checkbox
+              v-model="user.row.admin"
+              @input="toggleUser(user.row, 'admin')"
+              :disabled="user.row.username === currentUserName"
+            ></b-checkbox>
           </b-table-column>
           <b-table-column field="enabled" label="Enabled">
-            <b-checkbox v-model="user.row.enabled" @click.native="toggleUser(user.row)"></b-checkbox>
+            <b-checkbox
+              v-model="user.row.enabled"
+              @input="toggleUser(user.row, 'enabled')"
+              :disabled="user.row.username === currentUserName"
+            ></b-checkbox>
           </b-table-column>
           <b-table-column custom-key="remove" label="Remove">
-            <b-button class="button is-warning" size="is-small" @click="confirmDeleteUser(user.row)">
+            <b-button
+              class="button is-warning"
+              size="is-small"
+              @click="confirmDeleteUser(user.row)"
+              :disabled="user.row.username === currentUserName"
+            >
               <b-icon pack="fas" icon="trash-alt" size="is-small"></b-icon>
               <span>Remove</span>
             </b-button>
@@ -102,7 +115,7 @@ export default {
       userFilter: "",
       page: 1,
       totalUsers: 100,
-      activeTab: 1,
+      activeTab: 0,
       newUsername: null,
       newPassword: null,
       newAdmin: false
@@ -110,15 +123,14 @@ export default {
   },
   mounted() {
     this.listUsers();
-    this.getTotalUsers();
   },
   methods: {
     listUsers() {
-      var params = this.searchParams;
       axios
-        .post("/api/useradminsearch/", params)
+        .post("/api/v2/users/search", this.searchParams)
         .then(response => {
-          this.users = response.data;
+          this.users = response.data.users;
+          this.totalUsers = response.data.total;
         })
         .catch(error => {
           console.log(error);
@@ -129,18 +141,7 @@ export default {
       this.page = page;
       this.listUsers();
     },
-    getTotalUsers() {
-      var params = this.searchParams;
-      axios
-        .post("/api/useradminsearch/total", params)
-        .then(response => {
-          this.totalUsers = response.data.total;
-        })
-        .catch(error => {
-          console.log(error);
-        })
-        .finally(() => {});
-    },
+
     clearForm() {
       this.newUsername = this.newPassword = null;
       this.newAdmin = false;
@@ -148,9 +149,8 @@ export default {
     addUser(e) {
       e.preventDefault();
       axios
-        .post("/api/createuser", { username: this.newUsername, password: this.newPassword, admin: this.newAdmin })
+        .post("/api/v2/users", { username: this.newUsername, password: this.newPassword, admin: this.newAdmin })
         .then(response => {
-          this.getTotalUsers();
           this.listUsers();
           this.clearForm();
           this.$buefy.notification.open({
@@ -166,23 +166,9 @@ export default {
         })
         .finally(() => {});
     },
-    toggleUser(user) {
+    toggleUser(user, field) {
       axios
-        .post(`/api/useradmin/toggle/${user.id}`)
-        .then(() => {
-          this.$buefy.notification.open({
-            message: `Changes saved.`,
-            type: "is-success"
-          });
-        })
-        .catch(error => {
-          console.log(error);
-        })
-        .finally(() => {});
-    },
-    toggleAdminUser(user) {
-      axios
-        .post(`/api/useradmin/toggle-admin/${user.id}`)
+        .post(`/api/v2/users/toggle`, { user_id: user.id, field: field })
         .then(() => {
           this.$buefy.notification.open({
             message: `Changes saved.`,
@@ -208,9 +194,8 @@ export default {
     },
     deleteUser(user) {
       axios
-        .post(`/api/useradmin/remove/${user.id}`)
+        .delete(`/api/v2/users/${user.id}`)
         .then(() => {
-          this.getTotalUsers();
           this.listUsers();
           this.$buefy.notification.open({
             message: `User <strong>${user.username}</strong> succesfully deleted.`,
@@ -224,7 +209,7 @@ export default {
     },
     resetApiKey(user) {
       axios
-        .post(`/api/useradmin/reset-api/${user.id}`)
+        .post(`/api/v2/users/reset-api-key`, { user_id: user.id })
         .then(response => {
           user.api_key = response.data.api_key;
           this.$buefy.notification.open({
@@ -241,16 +226,14 @@ export default {
   computed: {
     searchParams() {
       var params = {
-        params: {
-          page: this.page,
-          regex: true,
-          ignorecase: true
-        }
+        page: this.page - 1,
+        count: 50,
+        username: this.userFilter
       };
-      if (this.userFilter) {
-        params.filter = { username: this.userFilter };
-      }
       return params;
+    },
+    currentUserName() {
+      return this.$store.getters.tokenSubject;
     }
   }
 };
