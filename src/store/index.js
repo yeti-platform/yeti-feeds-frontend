@@ -90,6 +90,7 @@ const getters = {
     }
   },
   tokenSubject: state => state.user.username,
+  userId: state => state.user.id,
   appConfig: state => state.appConfig
 };
 
