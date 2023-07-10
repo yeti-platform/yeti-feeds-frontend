@@ -32,7 +32,7 @@ const actions = {
   },
   logout({ commit }) {
     return new Promise(resolve => {
-      axios.post(`/api/auth/logout`).then(response => {
+      axios.post(`/api/v2/auth/logout`).then(response => {
         commit("logout");
         resolve(response);
       });
@@ -54,7 +54,7 @@ const actions = {
     });
   },
   getAppConfig({ commit }) {
-    axios.get("/api/system/config/").then(response => {
+    axios.get("/api/v2/system/config").then(response => {
       commit("setAppConfig", response.data);
     });
   }

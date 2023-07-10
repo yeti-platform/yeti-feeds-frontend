@@ -149,8 +149,7 @@ export default {
       return this.$store.getters.userId;
     },
     systemAuth() {
-      // we only support local for now
-      return "local";
+      return this.$store.getters.appConfig.auth.module;
     }
   },
   mounted() {
