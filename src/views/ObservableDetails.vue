@@ -103,7 +103,7 @@
             <p class="panel-heading">Tags</p>
             <div class="panel-block">
               <b-field>
-                <yeti-tag-input v-model="newTags"></yeti-tag-input>
+                <b-taginput v-model="newTags" expanded icon="tag" placeholder="e.g. CobaltStrike"></b-taginput>
                 <p class="control">
                   <button class="button is-primary" @click="saveTags">Save</button>
                 </p>
@@ -118,7 +118,6 @@
 
 <script>
 import axios from "axios";
-import YetiTagInput from "@/components/YetiTagInput";
 import RelatedObjects from "@/components/RelatedObjects";
 import ObservableInfoTable from "@/components/ObservableInfoTable";
 
@@ -128,7 +127,6 @@ import { OBSERVABLE_TYPES } from "@/definitions/observableDefinitions.js";
 export default {
   props: ["id"],
   components: {
-    YetiTagInput,
     RelatedObjects,
     ObservableInfoTable
   },
@@ -159,7 +157,9 @@ export default {
         .get(`/api/v2/observables/${this.id}`)
         .then(response => {
           this.observable = response.data;
-          this.newTags = [...this.observable.tags];
+          this.newTags = Object.values(this.observable.tags).map(tag => {
+            return tag.name;
+          });
           // Switch back to Context view when reloading the page.
           this.activeTab = 0;
         })
@@ -170,11 +170,12 @@ export default {
     },
     saveTags() {
       var params = {
+        ids: [this.id],
         strict: true,
-        tags: this.newTags.map(tag => tag.name)
+        tags: this.newTags
       };
       axios
-        .post(`/api/v2/observables/${this.id}`, params)
+        .post(`/api/v2/observables/tag`, params)
         .then(response => {
           this.observable = response.data;
         })

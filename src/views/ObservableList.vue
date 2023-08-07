@@ -138,7 +138,7 @@
               label="Select tags"
               :message="selectedTags.length + ' tags will be applied to ' + tableSelectedItems.length + ' observables'"
             >
-              <yeti-tag-input v-model="selectedTags"></yeti-tag-input>
+              <b-taginput v-model="selectedTags" placeholder="e.g. CobaltStrike" icon="tag"></b-taginput>
             </b-field>
 
             <div class="buttons">
@@ -158,14 +158,11 @@
 
 <script>
 import axios from "axios";
-import YetiTagInput from "@/components/YetiTagInput";
 import utils from "@/utils";
 
 export default {
   name: "ObservableList",
-  components: {
-    YetiTagInput
-  },
+  components: {},
   props: {
     searchQuery: {
       type: String,
@@ -237,11 +234,12 @@ export default {
     },
     changeTags(action) {
       var params = {
-        tags: this.selectedTags.map(tag => tag.name),
-        ids: this.tableSelectedItems.map(item => item.id)
+        tags: this.selectedTags,
+        ids: this.tableSelectedItems.map(item => item.id),
+        strict: false
       };
       axios
-        .post(`/api/observable/bulk-${action}`, params)
+        .post(`/api/v2/observables/tag`, params)
         .then(() => {
           this.searchObservables();
           this.$buefy.notification.open(
