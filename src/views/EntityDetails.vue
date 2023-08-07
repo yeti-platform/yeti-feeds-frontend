@@ -175,7 +175,7 @@ export default {
         props: {
           objectTypeName: this.entity.type,
           object: this.entity,
-          endpoint: "entity"
+          endpoint: "entities"
         },
         events: {
           refresh: newEntity => {

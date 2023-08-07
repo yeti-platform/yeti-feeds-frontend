@@ -196,7 +196,7 @@ export default {
         props: {
           objectTypeName: this.indicator.type,
           object: this.indicator,
-          endpoint: "indicator"
+          endpoint: "indicators"
         },
         events: {
           refresh: newIndicator => {

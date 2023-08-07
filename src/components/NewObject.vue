@@ -1,7 +1,9 @@
 <template>
   <div class="modal-card" v-if="localObject">
     <header class="modal-card-head">
-      <p v-if="localObject.id" class="modal-card-title">Editing {{ localObject.id }}</p>
+      <p v-if="localObject.id" class="modal-card-title">
+        Editing {{ objectType.name.toLowerCase() }} <strong>{{ localObject.name }}</strong>
+      </p>
       <p v-else class="modal-card-title">New {{ objectType.name }}</p>
     </header>
     <section class="modal-card-body">
@@ -30,6 +32,9 @@
       <div class="buttons">
         <b-button type="is-primary" @click="saveObject">
           Save
+        </b-button>
+        <b-button @click="$parent.close()">
+          Cancel
         </b-button>
       </div>
     </section>
@@ -69,7 +74,7 @@ export default {
   methods: {
     saveObject() {
       axios
-        .post(`/api/${this.endpoint}/${this.object.id}`, this.localObject)
+        .patch(`/api/v2/${this.endpoint}/${this.object.id}`, { [this.localObject.root_type]: this.localObject })
         .then(response => {
           this.$parent.close();
           this.$buefy.toast.open({
