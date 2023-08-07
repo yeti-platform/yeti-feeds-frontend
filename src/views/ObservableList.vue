@@ -254,9 +254,9 @@ export default {
     },
     getExportTemplates() {
       axios
-        .get("/api/exporttemplate/")
+        .post("/api/v2/templates/search", { name: "" })
         .then(response => {
-          this.exportTemplates = response.data;
+          this.exportTemplates = response.data.templates;
         })
         .catch(error => {
           console.log(error);
@@ -264,21 +264,16 @@ export default {
     },
     downloadExport() {
       var params = {
-        id: this.selectedExportTemplate
+        template_id: this.selectedExportTemplate
       };
       if (this.tableSelectedItems.length) {
-        params.observables = this.tableSelectedItems.map(row => row.id);
+        params.observable_ids = this.tableSelectedItems.map(row => row.id);
       } else {
-        params.query = { filter: this.generateSearchParams(this.searchQuery) };
-        params.query.params = {
-          regex: this.regexSearch,
-          page: this.tablePage
-        };
+        params.search_query = this.searchQuery;
       }
 
-      console.log(params);
       axios
-        .post("/api/exporttemplate/export", params)
+        .post("/api/v2/templates/render", params)
         .then(response => {
           var fileURL = window.URL.createObjectURL(new Blob([response.data]));
           var fileLink = document.createElement("a");
