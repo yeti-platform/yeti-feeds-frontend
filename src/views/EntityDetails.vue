@@ -124,7 +124,7 @@
 <script>
 import axios from "axios";
 import RelatedObjects from "@/components/RelatedObjects";
-import NewObject from "@/components/NewObject";
+import EditObject from "@/components/EditObject";
 import { ENTITY_TYPES } from "@/definitions/entityDefinitions.js";
 import { OBSERVABLE_TYPES } from "@/definitions/observableDefinitions.js";
 
@@ -168,7 +168,7 @@ export default {
     editEntity() {
       this.$buefy.modal.open({
         parent: this,
-        component: NewObject,
+        component: EditObject,
         hasModalCard: true,
         customClass: "custom-class custom-class-2",
         trapFocus: true,
