@@ -30,8 +30,8 @@ export const OBSERVABLE_TYPES = [
     icon: "globe"
   },
   {
-    name:"file",
-    type:"file",
+    name: "File",
+    type: "file",
     fields:[
       { field: "value", type: "text", label: "Value", displayList: true },
       { field: "tags", type: "list", label: "tags", displayList: true },
@@ -41,7 +41,7 @@ export const OBSERVABLE_TYPES = [
 
   },
   {
-    name: "sha256",
+    name: "SHA256",
     type: "sha256",
     fields: [
       { field: "value", type: "text", label: "Value", displayList: true },
@@ -51,7 +51,7 @@ export const OBSERVABLE_TYPES = [
     icon: "lock"
   },
   {
-    name: "md5",
+    name: "MD5",
     type: "md5",
     fields: [
       { field: "value", type: "text", label: "Value", displayList: true },
@@ -61,7 +61,7 @@ export const OBSERVABLE_TYPES = [
     icon: "lock"
   },
   {
-    name: "sha1",
+    name: "SHA1",
     type: "sha1",
     fields: [
       { field: "value", type: "text", label: "Value", displayList: true },
@@ -69,6 +69,16 @@ export const OBSERVABLE_TYPES = [
       { field: "description", type: "longtext", label: "Description", displayList: false }
     ],
     icon: "lock"
+  },
+  {
+    name: "ASN",
+    type: "asn",
+    fields: [
+      { field: "value", type: "text", label: "Value", displayList: true },
+      { field: "tags", type: "list", label: "tags", displayList: true },
+      { field: "description", type: "longtext", label: "Description", displayList: false }
+    ],
+    icon: "sitemap"
   },
 
 ];
