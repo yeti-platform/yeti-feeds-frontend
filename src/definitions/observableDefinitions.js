@@ -87,5 +87,14 @@ export const OBSERVABLE_TYPES = [
       { field: "tags", type: "list", label: "tags", displayList: true },
       { field: "description", type: "longtext", label: "Description", displayList: false }
     ]
-  }
+  },
+  {
+    name: "Certificate",
+    type: "certificate",
+    fields: [
+      { field: "value", type: "text", label: "Value", displayList: false },
+      { field: "tags", type: "list", label: "tags", displayList: false },
+      { field: "description", type: "longtext", label: "Description", displayList: false }
+    ]
+  },
 ];
