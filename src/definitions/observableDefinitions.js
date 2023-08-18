@@ -80,8 +80,8 @@ export const OBSERVABLE_TYPES = [
     icon: "sitemap"
   },
   {
-    name: "bitcoin_address",
-    type: "bitcoin_address",
+    name: "Bitcoin Wallet",
+    type: "bitcoin_wallet",
     fields: [
       { field: "value", type: "text", label: "Value", displayList: true },
       { field: "tags", type: "list", label: "tags", displayList: true },
