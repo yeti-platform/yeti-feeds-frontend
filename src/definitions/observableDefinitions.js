@@ -32,13 +32,12 @@ export const OBSERVABLE_TYPES = [
   {
     name: "File",
     type: "file",
-    fields:[
+    fields: [
       { field: "value", type: "text", label: "Value", displayList: true },
       { field: "tags", type: "list", label: "tags", displayList: true },
       { field: "description", type: "longtext", label: "Description", displayList: false }
     ],
     icon: "file"
-
   },
   {
     name: "SHA256",
@@ -80,5 +79,22 @@ export const OBSERVABLE_TYPES = [
     ],
     icon: "sitemap"
   },
-
+  {
+    name: "Bitcoin Wallet",
+    type: "bitcoin_wallet",
+    fields: [
+      { field: "value", type: "text", label: "Value", displayList: true },
+      { field: "tags", type: "list", label: "tags", displayList: true },
+      { field: "description", type: "longtext", label: "Description", displayList: false }
+    ]
+  },
+  {
+    name: "Certificate",
+    type: "certificate",
+    fields: [
+      { field: "value", type: "text", label: "Value", displayList: false },
+      { field: "tags", type: "list", label: "tags", displayList: false },
+      { field: "description", type: "longtext", label: "Description", displayList: false }
+    ]
+  },
 ];
