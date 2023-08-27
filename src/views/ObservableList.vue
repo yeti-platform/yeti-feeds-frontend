@@ -54,13 +54,16 @@
             </b-taglist>
           </b-table-column>
         </template>
-        <template slot="bottom-left">
+        <template #bottom-left>
           <div v-if="tableSelectedItems.length">
             <b>Total selected</b>: {{ tableSelectedItems.length }}
             <b-button size="is-small" type="is-warning" icon-right="ban" @click="tableSelectedItems = []">
               Clear selection
             </b-button>
           </div>
+        </template>
+        <template #empty>
+          <div class="has-text-centered">No records</div>
         </template>
       </b-table>
     </div>
