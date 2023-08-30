@@ -204,9 +204,24 @@ export default {
       this.tablePage = tablePage;
       this.searchObservables();
     },
+    extractTagsFromQueryString(searchQuery) {
+      var tags = [];
+      var queries = searchQuery.split(" ");
+      for (var i in queries) {
+        var splitted = queries[i].split("=");
+        if (splitted.length == 2 && splitted[0] === "tags") {
+          tags = splitted[1].split(",");
+        }
+      }
+      return tags;
+    },
     searchObservables() {
+      let tags = this.extractTagsFromQueryString(this.searchQuery);
+      let searchQuery = this.searchQuery.replace(/tags=[^ ]+/, "");
+
       var params = {
-        value: this.searchQuery,
+        value: searchQuery,
+        tags: tags,
         page: this.tablePage - 1,
         count: this.tablePerPage
       };
