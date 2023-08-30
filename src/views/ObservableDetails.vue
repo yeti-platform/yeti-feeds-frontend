@@ -157,9 +157,7 @@ export default {
         .get(`/api/v2/observables/${this.id}`)
         .then(response => {
           this.observable = response.data;
-          this.newTags = Object.values(this.observable.tags).map(tag => {
-            return tag.name;
-          });
+          this.newTags = Object.keys(this.observable.tags);
           // Switch back to Context view when reloading the page.
           this.activeTab = 0;
         })

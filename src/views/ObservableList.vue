@@ -24,8 +24,12 @@
 
           <b-table-column field="tags" label="Tags">
             <b-taglist>
-              <b-tag v-for="tag in observable.row.tags" v-bind:key="tag.name" :type="tag.fresh ? 'is-primary' : ''">
-                {{ tag.name }}
+              <b-tag
+                v-for="tag in Object.keys(observable.row.tags)"
+                v-bind:key="tag"
+                :type="observable.row.tags[tag].fresh ? 'is-primary' : ''"
+              >
+                {{ tag }}
               </b-tag>
             </b-taglist>
           </b-table-column>
