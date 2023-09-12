@@ -97,4 +97,67 @@ export const OBSERVABLE_TYPES = [
       { field: "description", type: "longtext", label: "Description", displayList: false }
     ]
   },
+  {
+    name: "CIDR",
+    type: "cidr",
+    fields: [
+      { field: "value", type: "text", label: "Value", displayList: false },
+      { field: "tags", type: "list", label: "tags", displayList: false },
+      { field: "description", type: "longtext", label: "Description", displayList: false }
+    ]
+  },
+  {
+    name: "Mac Address",
+    type: "mac_address",
+    fields: [
+      { field: "value", type: "text", label: "Value", displayList: false },
+      { field: "tags", type: "list", label: "tags", displayList: false },
+      { field: "description", type: "longtext", label: "Description", displayList: false }
+    ]
+  },
+  {
+    name: "Command Line",
+    type: "command_line",
+    fields: [
+      { field: "value", type: "text", label: "Value", displayList: false },
+      { field: "tags", type: "list", label: "tags", displayList: false },
+      { field: "description", type: "longtext", label: "Description", displayList: false }
+    ]
+  },
+  {
+    name: "Registry Key",
+    type: "registry_key",
+    fields: [
+      { field: "value", type: "text", label: "Value", displayList: false },
+      { field: "tags", type: "list", label: "tags", displayList: false },
+      { field: "description", type: "longtext", label: "Description", displayList: false }
+    ]
+  },
+  {
+    name: "Imphash",
+    type: "imphash",
+    fields: [
+      { field: "value", type: "text", label: "Value", displayList: false },
+      { field: "tags", type: "list", label: "tags", displayList: false },
+      { field: "description", type: "longtext", label: "Description", displayList: false }
+    ]
+  },
+  {
+    name: "TSLH",
+    type: "tlsh",
+    fields: [
+      { field: "value", type: "text", label: "Value", displayList: false },
+      { field: "tags", type: "list", label: "tags", displayList: false },
+      { field: "description", type: "longtext", label: "Description", displayList: false }
+    ]
+  },
+  {
+    name: "SSDEEP",
+    type: "ssdeep",
+    fields: [
+      { field: "value", type: "text", label: "Value", displayList: false },
+      { field: "tags", type: "list", label: "tags", displayList: false },
+      { field: "description", type: "longtext", label: "Description", displayList: false }
+    ]
+  }
 ];
