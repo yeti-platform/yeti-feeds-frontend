@@ -3,7 +3,7 @@ FROM node:buster
 RUN apt update && apt install \
     python3
 
-RUN npm install -g n && n 14
+RUN npm install -g n && n 16
 
 ADD . /app
 WORKDIR /app
