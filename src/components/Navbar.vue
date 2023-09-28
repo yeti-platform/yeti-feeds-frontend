@@ -8,7 +8,7 @@
       <b-navbar-item tag="router-link" :to="{ path: '/browse' }">Browse observables</b-navbar-item>
       <b-navbar-item tag="router-link" :to="{ path: '/entities' }">Entities</b-navbar-item>
       <b-navbar-item tag="router-link" :to="{ path: '/indicators' }">Indicators</b-navbar-item>
-      <b-navbar-dropdown label="Scheduling">
+      <b-navbar-dropdown label="Automation">
         <b-navbar-item tag="router-link" :to="{ path: '/feeds' }">Feeds</b-navbar-item>
         <b-navbar-item tag="router-link" :to="{ path: '/analytics' }">Analytics</b-navbar-item>
         <b-navbar-item tag="router-link" :to="{ path: '/exports' }">Exports</b-navbar-item>
