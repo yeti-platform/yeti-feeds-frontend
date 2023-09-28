@@ -11,7 +11,7 @@
               </b-taglist>
             </p>
             <div class="panel-block">
-              <div class="content">{{ entity.description || "No description provided" }}</div>
+              <div class="content" v-html="markdownify(entity.description) || 'No description provided'"></div>
             </div>
           </nav>
           <div class="tile is-child">
@@ -123,6 +123,9 @@
 
 <script>
 import axios from "axios";
+import marked from "marked";
+import DOMPurify from "isomorphic-dompurify";
+
 import RelatedObjects from "@/components/RelatedObjects";
 import EditObject from "@/components/EditObject";
 import { ENTITY_TYPES } from "@/definitions/entityDefinitions.js";
@@ -232,6 +235,10 @@ export default {
           console.log(error);
         })
         .finally();
+    },
+    markdownify(text) {
+      return DOMPurify.sanitize(marked.parse(text));
+      // return text;
     }
   },
   computed: {
