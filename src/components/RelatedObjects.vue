@@ -28,7 +28,7 @@
 
           <b-taglist v-else-if="field === 'tags' || field === 'relevant_tags'">
             <b-tag
-              v-for="tag in link.row.node[field]"
+              v-for="tag in Object.keys(link.row.node[field])"
               v-bind:key="tag.name ? tag.name : tag"
               :type="tag.fresh ? 'is-primary' : ''"
             >
