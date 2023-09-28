@@ -20,5 +20,16 @@ export const INDICATOR_TYPES = [
       { field: "description", type: "longtext", label: "Description", displayList: false }
     ],
     icon: "bolt"
+  },
+  {
+    name: "Sigma rule",
+    type: "sigma",
+    fields: [
+      { field: "name", type: "text", label: "Name", displayList: true },
+      { field: "pattern", type: "longcode", label: "Rule text", displayList: true },
+      { field: "location", type: "text", label: "Location", displayList: true },
+      { field: "description", type: "longtext", label: "Description", displayList: false }
+    ],
+    icon: "bolt"
   }
 ];
