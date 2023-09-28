@@ -1,7 +1,17 @@
 export const OBSERVABLE_TYPES = [
   {
-    name: "IP",
-    type: "ip",
+    name: "IPv6",
+    type: "ipv6",
+    fields: [
+      { field: "value", type: "text", label: "Value", displayList: true },
+      { field: "tags", type: "list", label: "tags", displayList: true },
+      { field: "description", type: "longtext", label: "Description", displayList: false }
+    ],
+    icon: "globe"
+  },
+  {
+    name: "IPv4",
+    type: "ipv4",
     fields: [
       { field: "value", type: "text", label: "Value", displayList: true },
       { field: "tags", type: "list", label: "tags", displayList: true },
@@ -154,6 +164,24 @@ export const OBSERVABLE_TYPES = [
   {
     name: "SSDEEP",
     type: "ssdeep",
+    fields: [
+      { field: "value", type: "text", label: "Value", displayList: false },
+      { field: "tags", type: "list", label: "tags", displayList: false },
+      { field: "description", type: "longtext", label: "Description", displayList: false }
+    ]
+  },
+  {
+    name: "Email",
+    type: "email",
+    fields: [
+      { field: "value", type: "text", label: "Value", displayList: false },
+      { field: "tags", type: "list", label: "tags", displayList: false },
+      { field: "description", type: "longtext", label: "Description", displayList: false }
+    ]
+  },
+  {
+    name: "Filesystem path",
+    type: "path",
     fields: [
       { field: "value", type: "text", label: "Value", displayList: false },
       { field: "tags", type: "list", label: "tags", displayList: false },
