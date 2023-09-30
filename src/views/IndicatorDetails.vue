@@ -15,7 +15,7 @@
             </div>
             <div class="panel-block">
               <div class="content">
-                <code>{{ indicator.pattern }}</code>
+                <pre>{{ indicator.pattern }}</pre>
               </div>
             </div>
           </nav>
