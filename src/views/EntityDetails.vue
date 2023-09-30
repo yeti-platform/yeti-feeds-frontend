@@ -81,6 +81,23 @@
           </nav>
 
           <nav class="tile panel is-child">
+            <p class="panel-heading">Related indicators</p>
+            <div class="panel-block">
+              <related-objects
+                v-show="totalRelatedIndicators > 0"
+                source-type="entity"
+                inline-icons
+                :fields="['name']"
+                :target-types="indicatorTypes.map(def => def.type)"
+                :id="id"
+                @totalUpdated="value => (totalRelatedIndicators = value)"
+                style="width: 100%"
+                ref="relatdIndicatorsList"
+              ></related-objects>
+            </div>
+          </nav>
+
+          <nav class="tile panel is-child">
             <p class="panel-heading">Related entities</p>
             <div class="panel-block">
               <related-objects
@@ -129,6 +146,7 @@ import DOMPurify from "isomorphic-dompurify";
 import RelatedObjects from "@/components/RelatedObjects";
 import EditObject from "@/components/EditObject";
 import { ENTITY_TYPES } from "@/definitions/entityDefinitions.js";
+import { INDICATOR_TYPES } from "@/definitions/indicatorDefinitions.js";
 import { OBSERVABLE_TYPES } from "@/definitions/observableDefinitions.js";
 
 export default {
@@ -142,11 +160,13 @@ export default {
       newTags: [],
       activeTab: null,
       totalRelatedObservables: null,
+      totalRelatedIndicators: 0,
       totalRelatedEntities: 0,
       linkedEntityNameFilter: "",
       linkedEntity: null,
       entities: [],
       entityTypes: ENTITY_TYPES,
+      indicatorTypes: INDICATOR_TYPES,
       observableTypes: OBSERVABLE_TYPES
     };
   },
