@@ -2,12 +2,20 @@
   <div class="entity-list columns">
     <div class="column is-three-quarters">
       <b-tabs v-model="activeMainTab" position="is-left" :animated="false">
-        <b-tab-item :label="entity.name" v-for="entity in entityTypes" v-bind:key="entity.type">
+        <b-tab-item v-for="entity in entityTypes" v-bind:key="entity.type">
+          <template slot="header">
+            <b-icon icon="sitemap"></b-icon>
+            <span>
+              {{ entity.name }}
+              <b-tag rounded> {{ entityCount[entity.type] == null ? "?" : entityCount[entity.type] }}</b-tag>
+            </span>
+          </template>
           <object-list
             search-type="entities"
             :search-subtype="entity.type"
             :fields="entity.fields"
             :search-query="searchQuery"
+            @totalUpdated="countEntities(entity.type, $event)"
             :ref="entity.type + 'ObjectList'"
           />
         </b-tab-item>
@@ -105,11 +113,10 @@ export default {
   },
   data() {
     return {
-      // Table
-      entities: [],
-      tablePage: 1,
-      tablePerPage: 50,
-      tableTotal: 500, // 5 pages worth should be enough to have time to get a more accurate count
+      entityCount: ENTITY_TYPES.reduce((acc, cur) => {
+        acc[cur.type] = null;
+        return acc;
+      }, {}),
       loading: false,
       // New
       entityTypes: ENTITY_TYPES,
@@ -145,6 +152,15 @@ export default {
     },
     formatTimestamp(timestamp, local) {
       return utils.formatTimestamp(timestamp, local);
+    },
+    countEntities(type, count) {
+      this.entityCount[type] = count;
+      for (const [i, entityType] of this.entityTypes.entries()) {
+        if (this.entityCount[entityType.type] > 0) {
+          this.activeMainTab = i;
+          break;
+        }
+      }
     }
   },
   computed: {}

@@ -79,7 +79,7 @@
                       :fields="['name', 'relevant_tags']"
                       source-type="observable"
                       :target-types="[entity.type]"
-                      @totalUpdated="value => (totalRelatedEntities[entity.type] = value)"
+                      @totalUpdated="countRelatedEntities(entity.type, $event)"
                     >
                     </related-objects>
                   </b-tab-item>
@@ -137,13 +137,10 @@ export default {
       activeTab: null,
       activeSubTab: null,
       totalRelatedObservables: null,
-      totalRelatedEntities: {
-        malware: null,
-        ttp: null,
-        actor: null,
-        campaign: null,
-        exploit: null
-      },
+      totalRelatedEntities: ENTITY_TYPES.reduce((acc, cur) => {
+        acc[cur.type] = null;
+        return acc;
+      }, {}),
       entityTypes: ENTITY_TYPES,
       observableTypes: OBSERVABLE_TYPES
     };
@@ -181,6 +178,15 @@ export default {
           console.log(error);
         })
         .finally();
+    },
+    countRelatedEntities(type, count) {
+      this.totalRelatedEntities[type] = count;
+      for (let i = 0; i < this.entityTypes.length; i++) {
+        if (this.totalRelatedEntities[this.entityTypes[i].type] > 0) {
+          this.activeSubTab = i;
+          break;
+        }
+      }
     }
   },
   computed: {

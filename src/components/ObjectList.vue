@@ -132,6 +132,7 @@ export default {
         .then(response => {
           this.objects = response.data[this.searchType];
           this.tableTotal = response.data.total;
+          this.$emit("totalUpdated", this.tableTotal);
         })
         .catch(error => {
           console.log(error);

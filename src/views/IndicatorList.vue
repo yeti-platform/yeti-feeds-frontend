@@ -2,12 +2,22 @@
   <div class="indicator-list columns">
     <div class="column is-three-quarters">
       <b-tabs v-model="activeMainTab" position="is-left" :animated="false">
-        <b-tab-item :label="indicator.name" v-for="indicator in indicatorTypes" v-bind:key="indicator.type">
+        <b-tab-item v-for="indicator in indicatorTypes" v-bind:key="indicator.type">
+          <template slot="header">
+            <b-icon icon="sitemap"></b-icon>
+            <span>
+              {{ indicator.name }}
+              <b-tag rounded>
+                {{ indicatorCount[indicator.type] == null ? "?" : indicatorCount[indicator.type] }}</b-tag
+              >
+            </span>
+          </template>
           <object-list
             search-type="indicators"
             :search-subtype="indicator.type"
             :fields="indicator.fields"
             :search-query="searchQuery"
+            @totalUpdated="countIndicators(indicator.type, $event)"
             :ref="indicator.type + 'ObjectList'"
           />
         </b-tab-item>
@@ -112,11 +122,10 @@ export default {
   },
   data() {
     return {
-      // Table
-      indicators: [],
-      tablePage: 1,
-      tablePerPage: 50,
-      tableTotal: 500, // 5 pages worth should be enough to have time to get a more accurate count
+      indicatorCount: INDICATOR_TYPES.reduce((acc, cur) => {
+        acc[cur.type] = null;
+        return acc;
+      }, {}),
       loading: false,
       // New
       indicatorTypes: INDICATOR_TYPES,
@@ -150,6 +159,15 @@ export default {
     },
     formatTimestamp(timestamp, local) {
       return utils.formatTimestamp(timestamp, local);
+    },
+    countIndicators(type, count) {
+      this.indicatorCount[type] = count;
+      for (const [i, indicatorType] of this.indicatorTypes.entries()) {
+        if (this.indicatorCount[indicatorType.type] > 0) {
+          this.activeMainTab = i;
+          break;
+        }
+      }
     }
   },
   computed: {}
