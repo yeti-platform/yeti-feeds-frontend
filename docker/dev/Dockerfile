@@ -1,7 +1,8 @@
 FROM node:buster
 
 RUN apt update && apt install \
-    python3
+    python3 \
+    git
 
 RUN npm install -g n && n 16
 
