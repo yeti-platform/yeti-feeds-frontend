@@ -1,10 +1,10 @@
 <template>
   <div class="entity-list columns">
     <div class="column is-three-quarters">
-      <b-tabs v-model="activeMainTab" position="is-left" :animated="false">
-        <b-tab-item v-for="entity in entityTypes" v-bind:key="entity.type">
+      <b-tabs v-model="activeMainTab" position="is-left" :animated="false" @input="trackTabChange">
+        <b-tab-item v-for="entity in entityTypes" v-bind:key="entity.type" :value="entity.type">
           <template slot="header">
-            <b-icon icon="sitemap"></b-icon>
+            <b-icon :icon="entity.icon"></b-icon>
             <span>
               {{ entity.name }}
               <b-tag rounded> {{ entityCount[entity.type] == null ? "?" : entityCount[entity.type] }}</b-tag>
@@ -128,6 +128,11 @@ export default {
       searchQuery: ""
     };
   },
+  mounted() {
+    if (this.$route.hash) {
+      this.activeMainTab = this.$route.hash.replace("#", "");
+    }
+  },
   methods: {
     saveEntity() {
       this.newEntity.type = this.selectedEntityType.type;
@@ -155,15 +160,31 @@ export default {
     },
     countEntities(type, count) {
       this.entityCount[type] = count;
-      for (const [i, entityType] of this.entityTypes.entries()) {
+      if (!this.$route.hash) {
+        this.navigateToFirstPopulatedTab();
+      }
+    },
+    navigateToFirstPopulatedTab() {
+      for (const entityType of this.entityTypes) {
         if (this.entityCount[entityType.type] > 0) {
-          this.activeMainTab = i;
+          this.activeMainTab = entityType.type;
           break;
         }
       }
+    },
+    trackTabChange(value) {
+      window.location.hash = value;
     }
   },
-  computed: {}
+  watch: {
+    $route(to) {
+      if (to.hash) {
+        this.activeMainTab = to.hash.replace("#", "");
+      } else {
+        this.navigateToFirstPopulatedTab();
+      }
+    }
+  }
 };
 </script>
 

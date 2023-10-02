@@ -1,10 +1,10 @@
 <template>
   <div class="indicator-list columns">
     <div class="column is-three-quarters">
-      <b-tabs v-model="activeMainTab" position="is-left" :animated="false">
-        <b-tab-item v-for="indicator in indicatorTypes" v-bind:key="indicator.type">
+      <b-tabs v-model="activeMainTab" position="is-left" :animated="false" @input="trackTabChange">
+        <b-tab-item v-for="indicator in indicatorTypes" v-bind:key="indicator.type" :value="indicator.type">
           <template slot="header">
-            <b-icon icon="sitemap"></b-icon>
+            <b-icon :icon="indicator.icon"></b-icon>
             <span>
               {{ indicator.name }}
               <b-tag rounded>
@@ -137,6 +137,11 @@ export default {
       searchQuery: ""
     };
   },
+  mounted() {
+    if (this.$route.hash) {
+      this.activeMainTab = this.$route.hash.replace("#", "");
+    }
+  },
   methods: {
     saveIndicator() {
       this.newIndicator.type = this.selectedindicatorType.type;
@@ -162,11 +167,28 @@ export default {
     },
     countIndicators(type, count) {
       this.indicatorCount[type] = count;
-      for (const [i, indicatorType] of this.indicatorTypes.entries()) {
+      if (!this.$route.hash) {
+        this.navigateToFirstPopulatedTab();
+      }
+    },
+    navigateToFirstPopulatedTab() {
+      for (const indicatorType of this.indicatorTypes) {
         if (this.indicatorCount[indicatorType.type] > 0) {
-          this.activeMainTab = i;
+          this.activeMainTab = indicatorType.type;
           break;
         }
+      }
+    },
+    trackTabChange(value) {
+      window.location.hash = value;
+    }
+  },
+  watch: {
+    $route(to) {
+      if (to.hash) {
+        this.activeMainTab = to.hash.replace("#", "");
+      } else {
+        this.navigateToFirstPopulatedTab();
       }
     }
   },
