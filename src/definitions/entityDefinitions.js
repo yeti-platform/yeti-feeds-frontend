@@ -73,5 +73,15 @@ export const ENTITY_TYPES = [
       { field: "description", type: "longtext", label: "Description", displayList: false }
     ],
     icon: "code"
+  },
+  {
+    name: "Company",
+    type: "company",
+    fields: [
+      { field: "name", type: "text", label: "Name", displayList: true },
+      { field: "relevant_tags", type: "list", label: "Relevant tags", displayList: true },
+      { field: "description", type: "longtext", label: "Description", displayList: false }
+    ],
+    icon: "building"
   }
 ];
