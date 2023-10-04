@@ -23,8 +23,6 @@
 </template>
 
 <script>
-import axios from "axios";
-import utils from "@/utils";
 // import TaskList
 import TaskList from "@/views/TaskList.vue";
 
@@ -32,73 +30,7 @@ export default {
   components: {
     TaskList
   },
-  name: "AnalyticsList",
-  data() {
-    return {
-      scheduled: [],
-      oneshot: [],
-      inline: []
-    };
-  },
-  methods: {
-    getAnalytics(type) {
-      axios
-        .get(`/api/analytics/${type}/`)
-        .then(response => {
-          this[type] = response.data;
-        })
-        .catch(error => {
-          console.log(error);
-        })
-        .finally(() => {});
-    },
-    toggle(analytics, type) {
-      axios
-        .post(`/api/analytics/${type}/${analytics.id}/toggle`)
-        .then(response => {
-          analytics.enabled = response.data.status;
-        })
-        .catch(error => {
-          console.log(error);
-        })
-        .finally(() => {});
-    },
-    refresh(analytics) {
-      axios
-        .post(`/api/analytics/scheduled/${analytics.id}/refresh`)
-        .then(() => {})
-        .catch(error => {
-          console.log(error);
-        })
-        .finally(() => {});
-      console.log(analytics);
-    },
-    isRunning(feed) {
-      return feed.status === "Running...";
-    },
-    getRowClass(row) {
-      if (!row.enabled) {
-        return "disabled";
-      }
-      if (row.status === "OK") {
-        return "is-success";
-      }
-      if (row.status === "Updating...") {
-        return "is-warning";
-      }
-      if (row.status === "ERROR") {
-        return "is-danger";
-      }
-    },
-    formatTimestamp(timestamp, local) {
-      return utils.formatTimestamp(timestamp, local);
-    }
-  },
-  mounted() {
-    this.getAnalytics("scheduled");
-    this.getAnalytics("oneshot");
-    this.getAnalytics("inline");
-  }
+  name: "AnalyticsList"
 };
 </script>
 
