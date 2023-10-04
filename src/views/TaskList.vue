@@ -8,30 +8,42 @@
       @click="task => $emit('taskSelected', task)"
     >
       <template v-slot:default="task">
-        <b-table-column field="name" label="Name">
+        <!-- hide  if not in column -->
+        <b-table-column field="name" label="Name" v-if="displayColumns.includes('name')">
           <strong>{{ task.row.name }}</strong>
         </b-table-column>
-        <b-table-column v-if="task.row.acts_on" field="acts_on" label="Acts on" width="130">
+        <b-table-column
+          v-if="task.row.acts_on && displayColumns.includes('acts_on')"
+          field="acts_on"
+          label="Acts on"
+          width="130"
+        >
           <b-taglist>
             <b-tag v-for="observableType in task.row.acts_on" v-bind:key="observableType">
               {{ observableType }}
             </b-tag>
           </b-taglist>
         </b-table-column>
-        <b-table-column field="frequency" label="Runs every" width="130">{{ task.row.frequency }}</b-table-column>
-        <b-table-column field="last_run" label="Last run (UTC)" width="180"
+        <b-table-column field="frequency" label="Runs every" v-if="displayColumns.includes('frequency')" width="130">{{
+          task.row.frequency
+        }}</b-table-column>
+        <b-table-column field="last_run" label="Last run (UTC)" v-if="displayColumns.includes('last_run')" width="180"
           ><span :title="'Localtime: ' + formatTimestamp(task.row.last_run, true)">{{
             formatTimestamp(task.row.last_run)
           }}</span>
         </b-table-column>
-        <b-table-column field="description" label="Description">{{ task.row.description }}</b-table-column>
-        <b-table-column field="status" label="Status">{{ getHumanStatus(task.row) }}</b-table-column>
-        <b-table-column field="toggle" label="Toggle">
+        <b-table-column field="description" label="Description" v-if="displayColumns.includes('description')">{{
+          task.row.description
+        }}</b-table-column>
+        <b-table-column field="status" label="Status" v-if="displayColumns.includes('status')">{{
+          getHumanStatus(task.row)
+        }}</b-table-column>
+        <b-table-column field="toggle" label="Toggle" v-if="displayColumns.includes('toggle')">
           <div @click="toggle(task.row)" class="toggle">
             <b-switch v-model="task.row.enabled" :disabled="task.row.status === 'running'"></b-switch>
           </div>
         </b-table-column>
-        <b-table-column field="run" label>
+        <b-table-column field="run" v-if="displayColumns.includes('run')" label>
           <b-button
             :disabled="task.row.status === 'running' || !task.row.enabled"
             @click="run(task.row)"
@@ -62,6 +74,17 @@ export default {
   props: {
     taskType: {
       type: String
+    },
+    actsOnFilter: {
+      type: Array,
+      default: () => []
+    },
+    actOnValue: {
+      type: String
+    },
+    displayColumns: {
+      type: Array,
+      default: () => ["name", "acts_on", "frequency", "last_run", "description", "status", "toggle", "run"]
     }
   },
   data() {
@@ -90,18 +113,31 @@ export default {
         });
     },
     listTasks() {
-      var params = { type: this.taskType };
+      var params = {
+        type: this.taskType
+      };
       axios
         .post("/api/v2/tasks/search", params)
-        .then(response => (this.tasks = response.data.tasks))
+        .then(response => {
+          this.tasks = response.data.tasks.filter(task => {
+            if (this.actsOnFilter.length > 0) {
+              return task.acts_on.some(actsOn => this.actsOnFilter.includes(actsOn));
+            }
+            return true;
+          });
+        })
         .catch(error => {
           console.log(error);
         })
         .finally(() => {});
     },
     run(task) {
+      let taskParams = { params: {} };
+      if (this.actOnValue) {
+        taskParams.params["value"] = this.actOnValue;
+      }
       axios
-        .post(`/api/v2/tasks/${task.name}/run`)
+        .post(`/api/v2/tasks/${task.name}/run`, taskParams)
         .then(() => {})
         .catch(error => {
           console.log(error);
@@ -138,6 +174,9 @@ export default {
     },
     formatTimestamp(timestamp, local) {
       return utils.formatTimestamp(timestamp, local);
+    },
+    displayColumn(name) {
+      return this.displayColumns.includes(name);
     }
   }
 };
@@ -145,6 +184,10 @@ export default {
 
 <style scoped lang="scss">
 @import "@/style.scss";
+
+.tasklist {
+  width: 100%;
+}
 
 .tasklist ::v-deep tbody .disabled {
   opacity: 0.5;

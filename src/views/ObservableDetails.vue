@@ -110,6 +110,19 @@
               </b-field>
             </div>
           </nav>
+
+          <nav class="tile panel is-child">
+            <p class="panel-heading">Available analytics for {{ observable.type }}</p>
+            <div class="panel-block">
+              <task-list
+                task-type="oneshot"
+                :acts-on-filter="[observable.type]"
+                :act-on-value="observable.value"
+                :display-columns="['name', 'description', 'run']"
+              >
+              </task-list>
+            </div>
+          </nav>
         </div>
       </div>
     </div>
@@ -119,6 +132,7 @@
 <script>
 import axios from "axios";
 import RelatedObjects from "@/components/RelatedObjects";
+import TaskList from "@/views/TaskList.vue";
 import ObservableInfoTable from "@/components/ObservableInfoTable";
 
 import { ENTITY_TYPES } from "@/definitions/entityDefinitions.js";
@@ -128,7 +142,8 @@ export default {
   props: ["id"],
   components: {
     RelatedObjects,
-    ObservableInfoTable
+    ObservableInfoTable,
+    TaskList
   },
   data() {
     return {
