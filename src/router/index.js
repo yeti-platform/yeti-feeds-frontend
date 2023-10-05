@@ -37,7 +37,7 @@ const routes = [
     }
   },
   {
-    path: "/observable/:id([0-9]{5,})",
+    path: "/observable/:id([0-9]+)",
     name: "ObservableDetails",
     component: ObservableDetails,
     props: true
@@ -53,7 +53,7 @@ const routes = [
     }
   },
   {
-    path: "/entity/:id([0-9]{5,})",
+    path: "/entity/:id([0-9]+)",
     name: "EntityDetails",
     component: EntityDetails,
     props: true
@@ -69,7 +69,7 @@ const routes = [
     }
   },
   {
-    path: "/indicator/:id([0-9]{5,})",
+    path: "/indicator/:id([0-9]+)",
     name: "IndicatorDetails",
     component: IndicatorDetails,
     props: true
@@ -96,7 +96,7 @@ const routes = [
     component: TemplateList
   },
   {
-    path: "/profile/:id([0-9]{5,})",
+    path: "/profile/:id([0-9]+)",
     name: "UserProfileAdmin",
     component: UserProfile,
     props: true
@@ -148,13 +148,13 @@ router.beforeEach((to, from, next) => {
     store
       .dispatch("refresh")
       .then(() => {
-        console.log("redirecting to " + to.fullPath);
+        console.log("Refreshed and redirecting to " + to.fullPath);
         next({ path: to.fullPath });
       })
       .catch(error => {
         console.log(error);
-        console.log("redirecting to /login");
-        window.location.href = "/login";
+        console.log("Not authed; redirecting to Login");
+        next({ name: "Login" });
       });
   } else {
     next();
