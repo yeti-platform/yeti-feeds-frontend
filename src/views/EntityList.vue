@@ -47,16 +47,12 @@
                 <ul>
                   <li>
                     <strong>Generic tag query</strong>:
-                    <code>tags=crimeware</code>
+                    <code>tags=lolbas</code>
                   </li>
-                  <li><strong>Gate URLs</strong>: <code>tags=zeus .php$</code> (regex <code>on</code>)</li>
+                  <li><strong>Gate URLs</strong>: <code>tags=cobaltstrike .php$</code></li>
                   <li>
                     <strong>Ransomware C2s</strong>:
                     <code>tags=c2,ransomware</code>
-                  </li>
-                  <li>
-                    <strong>Context</strong>:
-                    <code>context.source=FeodoTracker</code>
                   </li>
                 </ul>
               </div>
