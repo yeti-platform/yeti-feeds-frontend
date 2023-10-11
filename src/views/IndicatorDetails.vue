@@ -49,9 +49,19 @@
             <div class="panel-block">
               <table class="table is-fullwidth">
                 <tbody>
-                  <tr>
-                    <th>Location</th>
-                    <td>{{ indicator.location }}</td>
+                  <tr v-for="field in indicatorInfoFields" v-bind:key="field.field">
+                    <th>{{ field.label }}</th>
+                    <td>
+                      <span v-if="!indicator[field.field] || !indicator[field.field].length">N/A</span>
+                      <b-taglist v-else-if="field.type == 'list'">
+                        <b-tag v-for="item in indicator[field.field]" v-bind:key="item">
+                          {{ item }}
+                        </b-tag>
+                      </b-taglist>
+                      <span v-else>
+                        {{ indicator[field.field] }}
+                      </span>
+                    </td>
                   </tr>
                 </tbody>
               </table>
@@ -176,7 +186,6 @@ export default {
       axios
         .get(`/api/v2/indicators/${this.id}`)
         .then(response => {
-          console.log(response.data);
           this.indicator = response.data;
           // Switch back to Context view when reloading the page.
           this.activeTab = 0;
@@ -200,7 +209,6 @@ export default {
         },
         events: {
           refresh: newIndicator => {
-            console.log(newIndicator);
             this.indicator = newIndicator;
           }
         }
@@ -300,6 +308,15 @@ export default {
       return this.entities.filter(entity => {
         return entity.name.toLowerCase().includes(this.linkedEntityNameFilter.toLowerCase());
       });
+    },
+    indicatorTypeDefinition() {
+      return this.indicatorTypes.filter(indicatorType => indicatorType.type == this.indicator.type)[0];
+    },
+    indicatorInfoFields() {
+      const hideFields = ["name", "pattern", "description"];
+      return this.indicatorTypeDefinition.fields
+        .filter(field => field.displayInfoBox)
+        .filter(field => !hideFields.includes(field.field));
     }
   },
   watch: {
