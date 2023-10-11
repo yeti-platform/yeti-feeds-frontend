@@ -44,14 +44,14 @@
             <div class="panel-block">
               <table class="table is-fullwidth">
                 <tbody>
-                  <tr v-for="field in entityInfoFields" v-bind:key="field.name">
+                  <tr v-for="field in entityInfoFields" v-bind:key="field.field">
                     <th>{{ field.label }}</th>
                     <td>
-                      <b-taglist v-if="field.type == 'list'">
+                      <span v-if="!entity[field.field] || !entity[field.field].length">N/A</span>
+                      <b-taglist v-else-if="field.type == 'list'">
                         <b-tag v-for="item in entity[field.field]" v-bind:key="item">
                           {{ item }}
                         </b-tag>
-                        <span v-if="!entity[field.field]">N/A</span>
                       </b-taglist>
                       <span v-else>
                         {{ entity[field.field] }}
@@ -273,8 +273,9 @@ export default {
       return this.entityTypes.find(entityType => entityType.type === this.entity.type);
     },
     entityInfoFields() {
+      const hideFields = ["name", "relevant_tags", "description"];
       return this.entityTypeDefinition.fields.filter(field => {
-        return !["name", "relevant_tags", "description"].includes(field.field);
+        return !hideFields.includes(field.field);
       });
     }
   },
