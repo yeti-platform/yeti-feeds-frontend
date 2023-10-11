@@ -25,9 +25,9 @@
                   <b-table-column field="diamond" label="Diamond edge">
                     {{ match.row[1].diamond }}
                   </b-table-column>
-                  <b-table-column field="suggested_tags" label="Suggested tags">
+                  <b-table-column field="relevant_tags" label="Suggested tags">
                     <b-taglist>
-                      <b-tag v-for="tag in match.row[1].suggested_tags" v-bind:key="tag">
+                      <b-tag v-for="tag in match.row[1].relevant_tags" v-bind:key="tag">
                         {{ tag }}
                       </b-tag>
                     </b-taglist>
