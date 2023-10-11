@@ -5,19 +5,18 @@ export const INDICATOR_TYPES = [
     name: "Regular expressions",
     type: "regex",
     fields: [
-      { field: "name", type: "text", label: "Name", displayList: true, displayInfoBox: true },
-      { field: "pattern", type: "code", label: "Pattern", displayList: false, displayInfoBox: true },
-      { field: "relevant_tags", type: "list", label: "Relevant tags", displayList: true, displayInfoBox: true },
-      { field: "location", type: "text", label: "Location", displayList: true, displayInfoBox: true },
+      { field: "name", type: "text", label: "Name", displayList: true },
+      { field: "pattern", type: "code", label: "Pattern", displayList: false },
+      { field: "relevant_tags", type: "list", label: "Relevant tags", displayList: true },
+      { field: "location", type: "text", label: "Location", displayList: true },
       {
         field: "diamond",
         type: "option",
         choices: DIAMOND_MODEL,
         label: "Diamond model",
-        displayList: true,
-        displayInfoBox: true
+        displayList: true
       },
-      { field: "description", type: "longtext", label: "Description", displayList: false, displayInfoBox: true }
+      { field: "description", type: "longtext", label: "Description", displayList: false }
     ],
     icon: "code"
   },
@@ -25,12 +24,20 @@ export const INDICATOR_TYPES = [
     name: "Queries",
     type: "query",
     fields: [
-      { field: "name", type: "text", label: "Name", displayList: true, displayInfoBox: true },
-      { field: "pattern", type: "longcode", label: "Rule text", displayList: false, displayInfoBox: true },
-      { field: "relevant_tags", type: "list", label: "Relevant tags", displayList: true, displayInfoBox: true },
-      { field: "query_type", type: "text", label: "Query type", displayList: true, displayInfoBox: true },
-      { field: "target_systems", type: "text", label: "Target system", displayList: true, displayInfoBox: true },
-      { field: "description", type: "longtext", label: "Description", displayList: false, displayInfoBox: true }
+      { field: "name", type: "text", label: "Name", displayList: true },
+      { field: "pattern", type: "longcode", label: "Rule text", displayList: false },
+      { field: "relevant_tags", type: "list", label: "Relevant tags", displayList: true },
+      { field: "query_type", type: "text", label: "Query type", displayList: true },
+      { field: "target_systems", type: "list", label: "Target systems", displayList: true },
+      { field: "location", type: "text", label: "Location", displayList: true },
+      {
+        field: "diamond",
+        type: "option",
+        choices: DIAMOND_MODEL,
+        label: "Diamond model",
+        displayList: true
+      },
+      { field: "description", type: "longtext", label: "Description", displayList: false }
     ],
     icon: "database"
   },
@@ -38,19 +45,18 @@ export const INDICATOR_TYPES = [
     name: "Yara rules",
     type: "yara",
     fields: [
-      { field: "name", type: "text", label: "Name", displayList: true, displayInfoBox: true },
-      { field: "pattern", type: "longcode", label: "Rule text", displayList: false, displayInfoBox: true },
-      { field: "relevant_tags", type: "list", label: "Relevant tags", displayList: true, displayInfoBox: true },
-      { field: "location", type: "text", label: "Location", displayList: true, displayInfoBox: true },
+      { field: "name", type: "text", label: "Name", displayList: true },
+      { field: "pattern", type: "longcode", label: "Rule text", displayList: false },
+      { field: "relevant_tags", type: "list", label: "Relevant tags", displayList: true },
+      { field: "location", type: "text", label: "Location", displayList: true },
       {
         field: "diamond",
         type: "option",
         choices: DIAMOND_MODEL,
         label: "Diamond model",
-        displayList: true,
-        displayInfoBox: true
+        displayList: true
       },
-      { field: "description", type: "longtext", label: "Description", displayList: false, displayInfoBox: true }
+      { field: "description", type: "longtext", label: "Description", displayList: false }
     ],
     icon: "bolt"
   },
@@ -58,19 +64,18 @@ export const INDICATOR_TYPES = [
     name: "Sigma rules",
     type: "sigma",
     fields: [
-      { field: "name", type: "text", label: "Name", displayList: true, displayInfoBox: true },
-      { field: "pattern", type: "longcode", label: "Rule text", displayList: false, displayInfoBox: true },
-      { field: "relevant_tags", type: "list", label: "Relevant tags", displayList: true, displayInfoBox: true },
-      { field: "location", type: "text", label: "Location", displayList: true, displayInfoBox: true },
+      { field: "name", type: "text", label: "Name", displayList: true },
+      { field: "pattern", type: "longcode", label: "Rule text", displayList: false },
+      { field: "relevant_tags", type: "list", label: "Relevant tags", displayList: true },
+      { field: "location", type: "text", label: "Location", displayList: true },
       {
         field: "diamond",
         type: "option",
         choices: DIAMOND_MODEL,
         label: "Diamond model",
-        displayList: true,
-        displayInfoBox: true
+        displayList: true
       },
-      { field: "description", type: "longtext", label: "Description", displayList: false, displayInfoBox: true }
+      { field: "description", type: "longtext", label: "Description", displayList: false }
     ],
     icon: "bolt"
   }

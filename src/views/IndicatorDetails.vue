@@ -314,9 +314,7 @@ export default {
     },
     indicatorInfoFields() {
       const hideFields = ["name", "pattern", "description"];
-      return this.indicatorTypeDefinition.fields
-        .filter(field => field.displayInfoBox)
-        .filter(field => !hideFields.includes(field.field));
+      return this.indicatorTypeDefinition.fields.filter(field => !hideFields.includes(field.field));
     }
   },
   watch: {
