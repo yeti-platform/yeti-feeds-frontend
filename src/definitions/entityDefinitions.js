@@ -1,10 +1,21 @@
 export const ENTITY_TYPES = [
   {
+    name: "Investigations",
+    type: "investigation",
+    fields: [
+      { field: "name", type: "text", label: "Name", displayList: true },
+      { field: "reference", type: "text", label: "Reference", displayList: true },
+      { field: "tags", type: "list", label: "Relevant tags", displayList: true },
+      { field: "description", type: "longtext", label: "Description", displayList: false }
+    ],
+    icon: "bug"
+  },
+  {
     name: "Malware",
     type: "malware",
     fields: [
       { field: "name", type: "text", label: "Name", displayList: true },
-      { field: "relevant_tags", type: "list", label: "Relevant tags", displayList: true },
+      { field: "tags", type: "list", label: "Relevant tags", displayList: true },
       { field: "family", type: "text", label: "Family", displayList: true },
       { field: "aliases", type: "list", label: "Aliases", displayList: true },
       { field: "description", type: "longtext", label: "Description", displayList: false }
@@ -16,7 +27,7 @@ export const ENTITY_TYPES = [
     type: "tool",
     fields: [
       { field: "name", type: "text", label: "Name", displayList: true },
-      { field: "relevant_tags", type: "list", label: "Relevant tags", displayList: true },
+      { field: "tags", type: "list", label: "Relevant tags", displayList: true },
       { field: "description", type: "longtext", label: "Description", displayList: false }
     ],
     icon: "bug"
@@ -26,7 +37,7 @@ export const ENTITY_TYPES = [
     type: "attack-pattern",
     fields: [
       { field: "name", type: "text", label: "Name", displayList: true },
-      { field: "relevant_tags", type: "list", label: "Relevant tags", displayList: true },
+      { field: "tags", type: "list", label: "Relevant tags", displayList: true },
       { field: "description", type: "longtext", label: "Description", displayList: false }
     ],
     icon: "bolt"
@@ -36,7 +47,7 @@ export const ENTITY_TYPES = [
     type: "threat-actor",
     fields: [
       { field: "name", type: "text", label: "Name", displayList: true },
-      { field: "relevant_tags", type: "list", label: "Relevant tags", displayList: true },
+      { field: "tags", type: "list", label: "Relevant tags", displayList: true },
       { field: "aliases", type: "list", label: "Aliases", displayList: true },
       { field: "description", type: "longtext", label: "Description", displayList: false }
     ],
@@ -47,7 +58,7 @@ export const ENTITY_TYPES = [
     type: "intrusion-set",
     fields: [
       { field: "name", type: "text", label: "Name", displayList: true },
-      { field: "relevant_tags", type: "list", label: "Relevant tags", displayList: true },
+      { field: "tags", type: "list", label: "Relevant tags", displayList: true },
       { field: "description", type: "longtext", label: "Description", displayList: false }
     ],
     icon: "user"
@@ -57,7 +68,7 @@ export const ENTITY_TYPES = [
     type: "campaign",
     fields: [
       { field: "name", type: "text", label: "Name", displayList: true },
-      { field: "relevant_tags", type: "list", label: "Relevant tags", displayList: true },
+      { field: "tags", type: "list", label: "Relevant tags", displayList: true },
       { field: "aliases", type: "list", label: "Aliases", displayList: true },
       { field: "description", type: "longtext", label: "Description", displayList: false }
     ],
@@ -68,7 +79,7 @@ export const ENTITY_TYPES = [
     type: "identity",
     fields: [
       { field: "name", type: "text", label: "Name", displayList: true },
-      { field: "relevant_tags", type: "list", label: "Relevant tags", displayList: true },
+      { field: "tags", type: "list", label: "Relevant tags", displayList: true },
       { field: "aliases", type: "list", label: "Aliases", displayList: true },
       { field: "description", type: "longtext", label: "Description", displayList: false }
     ],
@@ -79,7 +90,7 @@ export const ENTITY_TYPES = [
     type: "company",
     fields: [
       { field: "name", type: "text", label: "Name", displayList: true },
-      { field: "relevant_tags", type: "list", label: "Relevant tags", displayList: true },
+      { field: "tags", type: "list", label: "Relevant tags", displayList: true },
       { field: "description", type: "longtext", label: "Description", displayList: false }
     ],
     icon: "building"

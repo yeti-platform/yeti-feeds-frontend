@@ -90,6 +90,7 @@ export default {
       let graphSearchRequest = {
         source: `${this.sourceType}/${this.id}`,
         target_types: this.targetTypes,
+        graph: "links",
         hops: 1,
         direction: "any",
         include_original: false,
@@ -100,11 +101,12 @@ export default {
         .post(`/api/v2/graph/search`, graphSearchRequest)
         .then(response => {
           this.vertices = response.data.vertices;
-          this.links = response.data.edges;
-          this.links.map(link => {
+          let links = response.data.edges;
+          links.map(link => {
             link.node = link.target.includes(this.id) ? this.vertices[link.source] : this.vertices[link.target];
           });
 
+          this.links = links;
           this.total = response.data.total;
           this.$emit("totalUpdated", this.links.length);
         })

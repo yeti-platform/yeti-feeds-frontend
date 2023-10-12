@@ -66,12 +66,7 @@
             <p class="panel-heading">Relevant tags</p>
             <div class="panel-block">
               <b-field class="expanded">
-                <b-taginput
-                  expanded
-                  v-model="entity.relevant_tags"
-                  icon="tag"
-                  placeholder="e.g. CobaltStrike"
-                ></b-taginput>
+                <b-taginput expanded v-model="newTags" icon="tag" placeholder="e.g. CobaltStrike"></b-taginput>
                 <p class="control">
                   <button class="button is-primary" @click="saveTags">Save</button>
                 </p>
@@ -180,6 +175,7 @@ export default {
         .get(`/api/v2/entities/${this.id}`)
         .then(response => {
           this.entity = response.data;
+          this.newTags = Object.keys(this.entity.tags);
           // Switch back to Context view when reloading the page.
           this.activeTab = 0;
         })
@@ -240,17 +236,13 @@ export default {
     },
     saveTags() {
       var params = {
-        entity: {
-          id: this.entity.id,
-          name: this.entity.name,
-          relevant_tags: this.entity.relevant_tags
-        }
+        ids: [this.entity.id],
+        tags: this.newTags,
+        strict: true
       };
       axios
-        .patch(`/api/v2/entities/${this.id}`, params)
-        .then(response => {
-          this.entity = response.data;
-        })
+        .post("/api/v2/entities/tag", params)
+        .then(this.getentityDetails)
         .catch(error => {
           console.log(error);
         })
@@ -273,7 +265,7 @@ export default {
       return this.entityTypes.find(entityType => entityType.type === this.entity.type);
     },
     entityInfoFields() {
-      const hideFields = ["name", "relevant_tags", "description"];
+      const hideFields = ["name", "tags", "description"];
       return this.entityTypeDefinition.fields.filter(field => {
         return !hideFields.includes(field.field);
       });

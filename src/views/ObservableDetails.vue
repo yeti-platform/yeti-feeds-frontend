@@ -76,7 +76,7 @@
                     </template>
                     <related-objects
                       :id="id"
-                      :fields="['name', 'relevant_tags']"
+                      :fields="['name', 'tags']"
                       source-type="observable"
                       :target-types="[entity.type]"
                       @totalUpdated="countRelatedEntities(entity.type, $event)"
@@ -186,9 +186,7 @@ export default {
       };
       axios
         .post(`/api/v2/observables/tag`, params)
-        .then(response => {
-          this.observable = response.data;
-        })
+        .then(this.getObservableDetails)
         .catch(error => {
           console.log(error);
         })
