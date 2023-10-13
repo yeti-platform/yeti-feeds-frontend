@@ -205,7 +205,7 @@ export default {
     },
     getEntityAutocomplete() {
       axios
-        .get("/api/v2/entities")
+        .get("/api/v2/entities/")
         .then(response => {
           this.entities = response.data;
         })
