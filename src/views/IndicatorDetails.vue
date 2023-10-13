@@ -147,6 +147,8 @@
 
 <script>
 import axios from "axios";
+import _ from "lodash";
+
 import RelatedObjects from "@/components/RelatedObjects";
 import EditObject from "@/components/EditObject";
 import { ENTITY_TYPES } from "@/definitions/entityDefinitions.js";
@@ -216,9 +218,12 @@ export default {
     },
     getIndicatorAutocomplete() {
       axios
-        .get("/api/v2/indicators")
+        .post("/api/v2/indicators/search", {
+          name: this.linkedIndicatorNameFilter,
+          count: 20
+        })
         .then(response => {
-          this.indicators = response.data;
+          this.indicators = response.data.indicators;
         })
         .catch(error => {
           console.log(error);
@@ -226,10 +231,19 @@ export default {
         .finally();
     },
     getEntityAutocomplete() {
+      this.entities = [];
       axios
-        .get("/api/v2/entities")
+        .post("/api/v2/entities/search", {
+          name: this.linkedEntityNameFilter,
+          count: 20
+        })
         .then(response => {
-          this.entities = response.data;
+          this.entities = response.data.entities.map(entity => {
+            return {
+              id: entity.id,
+              name: entity.name
+            };
+          });
         })
         .catch(error => {
           console.log(error);
@@ -318,7 +332,13 @@ export default {
     }
   },
   watch: {
-    id: "getindicatorDetails"
+    id: "getindicatorDetails",
+    linkedEntityNameFilter: _.debounce(function() {
+      this.getEntityAutocomplete();
+    }, 50),
+    linkedIndicatorNameFilter: _.debounce(function() {
+      this.getIndicatorAutocomplete();
+    }, 50)
   }
 };
 </script>
