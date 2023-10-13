@@ -33,8 +33,17 @@
 
         <code v-else-if="field.type === 'code'"> {{ object.row[field.field] }} </code>
         <code v-else-if="field.type === 'longcode'"> {{ object.row[field.field] }} </code>
+        <b-taglist v-else-if="field.field === 'tags'">
+          <b-tag
+            v-for="tag in Object.keys(object.row['tags'])"
+            v-bind:key="tag"
+            :type="object.row['tags'][tag].fresh ? 'is-primary' : ''"
+          >
+            {{ tag }}
+          </b-tag>
+        </b-taglist>
 
-        <b-taglist v-else-if="field.field === 'tags' || field.type == 'list'">
+        <b-taglist v-else-if="field.type == 'list'">
           <b-tag
             v-for="tag in object.row[field.field]"
             v-bind:key="tag.name ? tag.name : tag"
@@ -62,7 +71,6 @@
 <script>
 import axios from "axios";
 import utils from "@/utils";
-// import { ENTITY_TYPES } from "@/definitions/entityDefinitions.js";
 import _ from "lodash";
 
 export default {
