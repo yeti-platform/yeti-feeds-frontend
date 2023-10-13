@@ -62,7 +62,11 @@
                   </span>
                 </template>
                 <b-tabs v-model="activeSubTab" position="is-left" :animated="false">
-                  <b-tab-item v-for="entity in entityTypes" :key="entity.name">
+                  <b-tab-item
+                    v-for="entity in entityTypes"
+                    :key="entity.name"
+                    :visible="displayEntityType(entity.type)"
+                  >
                     <template slot="header">
                       <b-icon :icon="entity.icon"></b-icon>
                       <span>
@@ -200,6 +204,9 @@ export default {
           break;
         }
       }
+    },
+    displayEntityType(type) {
+      return this.totalRelatedEntities[type] > 0;
     }
   },
   computed: {

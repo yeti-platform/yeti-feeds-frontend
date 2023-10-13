@@ -2,12 +2,17 @@
   <div class="entity-list columns">
     <div class="column is-three-quarters">
       <b-tabs v-model="activeMainTab" position="is-left" :animated="false" @input="trackTabChange">
-        <b-tab-item v-for="entity in entityTypes" v-bind:key="entity.type" :value="entity.type">
+        <b-tab-item
+          v-for="entity in entityTypes"
+          v-bind:key="entity.type"
+          :value="entity.type"
+          :visible="displayEntityType(entity.type)"
+        >
           <template slot="header">
             <b-icon :icon="entity.icon"></b-icon>
             <span>
               {{ entity.name }}
-              <b-tag rounded> {{ entityCount[entity.type] == null ? "?" : entityCount[entity.type] }}</b-tag>
+              <b-tag rounded>{{ entityCount[entity.type] === null ? "?" : entityCount[entity.type] }}</b-tag>
             </span>
           </template>
           <object-list
@@ -69,15 +74,21 @@
             </b-field>
             <div v-if="selectedEntityType">
               <b-field :label="field.label" v-for="field in selectedEntityType.fields" :key="field.field">
-                <b-input v-model="newEntity[field.field]" v-if="field.type === 'text'" />
-                <b-input type="textarea" v-model="newEntity[field.field]" v-if="field.type === 'longtext'" />
-                <b-select v-if="field.type === 'option'" v-model="newEntity[field.field]">
+                <b-input v-if="field.type === 'text'" v-model="newEntity[field.field]" />
+                <b-input v-else-if="field.type === 'longtext'" type="textarea" v-model="newEntity[field.field]" />
+                <b-select v-else-if="field.type === 'option'" v-model="newEntity[field.field]">
                   <option v-for="option in field.choices" :value="option" :key="option"> {{ option }}</option>
                 </b-select>
                 <b-taginput
+                  v-else-if="field.field === 'tags'"
+                  label="Tags"
+                  v-model="newEntityTags"
+                  icon="tag"
+                ></b-taginput>
+                <b-taginput
+                  v-else-if="field.type === 'list'"
                   label="Tags"
                   v-model="newEntity[field.field]"
-                  v-if="field.type === 'list'"
                   icon="tag"
                 ></b-taginput>
               </b-field>
@@ -116,6 +127,7 @@ export default {
       entityTypes: ENTITY_TYPES,
       selectedEntityType: null,
       newEntity: {},
+      newEntityTags: [],
       // Panel
       activeTab: 0,
       activeMainTab: 0,
@@ -131,7 +143,7 @@ export default {
     saveEntity() {
       this.newEntity.type = this.selectedEntityType.type;
       axios
-        .post("/api/v2/entities", { entity: this.newEntity })
+        .post("/api/v2/entities/", { entity: this.newEntity, tags: this.newEntityTags })
         .then(response => {
           this.$buefy.toast.open({
             message: `Entity ${response.data.name} saved`,
@@ -168,6 +180,9 @@ export default {
     },
     trackTabChange(value) {
       window.location.hash = value;
+    },
+    displayEntityType(type) {
+      return this.entityCount[type] > 0;
     }
   },
   watch: {
