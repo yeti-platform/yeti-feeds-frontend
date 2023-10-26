@@ -76,7 +76,7 @@ export default {
         .then(response => {
           this.$parent.close();
           this.$buefy.toast.open({
-            message: "Update succesful!",
+            message: "Update successful!",
             type: "is-success"
           });
           this.$emit("refresh", response.data);
