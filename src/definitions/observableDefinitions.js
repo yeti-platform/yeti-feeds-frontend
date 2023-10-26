@@ -1,5 +1,14 @@
 export const OBSERVABLE_TYPES = [
   {
+    name: "Generic observable",
+    type: "observable",
+    fields: [
+      { field: "value", type: "text", label: "Value", displayList: true },
+      { field: "tags", type: "list", label: "tags", displayList: true },
+      { field: "description", type: "longtext", label: "Description", displayList: false }
+    ]
+  },
+  {
     name: "IPv6",
     type: "ipv6",
     fields: [
@@ -102,8 +111,8 @@ export const OBSERVABLE_TYPES = [
     name: "Certificate",
     type: "certificate",
     fields: [
-      { field: "value", type: "text", label: "Value", displayList: false },
-      { field: "tags", type: "list", label: "tags", displayList: false },
+      { field: "value", type: "text", label: "Value", displayList: true },
+      { field: "tags", type: "list", label: "tags", displayList: true },
       { field: "description", type: "longtext", label: "Description", displayList: false }
     ]
   },
@@ -111,8 +120,8 @@ export const OBSERVABLE_TYPES = [
     name: "CIDR",
     type: "cidr",
     fields: [
-      { field: "value", type: "text", label: "Value", displayList: false },
-      { field: "tags", type: "list", label: "tags", displayList: false },
+      { field: "value", type: "text", label: "Value", displayList: true },
+      { field: "tags", type: "list", label: "tags", displayList: true },
       { field: "description", type: "longtext", label: "Description", displayList: false }
     ]
   },
@@ -120,8 +129,8 @@ export const OBSERVABLE_TYPES = [
     name: "Mac Address",
     type: "mac_address",
     fields: [
-      { field: "value", type: "text", label: "Value", displayList: false },
-      { field: "tags", type: "list", label: "tags", displayList: false },
+      { field: "value", type: "text", label: "Value", displayList: true },
+      { field: "tags", type: "list", label: "tags", displayList: true },
       { field: "description", type: "longtext", label: "Description", displayList: false }
     ]
   },
@@ -129,8 +138,8 @@ export const OBSERVABLE_TYPES = [
     name: "Command Line",
     type: "command_line",
     fields: [
-      { field: "value", type: "text", label: "Value", displayList: false },
-      { field: "tags", type: "list", label: "tags", displayList: false },
+      { field: "value", type: "text", label: "Value", displayList: true },
+      { field: "tags", type: "list", label: "tags", displayList: true },
       { field: "description", type: "longtext", label: "Description", displayList: false }
     ]
   },
@@ -138,8 +147,8 @@ export const OBSERVABLE_TYPES = [
     name: "Registry Key",
     type: "registry_key",
     fields: [
-      { field: "value", type: "text", label: "Value", displayList: false },
-      { field: "tags", type: "list", label: "tags", displayList: false },
+      { field: "value", type: "text", label: "Value", displayList: true },
+      { field: "tags", type: "list", label: "tags", displayList: true },
       { field: "description", type: "longtext", label: "Description", displayList: false }
     ]
   },
@@ -147,8 +156,8 @@ export const OBSERVABLE_TYPES = [
     name: "Imphash",
     type: "imphash",
     fields: [
-      { field: "value", type: "text", label: "Value", displayList: false },
-      { field: "tags", type: "list", label: "tags", displayList: false },
+      { field: "value", type: "text", label: "Value", displayList: true },
+      { field: "tags", type: "list", label: "tags", displayList: true },
       { field: "description", type: "longtext", label: "Description", displayList: false }
     ]
   },
@@ -156,8 +165,8 @@ export const OBSERVABLE_TYPES = [
     name: "TSLH",
     type: "tlsh",
     fields: [
-      { field: "value", type: "text", label: "Value", displayList: false },
-      { field: "tags", type: "list", label: "tags", displayList: false },
+      { field: "value", type: "text", label: "Value", displayList: true },
+      { field: "tags", type: "list", label: "tags", displayList: true },
       { field: "description", type: "longtext", label: "Description", displayList: false }
     ]
   },
@@ -165,8 +174,8 @@ export const OBSERVABLE_TYPES = [
     name: "SSDEEP",
     type: "ssdeep",
     fields: [
-      { field: "value", type: "text", label: "Value", displayList: false },
-      { field: "tags", type: "list", label: "tags", displayList: false },
+      { field: "value", type: "text", label: "Value", displayList: true },
+      { field: "tags", type: "list", label: "tags", displayList: true },
       { field: "description", type: "longtext", label: "Description", displayList: false }
     ]
   },
@@ -174,8 +183,8 @@ export const OBSERVABLE_TYPES = [
     name: "Email",
     type: "email",
     fields: [
-      { field: "value", type: "text", label: "Value", displayList: false },
-      { field: "tags", type: "list", label: "tags", displayList: false },
+      { field: "value", type: "text", label: "Value", displayList: true },
+      { field: "tags", type: "list", label: "tags", displayList: true },
       { field: "description", type: "longtext", label: "Description", displayList: false }
     ]
   },
@@ -183,8 +192,8 @@ export const OBSERVABLE_TYPES = [
     name: "Filesystem path",
     type: "path",
     fields: [
-      { field: "value", type: "text", label: "Value", displayList: false },
-      { field: "tags", type: "list", label: "tags", displayList: false },
+      { field: "value", type: "text", label: "Value", displayList: true },
+      { field: "tags", type: "list", label: "tags", displayList: true },
       { field: "description", type: "longtext", label: "Description", displayList: false }
     ]
   }

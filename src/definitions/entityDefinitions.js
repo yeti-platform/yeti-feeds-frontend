@@ -1,6 +1,6 @@
 export const ENTITY_TYPES = [
   {
-    name: "Investigations",
+    name: "Investigation",
     type: "investigation",
     fields: [
       { field: "name", type: "text", label: "Name", displayList: true },
@@ -8,7 +8,7 @@ export const ENTITY_TYPES = [
       { field: "tags", type: "list", label: "Relevant tags", displayList: true },
       { field: "description", type: "longtext", label: "Description", displayList: false }
     ],
-    icon: "bug"
+    icon: "fire"
   },
   {
     name: "Malware",
