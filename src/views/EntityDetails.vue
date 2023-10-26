@@ -90,6 +90,25 @@
                 ref="relatdIndicatorsList"
               ></related-objects>
             </div>
+            <div class="panel-block">
+              <b-field class="expanded">
+                <b-autocomplete
+                  :open-on-focus="true"
+                  :keep-first="true"
+                  field="name"
+                  :clearable="true"
+                  :data="filteredIndicators"
+                  placeholder="Link new indicator..."
+                  v-model="linkedIndicatorNameFilter"
+                  @select="option => (linkedIndicator = option)"
+                  expanded
+                >
+                </b-autocomplete>
+                <p class="control">
+                  <button class="button is-primary" @click="linkIndicator">Link</button>
+                </p>
+              </b-field>
+            </div>
           </nav>
 
           <nav class="tile panel is-child">
@@ -160,7 +179,10 @@ export default {
       totalRelatedEntities: 0,
       linkedEntityNameFilter: "",
       linkedEntity: null,
+      linkedIndicatorNameFilter: "",
+      linkedIndicator: null,
       entities: [],
+      indicators: [],
       entityTypes: ENTITY_TYPES,
       indicatorTypes: INDICATOR_TYPES,
       observableTypes: OBSERVABLE_TYPES
@@ -168,6 +190,7 @@ export default {
   },
   mounted() {
     this.getentityDetails();
+    this.getIndicatorAutocomplete();
     this.getEntityAutocomplete();
   },
   methods: {
@@ -204,6 +227,20 @@ export default {
         }
       });
     },
+    getIndicatorAutocomplete() {
+      axios
+        .post("/api/v2/indicators/search", {
+          name: this.linkedIndicatorNameFilter,
+          count: 20
+        })
+        .then(response => {
+          this.indicators = response.data.indicators;
+        })
+        .catch(error => {
+          console.log(error);
+        })
+        .finally();
+    },
     getEntityAutocomplete() {
       this.entities = [];
       axios
@@ -218,6 +255,26 @@ export default {
               name: entity.name
             };
           });
+        })
+        .catch(error => {
+          console.log(error);
+        })
+        .finally();
+    },
+    linkIndicator() {
+      var params = {
+        source: `entity/${this.entity.id}`,
+        target: `indicators/${this.linkedIndicator.id}`,
+        link_type: "web",
+        description: "Manual link."
+      };
+      axios
+        .post("/api/v2/graph/add", params)
+        .then(() => {
+          // Refresh neighbors list.
+          this.$refs.relatdIndicatorsList.fetchNeighbors();
+          this.linkedIndicatorNameFilter = "";
+          this.linkedIndicator = null;
         })
         .catch(error => {
           console.log(error);
@@ -264,6 +321,11 @@ export default {
     }
   },
   computed: {
+    filteredIndicators() {
+      return this.indicators.filter(indicator => {
+        return indicator.name.toLowerCase().includes(this.linkedIndicatorNameFilter.toLowerCase());
+      });
+    },
     filteredEntities() {
       return this.entities.filter(entity => {
         return (

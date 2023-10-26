@@ -171,6 +171,7 @@ export default {
       linkedIndicatorNameFilter: "",
       linkedEntityNameFilter: "",
       linkedIndicator: null,
+      linkedEntity: null,
       entities: [],
       indicators: [],
       entityTypes: ENTITY_TYPES,
