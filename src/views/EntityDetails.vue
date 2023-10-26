@@ -309,7 +309,13 @@ export default {
       };
       axios
         .post("/api/v2/entities/tag", params)
-        .then(this.getentityDetails)
+        .then(() => {
+          this.getentityDetails();
+          this.$buefy.toast.open({
+            message: "Tags saved!",
+            type: "is-success"
+          });
+        })
         .catch(error => {
           console.log(error);
         })

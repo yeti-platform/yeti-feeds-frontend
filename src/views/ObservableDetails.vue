@@ -190,7 +190,13 @@ export default {
       };
       axios
         .post(`/api/v2/observables/tag`, params)
-        .then(this.getObservableDetails)
+        .then(() => {
+          this.getObservableDetails();
+          this.$buefy.toast.open({
+            message: "Tags saved!",
+            type: "is-success"
+          });
+        })
         .catch(error => {
           console.log(error);
         })
