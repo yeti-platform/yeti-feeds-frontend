@@ -12,39 +12,45 @@
       :per-page="perPage"
       :current-page.sync="page"
       @page-change="onPageChange"
+      class="related-objects"
     >
       <template v-slot:default="link">
-        <b-table-column v-for="field in fields" :field="field" :label="getLabelForField(field)" v-bind:key="field">
-          <span v-if="field === 'value' || field === 'name'">
-            <b-icon
-              size="is-small"
-              v-if="link.row.node.type && inlineIcons"
-              :icon="getIconForType(link.row.node.type)"
-            ></b-icon>
-            <router-link :to="`/${link.row.node.root_type}/${link.row.node.id}`">
-              {{ link.row.node[field] }}
+        <b-table-column v-for="node in link.row" v-bind:key="node.id">
+          <span v-if="node.direction">{{
+            node.direction == "out" ? `→ ${node.type || ""}` : `← ${node.type || ""}`
+          }}</span>
+          <span v-else-if="node.root_type === 'observable'">
+            <router-link :to="{ name: 'ObservableDetails', params: { id: node.id } }">
+              {{ node.value }}
+            </router-link>
+            <span v-if="fields.includes('tags')">
+              <b-taglist>
+                <b-tag
+                  v-for="tag in Object.keys(node.tags)"
+                  :key="tag"
+                  :type="node.tags[tag].fresh ? 'is-primary' : ''"
+                  size="is-small"
+                >
+                  {{ tag }}
+                </b-tag>
+              </b-taglist>
+            </span>
+          </span>
+          <span v-else-if="node.root_type === 'entity'">
+            <b-icon size="is-small" :icon="getIconForType(node.type)"></b-icon>
+            <router-link :to="{ name: 'EntityDetails', params: { id: node.id } }">
+              {{ node.name }}
             </router-link>
           </span>
-
-          <b-taglist v-else-if="field === 'tags' || field === 'relevant_tags'">
-            <b-tag
-              v-for="tag in Object.keys(link.row.node[field])"
-              v-bind:key="tag.name ? tag.name : tag"
-              :type="tag.fresh ? 'is-primary' : ''"
-            >
-              {{ tag.name ? tag.name : tag }}
-            </b-tag>
-          </b-taglist>
-
-          <span v-else>{{ link.row.node[field] }}</span>
-        </b-table-column>
-
-        <b-table-column field="relation" label="Relation">
-          {{ link.row.description || "N/A" }}
-        </b-table-column>
-
-        <b-table-column field="unlink" label="Controls" width="10">
-          <b-button type="is-text" icon-left="unlink" size="is-small" @click="unlink(link.row.id)"> </b-button>
+          <span v-else-if="node.root_type === 'indicator'">
+            <b-icon size="is-small" :icon="getIconForType(node.type)"></b-icon>
+            <router-link :to="{ name: 'IndicatorDetails', params: { id: node.id } }">
+              {{ node.name }}
+            </router-link>
+          </span>
+          <span v-else>
+            <b-tag> {{ node.name }}</b-tag>
+          </span>
         </b-table-column>
       </template>
     </b-table>
@@ -63,7 +69,9 @@ export default {
     fields: { type: Array, default: () => ["value", "tags"] },
     sourceType: { type: String, default: "observable" },
     targetTypes: { type: Array, default: Array },
-    inlineIcons: { type: Boolean, default: false }
+    inlineIcons: { type: Boolean, default: false },
+    graph: { type: String, default: "links" },
+    hops: { type: Number, default: 1 }
   },
   data() {
     return {
@@ -90,23 +98,50 @@ export default {
       let graphSearchRequest = {
         source: `${this.sourceType}/${this.id}`,
         target_types: this.targetTypes,
-        graph: "links",
-        hops: 1,
+        graph: this.graph,
+        hops: this.hops,
         direction: "any",
-        include_original: false,
+        include_original: true,
         count: this.perPage,
         page: this.page - 1
       };
       axios
         .post(`/api/v2/graph/search`, graphSearchRequest)
         .then(response => {
-          this.vertices = response.data.vertices;
-          let links = response.data.edges;
-          links.map(link => {
-            link.node = link.target.includes(this.id) ? this.vertices[link.source] : this.vertices[link.target];
-          });
-
-          this.links = links;
+          let vertices = response.data.vertices;
+          let paths = [];
+          for (let i = 0; i < response.data.paths.length; i++) {
+            let edges = response.data.paths[i];
+            let nodeChain = [];
+            for (let j = 0; j < edges.length; j++) {
+              let edge = edges[j];
+              if (j === 0) {
+                if (edge.source === this.extendedId) {
+                  nodeChain.push(vertices[edge.source]);
+                  edge.direction = "out";
+                  nodeChain.push(edge);
+                  nodeChain.push(vertices[edge.target]);
+                } else {
+                  nodeChain.push(vertices[edge.target]);
+                  edge.direction = "in";
+                  nodeChain.push(edge);
+                  nodeChain.push(vertices[edge.source]);
+                }
+              } else {
+                if (edge.source != edges[j - 1].target) {
+                  edge.direction = "in";
+                  nodeChain.push(edge);
+                  nodeChain.push(vertices[edge.source]);
+                } else {
+                  edge.direction = "out";
+                  nodeChain.push(edge);
+                  nodeChain.push(vertices[edge.target]);
+                }
+              }
+            }
+            paths.push(nodeChain);
+          }
+          this.links = paths;
           this.total = response.data.total;
           this.$emit("totalUpdated", this.links.length);
         })
@@ -126,11 +161,17 @@ export default {
         });
     },
     getIconForType(type) {
-      return this.objectTypes.find(entityType => entityType.type === type).icon;
+      console.log(type);
+      return this.objectTypes.find(objectType => objectType.type === type).icon;
     },
     onPageChange(page) {
       this.page = page;
       this.fetchNeighbors();
+    }
+  },
+  computed: {
+    extendedId() {
+      return `${this.sourceType}/${this.id}`;
     }
   },
   watch: {
@@ -142,3 +183,9 @@ export default {
   }
 };
 </script>
+
+<style>
+.related-objects thead {
+  display: none;
+}
+</style>

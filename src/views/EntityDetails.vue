@@ -18,16 +18,18 @@
             <b-tabs v-model="activeTab" position="is-left" :animated="false">
               <b-tab-item>
                 <template slot="header">
-                  <b-icon icon="sitemap"></b-icon>
+                  <b-icon icon="tag"></b-icon>
                   <span>
-                    Observables
+                    Tagged observables
                     <b-tag rounded> {{ totalRelatedObservables == null ? "?" : totalRelatedObservables }}</b-tag>
                   </span>
                 </template>
                 <related-objects
-                  source-type="entity"
-                  :target-types="observableTypes.map(def => def.type)"
                   :id="id"
+                  source-type="entities"
+                  :hops="2"
+                  graph="tagged"
+                  :target-types="observableTypes.map(def => def.type)"
                   @totalUpdated="value => (totalRelatedObservables = value)"
                 ></related-objects>
               </b-tab-item>

@@ -48,16 +48,16 @@
                 </template>
                 <related-objects
                   :id="id"
-                  source-type="observable"
+                  source-type="observables"
                   :target-types="observableTypes.map(def => def.type)"
                   @totalUpdated="value => (totalRelatedObservables = value)"
                 ></related-objects>
               </b-tab-item>
               <b-tab-item>
                 <template slot="header">
-                  <b-icon icon="sitemap"></b-icon>
+                  <b-icon icon="tags"></b-icon>
                   <span>
-                    Related Entities
+                    Entities from tags
                     <b-tag rounded> {{ globalRelatedEntities }}</b-tag>
                   </span>
                 </template>
@@ -81,7 +81,9 @@
                     <related-objects
                       :id="id"
                       :fields="['name', 'tags']"
-                      source-type="observable"
+                      source-type="observables"
+                      :hops="2"
+                      graph="tagged"
                       :target-types="[entity.type]"
                       @totalUpdated="countRelatedEntities(entity.type, $event)"
                     >
