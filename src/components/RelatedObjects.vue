@@ -15,7 +15,7 @@
       class="related-objects"
     >
       <template v-slot:default="link">
-        <b-table-column v-for="node in link.row" v-bind:key="node.id">
+        <b-table-column v-for="node in link.row.nodeChain" v-bind:key="node.id">
           <span v-if="node.direction">{{
             node.direction == "out" ? `→ ${node.type || ""}` : `← ${node.type || ""}`
           }}</span>
@@ -51,6 +51,10 @@
           <span v-else>
             <b-tag> {{ node.name }}</b-tag>
           </span>
+        </b-table-column>
+
+        <b-table-column v-if="hops === 1" field="unlink" label="Controls" width="10">
+          <b-button type="is-text" icon-left="unlink" size="is-small" @click="unlink(link.row.edges[0].id)"> </b-button>
         </b-table-column>
       </template>
     </b-table>
@@ -139,7 +143,7 @@ export default {
                 }
               }
             }
-            paths.push(nodeChain);
+            paths.push({ edges: edges, nodeChain: nodeChain });
           }
           this.links = paths;
           this.total = response.data.total;
