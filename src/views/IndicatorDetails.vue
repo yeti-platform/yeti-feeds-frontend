@@ -203,7 +203,6 @@ export default {
         parent: this,
         component: EditObject,
         hasModalCard: true,
-        customClass: "custom-class custom-class-2",
         trapFocus: true,
         props: {
           objectTypeName: this.indicator.type,

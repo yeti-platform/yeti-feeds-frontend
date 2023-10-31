@@ -15,7 +15,7 @@
       class="related-objects"
     >
       <template v-slot:default="link">
-        <b-table-column v-for="node in link.row" v-bind:key="node.id">
+        <b-table-column v-for="node in link.row.nodeChain" v-bind:key="node.id">
           <span v-if="node.direction">{{
             node.direction == "out" ? `→ ${node.type || ""}` : `← ${node.type || ""}`
           }}</span>
@@ -52,6 +52,11 @@
             <b-tag> {{ node.name }}</b-tag>
           </span>
         </b-table-column>
+
+        <b-table-column v-if="hops === 1" field="unlink" label="Controls" width="10">
+          <b-button type="is-text" icon-left="unlink" size="is-small" @click="unlink(link.row.edges[0].id)"> </b-button>
+          <b-button type="is-text" icon-left="pen" size="is-small" @click="editEdge(link.row.edges[0])"> </b-button>
+        </b-table-column>
       </template>
     </b-table>
   </div>
@@ -61,6 +66,7 @@
 import axios from "axios";
 import { ENTITY_TYPES } from "@/definitions/entityDefinitions.js";
 import { INDICATOR_TYPES } from "@/definitions/indicatorDefinitions.js";
+import EditLink from "@/components/EditLink";
 
 export default {
   name: "RelatedObjects",
@@ -139,10 +145,11 @@ export default {
                 }
               }
             }
-            paths.push(nodeChain);
+            paths.push({ edges: edges, nodeChain: nodeChain });
           }
           this.links = paths;
           this.total = response.data.total;
+          this.vertices = vertices;
           this.$emit("totalUpdated", this.links.length);
         })
         .catch(error => {
@@ -160,8 +167,22 @@ export default {
           console.log(error);
         });
     },
+    editEdge(edge) {
+      this.$buefy.modal.open({
+        parent: this,
+        component: EditLink,
+        hasModalCard: true,
+        trapFocus: true,
+        props: {
+          edge: edge,
+          vertices: this.vertices
+        },
+        events: {
+          refresh: this.fetchNeighbors
+        }
+      });
+    },
     getIconForType(type) {
-      console.log(type);
       return this.objectTypes.find(objectType => objectType.type === type).icon;
     },
     onPageChange(page) {

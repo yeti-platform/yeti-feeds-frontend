@@ -45,7 +45,7 @@ export default {
         })
         .catch(error => {
           this.$buefy.notification.open({
-            message: error.response.data.error,
+            message: error.response.data.detail,
             type: "is-danger"
           });
         })
