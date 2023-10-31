@@ -19,7 +19,7 @@
             <b-tag>{{ tag.row.name }}</b-tag>
           </b-table-column>
           <b-table-column field="default_expiration" label="Default expiration (days)">
-            {{ tag.row.default_expiration / 86400 }}
+            {{ tag.row.default_expiration }}
           </b-table-column>
           <b-table-column field="count" label="Count">{{ tag.row.count }}</b-table-column>
           <b-table-column field="produces" label="Produces">
@@ -58,7 +58,7 @@
             <b-taginput v-model="selectedTag.replaces"></b-taginput>
           </b-field>
           <b-field label="Expiration" message="Expiration delay for tag in days.">
-            <b-input v-model="selectedTagExpirationDays"></b-input>
+            <b-input v-model="selectedTag.default_expiration"></b-input>
           </b-field>
           <b-field grouped>
             <p class="control" v-if="selectedTag.id">
@@ -99,7 +99,6 @@ export default {
     return {
       tags: [],
       selectedTag: {},
-      selectedTagExpirationDays: "",
       activeTab: 0,
       tablePage: 1,
       tableTotal: 500,
@@ -136,18 +135,22 @@ export default {
     },
     onRowClick(row) {
       this.selectedTag = JSON.parse(JSON.stringify(row));
-      this.selectedTagExpirationDays = this.selectedTag.default_expiration / 86400;
     },
     updateTag() {
       var params = {
         name: this.selectedTag.name,
         produces: this.selectedTag.produces.map(tag => tag.name || tag),
         replaces: this.selectedTag.replaces.map(tag => tag.name || tag),
-        default_expiration_days: this.selectedTagExpirationDays
+        default_expiration: this.selectedTag.default_expiration
       };
       axios
         .put(`/api/v2/tags/${this.selectedTag.id}`, params)
         .then(() => {
+          // message to user
+          this.$buefy.toast.open({
+            message: `Tag ${this.selectedTag.name} succesfully updated`,
+            type: "is-success"
+          });
           this.searchTags();
         })
         .catch(error => {
