@@ -65,7 +65,7 @@ export default {
   methods: {
     listExportTemplates() {
       axios
-        .post("/api/v2/templates/search", { name: "" })
+        .post("/api/v2/templates/search", { query: { name: "" } })
         .then(response => {
           this.templates = response.data.templates;
         })

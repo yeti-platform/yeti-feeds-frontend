@@ -219,7 +219,7 @@ export default {
     getIndicatorAutocomplete() {
       axios
         .post("/api/v2/indicators/search", {
-          name: this.linkedIndicatorNameFilter,
+          query: { name: this.linkedIndicatorNameFilter },
           count: 20
         })
         .then(response => {
@@ -234,7 +234,7 @@ export default {
       this.entities = [];
       axios
         .post("/api/v2/entities/search", {
-          name: this.linkedEntityNameFilter,
+          query: { name: this.linkedEntityNameFilter },
           count: 20
         })
         .then(response => {

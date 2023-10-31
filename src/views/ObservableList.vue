@@ -200,24 +200,26 @@ export default {
       this.tablePage = tablePage;
       this.searchObservables();
     },
-    extractTagsFromQueryString(searchQuery) {
-      var tags = [];
-      var queries = searchQuery.split(" ");
-      for (var i in queries) {
-        var splitted = queries[i].split("=");
-        if (splitted.length == 2 && splitted[0] === "tags") {
-          tags = splitted[1].split(",");
+    extractParamsFromSearchQuery(searchQuery, defaultKey) {
+      let params = {};
+      let query = searchQuery.split(" ");
+      for (let i = 0; i < query.length; i++) {
+        let param = query[i].split("=");
+        if (param.length === 1) {
+          params[defaultKey] = param[0];
+        } else if (param.length === 2) {
+          if (param[0].startsWith("in__") || param[0].endsWith("__in") || param[0] == "tags") {
+            params[param[0]] = param[1].split(",");
+          } else {
+            params[param[0]] = param[1];
+          }
         }
       }
-      return tags;
+      return params;
     },
     searchObservables() {
-      let tags = this.extractTagsFromQueryString(this.searchQuery);
-      let searchQuery = this.searchQuery.replace(/tags=[^ ]+/, "");
-
       var params = {
-        value: searchQuery,
-        tags: tags,
+        query: this.extractParamsFromSearchQuery(this.searchQuery, "value"),
         page: this.tablePage - 1,
         count: this.tablePerPage
       };
@@ -272,7 +274,7 @@ export default {
     },
     getExportTemplates() {
       axios
-        .post("/api/v2/templates/search", { name: "" })
+        .post("/api/v2/templates/search", { query: { name: "" } })
         .then(response => {
           this.exportTemplates = response.data.templates;
         })

@@ -107,7 +107,7 @@ export default {
   methods: {
     listTemplates() {
       axios
-        .post("/api/v2/templates/search", { name: "" })
+        .post("/api/v2/templates/search", { query: { name: "" } })
         .then(response => (this.exportTemplates = response.data.templates.map(template => template.name)))
         .catch(error => {
           console.log(error);

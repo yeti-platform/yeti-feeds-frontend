@@ -127,9 +127,26 @@ export default {
       this.tablePage = tablePage;
       this.searchObjects(false);
     },
+    extractParamsFromSearchQuery(searchQuery, defaultKey) {
+      let params = {};
+      let query = searchQuery.split(" ");
+      for (let i = 0; i < query.length; i++) {
+        let param = query[i].split("=");
+        if (param.length === 1) {
+          params[defaultKey] = param[0];
+        } else if (param.length === 2) {
+          if (param[0].startsWith("in__") || param[0].endsWith("__in")) {
+            params[param[0]] = param[1].split(",");
+          } else {
+            params[param[0]] = param[1];
+          }
+        }
+      }
+      return params;
+    },
     searchObjects() {
       var params = {
-        name: this.searchQuery,
+        query: this.extractParamsFromSearchQuery(this.searchQuery, "name"),
         type: this.searchSubtype,
         count: this.tablePerPage,
         page: this.tablePage - 1
