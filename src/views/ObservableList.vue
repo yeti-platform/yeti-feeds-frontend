@@ -49,14 +49,6 @@
               formatTimestamp(observable.row.created)
             }}</span>
           </b-table-column>
-
-          <b-table-column field="sources" label="Sources">
-            <b-taglist>
-              <b-tag v-for="source in observable.row.sources" v-bind:key="source">
-                {{ source }}
-              </b-tag>
-            </b-taglist>
-          </b-table-column>
         </template>
         <template #bottom-left>
           <div v-if="tableSelectedItems.length">
