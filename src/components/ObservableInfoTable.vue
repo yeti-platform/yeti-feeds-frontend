@@ -5,7 +5,7 @@
         <th>Sources</th>
         <td>
           <b-taglist>
-            <b-tag v-for="source in observable.sources" v-bind:key="source">
+            <b-tag v-for="source in new Set(observable.context.map(c => c.source))" v-bind:key="source">
               {{ source }}
             </b-tag>
           </b-taglist>
