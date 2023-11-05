@@ -16,7 +16,7 @@
         class="observable-table"
       >
         <template v-slot:default="observable">
-          <b-table-column field="value" label="Value">
+          <b-table-column field="value" label="Value" class="observable-value">
             <router-link :to="{ name: 'ObservableDetails', params: { id: observable.row.id } }">
               {{ observable.row.value }}
             </router-link>
@@ -78,22 +78,17 @@
                   v-on:keyup.native.enter="searchObservables"
                 />
               </div>
-              <div class="field">
-                <b-checkbox v-model="regexSearch">
-                  Use regex (slower)
-                </b-checkbox>
-              </div>
             </div>
             <br />
             <article class="message tip">
               <div class="message-body content">
                 <p>
-                  You can run complex queries against the database using the input field above.
+                  You can run advanced queries using the input field above.
                 </p>
                 <p>
                   By default, the query will be matched against the
-                  <code>value</code> attribute of the observables. To match against other attributes, use
-                  <code>attribute=query</code>.
+                  <code>value</code> attribute of the observables using regular expressions. To match against other
+                  attributes, use <code>attribute=query</code>.
                 </p>
 
                 <p>Examples:</p>
@@ -167,7 +162,6 @@ export default {
   data() {
     return {
       // Table
-      regexSearch: false,
       observables: [],
       tablePage: 1,
       tablePerPage: 50,
@@ -315,5 +309,11 @@ export default {
 <style>
 .observable-table {
   margin-top: 0.4em;
+  overflow: auto;
+}
+
+.observable-table td.observable-value {
+  font-family: monospace;
+  font-size: 0.9em;
 }
 </style>
