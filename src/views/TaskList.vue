@@ -45,7 +45,7 @@
         <b-table-column sortable field="status" label="Status" v-if="displayColumns.includes('status')">{{
           getHumanStatus(task.row)
         }}</b-table-column>
-        <b-table-column sortable field="toggle" label="Toggle" v-if="displayColumns.includes('toggle')">
+        <b-table-column sortable field="enabled" label="Toggle" v-if="displayColumns.includes('toggle')">
           <div @click="toggle(task.row)" class="toggle">
             <b-switch v-model="task.row.enabled" :disabled="task.row.status === 'running'"></b-switch>
           </div>
