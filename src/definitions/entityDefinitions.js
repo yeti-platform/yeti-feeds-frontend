@@ -30,7 +30,7 @@ export const ENTITY_TYPES = [
       { field: "tags", type: "list", label: "Relevant tags", displayList: true },
       { field: "description", type: "longtext", label: "Description", displayList: false }
     ],
-    icon: "bug"
+    icon: "wrench"
   },
   {
     name: "Attack pattern",
