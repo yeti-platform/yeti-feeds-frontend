@@ -6,10 +6,12 @@
       :narrowed="true"
       :row-class="getRowClass"
       @click="task => $emit('taskSelected', task)"
+      default-sort="name"
+      sort-icon-size="is-small"
     >
       <template v-slot:default="task">
         <!-- hide  if not in column -->
-        <b-table-column field="name" label="Name" v-if="displayColumns.includes('name')">
+        <b-table-column sortable field="name" label="Name" v-if="displayColumns.includes('name')">
           <strong>{{ task.row.name }}</strong>
         </b-table-column>
         <b-table-column
@@ -27,7 +29,12 @@
         <b-table-column field="frequency" label="Runs every" v-if="displayColumns.includes('frequency')" width="130">{{
           task.row.frequency
         }}</b-table-column>
-        <b-table-column field="last_run" label="Last run (UTC)" v-if="displayColumns.includes('last_run')" width="180"
+        <b-table-column
+          sortable
+          field="last_run"
+          label="Last run (UTC)"
+          v-if="displayColumns.includes('last_run')"
+          width="180"
           ><span :title="'Localtime: ' + formatTimestamp(task.row.last_run, true)">{{
             formatTimestamp(task.row.last_run)
           }}</span>
@@ -35,10 +42,10 @@
         <b-table-column field="description" label="Description" v-if="displayColumns.includes('description')">{{
           task.row.description
         }}</b-table-column>
-        <b-table-column field="status" label="Status" v-if="displayColumns.includes('status')">{{
+        <b-table-column sortable field="status" label="Status" v-if="displayColumns.includes('status')">{{
           getHumanStatus(task.row)
         }}</b-table-column>
-        <b-table-column field="toggle" label="Toggle" v-if="displayColumns.includes('toggle')">
+        <b-table-column sortable field="toggle" label="Toggle" v-if="displayColumns.includes('toggle')">
           <div @click="toggle(task.row)" class="toggle">
             <b-switch v-model="task.row.enabled" :disabled="task.row.status === 'running'"></b-switch>
           </div>
