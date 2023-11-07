@@ -1,145 +1,149 @@
 <template>
-  <div class="columns" v-if="indicator">
-    <div class="column is-8">
-      <div class="tile is-ancestor">
-        <div class="tile is-vertical is-parent">
-          <nav class="tile panel is-child">
-            <p class="panel-heading">
-              <b-taglist attached>
-                <b-tag size="is-large" type="is-dark">{{ indicator.name }}</b-tag>
-                <b-tag size="is-large" type="is-info">{{ indicator.type }}</b-tag>
-              </b-taglist>
-            </p>
-            <div class="panel-block">
-              <div class="content">{{ indicator.description || "No description provided" }}</div>
-            </div>
-            <div class="panel-block">
-              <div class="content">
-                <pre>{{ indicator.pattern }}</pre>
+  <div v-if="indicator">
+    <div class="columns">
+      <div class="column is-8">
+        <div class="tile is-ancestor">
+          <div class="tile is-vertical is-parent">
+            <nav class="tile panel is-child">
+              <p class="panel-heading">
+                <b-taglist attached>
+                  <b-tag size="is-large" type="is-dark">{{ indicator.name }}</b-tag>
+                  <b-tag size="is-large" type="is-info">{{ indicator.type }}</b-tag>
+                </b-taglist>
+              </p>
+              <div class="panel-block">
+                <div class="content">{{ indicator.description || "No description provided" }}</div>
               </div>
-            </div>
-          </nav>
-          <div class="tile is-child">
-            <b-tabs v-model="activeTab" position="is-left" :animated="false">
-              <b-tab-item>
-                <template slot="header">
-                  <b-icon icon="sitemap"></b-icon>
-                  <span>
-                    Observables
-                    <b-tag rounded> {{ totalRelatedObservables == null ? "?" : totalRelatedObservables }}</b-tag>
-                  </span>
-                </template>
+              <div class="panel-block">
+                <div class="content">
+                  <pre>{{ indicator.pattern }}</pre>
+                </div>
+              </div>
+            </nav>
+          </div>
+        </div>
+      </div>
+      <div class="column">
+        <div class="tile is-ancestor">
+          <div class="tile is-vertical is-parent">
+            <nav class="tile panel is-child">
+              <p class="panel-heading">Info <b-button size="is-small" @click="editIndicator"> Edit </b-button></p>
+              <div class="panel-block">
+                <table class="table is-fullwidth">
+                  <tbody>
+                    <tr v-for="field in indicatorInfoFields" v-bind:key="field.field">
+                      <th>{{ field.label }}</th>
+                      <td>
+                        <span v-if="!indicator[field.field] || !indicator[field.field].length">N/A</span>
+                        <b-taglist v-else-if="field.type == 'list'">
+                          <b-tag v-for="item in indicator[field.field]" v-bind:key="item">
+                            {{ item }}
+                          </b-tag>
+                        </b-taglist>
+                        <span v-else>
+                          {{ indicator[field.field] }}
+                        </span>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </nav>
+
+            <nav class="tile panel is-child">
+              <p class="panel-heading">Related indicators</p>
+              <div class="panel-block">
                 <related-objects
+                  v-show="totalRelatedIndicators > 0"
                   source-type="indicator"
-                  :target-types="observableTypes.map(def => def.type)"
+                  inline-icons
+                  :fields="['name']"
+                  :target-types="indicatorTypes.map(def => def.type)"
                   :id="id"
-                  @totalUpdated="value => (totalRelatedObservables = value)"
+                  @totalUpdated="value => (totalRelatedIndicators = value)"
+                  style="width: 100%"
+                  ref="relatdIndicatorsList"
                 ></related-objects>
-              </b-tab-item>
-            </b-tabs>
+              </div>
+              <div class="panel-block">
+                <b-field class="expanded">
+                  <b-autocomplete
+                    :open-on-focus="true"
+                    :keep-first="true"
+                    field="name"
+                    :clearable="true"
+                    :data="filteredIndicators"
+                    placeholder="Link new indicator..."
+                    v-model="linkedIndicatorNameFilter"
+                    @select="option => (linkedIndicator = option)"
+                    expanded
+                  >
+                  </b-autocomplete>
+                  <p class="control">
+                    <button class="button is-primary" @click="linkIndicator">Link</button>
+                  </p>
+                </b-field>
+              </div>
+            </nav>
+
+            <nav class="tile panel is-child">
+              <p class="panel-heading">Related entities</p>
+              <div class="panel-block">
+                <related-objects
+                  v-show="totalRelatedEntities > 0"
+                  source-type="indicator"
+                  inline-icons
+                  :fields="['name']"
+                  :target-types="entityTypes.map(def => def.type)"
+                  :id="id"
+                  @totalUpdated="value => (totalRelatedEntities = value)"
+                  style="width: 100%"
+                  ref="relatdEntitiesList"
+                ></related-objects>
+              </div>
+              <div class="panel-block">
+                <b-field class="expanded">
+                  <b-autocomplete
+                    :open-on-focus="true"
+                    :keep-first="true"
+                    field="name"
+                    :clearable="true"
+                    :data="filteredEntities"
+                    placeholder="Link new indicator..."
+                    v-model="linkedEntityNameFilter"
+                    @select="option => (linkedEntity = option)"
+                    expanded
+                  >
+                  </b-autocomplete>
+                  <p class="control">
+                    <button class="button is-primary" @click="linkEntity">Link</button>
+                  </p>
+                </b-field>
+              </div>
+            </nav>
           </div>
         </div>
       </div>
     </div>
-    <div class="column">
-      <div class="tile is-ancestor">
-        <div class="tile is-vertical is-parent">
-          <nav class="tile panel is-child">
-            <p class="panel-heading">Info <b-button size="is-small" @click="editIndicator"> Edit </b-button></p>
-            <div class="panel-block">
-              <table class="table is-fullwidth">
-                <tbody>
-                  <tr v-for="field in indicatorInfoFields" v-bind:key="field.field">
-                    <th>{{ field.label }}</th>
-                    <td>
-                      <span v-if="!indicator[field.field] || !indicator[field.field].length">N/A</span>
-                      <b-taglist v-else-if="field.type == 'list'">
-                        <b-tag v-for="item in indicator[field.field]" v-bind:key="item">
-                          {{ item }}
-                        </b-tag>
-                      </b-taglist>
-                      <span v-else>
-                        {{ indicator[field.field] }}
-                      </span>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </nav>
-
-          <nav class="tile panel is-child">
-            <p class="panel-heading">Related indicators</p>
-            <div class="panel-block">
-              <related-objects
-                v-show="totalRelatedIndicators > 0"
-                source-type="indicator"
-                inline-icons
-                :fields="['name']"
-                :target-types="indicatorTypes.map(def => def.type)"
-                :id="id"
-                @totalUpdated="value => (totalRelatedIndicators = value)"
-                style="width: 100%"
-                ref="relatdIndicatorsList"
-              ></related-objects>
-            </div>
-            <div class="panel-block">
-              <b-field class="expanded">
-                <b-autocomplete
-                  :open-on-focus="true"
-                  :keep-first="true"
-                  field="name"
-                  :clearable="true"
-                  :data="filteredIndicators"
-                  placeholder="Link new indicator..."
-                  v-model="linkedIndicatorNameFilter"
-                  @select="option => (linkedIndicator = option)"
-                  expanded
-                >
-                </b-autocomplete>
-                <p class="control">
-                  <button class="button is-primary" @click="linkIndicator">Link</button>
-                </p>
-              </b-field>
-            </div>
-          </nav>
-
-          <nav class="tile panel is-child">
-            <p class="panel-heading">Related entities</p>
-            <div class="panel-block">
-              <related-objects
-                v-show="totalRelatedEntities > 0"
-                source-type="indicator"
-                inline-icons
-                :fields="['name']"
-                :target-types="entityTypes.map(def => def.type)"
-                :id="id"
-                @totalUpdated="value => (totalRelatedEntities = value)"
-                style="width: 100%"
-                ref="relatdEntitiesList"
-              ></related-objects>
-            </div>
-            <div class="panel-block">
-              <b-field class="expanded">
-                <b-autocomplete
-                  :open-on-focus="true"
-                  :keep-first="true"
-                  field="name"
-                  :clearable="true"
-                  :data="filteredEntities"
-                  placeholder="Link new indicator..."
-                  v-model="linkedEntityNameFilter"
-                  @select="option => (linkedEntity = option)"
-                  expanded
-                >
-                </b-autocomplete>
-                <p class="control">
-                  <button class="button is-primary" @click="linkEntity">Link</button>
-                </p>
-              </b-field>
-            </div>
-          </nav>
-        </div>
+    <div class="columns">
+      <div class="column">
+        <b-tabs v-model="activeTab" position="is-left" :animated="false">
+          <b-tab-item>
+            <template slot="header">
+              <b-icon icon="sitemap"></b-icon>
+              <span>
+                Observables
+                <b-tag rounded> {{ totalRelatedObservables == null ? "?" : totalRelatedObservables }}</b-tag>
+              </span>
+            </template>
+            <related-objects
+              source-type="indicator"
+              :target-types="observableTypes.map(def => def.type)"
+              :id="id"
+              @totalUpdated="value => (totalRelatedObservables = value)"
+            ></related-objects>
+          </b-tab-item>
+        </b-tabs>
       </div>
     </div>
   </div>
