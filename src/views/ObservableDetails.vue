@@ -3,11 +3,11 @@
     <div class="columns" v-if="observable">
       <div class="column is-8">
         <div class="tile is-ancestor">
-          <div class="tile is-vertical is-parent">
+          <div class="tile is-vertical is-parent observable-tile">
             <nav class="tile panel is-child">
               <p class="panel-heading">
-                <b-taglist attached>
-                  <b-tag size="is-large" type="is-dark">{{ observable.value }}</b-tag>
+                <span class="observable-value">{{ observable.value }}</span>
+                <b-taglist>
                   <b-tag size="is-large" type="is-info">{{ observable.type }}</b-tag>
                 </b-taglist>
               </p>
@@ -226,4 +226,21 @@ export default {
 };
 </script>
 
-<style scoped lang="css"></style>
+<style scoped lang="css">
+.observable-tile {
+  width: 100%;
+}
+
+.observable-tile .tag {
+  margin-top: 0.5rem;
+}
+.observable-value {
+  font-family: monospace;
+  overflow-wrap: break-word;
+  width: 100%;
+  border-radius: 4px;
+  background: hsl(0, 0%, 21%);
+  color: hsl(0, 0%, 96%);
+  padding: 0.2rem 0.6rem 0.2rem 0.6rem;
+}
+</style>
