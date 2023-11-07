@@ -15,11 +15,15 @@
       class="related-objects"
     >
       <template v-slot:default="link">
-        <b-table-column v-for="node in link.row.nodeChain" v-bind:key="node.id">
+        <b-table-column
+          v-for="node in link.row.nodeChain"
+          v-bind:key="node.id"
+          :class="{ arrow: !!node.direction, object: !node.direction }"
+        >
           <span v-if="node.direction">{{
             node.direction == "out" ? `→ ${node.type || ""}` : `← ${node.type || ""}`
           }}</span>
-          <span v-else-if="node.root_type === 'observable'">
+          <span v-else-if="node.root_type === 'observable'" class="short-links">
             <router-link :to="{ name: 'ObservableDetails', params: { id: node.id } }">
               {{ node.value }}
             </router-link>
@@ -208,5 +212,20 @@ export default {
 <style>
 .related-objects thead {
   display: none;
+}
+
+td.arrow {
+  width: 10px;
+}
+
+td.object {
+  max-width: 300px;
+}
+
+span.short-links {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
 }
 </style>
