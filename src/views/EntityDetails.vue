@@ -140,7 +140,7 @@
               <b-icon icon="tag"></b-icon>
               <span>
                 Tagged observables
-                <b-tag rounded> {{ totalRelatedObservables == null ? "?" : totalRelatedObservables }}</b-tag>
+                <b-tag rounded> {{ totalTaggedObservables == null ? "?" : totalTaggedObservables }}</b-tag>
               </span>
             </template>
             <related-objects
@@ -149,7 +149,22 @@
               :hops="2"
               graph="tagged"
               :target-types="observableTypes.map(def => def.type)"
-              @totalUpdated="value => (totalRelatedObservables = value)"
+              @totalUpdated="value => (totalTaggedObservables = value)"
+            ></related-objects>
+          </b-tab-item>
+          <b-tab-item>
+            <template slot="header">
+              <b-icon icon="link"></b-icon>
+              <span>
+                Linked observables
+                <b-tag rounded> {{ totalLinkedObservables == null ? "?" : totalLinkedObservables }}</b-tag>
+              </span>
+            </template>
+            <related-objects
+              source-type="entities"
+              :target-types="observableTypes.map(def => def.type)"
+              :id="id"
+              @totalUpdated="value => (totalLinkedObservables = value)"
             ></related-objects>
           </b-tab-item>
         </b-tabs>
@@ -180,7 +195,8 @@ export default {
       entity: null,
       newTags: [],
       activeTab: null,
-      totalRelatedObservables: null,
+      totalTaggedObservables: null,
+      totalLinkedObservables: null,
       totalRelatedIndicators: 0,
       totalRelatedEntities: 0,
       linkedEntityNameFilter: "",
