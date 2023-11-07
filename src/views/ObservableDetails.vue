@@ -11,9 +11,6 @@
                   <b-tag size="is-large" type="is-info">{{ observable.type }}</b-tag>
                 </b-taglist>
               </p>
-              <div class="panel-block">
-                <div class="content">{{ observable.description || "No description provided" }}</div>
-              </div>
             </nav>
           </div>
         </div>
