@@ -58,6 +58,9 @@
           <b-button type="is-text" icon-left="pen" size="is-small" @click="editEdge(link.row.edges[0])"> </b-button>
         </b-table-column>
       </template>
+      <template #empty>
+        <div class="has-text-centered">No related objects.</div>
+      </template>
     </b-table>
   </div>
 </template>

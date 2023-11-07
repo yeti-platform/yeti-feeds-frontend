@@ -103,7 +103,7 @@
                 <b-tag rounded> {{ globalRelatedEntities }}</b-tag>
               </span>
             </template>
-            <b-tabs v-model="activeSubTab" position="is-left" :animated="false">
+            <b-tabs v-model="activeSubTab" position="is-left" :animated="false" v-if="globalRelatedEntities > 0">
               <b-tab-item v-for="entity in entityTypes" :key="entity.name" :visible="displayEntityType(entity.type)">
                 <template slot="header">
                   <b-icon :icon="entity.icon"></b-icon>
@@ -126,6 +126,7 @@
                 </related-objects>
               </b-tab-item>
             </b-tabs>
+            <span v-if="globalRelatedEntities === 0">No related entities.</span>
           </b-tab-item>
         </b-tabs>
       </div>
