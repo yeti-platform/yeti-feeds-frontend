@@ -153,7 +153,7 @@ export default {
           this.links = paths;
           this.total = response.data.total;
           this.vertices = vertices;
-          this.$emit("totalUpdated", this.links.length);
+          this.$emit("totalUpdated", this.total);
         })
         .catch(error => {
           console.log(error);
