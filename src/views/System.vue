@@ -9,40 +9,25 @@
         <table class="table is-narrow is-fullwidth" v-if="info">
           <tbody>
             <tr>
-              <th>Registered worker</th>
-              <th>Process IDs</th>
-              <th>Active</th>
-              <th>Restart</th>
-            </tr>
-            <tr v-for="worker in Object.keys(info.registered)" v-bind:key="worker">
-              <td>{{ worker }}</td>
-              <td>
-                <b-taglist>
-                  <b-tag v-for="pid in info.registered[worker].processes" v-bind:key="pid">
-                    {{ pid }}
-                  </b-tag>
-                </b-taglist>
-              </td>
-              <td>{{ info.registered[worker].active ? "Yes" : "No" }}</td>
-              <td><b-button @click="restartWorker(worker)">Restart</b-button></td>
+              <th>Host</th>
+              <th>Active workers</th>
             </tr>
           </tbody>
+          <tr v-for="entry in Object.keys(info.registered)" v-bind:key="entry">
+            <td>{{ entry }}</td>
+            <td>{{ info.registered[entry] }}</td>
+          </tr>
         </table>
+
         <table class="table is-narrow is-fullwidth" v-if="info">
           <tbody>
             <tr>
-              <th>Workers</th>
-              <th>Active tasks</th>
+              <th>Task name</th>
+              <th>Params</th>
             </tr>
-            <tr v-for="worker in Object.keys(info.active)" v-bind:key="worker">
-              <td>{{ worker }}</td>
-              <td>
-                <b-taglist>
-                  <b-tag v-for="pid in info.active[worker].running" v-bind:key="pid">
-                    {{ pid }}
-                  </b-tag>
-                </b-taglist>
-              </td>
+            <tr v-for="workerData in info.active" v-bind:key="workerData[0]">
+              <td>{{ workerData[0] }}</td>
+              <td>{{ workerData[1] }}</td>
             </tr>
           </tbody>
         </table>
@@ -66,7 +51,7 @@ export default {
   data() {
     return {
       info: null,
-      infoLoading: false
+      infoLoading: true
     };
   },
   mounted() {
@@ -74,9 +59,8 @@ export default {
   },
   methods: {
     getWorkerInfo() {
-      this.infoLoading = true;
       axios
-        .get(`/api/system/`)
+        .get(`/api/v2/system/workers`)
         .then(response => {
           this.info = response.data;
           this.infoLoading = false;
@@ -87,12 +71,20 @@ export default {
     },
     restartWorker(workerName) {
       axios
-        .get(`/api/system/restart/worker/${workerName}`)
+        .post(`/api/v2/system/restartworker/${workerName}`)
         .then(response => {
-          this.$buefy.notification.open({
-            message: response.data.message,
-            type: response.data.status == "success" ? "is-success" : "is-danger"
-          });
+          if (response.data.failures.length > 0) {
+            this.$buefy.notification.alert({
+              title: "Some workers could not be restarted",
+              message: response.data.failures.join("\n"),
+              type: "is-danger"
+            });
+          } else {
+            this.$buefy.notification.open({
+              message: "Workers succesfully restarted!",
+              type: "is-success"
+            });
+          }
         })
         .catch(error => {
           console.log(error);
