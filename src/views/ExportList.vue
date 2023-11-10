@@ -162,8 +162,19 @@ export default {
         confirmText: "Delete Export",
         type: "is-danger",
         hasIcon: true,
-        onConfirm: this.deleteExport
+        onConfirm: this.deleteExport,
+        focusOn: "cancel"
       });
+    },
+    deleteExport() {
+      axios
+        .delete(`/api/v2/tasks/export/${this.selectedExport.name}`)
+        .then(() => {
+          this.$refs.exportList.listTasks();
+          this.selectedExport = {};
+        })
+        .catch(error => console.log(error))
+        .finally(() => {});
     },
     downloadExport(singleExport) {
       axios
