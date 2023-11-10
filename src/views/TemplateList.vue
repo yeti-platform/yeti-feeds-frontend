@@ -33,15 +33,18 @@
           <button class="button is-light" @click="deselectTemplate">Clear form</button>
         </p>
       </b-field>
-      Example template body:
+      The rendering engine receives a <code>data</code> variable containing all selected observables. <br />Example
+      template body:
+
       <span v-pre>
         <pre>
 &lt;arbitrary&gt;
-{% for obs in elements %}{{ obs.value }}
+{% for obs in data %}{{ obs.value }}
 {% endfor %}
 &lt;/arbitrary&gt;</pre
         >
       </span>
+      Refer to the Yeti documentation for tips on how to write good templates.
     </div>
   </div>
 </template>
