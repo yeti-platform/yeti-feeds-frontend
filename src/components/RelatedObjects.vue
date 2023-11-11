@@ -87,7 +87,7 @@ export default {
       links: [],
       vertices: {},
       page: 1,
-      perPage: 10,
+      perPage: 20,
       total: 500,
       loading: false,
       objectTypes: ENTITY_TYPES.concat(INDICATOR_TYPES)
@@ -127,28 +127,28 @@ export default {
               if (j === 0) {
                 if (edge.source === this.extendedId) {
                   nodeChain.push(vertices[edge.source]);
-                  edge.direction = "out";
+                  edge.direction = "in";
                   nodeChain.push(edge);
                   nodeChain.push(vertices[edge.target]);
                 } else {
                   nodeChain.push(vertices[edge.target]);
-                  edge.direction = "in";
+                  edge.direction = "out";
                   nodeChain.push(edge);
                   nodeChain.push(vertices[edge.source]);
                 }
               } else {
                 if (edge.source != edges[j - 1].target) {
-                  edge.direction = "in";
+                  edge.direction = "out";
                   nodeChain.push(edge);
                   nodeChain.push(vertices[edge.source]);
                 } else {
-                  edge.direction = "out";
+                  edge.direction = "in";
                   nodeChain.push(edge);
                   nodeChain.push(vertices[edge.target]);
                 }
               }
             }
-            paths.push({ edges: edges, nodeChain: nodeChain });
+            paths.push({ edges: edges, nodeChain: nodeChain.reverse() });
           }
           this.links = paths;
           this.total = response.data.total;
