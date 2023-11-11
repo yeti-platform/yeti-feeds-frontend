@@ -94,13 +94,16 @@
                 <p>Examples:</p>
                 <ul>
                   <li>
-                    <strong>Generic tag query</strong>:
-                    <code>tags=lolbas</code>
+                    <!-- <strong>Quoted values</strong>: -->
+                    <code>"curl/8.1.2 (headless)" tags=c2</code>
                   </li>
-                  <li><strong>Gate URLs</strong>: <code>tags=cobaltstrike .php$</code></li>
                   <li>
-                    <strong>Ransomware C2s</strong>:
-                    <code>tags=c2,ransomware</code>
+                    <!-- <strong>Generic tag query</strong>: -->
+                    <code>tags=lolbas,persistence</code>
+                  </li>
+                  <li>
+                    <!-- <strong>Gate URLs</strong>:  -->
+                    <code>.php$ tags=cobaltstrike</code>
                   </li>
                 </ul>
               </div>
@@ -187,21 +190,36 @@ export default {
       this.searchObservables();
     },
     extractParamsFromSearchQuery(searchQuery, defaultKey) {
-      let params = {};
-      let query = searchQuery.split(" ");
-      for (let i = 0; i < query.length; i++) {
-        let param = query[i].split("=");
-        if (param.length === 1) {
-          params[defaultKey] = param[0];
-        } else if (param.length === 2) {
-          if (param[0].startsWith("in__") || param[0].endsWith("__in") || param[0] == "tags") {
-            params[param[0]] = param[1].split(",");
+      const pattern = /(?<key>\w+)=(?<keyed_terms>[^\s,]+(?:,[^\s,]+)*)|(?<isolated_term>[^"\s]+)|"(?<quoted_term>[^"]+)"/g;
+
+      let resultObj = {};
+      let match;
+
+      while ((match = pattern.exec(searchQuery)) !== null) {
+        let isolatedTerm = match.groups.isolated_term;
+        let quotedTerm = match.groups.quoted_term;
+        let key = match.groups.key;
+        let keyedTerms = match.groups.keyed_terms;
+
+        let values;
+        if (key) {
+          if (key.startsWith("in__") || key.endsWith("__in") || key == "tags" || keyedTerms.includes(",")) {
+            values = keyedTerms.split(",").map(term => term.trim());
           } else {
-            params[param[0]] = param[1];
+            values = keyedTerms;
           }
+          resultObj[key] = values;
+        }
+
+        // Logging isolated and quoted terms (optional)
+        if (isolatedTerm) {
+          resultObj[defaultKey] = isolatedTerm;
+        }
+        if (quotedTerm) {
+          resultObj[defaultKey] = quotedTerm;
         }
       }
-      return params;
+      return resultObj;
     },
     searchObservables() {
       var params = {

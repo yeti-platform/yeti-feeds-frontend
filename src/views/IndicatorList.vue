@@ -37,24 +37,21 @@
             <article class="message tip">
               <div class="message-body content">
                 <p>
-                  You can run complex queries against the database using the input field above.
+                  You can run advanced queries using the input field above.
                 </p>
                 <p>
                   By default, the query will be matched against the
-                  <code>value</code> attribute of the indicators. To match against other attributes, use
-                  <code>attribute=query</code>.
+                  <code>name</code> attribute of the indicators using regular expressions. To match against other
+                  attributes, use <code>attribute=query</code>.
                 </p>
 
                 <p>Examples:</p>
                 <ul>
                   <li>
-                    <strong>Generic tag query</strong>:
-                    <code>tags=lolbas</code>
+                    <code>"Access logs" relevant_tags=nginx</code>
                   </li>
-                  <li><strong>Gate URLs</strong>: <code>tags=cobaltstrike .php$</code></li>
                   <li>
-                    <strong>Ransomware C2s</strong>:
-                    <code>tags=c2,ransomware</code>
+                    <code>query_type=opensearch in__target_systems=timesketch</code>
                   </li>
                 </ul>
               </div>
