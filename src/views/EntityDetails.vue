@@ -58,7 +58,7 @@
             </nav>
 
             <nav class="tile panel is-child">
-              <p class="panel-heading">Related indicators</p>
+              <p class="panel-heading">Link indicators and entities</p>
               <div class="panel-block">
                 <related-objects
                   v-show="totalRelatedIndicators > 0"
@@ -69,7 +69,7 @@
                   :id="id"
                   @totalUpdated="value => (totalRelatedIndicators = value)"
                   style="width: 100%"
-                  ref="relatdIndicatorsList"
+                  ref="relatedIndicatorsList"
                 ></related-objects>
               </div>
               <div class="panel-block">
@@ -90,23 +90,6 @@
                     <button class="button is-primary" @click="linkIndicator">Link</button>
                   </p>
                 </b-field>
-              </div>
-            </nav>
-
-            <nav class="tile panel is-child">
-              <p class="panel-heading">Related entities</p>
-              <div class="panel-block">
-                <related-objects
-                  v-show="totalRelatedEntities > 0"
-                  source-type="entity"
-                  inline-icons
-                  :fields="['name']"
-                  :target-types="entityTypes.map(def => def.type)"
-                  :id="id"
-                  @totalUpdated="value => (totalRelatedEntities = value)"
-                  style="width: 100%"
-                  ref="relatdEntitiesList"
-                ></related-objects>
               </div>
               <div class="panel-block">
                 <b-field class="expanded">
@@ -135,6 +118,34 @@
     <div class="columns">
       <div class="column">
         <b-tabs v-model="activeTab" position="is-left" :animated="false">
+          <!-- other entities -->
+          <b-tab-item
+            v-for="entityType in entityTypes"
+            v-bind:key="entityType.type"
+            :value="entityType.type"
+            :visible="displayEntityType(entityType.type)"
+          >
+            <template slot="header">
+              <b-icon :icon="entityType.icon"></b-icon>
+              <span>
+                {{ entityType.name }}
+                <b-tag rounded>{{ entityCount[entityType.type] === null ? "?" : entityCount[entityType.type] }}</b-tag>
+              </span>
+            </template>
+            <related-objects
+              source-type="entity"
+              inline-icons
+              :fields="['name']"
+              :target-types="[entityType.type]"
+              :id="id"
+              @totalUpdated="countEntities(entityType.type, $event)"
+              style="width: 100%"
+              :ref="'relatedEntitiesList' + entityType.type"
+            ></related-objects>
+          </b-tab-item>
+
+          <!-- end other entities -->
+
           <b-tab-item>
             <template slot="header">
               <b-icon icon="tag"></b-icon>
@@ -206,17 +217,21 @@ export default {
       entities: [],
       indicators: [],
       entityTypes: ENTITY_TYPES,
+      entityCount: ENTITY_TYPES.reduce((acc, cur) => {
+        acc[cur.type] = null;
+        return acc;
+      }, {}),
       indicatorTypes: INDICATOR_TYPES,
       observableTypes: OBSERVABLE_TYPES
     };
   },
   mounted() {
-    this.getentityDetails();
+    this.getEntityDetails();
     this.getIndicatorAutocomplete();
     this.getEntityAutocomplete();
   },
   methods: {
-    getentityDetails() {
+    getEntityDetails() {
       axios
         .get(`/api/v2/entities/${this.id}`)
         .then(response => {
@@ -273,7 +288,8 @@ export default {
           this.entities = response.data.entities.map(entity => {
             return {
               id: entity.id,
-              name: entity.name
+              name: entity.name,
+              type: entity.type
             };
           });
         })
@@ -293,7 +309,7 @@ export default {
         .post("/api/v2/graph/add", params)
         .then(() => {
           // Refresh neighbors list.
-          this.$refs.relatdIndicatorsList.fetchNeighbors();
+          this.$refs.relatedIndicatorsList.fetchNeighbors();
           this.linkedIndicatorNameFilter = "";
           this.linkedIndicator = null;
         })
@@ -312,8 +328,7 @@ export default {
       axios
         .post("/api/v2/graph/add", params)
         .then(() => {
-          // Refresh neighbors list.
-          this.$refs.relatdEntitiesList.fetchNeighbors();
+          this.$refs["relatedEntitiesList" + this.linkedEntity.type][0].fetchNeighbors();
           this.linkedEntityNameFilter = "";
           this.linkedEntity = null;
         })
@@ -331,7 +346,7 @@ export default {
       axios
         .post("/api/v2/entities/tag", params)
         .then(() => {
-          this.getentityDetails();
+          this.getEntityDetails();
           this.$buefy.toast.open({
             message: "Tags saved!",
             type: "is-success"
@@ -344,7 +359,23 @@ export default {
     },
     markdownify(text) {
       return DOMPurify.sanitize(marked.parse(text));
-      // return text;
+    },
+    displayEntityType(type) {
+      return this.entityCount[type] > 0;
+    },
+    countEntities(type, count) {
+      this.entityCount[type] = count;
+      if (!this.$route.hash) {
+        this.navigateToFirstPopulatedTab();
+      }
+    },
+    navigateToFirstPopulatedTab() {
+      for (const entityType of this.entityTypes) {
+        if (this.entityCount[entityType.type] > 0) {
+          this.activeTab = entityType.type;
+          break;
+        }
+      }
     }
   },
   computed: {
@@ -371,7 +402,7 @@ export default {
     }
   },
   watch: {
-    id: "getentityDetails",
+    id: "getEntityDetails",
     linkedEntityNameFilter: _.debounce(function() {
       this.getEntityAutocomplete();
     }, 50)
