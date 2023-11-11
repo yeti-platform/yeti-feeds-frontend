@@ -85,6 +85,10 @@
                     @select="option => (linkedIndicator = option)"
                     expanded
                   >
+                    <template slot-scope="props">
+                      <b-icon size="is-small" :icon="getIconForType(props.option.type)"></b-icon>
+                      {{ props.option.name }}
+                    </template>
                   </b-autocomplete>
                   <p class="control">
                     <button class="button is-primary" @click="linkIndicator">Link</button>
@@ -104,6 +108,10 @@
                     @select="option => (linkedEntity = option)"
                     expanded
                   >
+                    <template slot-scope="props">
+                      <b-icon size="is-small" :icon="getIconForType(props.option.type)"></b-icon>
+                      {{ props.option.name }}
+                    </template>
                   </b-autocomplete>
                   <p class="control">
                     <button class="button is-primary" @click="linkEntity">Link</button>
@@ -362,6 +370,9 @@ export default {
     },
     displayEntityType(type) {
       return this.entityCount[type] > 0;
+    },
+    getIconForType(type) {
+      return this.entityTypes.concat(this.indicatorTypes).find(objectType => objectType.type === type).icon;
     },
     countEntities(type, count) {
       this.entityCount[type] = count;
