@@ -28,6 +28,8 @@ export const ENTITY_TYPES = [
     fields: [
       { field: "name", type: "text", label: "Name", displayList: true },
       { field: "tags", type: "list", label: "Relevant tags", displayList: true },
+      { field: "aliases", type: "list", label: "Aliases", displayList: true },
+      { field: "kill_chain_phases", type: "list", label: "Kill chain phases", displayList: true },
       { field: "description", type: "longtext", label: "Description", displayList: false }
     ],
     icon: "wrench"
@@ -38,6 +40,7 @@ export const ENTITY_TYPES = [
     fields: [
       { field: "name", type: "text", label: "Name", displayList: true },
       { field: "tags", type: "list", label: "Relevant tags", displayList: true },
+      { field: "kill_chain_phases", type: "list", label: "Kill chain phases", displayList: true },
       { field: "description", type: "longtext", label: "Description", displayList: false }
     ],
     icon: "bolt"
@@ -59,6 +62,7 @@ export const ENTITY_TYPES = [
     fields: [
       { field: "name", type: "text", label: "Name", displayList: true },
       { field: "tags", type: "list", label: "Relevant tags", displayList: true },
+      { field: "aliases", type: "list", label: "Aliases", displayList: true },
       { field: "description", type: "longtext", label: "Description", displayList: false }
     ],
     icon: "user"
@@ -94,5 +98,24 @@ export const ENTITY_TYPES = [
       { field: "description", type: "longtext", label: "Description", displayList: false }
     ],
     icon: "building"
+  },
+  {
+    name: "Vulnerability",
+    type: "vulnerability",
+    fields: [
+      { field: "name", type: "text", label: "Name", displayList: true },
+      { field: "tags", type: "list", label: "Relevant tags", displayList: true },
+      { field: "description", type: "longtext", label: "Description", displayList: false }
+    ]
+  },
+  {
+    name: "Course of action",
+    type: "course-of-action",
+    fields: [
+      { field: "name", type: "text", label: "Name", displayList: true },
+      { field: "tags", type: "list", label: "Relevant tags", displayList: true },
+      { field: "description", type: "longtext", label: "Description", displayList: false }
+    ],
+    icon: "briefcase-medical"
   }
 ];
