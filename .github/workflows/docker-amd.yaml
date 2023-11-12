@@ -46,5 +46,6 @@ jobs:
           context: .
           file: ./docker/prod/Dockerfile
           push: false
+          platforms: linux/amd64
           tags: ${{ steps.meta.outputs.tags }},ghcr.io/${{ github.repository }}:latest
           labels: ${{ steps.meta.outputs.labels }}
