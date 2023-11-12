@@ -1,7 +1,6 @@
 #  Container used to build the minified frontend JS code
-FROM arm64v8/node:buster AS frontend-builder
+FROM node:buster AS frontend-builder
 
-RUN apt update && apt install python3
 RUN npm install -g n && n 16
 
 ADD . /app
