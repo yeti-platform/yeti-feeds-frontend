@@ -1,5 +1,5 @@
 #  Container used to build the minified frontend JS code
-FROM node:buster AS frontend-builder
+FROM amd64/node:buster AS frontend-builder
 
 RUN npm install -g n && n 16
 
