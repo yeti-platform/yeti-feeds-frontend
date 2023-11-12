@@ -7,7 +7,6 @@ RUN npm install -g n && n 16
 ADD . /app
 WORKDIR /app
 
-RUN npm install
 RUN npm run build
 
 FROM nginx:latest AS frontend
