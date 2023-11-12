@@ -3,9 +3,6 @@ name: Publish Docker image
 on:
   release:
     types: [published]
-  push:
-    branches:
-      - docker
 
 jobs:
   push_to_registries:
@@ -41,7 +38,7 @@ jobs:
         with:
           images: |
             yetiplatform/yeti-frontend
-            ghcr.io/${{ github.repository }}/yeti-frontend
+            ghcr.io/${{ github.repository }}
 
       - name: Build and push Docker images
         uses: docker/build-push-action@v5
@@ -50,5 +47,5 @@ jobs:
           file: ./docker/prod/Dockerfile
           push: true
           platforms: linux/amd64,linux/arm64
-          tags: ${{ steps.meta.outputs.tags }}
+          tags: ${{ steps.meta.outputs.tags }},ghcr.io/${{ github.repository }}:latest
           labels: ${{ steps.meta.outputs.labels }}
