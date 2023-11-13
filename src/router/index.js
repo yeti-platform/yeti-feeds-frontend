@@ -7,7 +7,7 @@ import EntityDetails from "../views/EntityDetails.vue";
 import IndicatorList from "../views/IndicatorList.vue";
 import IndicatorDetails from "../views/IndicatorDetails.vue";
 import ObservableDetails from "../views/ObservableDetails.vue";
-import FeedList from "../views/FeedList.vue";
+import TaskList from "../views/TaskList.vue";
 import AnalyticsList from "../views/AnalyticsList.vue";
 import ExportList from "../views/ExportList.vue";
 import TemplateList from "../views/TemplateList.vue";
@@ -37,7 +37,7 @@ const routes = [
     }
   },
   {
-    path: "/observable/:id([a-z0-9]{24})",
+    path: "/observable/:id([0-9]+)",
     name: "ObservableDetails",
     component: ObservableDetails,
     props: true
@@ -53,7 +53,7 @@ const routes = [
     }
   },
   {
-    path: "/entity/:id([a-z0-9]{24})",
+    path: "/entity/:id([0-9]+)",
     name: "EntityDetails",
     component: EntityDetails,
     props: true
@@ -69,7 +69,7 @@ const routes = [
     }
   },
   {
-    path: "/indicator/:id([a-z0-9]{24})",
+    path: "/indicator/:id([0-9]+)",
     name: "IndicatorDetails",
     component: IndicatorDetails,
     props: true
@@ -77,7 +77,8 @@ const routes = [
   {
     path: "/feeds",
     name: "Feeds",
-    component: FeedList
+    component: TaskList,
+    props: { taskType: "feed" }
   },
   {
     path: "/analytics",
@@ -95,7 +96,7 @@ const routes = [
     component: TemplateList
   },
   {
-    path: "/profile/:id([a-z0-9]{24})",
+    path: "/profile/:id([0-9]+)",
     name: "UserProfileAdmin",
     component: UserProfile,
     props: true
@@ -147,12 +148,13 @@ router.beforeEach((to, from, next) => {
     store
       .dispatch("refresh")
       .then(() => {
-        console.log("redirecting to " + to.fullPath);
+        console.log("Refreshed and redirecting to " + to.fullPath);
         next({ path: to.fullPath });
       })
-      .catch(() => {
-        console.log("redirecting to /auth/login");
-        window.location.href = "/auth/login";
+      .catch(error => {
+        console.log(error);
+        console.log("Not authed; redirecting to Login");
+        next({ name: "Login" });
       });
   } else {
     next();

@@ -1,82 +1,7 @@
 <template>
   <div class="columns">
     <div class="column is-9 exportlist">
-      <b-table
-        :data="exports"
-        :hoverable="true"
-        :narrowed="true"
-        :row-class="getRowClass"
-        @click="row => (this.selectedExport = JSON.parse(JSON.stringify(row)))"
-      >
-        <template v-slot:default="singleExport">
-          <b-table-column field="name" label="Name">
-            <strong>{{ singleExport.row.name }}</strong>
-          </b-table-column>
-          <b-table-column field="frequency" label="Runs every" width="130">{{
-            singleExport.row.frequency
-          }}</b-table-column>
-          <b-table-column field="last_run" label="Last run (UTC)" width="180"
-            ><span :title="'Localtime: ' + formatTimestamp(singleExport.row.last_run, true)">{{
-              formatTimestamp(singleExport.row.last_run)
-            }}</span>
-          </b-table-column>
-          <b-table-column field="description" label="Description">{{ singleExport.row.description }}</b-table-column>
-          <b-table-column field="acts_on" label="Acts on">{{ singleExport.row.acts_on }}</b-table-column>
-          <b-table-column field="ignore" label="Ignore">
-            <b-taglist>
-              <b-tag v-for="tag in singleExport.row.ignore_tags" v-bind:key="tag">{{ tag }}</b-tag>
-            </b-taglist>
-          </b-table-column>
-          <b-table-column field="include" label="include">
-            <b-taglist>
-              <b-tag v-for="tag in singleExport.row.include_tags" v-bind:key="tag">{{ tag }}</b-tag>
-            </b-taglist>
-          </b-table-column>
-          <b-table-column field="exclude" label="exclude">
-            <b-taglist>
-              <b-tag v-for="tag in singleExport.row.exclude_tags" v-bind:key="tag">{{ tag }}</b-tag>
-            </b-taglist>
-          </b-table-column>
-          <b-table-column field="singleExport.template" label="Template">{{
-            singleExport.row.template
-          }}</b-table-column>
-          <b-table-column field="status" label="Status">{{ singleExport.row.status || "N/A" }}</b-table-column>
-          <b-table-column field="toggle" label="Toggle">
-            <div @click="toggle(singleExport.row)" class="toggle">
-              <b-switch
-                v-model="singleExport.row.enabled"
-                :disabled="singleExport.row.status === 'Updating...'"
-              ></b-switch>
-            </div>
-          </b-table-column>
-
-          <b-table-column field="refresh" custom-key="refresh">
-            <b-button
-              :disabled="singleExport.row.status === 'Updating...' || !singleExport.row.enabled"
-              @click="refresh(singleExport.row)"
-              size="is-small"
-            >
-              <b-icon
-                :disabled="!singleExport.row.enabled"
-                pack="fas"
-                icon="sync"
-                size="is-small"
-                :custom-class="singleExport.row.status === 'Updating...' ? 'fa-spin' : ''"
-              ></b-icon>
-            </b-button>
-          </b-table-column>
-
-          <b-table-column field="download" custom-key="download">
-            <b-button
-              :disabled="!singleExport.row.enabled"
-              type="is-link"
-              icon-left="file-download"
-              size="is-small"
-              @click="downloadExport(singleExport.row)"
-            ></b-button>
-          </b-table-column>
-        </template>
-      </b-table>
+      <task-list task-type="export" ref="exportList" @taskSelected="task => (this.selectedExport = task)"> </task-list>
     </div>
     <div class="column is-3">
       <b-field label="Name">
@@ -86,30 +11,28 @@
         <b-input v-model="selectedExport.description"></b-input>
       </b-field>
       <b-field label="Include tags">
-        <yeti-tag-input v-model="selectedExport.include_tags"></yeti-tag-input>
+        <b-taginput label="Include tags" v-model="selectedExport.include_tags" icon="tag"></b-taginput>
       </b-field>
       <b-field label="Ignore tags">
-        <yeti-tag-input v-model="selectedExport.ignore_tags"></yeti-tag-input>
+        <b-taginput label="Ignore tags" v-model="selectedExport.ignore_tags" icon="tag"></b-taginput>
       </b-field>
       <b-field label="Exclude tags">
-        <yeti-tag-input v-model="selectedExport.exclude_tags"></yeti-tag-input>
+        <b-taginput label="Exclude tags" v-model="selectedExport.exclude_tags" icon="tag"></b-taginput>
       </b-field>
-      <b-field>
-        <b-select
+      <b-field label="Acts on">
+        <b-taginput
+          label="Acts on"
           v-model="selectedExport.acts_on"
-          placeholder="Select type to export"
-          required
-          ref="exportActsOn"
-          expanded
-        >
-          <option v-for="type in Object.keys(defaultTypes)" v-bind:key="type" :value="type">{{
-            defaultTypes[type]
-          }}</option>
-        </b-select>
+          icon="tag"
+          autocomplete
+          :allow-new="false"
+          placeholder="Add observable types"
+          :data="Object.keys(defaultTypes)"
+        ></b-taginput>
       </b-field>
       <b-field>
         <b-select
-          v-model="selectedExport.template"
+          v-model="selectedExport.template_name"
           placeholder="Select template to use"
           required
           ref="exportTemplate"
@@ -126,7 +49,7 @@
           <button class="button is-danger" @click="confirmDeleteExport">Delete export</button>
         </p>
         <p class="control" v-if="!selectedExport.id">
-          <button class="button is-primary" @click="updateExport">Add new export</button>
+          <button class="button is-primary" @click="newExport">Add new export</button>
         </p>
 
         <p class="control">
@@ -139,134 +62,96 @@
 
 <script>
 import axios from "axios";
-import YetiTagInput from "@/components/YetiTagInput";
 import utils from "@/utils";
+import TaskList from "@/views/TaskList.vue";
 
 var defaultTypes = {
-  Ip: "IP",
-  AutonomousSystem: "Autonomous System",
-  Url: "URL",
-  Hostname: "Hostname",
-  Hash: "Hash",
-  File: "File",
-  Certificate: "Certificate",
-  CertificateSubject: "Certificate Subject",
-  Email: "Email",
-  Text: "Text",
-  Bitcoin: "Bitcoin address",
-  Path: "Path",
-  MacAddress: "MAC address"
+  ip: "IP",
+  // AutonomousSystem: "Autonomous System",
+  url: "URL",
+  hostname: "Hostname"
+  // Hash: "Hash",
+  // File: "File",
+  // Certificate: "Certificate",
+  // CertificateSubject: "Certificate Subject",
+  // Email: "Email",
+  // Text: "Text",
+  // Bitcoin: "Bitcoin address",
+  // Path: "Path",
+  // MacAddress: "MAC address"
 };
 
 export default {
   name: "ExportList",
   components: {
-    YetiTagInput
+    TaskList
   },
   data() {
     return {
       defaultTypes: defaultTypes,
       exports: [],
       exportTemplates: [],
-      newExport: {},
       selectedExport: {},
-      timerListExports: null,
       timerListTemplates: null
     };
   },
   mounted() {
-    this.listExports();
-    this.listExportTemplates();
+    this.listTemplates();
   },
   created() {
-    this.timerListExports = setInterval(this.listExports, 5000);
-    this.timerListTemplates = setInterval(this.listExportTemplates, 2000);
+    this.timerListTemplates = setInterval(this.listTemplates, 2000);
   },
   beforeDestroy() {
-    clearInterval(this.timerListExports);
     clearInterval(this.timerListTemplates);
   },
   methods: {
-    toggle(feed) {
-      console.log(feed);
-      var url = "/api/export/" + feed.id + "/toggle";
+    listTemplates() {
       axios
-        .post(url)
-        .then(() => {
-          // feed.enabled = !feed.enabled;
-        })
-        .catch(error => {
-          console.log(error);
-        });
-    },
-    listExports() {
-      axios
-        .get("/api/export/")
-        .then(response => (this.exports = response.data))
+        .post("/api/v2/templates/search", { query: { name: "" } })
+        .then(response => (this.exportTemplates = response.data.templates.map(template => template.name)))
         .catch(error => {
           console.log(error);
         })
         .finally(() => {});
-    },
-    listExportTemplates() {
-      axios
-        .get("/api/exporttemplate/")
-        .then(response => (this.exportTemplates = response.data.map(template => template.name)))
-        .catch(error => {
-          console.log(error);
-        })
-        .finally(() => {});
-    },
-    refresh(feed) {
-      var url = "/api/export/" + feed.id + "/refresh";
-      axios
-        .post(url)
-        .then(() => {})
-        .catch(error => {
-          console.log(error);
-        });
-    },
-    isRefreshing(feed) {
-      return feed.status === "Updating...";
-    },
-    getRowClass(row) {
-      if (!row.enabled) {
-        return "disabled";
-      }
-      if (row.status === "OK") {
-        return "is-success";
-      }
     },
     updateExport() {
-      var valid = this.$refs.exportActsOn.checkHtml5Validity();
-      valid &= this.$refs.exportTemplate.checkHtml5Validity();
-      valid &= this.$refs.exportName.checkHtml5Validity();
-      if (!valid) {
-        return false;
-      }
-      var params = {
-        acts_on: this.selectedExport.acts_on,
-        description: this.selectedExport.description,
+      let exportTask = {
+        id: this.selectedExport.id,
         name: this.selectedExport.name,
-        template: this.selectedExport.template
+        description: this.selectedExport.description,
+        include_tags: this.selectedExport.include_tags,
+        ignore_tags: this.selectedExport.ignore_tags,
+        exclude_tags: this.selectedExport.exclude_tags,
+        acts_on: this.selectedExport.acts_on,
+        template_name: this.selectedExport.template_name
       };
 
-      if (!this.selectedExport.exclude_tags) {
-        this.selectedExport.exclude_tags = [];
-      }
-      if (!this.selectedExport.ignore_tags) {
-        this.selectedExport.ignore_tags = [];
-      }
-      if (!this.selectedExport.include_tags) {
-        this.selectedExport.include_tags = [];
-      }
-
-      params.exclude_tags = this.selectedExport.exclude_tags.map(tag => tag.name || tag);
-      params.ignore_tags = this.selectedExport.ignore_tags.map(tag => tag.name || tag);
-      params.include_tags = this.selectedExport.include_tags.map(tag => tag.name || tag);
       axios
-        .post(`/api/export/${this.selectedExport.id || ""}`, params)
-        .then(() => this.listExports())
+        .patch(`/api/v2/tasks/export/${this.selectedExport.name}`, { export: exportTask })
+        .then(() => {
+          this.$refs.exportList.listTasks();
+          this.selectedExport = {};
+        })
+        .catch(error => console.log(error))
+        .finally(() => {});
+    },
+    newExport() {
+      let exportTask = {
+        name: this.selectedExport.name,
+        acts_on: this.selectedExport.acts_on,
+        description: this.selectedExport.description,
+        template_name: this.selectedExport.template_name,
+        exclude_tags: this.selectedExport.exclude_tags,
+        ignore_tags: this.selectedExport.ignore_tags,
+        include_tags: this.selectedExport.include_tags
+      };
+      axios
+        .post(`/api/v2/tasks/export/new`, { export: exportTask })
+        .then(() => {
+          this.$refs.exportList.listTasks();
+          this.selectedExport = {};
+          console.log("clear");
+        })
         .catch(error => console.log(error))
         .finally(() => {});
     },
@@ -277,14 +162,15 @@ export default {
         confirmText: "Delete Export",
         type: "is-danger",
         hasIcon: true,
-        onConfirm: this.deleteExport
+        onConfirm: this.deleteExport,
+        focusOn: "cancel"
       });
     },
     deleteExport() {
       axios
-        .delete(`/api/export/${this.selectedExport.id}`)
+        .delete(`/api/v2/tasks/export/${this.selectedExport.name}`)
         .then(() => {
-          this.listExports();
+          this.$refs.exportList.listTasks();
           this.selectedExport = {};
         })
         .catch(error => console.log(error))
@@ -292,7 +178,7 @@ export default {
     },
     downloadExport(singleExport) {
       axios
-        .get(`/api/export/${singleExport.id}/content`)
+        .get(`/api/v2/tasks/export/${singleExport.id}/content`)
         .then(response => {
           var fileURL = window.URL.createObjectURL(new Blob([response.data]));
           var fileLink = document.createElement("a");

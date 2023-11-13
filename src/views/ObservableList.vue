@@ -16,7 +16,7 @@
         class="observable-table"
       >
         <template v-slot:default="observable">
-          <b-table-column field="value" label="Value">
+          <b-table-column field="value" label="Value" class="observable-value">
             <router-link :to="{ name: 'ObservableDetails', params: { id: observable.row.id } }">
               {{ observable.row.value }}
             </router-link>
@@ -24,8 +24,12 @@
 
           <b-table-column field="tags" label="Tags">
             <b-taglist>
-              <b-tag v-for="tag in observable.row.tags" v-bind:key="tag.name" :type="tag.fresh ? 'is-primary' : ''">
-                {{ tag.name }}
+              <b-tag
+                v-for="tag in Object.keys(observable.row.tags)"
+                v-bind:key="tag"
+                :type="observable.row.tags[tag].fresh ? 'is-primary' : ''"
+              >
+                {{ tag }}
               </b-tag>
             </b-taglist>
           </b-table-column>
@@ -45,22 +49,17 @@
               formatTimestamp(observable.row.created)
             }}</span>
           </b-table-column>
-
-          <b-table-column field="sources" label="Sources">
-            <b-taglist>
-              <b-tag v-for="source in observable.row.sources" v-bind:key="source">
-                {{ source }}
-              </b-tag>
-            </b-taglist>
-          </b-table-column>
         </template>
-        <template slot="bottom-left">
+        <template #bottom-left>
           <div v-if="tableSelectedItems.length">
             <b>Total selected</b>: {{ tableSelectedItems.length }}
             <b-button size="is-small" type="is-warning" icon-right="ban" @click="tableSelectedItems = []">
               Clear selection
             </b-button>
           </div>
+        </template>
+        <template #empty>
+          <div class="has-text-centered">No records</div>
         </template>
       </b-table>
     </div>
@@ -79,38 +78,32 @@
                   v-on:keyup.native.enter="searchObservables"
                 />
               </div>
-              <div class="field">
-                <b-checkbox v-model="regexSearch">
-                  Use regex (slower)
-                </b-checkbox>
-              </div>
             </div>
             <br />
             <article class="message tip">
               <div class="message-body content">
                 <p>
-                  You can run complex queries against the database using the input field above.
+                  You can run advanced queries using the input field above.
                 </p>
                 <p>
                   By default, the query will be matched against the
-                  <code>value</code> attribute of the observables. To match against other attributes, use
-                  <code>attribute=query</code>.
+                  <code>value</code> attribute of the observables using regular expressions. To match against other
+                  attributes, use <code>attribute=query</code>.
                 </p>
 
                 <p>Examples:</p>
                 <ul>
                   <li>
-                    <strong>Generic tag query</strong>:
-                    <code>tags=crimeware</code>
-                  </li>
-                  <li><strong>Gate URLs</strong>: <code>tags=zeus .php$</code> (regex <code>on</code>)</li>
-                  <li>
-                    <strong>Ransomware C2s</strong>:
-                    <code>tags=c2,ransomware</code>
+                    <!-- <strong>Quoted values</strong>: -->
+                    <code>"curl/8.1.2 (headless)" tags=c2</code>
                   </li>
                   <li>
-                    <strong>Context</strong>:
-                    <code>context.source=FeodoTracker</code>
+                    <!-- <strong>Generic tag query</strong>: -->
+                    <code>tags=lolbas,persistence</code>
+                  </li>
+                  <li>
+                    <!-- <strong>Gate URLs</strong>:  -->
+                    <code>.php$ tags=cobaltstrike</code>
                   </li>
                 </ul>
               </div>
@@ -138,7 +131,7 @@
               label="Select tags"
               :message="selectedTags.length + ' tags will be applied to ' + tableSelectedItems.length + ' observables'"
             >
-              <yeti-tag-input v-model="selectedTags"></yeti-tag-input>
+              <b-taginput v-model="selectedTags" placeholder="e.g. CobaltStrike" icon="tag"></b-taginput>
             </b-field>
 
             <div class="buttons">
@@ -158,14 +151,11 @@
 
 <script>
 import axios from "axios";
-import YetiTagInput from "@/components/YetiTagInput";
 import utils from "@/utils";
 
 export default {
   name: "ObservableList",
-  components: {
-    YetiTagInput
-  },
+  components: {},
   props: {
     searchQuery: {
       type: String,
@@ -175,7 +165,6 @@ export default {
   data() {
     return {
       // Table
-      regexSearch: false,
       observables: [],
       tablePage: 1,
       tablePerPage: 50,
@@ -198,25 +187,52 @@ export default {
   methods: {
     onPageChange(tablePage) {
       this.tablePage = tablePage;
-      this.searchObservables(false);
+      this.searchObservables();
     },
-    searchObservables(refreshTotal = true) {
-      var params = {
-        filter: this.generateSearchParams(this.searchQuery),
-        params: {
-          regex: this.regexSearch,
-          page: this.tablePage
+    extractParamsFromSearchQuery(searchQuery, defaultKey) {
+      const pattern = /(?<key>\w+)=(?<keyed_terms>[^\s,]+(?:,[^\s,]+)*)|(?<isolated_term>[^"\s]+)|"(?<quoted_term>[^"]+)"/g;
+
+      let resultObj = {};
+      let match;
+
+      while ((match = pattern.exec(searchQuery)) !== null) {
+        let isolatedTerm = match.groups.isolated_term;
+        let quotedTerm = match.groups.quoted_term;
+        let key = match.groups.key;
+        let keyedTerms = match.groups.keyed_terms;
+
+        let values;
+        if (key) {
+          if (key.startsWith("in__") || key.endsWith("__in") || key == "tags" || keyedTerms.includes(",")) {
+            values = keyedTerms.split(",").map(term => term.trim());
+          } else {
+            values = keyedTerms;
+          }
+          resultObj[key] = values;
         }
-      };
-      console.log(params);
-      if (refreshTotal) {
-        this.countTotal(params);
+
+        // Logging isolated and quoted terms (optional)
+        if (isolatedTerm) {
+          resultObj[defaultKey] = isolatedTerm;
+        }
+        if (quotedTerm) {
+          resultObj[defaultKey] = quotedTerm;
+        }
       }
+      return resultObj;
+    },
+    searchObservables() {
+      var params = {
+        query: this.extractParamsFromSearchQuery(this.searchQuery, "value"),
+        page: this.tablePage - 1,
+        count: this.tablePerPage
+      };
       this.loading = true;
       axios
-        .post("/api/observablesearch/", params)
+        .post("/api/v2/observables/search", params)
         .then(response => {
-          return (this.observables = response.data);
+          this.observables = response.data.observables;
+          this.tableTotal = response.data.total;
         })
         .catch(error => {
           return console.log(error);
@@ -242,11 +258,12 @@ export default {
     },
     changeTags(action) {
       var params = {
-        tags: this.selectedTags.map(tag => tag.name),
-        ids: this.tableSelectedItems.map(item => item.id)
+        tags: this.selectedTags,
+        ids: this.tableSelectedItems.map(item => item.id),
+        strict: false
       };
       axios
-        .post(`/api/observable/bulk-${action}`, params)
+        .post(`/api/v2/observables/tag`, params)
         .then(() => {
           this.searchObservables();
           this.$buefy.notification.open(
@@ -261,9 +278,9 @@ export default {
     },
     getExportTemplates() {
       axios
-        .get("/api/exporttemplate/")
+        .post("/api/v2/templates/search", { query: { name: "" } })
         .then(response => {
-          this.exportTemplates = response.data;
+          this.exportTemplates = response.data.templates;
         })
         .catch(error => {
           console.log(error);
@@ -271,21 +288,16 @@ export default {
     },
     downloadExport() {
       var params = {
-        id: this.selectedExportTemplate
+        template_id: this.selectedExportTemplate
       };
       if (this.tableSelectedItems.length) {
-        params.observables = this.tableSelectedItems.map(row => row.id);
+        params.observable_ids = this.tableSelectedItems.map(row => row.id);
       } else {
-        params.query = { filter: this.generateSearchParams(this.searchQuery) };
-        params.query.params = {
-          regex: this.regexSearch,
-          page: this.tablePage
-        };
+        params.search_query = this.searchQuery;
       }
 
-      console.log(params);
       axios
-        .post("/api/exporttemplate/export", params)
+        .post("/api/v2/templates/render", params)
         .then(response => {
           var fileURL = window.URL.createObjectURL(new Blob([response.data]));
           var fileLink = document.createElement("a");
@@ -300,32 +312,11 @@ export default {
           console.log(error);
         });
     },
-    countTotal(params) {
-      this.tableTotal = 500;
-      axios
-        .post("/api/observablesearch/total", params)
-        .then(response => {
-          this.tableTotal = response.data.total;
-        })
-        .catch(error => {
-          console.log(error);
-        });
-    },
     formatTimestamp(timestamp, local) {
       return utils.formatTimestamp(timestamp, local);
     }
   },
   computed: {
-    filterTags() {
-      return this.existingTags.filter(tag => {
-        return (
-          tag.name
-            .toString()
-            .toLowerCase()
-            .indexOf(this.tagName.toLowerCase()) >= 0
-        );
-      });
-    },
     totalSelectedItems() {
       return this.tableSelectedItems.length > 0 ? this.tableSelectedItems.length : this.tableTotal;
     }
@@ -336,5 +327,11 @@ export default {
 <style>
 .observable-table {
   margin-top: 0.4em;
+  overflow: auto;
+}
+
+.observable-table td.observable-value {
+  font-family: monospace;
+  font-size: 0.9em;
 }
 </style>

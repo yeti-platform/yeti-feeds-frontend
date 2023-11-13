@@ -13,7 +13,7 @@
     class="object-table"
   >
     <template v-slot:default="object">
-      <b-table-column field="created" label="Created on (UTC)" width="180"
+      <b-table-column field="created" label="Created" width="180"
         ><span :title="'Localtime: ' + formatTimestamp(object.row.created, true)">{{
           formatTimestamp(object.row.created)
         }}</span>
@@ -26,20 +26,24 @@
         v-bind:key="field.field"
       >
         <span v-if="field.field === 'value' || field.field === 'name'">
-          <router-link
-            :to="{
-              name: field === 'value' ? 'ObservableDetails' : 'EntityDetails',
-              params: { id: object.row.id }
-            }"
-          >
+          <router-link :to="`/${object.row.root_type}/${object.row.id}`">
             {{ object.row[field.field] }}
           </router-link>
         </span>
 
         <code v-else-if="field.type === 'code'"> {{ object.row[field.field] }} </code>
         <code v-else-if="field.type === 'longcode'"> {{ object.row[field.field] }} </code>
+        <b-taglist v-else-if="field.field === 'tags'">
+          <b-tag
+            v-for="tag in Object.keys(object.row['tags'])"
+            v-bind:key="tag"
+            :type="object.row['tags'][tag].fresh ? 'is-primary' : ''"
+          >
+            {{ tag }}
+          </b-tag>
+        </b-taglist>
 
-        <b-taglist v-else-if="field.field === 'tags' || field.field === 'aliases'">
+        <b-taglist v-else-if="field.type == 'list'">
           <b-tag
             v-for="tag in object.row[field.field]"
             v-bind:key="tag.name ? tag.name : tag"
@@ -49,8 +53,17 @@
           </b-tag>
         </b-taglist>
 
+        <span
+          v-else-if="field.type === 'timestamp'"
+          :title="'Localtime: ' + formatTimestamp(object.row[field.field], true)"
+          >{{ formatTimestamp(object.row[field.field]) }}
+        </span>
+
         <span v-else-if="field.type !== 'longtext'">{{ object.row[field.field] }}</span>
       </b-table-column>
+    </template>
+    <template #empty>
+      <div class="has-text-centered">No records</div>
     </template>
   </b-table>
 </template>
@@ -58,7 +71,6 @@
 <script>
 import axios from "axios";
 import utils from "@/utils";
-// import { ENTITY_TYPES } from "@/definitions/entityDefinitions.js";
 import _ from "lodash";
 
 export default {
@@ -115,58 +127,64 @@ export default {
       this.tablePage = tablePage;
       this.searchObjects(false);
     },
+    extractParamsFromSearchQuery(searchQuery, defaultKey) {
+      const pattern = /(?<key>\w+)=(?<keyed_terms>[^\s,]+(?:,[^\s,]+)*)|(?<isolated_term>[^"\s]+)|"(?<quoted_term>[^"]+)"/g;
+
+      let resultObj = {};
+      let match;
+
+      while ((match = pattern.exec(searchQuery)) !== null) {
+        let isolatedTerm = match.groups.isolated_term;
+        let quotedTerm = match.groups.quoted_term;
+        let key = match.groups.key;
+        let keyedTerms = match.groups.keyed_terms;
+
+        let values;
+        if (key) {
+          if (
+            key.startsWith("in__") ||
+            key.endsWith("__in") ||
+            key == "tags" ||
+            key == "relevant_tags" ||
+            keyedTerms.includes(",")
+          ) {
+            values = keyedTerms.split(",").map(term => term.trim());
+          } else {
+            values = keyedTerms;
+          }
+          resultObj[key] = values;
+        }
+
+        // Logging isolated and quoted terms (optional)
+        if (isolatedTerm) {
+          resultObj[defaultKey] = isolatedTerm;
+        }
+        if (quotedTerm) {
+          resultObj[defaultKey] = quotedTerm;
+        }
+      }
+      return resultObj;
+    },
     searchObjects() {
       var params = {
-        filter: this.generateSearchParams(this.searchQuery),
-        params: {
-          regex: this.regexSearch,
-          ignorecase: this.ignoreCase,
-          page: this.tablePage
-        }
+        query: this.extractParamsFromSearchQuery(this.searchQuery, "name"),
+        type: this.searchSubtype,
+        count: this.tablePerPage,
+        page: this.tablePage - 1
       };
-      this.countTotal(params);
       this.loading = true;
       axios
-        .post(`/api/${this.searchType}search/`, params)
+        .post(`/api/v2/${this.searchType}/search`, params)
         .then(response => {
-          this.objects = response.data;
-          this.loading = false;
+          this.objects = response.data[this.searchType];
+          this.tableTotal = response.data.total;
+          this.$emit("totalUpdated", this.tableTotal);
         })
         .catch(error => {
           console.log(error);
         })
         .finally(() => {
           this.loading = false;
-        });
-    },
-    generateSearchParams(searchQuery) {
-      var filter = {};
-      var queries = searchQuery.split(" ");
-      var default_field = "name";
-
-      for (var i in queries) {
-        var splitted = queries[i].split("=");
-        if (splitted.length == 2) {
-          filter[splitted[0]] = splitted[1].split(",");
-        } else if (queries[i] !== "") {
-          filter[default_field] = queries[i];
-        }
-      }
-
-      if (this.searchSubtype !== "") {
-        filter["_cls"] = `${this.searchSubtype}`;
-      }
-      return filter;
-    },
-    countTotal(params) {
-      this.tableTotal = 500;
-      axios
-        .post(`/api/${this.searchType}search/total`, params)
-        .then(response => {
-          this.tableTotal = response.data.total;
-        })
-        .catch(error => {
-          console.log(error);
         });
     },
     formatTimestamp(timestamp, local) {

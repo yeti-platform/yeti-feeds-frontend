@@ -1,13 +1,26 @@
 <template>
   <div class="entity-list columns">
     <div class="column is-three-quarters">
-      <b-tabs v-model="activeMainTab" position="is-left" :animated="false">
-        <b-tab-item :label="entity.name" v-for="entity in entityTypes" v-bind:key="entity.type">
+      <b-tabs v-model="activeMainTab" position="is-left" :animated="false" @input="trackTabChange">
+        <b-tab-item
+          v-for="entity in entityTypes"
+          v-bind:key="entity.type"
+          :value="entity.type"
+          :visible="displayEntityType(entity.type)"
+        >
+          <template slot="header">
+            <b-icon :icon="entity.icon"></b-icon>
+            <span>
+              {{ entity.name }}
+              <b-tag rounded>{{ entityCount[entity.type] === null ? "?" : entityCount[entity.type] }}</b-tag>
+            </span>
+          </template>
           <object-list
-            search-type="entity"
+            search-type="entities"
             :search-subtype="entity.type"
             :fields="entity.fields"
             :search-query="searchQuery"
+            @totalUpdated="countEntities(entity.type, $event)"
             :ref="entity.type + 'ObjectList'"
           />
         </b-tab-item>
@@ -27,28 +40,21 @@
             <article class="message tip">
               <div class="message-body content">
                 <p>
-                  You can run complex queries against the database using the input field above.
+                  You can run advanced queries using the input field above.
                 </p>
                 <p>
                   By default, the query will be matched against the
-                  <code>value</code> attribute of the entities. To match against other attributes, use
-                  <code>attribute=query</code>.
+                  <code>name</code> attribute of the entities using regular expressions. To match against other
+                  attributes, use <code>attribute=query</code>.
                 </p>
 
                 <p>Examples:</p>
                 <ul>
                   <li>
-                    <strong>Generic tag query</strong>:
-                    <code>tags=crimeware</code>
-                  </li>
-                  <li><strong>Gate URLs</strong>: <code>tags=zeus .php$</code> (regex <code>on</code>)</li>
-                  <li>
-                    <strong>Ransomware C2s</strong>:
-                    <code>tags=c2,ransomware</code>
+                    <code>"Bear" in__aliases=sofacy</code>
                   </li>
                   <li>
-                    <strong>Context</strong>:
-                    <code>context.source=FeodoTracker</code>
+                    <code>family=keylogger</code>
                   </li>
                 </ul>
               </div>
@@ -65,17 +71,21 @@
             </b-field>
             <div v-if="selectedEntityType">
               <b-field :label="field.label" v-for="field in selectedEntityType.fields" :key="field.field">
-                <b-input v-model="newEntity[field.field]" v-if="field.type === 'text'" />
-                <b-input type="textarea" v-model="newEntity[field.field]" v-if="field.type === 'longtext'" />
-                <b-select v-if="field.type === 'option'" v-model="newEntity[field.field]">
-                  <option v-for="(option, index) in field.choices" :value="String(index + 1)" :key="option">
-                    {{ option }} {{ index }}</option
-                  >
+                <b-input v-if="field.type === 'text'" v-model="newEntity[field.field]" />
+                <b-input v-else-if="field.type === 'longtext'" type="textarea" v-model="newEntity[field.field]" />
+                <b-select v-else-if="field.type === 'option'" v-model="newEntity[field.field]">
+                  <option v-for="option in field.choices" :value="option" :key="option"> {{ option }}</option>
                 </b-select>
                 <b-taginput
+                  v-else-if="field.field === 'tags'"
+                  label="Tags"
+                  v-model="newEntityTags"
+                  icon="tag"
+                ></b-taginput>
+                <b-taginput
+                  v-else-if="field.type === 'list'"
                   label="Tags"
                   v-model="newEntity[field.field]"
-                  v-if="field.type === 'list'"
                   icon="tag"
                 ></b-taginput>
               </b-field>
@@ -105,30 +115,35 @@ export default {
   },
   data() {
     return {
-      // Table
-      entities: [],
-      tablePage: 1,
-      tablePerPage: 50,
-      tableTotal: 500, // 5 pages worth should be enough to have time to get a more accurate count
+      entityCount: ENTITY_TYPES.reduce((acc, cur) => {
+        acc[cur.type] = null;
+        return acc;
+      }, {}),
       loading: false,
       // New
       entityTypes: ENTITY_TYPES,
       selectedEntityType: null,
       newEntity: {},
+      newEntityTags: [],
       // Panel
       activeTab: 0,
       activeMainTab: 0,
       searchQuery: ""
     };
   },
+  mounted() {
+    if (this.$route.hash) {
+      this.activeMainTab = this.$route.hash.replace("#", "");
+    }
+  },
   methods: {
     saveEntity() {
       this.newEntity.type = this.selectedEntityType.type;
       axios
-        .post("/api/entity/", this.newEntity)
+        .post("/api/v2/entities/", { entity: this.newEntity, tags: this.newEntityTags })
         .then(response => {
           this.$buefy.toast.open({
-            message: `Entity ${response.name} saved`,
+            message: `Entity ${response.data.name} saved`,
             type: "is-success"
           });
           // TODO: think about replacing this by an EventBus
@@ -145,9 +160,37 @@ export default {
     },
     formatTimestamp(timestamp, local) {
       return utils.formatTimestamp(timestamp, local);
+    },
+    countEntities(type, count) {
+      this.entityCount[type] = count;
+      if (!this.$route.hash) {
+        this.navigateToFirstPopulatedTab();
+      }
+    },
+    navigateToFirstPopulatedTab() {
+      for (const entityType of this.entityTypes) {
+        if (this.entityCount[entityType.type] > 0) {
+          this.activeMainTab = entityType.type;
+          break;
+        }
+      }
+    },
+    trackTabChange(value) {
+      window.location.hash = value;
+    },
+    displayEntityType(type) {
+      return this.entityCount[type] > 0;
     }
   },
-  computed: {}
+  watch: {
+    $route(to) {
+      if (to.hash) {
+        this.activeMainTab = to.hash.replace("#", "");
+      } else {
+        this.navigateToFirstPopulatedTab();
+      }
+    }
+  }
 };
 </script>
 

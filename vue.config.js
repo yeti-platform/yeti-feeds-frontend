@@ -4,11 +4,11 @@ module.exports = {
     proxy: {
       "^/api": {
         autoRewrite: true,
-        target: "http://localhost:5000/"
+        target: "http://fastapi:8000/"
       },
       "^/auth/": {
         autoRewrite: true,
-        target: "http://localhost:5000/"
+        target: "http://fastapi:8000/"
       }
     }
   }

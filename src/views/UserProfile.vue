@@ -25,16 +25,6 @@
                     </b-button>
                   </td>
                 </tr>
-                <tr>
-                  <th>Groups</th>
-                  <td>
-                    <b-taglist>
-                      <b-tag type="is-info" v-bind:key="group.groupname" v-for="group in profile.groups">
-                        {{ group.groupname }}
-                      </b-tag>
-                    </b-taglist>
-                  </td>
-                </tr>
               </tbody>
             </table>
           </div>
@@ -47,88 +37,16 @@
           </header>
           <div class="card-content" v-if="systemAuth === 'local'">
             <b-field>
-              <b-input v-model="currentPassword" type="password" placeholder="Current password"></b-input>
-            </b-field>
-            <b-field>
               <b-input v-model="newPassword" type="password" placeholder="New password" password-reveal></b-input>
             </b-field>
             <p class="control">
-              <b-button type="is-primary" @click="changeUserPassword()">Save</b-button>
+              <b-button type="is-primary" @click="changeUserPassword">Save</b-button>
             </p>
           </div>
           <div class="card-content" v-if="systemAuth === 'oidc'">
             Authentication is handled by Open ID Connect. There is no password to change.
           </div>
         </div>
-      </div>
-    </div>
-    <div class="columns">
-      <div class="column" v-if="profile">
-        <b-tabs v-model="activeTab">
-          <b-tab-item label="Permissions">
-            <table class="table is-fullwidth">
-              <tbody>
-                <tr>
-                  <th>Permission type</th>
-                  <th>Read</th>
-                  <th>Write</th>
-                  <th>Refresh</th>
-                  <th>Toggle</th>
-                </tr>
-                <tr v-for="type in Object.keys(profile.permissions)" v-bind:key="type">
-                  <td>{{ type }}</td>
-                  <td>
-                    <b-checkbox
-                      :disabled="profile.permissions[type].read == null || !isAdmin"
-                      v-model="profile.permissions[type].read"
-                    ></b-checkbox>
-                  </td>
-                  <td>
-                    <b-checkbox
-                      :disabled="profile.permissions[type].write == null || !isAdmin"
-                      v-model="profile.permissions[type].write"
-                    ></b-checkbox>
-                  </td>
-                  <td>
-                    <b-checkbox
-                      :disabled="profile.permissions[type].refresh == null || !isAdmin"
-                      v-model="profile.permissions[type].refresh"
-                    ></b-checkbox>
-                  </td>
-                  <td>
-                    <b-checkbox
-                      :disabled="profile.permissions[type].toggle == null || !isAdmin"
-                      v-model="profile.permissions[type].toggle"
-                    ></b-checkbox>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-            <p class="control">
-              <b-button type="is-primary" @click="saveUserPermissions()" v-if="isAdmin">Save permissions</b-button>
-            </p>
-          </b-tab-item>
-          <b-tab-item label="Misc settings">
-            <p class="title is-4">Miscellaneous settings</p>
-            <p class="subtitle is-6">
-              Any Yeti object can register per-user settings for specific tweaking. This is especially useful for API
-              keys or individual credentials.
-            </p>
-            <b-field
-              v-for="setting_name in Object.keys(profile.available_settings)"
-              v-bind:key="profile.available_settings[setting_name].name"
-              :label="profile.available_settings[setting_name].name"
-            >
-              <b-input
-                :placeholder="profile.available_settings[setting_name].description"
-                v-model="profile.settings[setting_name]"
-              ></b-input>
-            </b-field>
-            <p class="control">
-              <b-button type="is-primary" @click="saveUserSettings()">Save settings</b-button>
-            </p>
-          </b-tab-item>
-        </b-tabs>
       </div>
     </div>
   </div>
@@ -156,9 +74,12 @@ export default {
   },
   methods: {
     getUserProfile() {
-      console.log("userprofile");
+      let id = this.id;
+      if (id === null) {
+        id = this.userId;
+      }
       axios
-        .get(this.getEndpoint(""))
+        .get(`/api/v2/users/${id}`)
         .then(response => {
           this.profile = response.data;
         })
@@ -167,13 +88,13 @@ export default {
         })
         .finally(() => {});
     },
-    resetApiKey(user) {
+    resetApiKey() {
       axios
-        .post(this.getEndpoint("reset-api"))
+        .post(`/api/v2/users/reset-api-key`, { user_id: this.userId })
         .then(response => {
-          user.api_key = response.data.api_key;
+          this.profile.api_key = response.data.api_key;
           this.$buefy.notification.open({
-            message: `API key for user <strong>${user.username}</strong> succesfully reset.`,
+            message: `API key succesfully reset.`,
             type: "is-success"
           });
         })
@@ -184,11 +105,11 @@ export default {
     },
     changeUserPassword() {
       var params = {
-        current: this.currentPassword,
-        new: this.newPassword
+        user_id: this.userId,
+        new_password: this.newPassword
       };
       axios
-        .post(this.getEndpoint("change-password"), params)
+        .post("/api/v2/users/reset-password", params)
         .then(() => {
           this.$buefy.notification.open({
             message: `Password succesfully changed.`,
@@ -202,13 +123,12 @@ export default {
           });
         })
         .finally(() => {
-          this.currentPassword = null;
           this.newPassword = null;
         });
     },
     saveUserSettings() {
       axios
-        .post(this.getEndpoint("settings"), this.profile.settings)
+        .post("/api/v2/users", this.profile)
         .then(() => {
           this.$buefy.notification.open({
             message: `Settings successfully updated.`,
@@ -219,40 +139,14 @@ export default {
           console.log(error);
         })
         .finally(() => {});
-    },
-    saveUserPermissions() {
-      var uri = `/api/useradmin/permissions`;
-      if (this.id !== null) {
-        uri += `/${this.id}`;
-      }
-      axios
-        .post(uri, this.profile.permissions)
-        .then(response => {
-          this.profile.permissions = response.data.permissions;
-          this.$buefy.notification.open({
-            message: `Permissions successfully updated.`,
-            type: "is-success"
-          });
-        })
-        .catch(error => {
-          console.log(error);
-        })
-        .finally(() => {});
-    },
-    getEndpoint(endpoint) {
-      if (this.id !== null) {
-        return `/api/useradmin/${endpoint}/${this.id}`.replace("//", "/");
-      } else {
-        return `/api/users/${endpoint}`;
-      }
     }
   },
   computed: {
     isAdmin() {
       return this.$store.getters.isAdmin;
     },
-    tokenSubject() {
-      return this.$store.getters.tokenSubject;
+    userId() {
+      return this.$store.getters.userId;
     },
     systemAuth() {
       return this.$store.getters.appConfig.auth.module;

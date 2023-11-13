@@ -8,7 +8,7 @@
       <b-navbar-item tag="router-link" :to="{ path: '/browse' }">Browse observables</b-navbar-item>
       <b-navbar-item tag="router-link" :to="{ path: '/entities' }">Entities</b-navbar-item>
       <b-navbar-item tag="router-link" :to="{ path: '/indicators' }">Indicators</b-navbar-item>
-      <b-navbar-dropdown label="Scheduling">
+      <b-navbar-dropdown label="Automation">
         <b-navbar-item tag="router-link" :to="{ path: '/feeds' }">Feeds</b-navbar-item>
         <b-navbar-item tag="router-link" :to="{ path: '/analytics' }">Analytics</b-navbar-item>
         <b-navbar-item tag="router-link" :to="{ path: '/exports' }">Exports</b-navbar-item>
@@ -27,13 +27,13 @@
         <b-navbar-item tag="router-link" :to="{ path: '/profile' }">
           Profile
         </b-navbar-item>
-        <b-navbar-item tag="a" @click="logout()" v-if="localAuth">
+        <b-navbar-item tag="a" @click="logout" v-if="localAuth">
           Logout
         </b-navbar-item>
       </b-navbar-dropdown>
       <b-navbar-item tag="div">
         <div class="buttons">
-          <a class="button is-primary" href="/auth/login" v-if="!isAuthenticated">Log in</a>
+          <a class="button is-primary" href="/login" v-if="!isAuthenticated">Log in</a>
         </div>
       </b-navbar-item>
     </template>

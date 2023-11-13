@@ -1,7 +1,9 @@
 <template>
   <div class="modal-card" v-if="localObject">
     <header class="modal-card-head">
-      <p v-if="localObject.id" class="modal-card-title">Editing {{ localObject.id }}</p>
+      <p v-if="localObject.id" class="modal-card-title">
+        Editing {{ objectType.name.toLowerCase() }} <strong>{{ localObject.name }}</strong>
+      </p>
       <p v-else class="modal-card-title">New {{ objectType.name }}</p>
     </header>
     <section class="modal-card-body">
@@ -16,9 +18,7 @@
           v-if="field.type === 'longcode'"
         />
         <b-select v-if="field.type === 'option'" v-model="localObject[field.field]">
-          <option v-for="(option, index) in field.choices" :value="String(index + 1)" :key="option">
-            {{ option }} {{ index }}</option
-          >
+          <option v-for="option in field.choices" :value="option" :key="option"> {{ option }}</option>
         </b-select>
         <b-taginput
           label="Tags"
@@ -30,6 +30,9 @@
       <div class="buttons">
         <b-button type="is-primary" @click="saveObject">
           Save
+        </b-button>
+        <b-button @click="$parent.close()">
+          Cancel
         </b-button>
       </div>
     </section>
@@ -69,11 +72,11 @@ export default {
   methods: {
     saveObject() {
       axios
-        .post(`/api/${this.endpoint}/${this.object.id}`, this.localObject)
+        .patch(`/api/v2/${this.endpoint}/${this.object.id}`, { [this.localObject.root_type]: this.localObject })
         .then(response => {
           this.$parent.close();
           this.$buefy.toast.open({
-            message: "Update succesful!",
+            message: "Update successful!",
             type: "is-success"
           });
           this.$emit("refresh", response.data);

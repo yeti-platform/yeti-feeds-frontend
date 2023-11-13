@@ -1,135 +1,157 @@
 <template>
-  <div class="columns" v-if="indicator">
-    <div class="column is-8">
-      <div class="tile is-ancestor">
-        <div class="tile is-vertical is-parent">
-          <nav class="tile panel is-child">
-            <p class="panel-heading">
-              <b-taglist attached>
-                <b-tag size="is-large" type="is-dark">{{ indicator.name }}</b-tag>
-                <b-tag size="is-large" type="is-info">{{ indicator.type }}</b-tag>
-              </b-taglist>
-            </p>
-            <div class="panel-block">
-              <div class="content">{{ indicator.description || "No description provided" }}</div>
-            </div>
-            <div class="panel-block">
-              <div class="content">
-                <code>{{ indicator.pattern }}</code>
+  <div v-if="indicator">
+    <div class="columns">
+      <div class="column is-8">
+        <div class="tile is-ancestor">
+          <div class="tile is-vertical is-parent">
+            <nav class="tile panel is-child">
+              <p class="panel-heading">
+                <b-taglist attached>
+                  <b-tag size="is-large" type="is-dark">{{ indicator.name }}</b-tag>
+                  <b-tag size="is-large" type="is-info">{{ indicator.type }}</b-tag>
+                </b-taglist>
+              </p>
+              <div class="panel-block">
+                <div class="content">{{ indicator.description || "No description provided" }}</div>
               </div>
-            </div>
-          </nav>
-          <div class="tile is-child">
-            <b-tabs v-model="activeTab" position="is-left" :animated="false">
-              <b-tab-item>
-                <template slot="header">
-                  <b-icon icon="sitemap"></b-icon>
-                  <span>
-                    Observables
-                    <b-tag rounded> {{ totalRelatedObservables == null ? "?" : totalRelatedObservables }}</b-tag>
-                  </span>
-                </template>
+              <div class="panel-block">
+                <div class="content">
+                  <pre>{{ indicator.pattern }}</pre>
+                </div>
+              </div>
+            </nav>
+          </div>
+        </div>
+      </div>
+      <div class="column">
+        <div class="tile is-ancestor">
+          <div class="tile is-vertical is-parent">
+            <nav class="tile panel is-child">
+              <p class="panel-heading">Info <b-button size="is-small" @click="editIndicator"> Edit </b-button></p>
+              <div class="panel-block">
+                <table class="table is-fullwidth">
+                  <tbody>
+                    <tr v-for="field in indicatorInfoFields" v-bind:key="field.field">
+                      <th>{{ field.label }}</th>
+                      <td>
+                        <span v-if="!indicator[field.field] || !indicator[field.field].length">N/A</span>
+                        <b-taglist v-else-if="field.type == 'list'">
+                          <b-tag v-for="item in indicator[field.field]" v-bind:key="item">
+                            {{ item }}
+                          </b-tag>
+                        </b-taglist>
+                        <span v-else>
+                          {{ indicator[field.field] }}
+                        </span>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </nav>
+
+            <nav class="tile panel is-child">
+              <p class="panel-heading">Related indicators</p>
+              <div class="panel-block">
                 <related-objects
+                  v-show="totalRelatedIndicators > 0"
                   source-type="indicator"
-                  target-type="Observable"
+                  inline-icons
+                  :fields="['name']"
+                  :target-types="indicatorTypes.map(def => def.type)"
                   :id="id"
-                  @totalUpdated="value => (totalRelatedObservables = value)"
+                  @totalUpdated="value => (totalRelatedIndicators = value)"
+                  style="width: 100%"
+                  ref="relatdIndicatorsList"
                 ></related-objects>
-              </b-tab-item>
-            </b-tabs>
+              </div>
+              <div class="panel-block">
+                <b-field class="expanded">
+                  <b-autocomplete
+                    :open-on-focus="true"
+                    :keep-first="true"
+                    field="name"
+                    :clearable="true"
+                    :data="filteredIndicators"
+                    placeholder="Link new indicator..."
+                    v-model="linkedIndicatorNameFilter"
+                    @select="option => (linkedIndicator = option)"
+                    expanded
+                  >
+                    <template slot-scope="props">
+                      <b-icon size="is-small" :icon="getIconForType(props.option.type)"></b-icon>
+                      {{ props.option.name }}
+                    </template>
+                  </b-autocomplete>
+                  <p class="control">
+                    <button class="button is-primary" @click="linkIndicator">Link</button>
+                  </p>
+                </b-field>
+              </div>
+            </nav>
+
+            <nav class="tile panel is-child">
+              <p class="panel-heading">Related entities</p>
+              <div class="panel-block">
+                <related-objects
+                  v-show="totalRelatedEntities > 0"
+                  source-type="indicator"
+                  inline-icons
+                  :fields="['name']"
+                  :target-types="entityTypes.map(def => def.type)"
+                  :id="id"
+                  @totalUpdated="value => (totalRelatedEntities = value)"
+                  style="width: 100%"
+                  ref="relatdEntitiesList"
+                ></related-objects>
+              </div>
+              <div class="panel-block">
+                <b-field class="expanded">
+                  <b-autocomplete
+                    :open-on-focus="true"
+                    :keep-first="true"
+                    field="name"
+                    :clearable="true"
+                    :data="filteredEntities"
+                    placeholder="Link new indicator..."
+                    v-model="linkedEntityNameFilter"
+                    @select="option => (linkedEntity = option)"
+                    expanded
+                  >
+                    <template slot-scope="props">
+                      <b-icon size="is-small" :icon="getIconForType(props.option.type)"></b-icon>
+                      {{ props.option.name }}
+                    </template>
+                  </b-autocomplete>
+                  <p class="control">
+                    <button class="button is-primary" @click="linkEntity">Link</button>
+                  </p>
+                </b-field>
+              </div>
+            </nav>
           </div>
         </div>
       </div>
     </div>
-    <div class="column">
-      <div class="tile is-ancestor">
-        <div class="tile is-vertical is-parent">
-          <nav class="tile panel is-child">
-            <p class="panel-heading">Info <b-button size="is-small" @click="editIndicator"> Edit </b-button></p>
-            <div class="panel-block">
-              <table class="table is-fullwidth">
-                <tbody>
-                  <tr>
-                    <th>Location</th>
-                    <td>{{ indicator.location }}</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </nav>
-
-          <nav class="tile panel is-child">
-            <p class="panel-heading">Related indicators</p>
-            <div class="panel-block">
-              <related-objects
-                v-show="totalRelatedIndicators > 0"
-                source-type="Indicator"
-                inline-icons
-                :fields="['name']"
-                target-type="Indicator"
-                :id="id"
-                @totalUpdated="value => (totalRelatedIndicators = value)"
-                style="width: 100%"
-                ref="relatdIndicatorsList"
-              ></related-objects>
-            </div>
-            <div class="panel-block">
-              <b-field class="expanded">
-                <b-autocomplete
-                  :open-on-focus="true"
-                  :keep-first="true"
-                  field="name"
-                  :clearable="true"
-                  :data="filteredIndicators"
-                  placeholder="Link new indicator..."
-                  v-model="linkedIndicatorNameFilter"
-                  @select="option => (linkedIndicator = option)"
-                  expanded
-                >
-                </b-autocomplete>
-                <p class="control">
-                  <button class="button is-primary" @click="linkIndicator">Link</button>
-                </p>
-              </b-field>
-            </div>
-          </nav>
-
-          <nav class="tile panel is-child">
-            <p class="panel-heading">Related entities</p>
-            <div class="panel-block">
-              <related-objects
-                v-show="totalRelatedEntities > 0"
-                source-type="Indicator"
-                inline-icons
-                :fields="['name']"
-                target-type="Entity"
-                :id="id"
-                @totalUpdated="value => (totalRelatedEntities = value)"
-                style="width: 100%"
-                ref="relatdEntitiesList"
-              ></related-objects>
-            </div>
-            <div class="panel-block">
-              <b-field class="expanded">
-                <b-autocomplete
-                  :open-on-focus="true"
-                  :keep-first="true"
-                  field="name"
-                  :clearable="true"
-                  :data="filteredEntities"
-                  placeholder="Link new indicator..."
-                  v-model="linkedEntityNameFilter"
-                  @select="option => (linkedEntity = option)"
-                  expanded
-                >
-                </b-autocomplete>
-                <p class="control">
-                  <button class="button is-primary" @click="linkEntity">Link</button>
-                </p>
-              </b-field>
-            </div>
-          </nav>
-        </div>
+    <div class="columns">
+      <div class="column">
+        <b-tabs v-model="activeTab" position="is-left" :animated="false">
+          <b-tab-item>
+            <template slot="header">
+              <b-icon icon="sitemap"></b-icon>
+              <span>
+                Observables
+                <b-tag rounded> {{ totalRelatedObservables == null ? "?" : totalRelatedObservables }}</b-tag>
+              </span>
+            </template>
+            <related-objects
+              source-type="indicator"
+              :target-types="observableTypes.map(def => def.type)"
+              :id="id"
+              @totalUpdated="value => (totalRelatedObservables = value)"
+            ></related-objects>
+          </b-tab-item>
+        </b-tabs>
       </div>
     </div>
   </div>
@@ -137,8 +159,13 @@
 
 <script>
 import axios from "axios";
+import _ from "lodash";
+
 import RelatedObjects from "@/components/RelatedObjects";
-import NewObject from "@/components/NewObject";
+import EditObject from "@/components/EditObject";
+import { ENTITY_TYPES } from "@/definitions/entityDefinitions.js";
+import { INDICATOR_TYPES } from "@/definitions/indicatorDefinitions.js";
+import { OBSERVABLE_TYPES } from "@/definitions/observableDefinitions.js";
 
 export default {
   props: ["id"],
@@ -156,8 +183,12 @@ export default {
       linkedIndicatorNameFilter: "",
       linkedEntityNameFilter: "",
       linkedIndicator: null,
+      linkedEntity: null,
       entities: [],
-      indicators: []
+      indicators: [],
+      entityTypes: ENTITY_TYPES,
+      indicatorTypes: INDICATOR_TYPES,
+      observableTypes: OBSERVABLE_TYPES
     };
   },
   mounted() {
@@ -168,7 +199,7 @@ export default {
   methods: {
     getindicatorDetails() {
       axios
-        .get(`/api/indicator/${this.id}`)
+        .get(`/api/v2/indicators/${this.id}`)
         .then(response => {
           this.indicator = response.data;
           // Switch back to Context view when reloading the page.
@@ -182,18 +213,16 @@ export default {
     editIndicator() {
       this.$buefy.modal.open({
         parent: this,
-        component: NewObject,
+        component: EditObject,
         hasModalCard: true,
-        customClass: "custom-class custom-class-2",
         trapFocus: true,
         props: {
           objectTypeName: this.indicator.type,
           object: this.indicator,
-          endpoint: "indicator"
+          endpoint: "indicators"
         },
         events: {
           refresh: newIndicator => {
-            console.log(newIndicator);
             this.indicator = newIndicator;
           }
         }
@@ -201,9 +230,12 @@ export default {
     },
     getIndicatorAutocomplete() {
       axios
-        .post("/api/indicatorsearch/", { name: "" })
+        .post("/api/v2/indicators/search", {
+          query: { name: this.linkedIndicatorNameFilter },
+          count: 20
+        })
         .then(response => {
-          this.indicators = response.data;
+          this.indicators = response.data.indicators;
         })
         .catch(error => {
           console.log(error);
@@ -211,10 +243,20 @@ export default {
         .finally();
     },
     getEntityAutocomplete() {
+      this.entities = [];
       axios
-        .post("/api/entitysearch/", { name: "" })
+        .post("/api/v2/entities/search", {
+          query: { name: this.linkedEntityNameFilter },
+          count: 20
+        })
         .then(response => {
-          this.entities = response.data;
+          this.entities = response.data.entities.map(entity => {
+            return {
+              id: entity.id,
+              name: entity.name,
+              type: entity.type
+            };
+          });
         })
         .catch(error => {
           console.log(error);
@@ -223,18 +265,16 @@ export default {
     },
     linkIndicator() {
       var params = {
-        type_src: "indicator",
-        type_dst: "indicator",
-        link_src: this.indicator.id,
-        link_dst: this.linkedIndicator.id,
-        source: "web"
+        source: `indicators/${this.indicator.id}`,
+        target: `indicators/${this.linkedIndicator.id}`,
+        link_type: "web",
+        description: "Manual link."
       };
       axios
-        .post("/api/link/", params)
+        .post("/api/v2/graph/add", params)
         .then(() => {
           // Refresh neighbors list.
           this.$refs.relatdIndicatorsList.fetchNeighbors();
-          this.$refs.relatdIndicatorsList.countTotal();
           this.linkedIndicatorNameFilter = "";
           this.linkedIndicator = null;
         })
@@ -245,18 +285,16 @@ export default {
     },
     linkEntity() {
       var params = {
-        type_src: "indicator",
-        type_dst: "entity",
-        link_src: this.indicator.id,
-        link_dst: this.linkedEntity.id,
-        source: "web"
+        source: `indicators/${this.indicator.id}`,
+        target: `entities/${this.linkedEntity.id}`,
+        link_type: "web",
+        description: "Manual link."
       };
       axios
-        .post("/api/link/", params)
+        .post("/api/v2/graph/add", params)
         .then(() => {
           // Refresh neighbors list.
           this.$refs.relatdEntitiesList.fetchNeighbors();
-          this.$refs.relatdEntitiesList.countTotal();
           this.linkedEntityNameFilter = "";
           this.linkedEntity = null;
         })
@@ -267,10 +305,14 @@ export default {
     },
     saveTags() {
       var params = {
-        tags: this.indicator.tags
+        indicator: {
+          id: this.indicator.id,
+          name: this.indicator.name,
+          relevant_tags: this.indicator.relevant_tags
+        }
       };
       axios
-        .post(`/api/indicator/${this.id}`, params)
+        .post(`/api/v2/indicators/${this.id}`, params)
         .then(response => {
           this.indicator = response.data;
         })
@@ -278,6 +320,9 @@ export default {
           console.log(error);
         })
         .finally();
+    },
+    getIconForType(type) {
+      return this.entityTypes.concat(this.indicatorTypes).find(objectType => objectType.type === type).icon;
     }
   },
   computed: {
@@ -293,10 +338,23 @@ export default {
       return this.entities.filter(entity => {
         return entity.name.toLowerCase().includes(this.linkedEntityNameFilter.toLowerCase());
       });
+    },
+    indicatorTypeDefinition() {
+      return this.indicatorTypes.filter(indicatorType => indicatorType.type == this.indicator.type)[0];
+    },
+    indicatorInfoFields() {
+      const hideFields = ["name", "pattern", "description"];
+      return this.indicatorTypeDefinition.fields.filter(field => !hideFields.includes(field.field));
     }
   },
   watch: {
-    id: "getindicatorDetails"
+    id: "getindicatorDetails",
+    linkedEntityNameFilter: _.debounce(function() {
+      this.getEntityAutocomplete();
+    }, 50),
+    linkedIndicatorNameFilter: _.debounce(function() {
+      this.getIndicatorAutocomplete();
+    }, 50)
   }
 };
 </script>

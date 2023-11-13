@@ -1,13 +1,23 @@
 <template>
   <div class="indicator-list columns">
     <div class="column is-three-quarters">
-      <b-tabs v-model="activeMainTab" position="is-left" :animated="false">
-        <b-tab-item :label="indicator.name" v-for="indicator in indicatorTypes" v-bind:key="indicator.type">
+      <b-tabs v-model="activeMainTab" position="is-left" :animated="false" @input="trackTabChange">
+        <b-tab-item v-for="indicator in indicatorTypes" v-bind:key="indicator.type" :value="indicator.type">
+          <template slot="header">
+            <b-icon :icon="indicator.icon"></b-icon>
+            <span>
+              {{ indicator.name }}
+              <b-tag rounded>
+                {{ indicatorCount[indicator.type] == null ? "?" : indicatorCount[indicator.type] }}</b-tag
+              >
+            </span>
+          </template>
           <object-list
-            search-type="indicator"
+            search-type="indicators"
             :search-subtype="indicator.type"
             :fields="indicator.fields"
             :search-query="searchQuery"
+            @totalUpdated="countIndicators(indicator.type, $event)"
             :ref="indicator.type + 'ObjectList'"
           />
         </b-tab-item>
@@ -27,28 +37,21 @@
             <article class="message tip">
               <div class="message-body content">
                 <p>
-                  You can run complex queries against the database using the input field above.
+                  You can run advanced queries using the input field above.
                 </p>
                 <p>
                   By default, the query will be matched against the
-                  <code>value</code> attribute of the indicators. To match against other attributes, use
-                  <code>attribute=query</code>.
+                  <code>name</code> attribute of the indicators using regular expressions. To match against other
+                  attributes, use <code>attribute=query</code>.
                 </p>
 
                 <p>Examples:</p>
                 <ul>
                   <li>
-                    <strong>Generic tag query</strong>:
-                    <code>tags=crimeware</code>
-                  </li>
-                  <li><strong>Gate URLs</strong>: <code>tags=zeus .php$</code> (regex <code>on</code>)</li>
-                  <li>
-                    <strong>Ransomware C2s</strong>:
-                    <code>tags=c2,ransomware</code>
+                    <code>"Access logs" relevant_tags=nginx</code>
                   </li>
                   <li>
-                    <strong>Context</strong>:
-                    <code>context.source=FeodoTracker</code>
+                    <code>query_type=opensearch in__target_systems=timesketch</code>
                   </li>
                 </ul>
               </div>
@@ -75,9 +78,9 @@
                   v-if="field.type === 'longcode'"
                 />
                 <b-select v-if="field.type === 'option'" v-model="newIndicator[field.field]">
-                  <option v-for="(option, index) in field.choices" :value="String(index + 1)" :key="option">
-                    {{ option }} {{ index }}</option
-                  >
+                  <option v-for="option in field.choices" :value="option" :key="option">
+                    {{ option }}
+                  </option>
                 </b-select>
                 <b-taginput
                   label="Tags"
@@ -112,11 +115,10 @@ export default {
   },
   data() {
     return {
-      // Table
-      indicators: [],
-      tablePage: 1,
-      tablePerPage: 50,
-      tableTotal: 500, // 5 pages worth should be enough to have time to get a more accurate count
+      indicatorCount: INDICATOR_TYPES.reduce((acc, cur) => {
+        acc[cur.type] = null;
+        return acc;
+      }, {}),
       loading: false,
       // New
       indicatorTypes: INDICATOR_TYPES,
@@ -128,19 +130,23 @@ export default {
       searchQuery: ""
     };
   },
+  mounted() {
+    if (this.$route.hash) {
+      this.activeMainTab = this.$route.hash.replace("#", "");
+    }
+  },
   methods: {
     saveIndicator() {
       this.newIndicator.type = this.selectedindicatorType.type;
       axios
-        .post("/api/indicator/", this.newIndicator)
+        .post("/api/v2/indicators", { indicator: this.newIndicator })
         .then(response => {
           this.$buefy.toast.open({
-            message: `indicator ${response.name} saved`,
+            message: `Indicator ${response.data.name} saved`,
             type: "is-success"
           });
           this.$refs[this.newIndicator.type + "ObjectList"][0].searchObjects();
           this.newIndicator = {};
-          this.searchIndicators();
         })
         .catch(error => {
           this.$buefy.toast.open({
@@ -151,6 +157,32 @@ export default {
     },
     formatTimestamp(timestamp, local) {
       return utils.formatTimestamp(timestamp, local);
+    },
+    countIndicators(type, count) {
+      this.indicatorCount[type] = count;
+      if (!this.$route.hash) {
+        this.navigateToFirstPopulatedTab();
+      }
+    },
+    navigateToFirstPopulatedTab() {
+      for (const indicatorType of this.indicatorTypes) {
+        if (this.indicatorCount[indicatorType.type] > 0) {
+          this.activeMainTab = indicatorType.type;
+          break;
+        }
+      }
+    },
+    trackTabChange(value) {
+      window.location.hash = value;
+    }
+  },
+  watch: {
+    $route(to) {
+      if (to.hash) {
+        this.activeMainTab = to.hash.replace("#", "");
+      } else {
+        this.navigateToFirstPopulatedTab();
+      }
     }
   },
   computed: {}
