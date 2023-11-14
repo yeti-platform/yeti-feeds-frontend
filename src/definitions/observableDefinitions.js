@@ -205,5 +205,14 @@ export const OBSERVABLE_TYPES = [
       { field: "tags", type: "list", label: "tags", displayList: true },
       { field: "description", type: "longtext", label: "Description", displayList: false }
     ]
+  },
+  {
+    name: "User-Agent",
+    type: "user_agent",
+    fields: [
+      { field: "value", type: "text", label: "Value", displayList: true },
+      { field: "tags", type: "list", label: "tags", displayList: true },
+      { field: "description", type: "longtext", label: "Description", displayList: false }
+    ]
   }
 ];
