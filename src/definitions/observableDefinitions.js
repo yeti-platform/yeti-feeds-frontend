@@ -196,5 +196,14 @@ export const OBSERVABLE_TYPES = [
       { field: "tags", type: "list", label: "tags", displayList: true },
       { field: "description", type: "longtext", label: "Description", displayList: false }
     ]
+  },
+  {
+    name: "Docker Image",
+    type: "docker_image",
+    fields: [
+      { field: "value", type: "text", label: "Value", displayList: true },
+      { field: "tags", type: "list", label: "tags", displayList: true },
+      { field: "description", type: "longtext", label: "Description", displayList: false }
+    ]
   }
 ];
