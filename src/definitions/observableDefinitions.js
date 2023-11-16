@@ -1,7 +1,7 @@
 export const OBSERVABLE_TYPES = [
   {
     name: "Generic observable",
-    type: "observable",
+    type: "generic",
     fields: [
       { field: "value", type: "text", label: "Value", displayList: true },
       { field: "tags", type: "list", label: "tags", displayList: true },

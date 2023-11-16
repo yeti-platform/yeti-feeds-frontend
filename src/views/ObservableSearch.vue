@@ -56,8 +56,8 @@
           <b-field :class="{ hidden: !addMissing }">
             <b-select v-model="addType" placeholder="Force observable type">
               <option :value="null">Guess type</option>
-              <option v-for="type in Object.keys(defaultTypes)" v-bind:key="type" :value="type">
-                {{ defaultTypes[type] }}
+              <option v-for="def in defaultTypes" v-bind:key="def.type" :value="def.type">
+                {{ def.name }}
               </option>
             </b-select>
           </b-field>
@@ -107,22 +107,7 @@
 import axios from "axios";
 
 import SearchResults from "@/components/SearchResults";
-
-var defaultTypes = {
-  Ip: "IP",
-  AutonomousSystem: "Autonomous System",
-  Url: "URL",
-  Hostname: "Hostname",
-  Hash: "Hash",
-  File: "File",
-  Certificate: "Certificate",
-  CertificateSubject: "Certificate Subject",
-  Email: "Email",
-  Text: "Text",
-  Bitcoin: "Bitcoin",
-  Path: "Path",
-  MacAddress: "MAC address"
-};
+import { OBSERVABLE_TYPES } from "@/definitions/observableDefinitions.js";
 
 export default {
   name: "ObservableSearch",
@@ -133,7 +118,7 @@ export default {
     return {
       addMissing: false,
       addTags: [],
-      defaultTypes: defaultTypes,
+      defaultTypes: OBSERVABLE_TYPES,
       addType: null,
       uploadFile: null,
       textSearch: "",
@@ -150,7 +135,8 @@ export default {
       var params = {
         observables: this.textSearch.split("\n"),
         add_unknown: this.addMissing,
-        add_tags: this.addTags
+        add_tags: this.addTags,
+        add_type: this.addType
       };
       axios
         .post("/api/v2/graph/match", params)
