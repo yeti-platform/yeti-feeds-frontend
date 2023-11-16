@@ -105,7 +105,10 @@ export const ENTITY_TYPES = [
     fields: [
       { field: "name", type: "text", label: "Name", displayList: true },
       { field: "tags", type: "list", label: "Relevant tags", displayList: true },
-      { field: "description", type: "longtext", label: "Description", displayList: false }
+      { field: "description", type: "longtext", label: "Description", displayList: false },
+      { field: "reference", type: "text", label: "Reference", displayList: true },
+      { field: "base_score", type: "text", label: "Base score", displayList: true },
+      { field: "severity", type: "text", label: "Severity", displayList: true }
     ]
   },
   {
