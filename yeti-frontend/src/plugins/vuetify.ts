@@ -19,25 +19,25 @@ export default createVuetify({
     defaultSet: "mdi",
     aliases,
     sets: {
-      mdi,
-    },
+      mdi
+    }
   },
   blueprint: md3,
   theme: {
-    defaultTheme: "dark",
+    defaultTheme: "light",
     themes: {
       light: {
         colors: {
           primary: "#1867C0",
-          secondary: "#5CBBF6",
-        },
-      },
+          secondary: "#5CBBF6"
+        }
+      }
       // dark: {
       //   colors: {
       //     primary: "#1867C0",
       //     secondary: "#5CBBF6",
       //   },
       // },
-    },
-  },
+    }
+  }
 });
