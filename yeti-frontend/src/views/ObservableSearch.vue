@@ -7,7 +7,9 @@
     :items="items"
     @update:options="loadOjects"
     :search="search"
-    class="mx-6"
+    :show-select="showSelect"
+    :item-value="item => item.id"
+    v-model="selectedObservables"
   >
     <template v-slot:item.tags="{ item }">
       <v-chip
@@ -31,8 +33,33 @@
         class="mt-2"
       />
     </v-list-item>
-    <!-- separator -->
     <v-divider></v-divider>
+    <v-expansion-panels>
+      <v-expansion-panel title="Bulk actions" @group:selected="showSelect = $event.value">
+        <v-expansion-panel-text>
+          <v-card title="Bulk tag" class="pb-4" rounded="0" variant="flat">
+            <v-combobox v-model="bulkTags" chips clearable multiple variant="outlined" density="compact">
+              <template v-slot:chip="tag"> <v-chip :text="tag.item.value" label/></template>
+            </v-combobox>
+            <v-btn density="compact" variant="tonal" color="primary" class="me-2">Apply</v-btn>
+            <small>Will apply {{ bulkTags.length }} tags to {{ selectedObservables.length }} observables</small>
+          </v-card>
+          <v-card title="Export observables" class="pb-4" rounded="0" variant="flat">
+            <v-autocomplete
+              label="Select template"
+              variant="outlined"
+              density="compact"
+              :items="exportTemplates"
+              item-title="name"
+              v-model="selectedExportTemplate"
+            ></v-autocomplete>
+            <!-- <v-btn density="compact" variant="tonal" class="me-2" @click="selectedExportTemplate = null">Clear</v-btn> -->
+            <v-btn density="compact" variant="tonal" color="primary" class="me-2">Export</v-btn>
+            <small>Will export {{ selectedObservables.length || total }} observables</small>
+          </v-card>
+        </v-expansion-panel-text>
+      </v-expansion-panel>
+    </v-expansion-panels>
   </v-navigation-drawer>
 </template>
 
@@ -53,7 +80,12 @@ export default {
       page: 0,
       perPage: 20,
       total: 0,
-      search: ""
+      search: "",
+      showSelect: false,
+      selectedObservables: [],
+      bulkTags: [],
+      exportTemplates: [],
+      selectedExportTemplate: null
     };
   },
   methods: {
@@ -69,7 +101,21 @@ export default {
           this.items = response.data.observables;
           this.total = response.data.total;
         });
+    },
+    loadExportTemplates() {
+      axios
+        .post("/api/v2/templates/search", { query: { name: "" } })
+        .then(response => {
+          console.log(response.data.templates);
+          this.exportTemplates = response.data.templates;
+        })
+        .catch(error => {
+          console.log(error);
+        });
     }
+  },
+  mounted() {
+    this.loadExportTemplates();
   }
 };
 </script>
