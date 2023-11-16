@@ -6,7 +6,34 @@
     density="compact"
     :items="items"
     @update:options="loadOjects"
-  ></v-data-table-server>
+    :search="search"
+    class="mx-6"
+  >
+    <template v-slot:item.tags="{ item }">
+      <v-chip
+        v-for="name in Object.keys(item.tags)"
+        :color="item.tags[name].fresh ? 'blue ' : 'red'"
+        :text="name"
+        class="mx-1"
+        label
+        size="small"
+      ></v-chip>
+    </template>
+  </v-data-table-server>
+  <v-navigation-drawer permament location="right" width="400" ref="drawer">
+    <v-list-item class="mt-4">
+      <v-text-field
+        v-model="search"
+        prepend-inner-icon="mdi-magnify"
+        label="Search observables"
+        variant="outlined"
+        density="compact"
+        class="mt-2"
+      />
+    </v-list-item>
+    <!-- separator -->
+    <v-divider></v-divider>
+  </v-navigation-drawer>
 </template>
 
 <script lang="ts" setup>
@@ -20,18 +47,20 @@ export default {
       items: [],
       headers: [
         { title: "Value", key: "value" },
-        { title: "Types", key: "type" }
+        { title: "Tags", key: "tags" },
+        { title: "Type", key: "type" }
       ],
       page: 0,
       perPage: 20,
-      total: 0
+      total: 0,
+      search: ""
     };
   },
   methods: {
     loadOjects({ page, itemsPerPage, sortBy }) {
       axios
         .post("http://localhost:3000/api/v2/observables/search", {
-          query: {},
+          query: { value: this.search },
           count: itemsPerPage,
           page: page - 1
         })
