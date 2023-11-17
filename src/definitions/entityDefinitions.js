@@ -104,11 +104,12 @@ export const ENTITY_TYPES = [
     type: "vulnerability",
     fields: [
       { field: "name", type: "text", label: "Name", displayList: true },
+      { field: "title", type: "text", label: "Title", displayList: true },
+      { field: "base_score", type: "text", label: "Base score", displayList: true },
+      { field: "severity", type: "text", label: "Severity", displayList: true },
       { field: "tags", type: "list", label: "Relevant tags", displayList: true },
       { field: "description", type: "longtext", label: "Description", displayList: false },
-      { field: "reference", type: "text", label: "Reference", displayList: true },
-      { field: "base_score", type: "text", label: "Base score", displayList: true },
-      { field: "severity", type: "text", label: "Severity", displayList: true }
+      { field: "reference", type: "text", label: "Reference", displayList: false }
     ]
   },
   {
