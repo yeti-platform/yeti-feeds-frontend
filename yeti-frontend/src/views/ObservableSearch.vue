@@ -11,9 +11,16 @@
     :show-select="showSelect"
     :item-value="item => item.id"
     v-model="selectedObservables"
+    hover
+    class="ma-5"
   >
     <template v-slot:item.value="{ item }">
-      <router-link :to="{ name: 'ObservableDetails', params: { id: item.id } }">{{ item.value }}</router-link>
+      <router-link
+        :to="{ name: 'ObservableDetails', params: { id: item.id } }"
+        class="text-blue"
+        style="text-decoration:none"
+        >{{ item.value }}</router-link
+      >
     </template>
     <template v-slot:item.tags="{ item }">
       <v-chip
@@ -24,6 +31,19 @@
         label
         size="small"
       ></v-chip>
+    </template>
+    <template v-slot:item.context="{ item }">
+      <v-chip
+        v-for="context in item.context"
+        color="green"
+        :text="context.source"
+        class="mx-1"
+        label
+        size="small"
+      ></v-chip>
+    </template>
+    <template v-slot:item.created="{ item }">
+      {{ item.created }}
     </template>
   </v-data-table-server>
   <v-navigation-drawer permament location="right" width="400" ref="drawer">
@@ -79,7 +99,8 @@ export default {
       headers: [
         { title: "Value", key: "value" },
         { title: "Tags", key: "tags" },
-        { title: "Type", key: "type" }
+        { title: "Context", key: "context" },
+        { title: "Created on", key: "created" }
       ],
       page: 1,
       perPage: 20,
