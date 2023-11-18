@@ -7,7 +7,7 @@
     density="compact"
     :items="items"
     @update:options="loadOjects"
-    :search="search"
+    :search="searchQuery"
     :show-select="showSelect"
     :item-value="item => item.id"
     v-model="selectedObservables"
@@ -26,7 +26,7 @@
   <v-navigation-drawer permament location="right" width="400" ref="drawer">
     <v-list-item class="mt-4">
       <v-text-field
-        v-model="search"
+        v-model="searchQuery"
         prepend-inner-icon="mdi-magnify"
         label="Search observables"
         variant="outlined"
@@ -52,10 +52,10 @@
               density="compact"
               :items="exportTemplates"
               item-title="name"
+              item-value="id"
               v-model="selectedExportTemplate"
             ></v-autocomplete>
-            <!-- <v-btn density="compact" variant="tonal" class="me-2" @click="selectedExportTemplate = null">Clear</v-btn> -->
-            <v-btn density="compact" variant="tonal" color="primary" class="me-2">Export</v-btn>
+            <v-btn density="compact" variant="tonal" color="primary" class="me-2" @click="downloadExport">Export</v-btn>
             <small>Will export {{ selectedObservables.length || total }} observables</small>
           </v-card>
         </v-expansion-panel-text>
@@ -81,7 +81,7 @@ export default {
       page: 1,
       perPage: 20,
       total: 0,
-      search: "",
+      searchQuery: "",
       showSelect: false,
       selectedObservables: [],
       bulkTags: [],
@@ -90,17 +90,48 @@ export default {
     };
   },
   methods: {
+    extractParamsFromSearchQuery(searchQuery, defaultKey) {
+      const pattern = /(?<key>\w+)=(?<keyed_terms>[^\s,]+(?:,[^\s,]+)*)|(?<isolated_term>[^"\s]+)|"(?<quoted_term>[^"]+)"/g;
+
+      let resultObj: Record<string, string | string[]> = {};
+      let match;
+
+      while ((match = pattern.exec(searchQuery)) !== null) {
+        let isolatedTerm = match.groups.isolated_term;
+        let quotedTerm = match.groups.quoted_term;
+        let key = match.groups.key;
+        let keyedTerms = match.groups.keyed_terms;
+
+        let values;
+        if (key) {
+          if (key.startsWith("in__") || key.endsWith("__in") || key == "tags" || keyedTerms.includes(",")) {
+            values = keyedTerms.split(",").map(term => term.trim());
+          } else {
+            values = keyedTerms;
+          }
+          resultObj[key] = values;
+        }
+
+        // Logging isolated and quoted terms (optional)
+        if (isolatedTerm) {
+          resultObj[defaultKey] = isolatedTerm;
+        }
+        if (quotedTerm) {
+          resultObj[defaultKey] = quotedTerm;
+        }
+      }
+      return resultObj;
+    },
     loadOjects({ page, itemsPerPage, sortBy }: { page: number; itemsPerPage: number; sortBy: string }) {
-      axios
-        .post("http://localhost:3000/api/v2/observables/search", {
-          query: { value: this.search },
-          count: itemsPerPage,
-          page: page - 1
-        })
-        .then(response => {
-          this.items = response.data.observables;
-          this.total = response.data.total;
-        });
+      let params = {
+        page: page - 1,
+        count: itemsPerPage,
+        query: this.extractParamsFromSearchQuery(this.searchQuery, "value")
+      };
+      axios.post("http://localhost:3000/api/v2/observables/search", params).then(response => {
+        this.items = response.data.observables;
+        this.total = response.data.total;
+      });
     },
     loadExportTemplates() {
       axios
@@ -124,6 +155,34 @@ export default {
         })
         .catch(error => {
           return console.log(error);
+        });
+    },
+    downloadExport() {
+      var params = {
+        template_id: this.selectedExportTemplate,
+        observable_ids: [],
+        search_query: ""
+      };
+      if (this.selectedObservables.length) {
+        params.observable_ids = this.selectedObservables;
+      } else {
+        params.search_query = this.searchQuery;
+      }
+
+      axios
+        .post("/api/v2/templates/render", params)
+        .then(response => {
+          var fileURL = window.URL.createObjectURL(new Blob([response.data]));
+          var fileLink = document.createElement("a");
+          var fileName = response.headers["content-disposition"].split("filename=")[1];
+          fileLink.href = fileURL;
+          fileLink.setAttribute("download", fileName);
+          document.body.appendChild(fileLink);
+
+          fileLink.click();
+        })
+        .catch(error => {
+          console.log(error);
         });
     }
   },
