@@ -1,5 +1,5 @@
 <template>
-  <v-main class="d-flex align-center justify-center">
+  <v-main class="d-flex justify-center">
     <router-view />
   </v-main>
 </template>
