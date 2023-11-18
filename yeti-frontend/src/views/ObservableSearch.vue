@@ -12,6 +12,9 @@
     :item-value="item => item.id"
     v-model="selectedObservables"
   >
+    <template v-slot:item.value="{ item }">
+      <router-link :to="{ name: 'ObservableDetails', params: { id: item.id } }">{{ item.value }}</router-link>
+    </template>
     <template v-slot:item.tags="{ item }">
       <v-chip
         v-for="name in Object.keys(item.tags)"
