@@ -1,5 +1,5 @@
 <template>
-  <v-app-bar :elevation="2" title="Yeti (appbar)">
+  <v-app-bar :elevation="2" title="Yeti">
     <template v-slot:append>
       <v-btn :to="{ path: '/' }">Observables</v-btn>
       <v-btn :to="{ path: '/entities' }">Entities</v-btn>
