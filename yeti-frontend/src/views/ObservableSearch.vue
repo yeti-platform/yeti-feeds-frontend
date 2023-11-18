@@ -1,5 +1,6 @@
 <template>
   <v-data-table-server
+    v-model:page="page"
     :itemsLength="total"
     :items-per-page="perPage"
     :headers="headers"
@@ -41,7 +42,7 @@
             <v-combobox v-model="bulkTags" chips clearable multiple variant="outlined" density="compact">
               <template v-slot:chip="tag"> <v-chip :text="tag.item.value" label/></template>
             </v-combobox>
-            <v-btn density="compact" variant="tonal" color="primary" class="me-2">Apply</v-btn>
+            <v-btn density="compact" variant="tonal" color="primary" class="me-2" @click="changeTags">Apply</v-btn>
             <small>Will apply {{ bulkTags.length }} tags to {{ selectedObservables.length }} observables</small>
           </v-card>
           <v-card title="Export observables" class="pb-4" rounded="0" variant="flat">
@@ -77,7 +78,7 @@ export default {
         { title: "Tags", key: "tags" },
         { title: "Type", key: "type" }
       ],
-      page: 0,
+      page: 1,
       perPage: 20,
       total: 0,
       search: "",
@@ -89,7 +90,7 @@ export default {
     };
   },
   methods: {
-    loadOjects({ page, itemsPerPage, sortBy }) {
+    loadOjects({ page, itemsPerPage, sortBy }: { page: number; itemsPerPage: number; sortBy: string }) {
       axios
         .post("http://localhost:3000/api/v2/observables/search", {
           query: { value: this.search },
@@ -97,7 +98,6 @@ export default {
           page: page - 1
         })
         .then(response => {
-          console.log(response);
           this.items = response.data.observables;
           this.total = response.data.total;
         });
@@ -106,11 +106,24 @@ export default {
       axios
         .post("/api/v2/templates/search", { query: { name: "" } })
         .then(response => {
-          console.log(response.data.templates);
           this.exportTemplates = response.data.templates;
         })
+        .catch(error => {});
+    },
+    changeTags() {
+      var params = {
+        tags: this.bulkTags,
+        ids: this.selectedObservables,
+        strict: false
+      };
+      axios
+        .post(`/api/v2/observables/tag`, params)
+        .then(() => {
+          this.loadOjects({ page: this.page, itemsPerPage: this.perPage, sortBy: "" });
+          this.bulkTags = [];
+        })
         .catch(error => {
-          console.log(error);
+          return console.log(error);
         });
     }
   },
