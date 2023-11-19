@@ -14,14 +14,14 @@
       </v-col>
       <v-col cols="4">
         <v-card title="Info" class="ma-2" variant="outlined">
-          <table>
+          <v-table density="compact">
             <tbody>
               <tr v-for="field in getObservableInfoFields">
                 <th>{{ field.label }}</th>
                 <td>{{ observable[field.field] }}</td>
               </tr>
             </tbody>
-          </table>
+          </v-table>
         </v-card>
         <v-card title="Tags" class="ma-2" variant="outlined">
           <v-combobox
