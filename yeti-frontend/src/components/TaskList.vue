@@ -54,6 +54,12 @@
           </td>
         </tr>
       </template>
+      <template v-slot:no-data>
+        No <span v-if="onlyEnabled">enabled</span> tasks found
+        <span v-if="actsOnFilter">
+          for <code>{{ actsOnFilter.join(", ") }}</code></span
+        >
+      </template>
     </v-data-table>
   </div>
 </template>
@@ -79,6 +85,10 @@ export default {
     displayColumns: {
       type: Array,
       default: () => ["name", "acts_on", "frequency", "last_run", "description", "status", "toggle", "refresh"]
+    },
+    onlyEnabled: {
+      type: Boolean,
+      default: false
     }
   },
   data() {
@@ -91,7 +101,7 @@ export default {
         { key: "acts_on", title: "Acts On" },
         { key: "frequency", title: "Runs every" },
         { key: "last_run", title: "Last Run", width: "180px" },
-        { key: "description", title: "Description", width: "45%" },
+        { key: "description", title: "Description" },
         { key: "status", title: "Status", width: "120px" },
         { key: "toggle", title: "Toggle", width: "80px" },
         { key: "refresh", title: "", width: "80px" }
@@ -125,12 +135,16 @@ export default {
       axios
         .post("/api/v2/tasks/search", params)
         .then(response => {
-          this.tasks = response.data.tasks.filter(task => {
+          let tasks = response.data.tasks.filter(task => {
             if (this.actsOnFilter.length > 0) {
               return task.acts_on.some(actsOn => this.actsOnFilter.includes(actsOn));
             }
             return true;
           });
+          if (this.onlyEnabled) {
+            tasks = tasks.filter(task => task.enabled);
+          }
+          this.tasks = tasks;
         })
         .catch(error => {
           console.log(error);
@@ -167,7 +181,6 @@ export default {
       }
     },
     getHumanStatus(task) {
-      console.log(task.status);
       if (task.status === "completed") {
         return "Completed";
       }
