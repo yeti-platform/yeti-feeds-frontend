@@ -9,13 +9,18 @@
           <template v-slot:subtitle>
             <v-chip color="primary" :text="observable?.type" label></v-chip>
           </template>
-          {{ observable?.context }}
         </v-card>
-      </v-col>
-      <v-col cols="4">
-        <v-card title="Info" class="ma-2" variant="outlined">
+        <v-card class="ma-2 yeti-card" variant="flat">
           <v-table density="compact">
             <tbody>
+              <tr>
+                <th>Context sources</th>
+                <td>
+                  <v-chip label v-for="source in new Set(observable?.context.map(c => c.source))" v-bind:key="source">
+                    {{ source }}
+                  </v-chip>
+                </td>
+              </tr>
               <tr v-for="field in getObservableInfoFields">
                 <th>{{ field.label }}</th>
                 <td>{{ observable[field.field] }}</td>
@@ -23,7 +28,14 @@
             </tbody>
           </v-table>
         </v-card>
-        <v-card title="Tags" class="ma-2" variant="outlined">
+      </v-col>
+      <v-col cols="4">
+        <v-card class="ma-2 yeti-card" variant="outlined">
+          <!-- <v-card-item class="bg-grey-lighten-3">
+            <v-card-title>Titlesss</v-card-title>
+          </v-card-item> -->
+          <v-card-title class="bg-grey-lighten-3">Tags</v-card-title>
+
           <v-combobox
             v-model="observableTags"
             chips
@@ -33,6 +45,7 @@
             density="compact"
             :delimiters="[',', ' ', ';']"
             prepend-inner-icon="mdi-tag"
+            class="ma-2"
           >
             <template v-slot:chip="tag"> <v-chip :text="tag.item.value" label/></template>
             <template v-slot:append>
@@ -40,7 +53,9 @@
             </template>
           </v-combobox>
         </v-card>
-        <v-card title="Available analytics" class="ma-2" variant="outlined">
+        <v-card class="ma-2 yeti-card" variant="outlined">
+          <v-card-title class="bg-grey-lighten-3">Available analytics</v-card-title>
+
           more details
         </v-card>
       </v-col>
@@ -49,22 +64,37 @@
       <v-container fluid>
         <v-card variant="flat">
           <v-tabs v-model="activeTab" color="primary">
-            <v-tab value="one"><v-icon size="x-large">mdi-graph</v-icon>Related observables</v-tab>
-            <v-tab value="two"><v-icon size="x-large">mdi-brain</v-icon>Related entities</v-tab>
-            <v-tab value="three"><v-icon size="x-large">mdi-tag</v-icon>Tag relationships</v-tab>
+            <v-tab value="context"><v-icon size="x-large">mdi-graph</v-icon>Context</v-tab>
+            <v-tab value="related-observables"><v-icon size="x-large">mdi-graph</v-icon>Related observables</v-tab>
+            <v-tab value="related-entities"><v-icon size="x-large">mdi-brain</v-icon>Related entities</v-tab>
+            <v-tab value="tag-relationships"><v-icon size="x-large">mdi-tag</v-icon>Tag relationships</v-tab>
           </v-tabs>
 
           <v-card-text>
             <v-window v-model="activeTab">
-              <v-window-item value="one">
+              <v-window-item value="context">
+                <v-card v-for="(context, index) in observable?.context" variant="outlined" class="yeti-card">
+                  <v-card-title class="bg-grey-lighten-3">{{ context.source }}</v-card-title>
+
+                  <v-table>
+                    <tbody>
+                      <tr v-for="key in Object.keys(context).filter(k => k !== 'source')" v-bind:key="key">
+                        <th>{{ key }}</th>
+                        <td>{{ context[key] }}</td>
+                      </tr>
+                    </tbody>
+                  </v-table>
+                </v-card>
+              </v-window-item>
+              <v-window-item value="related-observables">
                 One
               </v-window-item>
 
-              <v-window-item value="two">
+              <v-window-item value="related-entities">
                 Two
               </v-window-item>
 
-              <v-window-item value="three">
+              <v-window-item value="tag-relationships">
                 Three
               </v-window-item>
             </v-window>
@@ -149,3 +179,9 @@ export default {
   }
 };
 </script>
+
+<style>
+.yeti-card.v-card {
+  border-color: #e0e0e0;
+}
+</style>
