@@ -47,16 +47,28 @@
             prepend-inner-icon="mdi-tag"
             class="ma-2"
           >
-            <template v-slot:chip="tag"> <v-chip :text="tag.item.value" label/></template>
+            <template v-slot:chip="tag">
+              <v-chip
+                :text="tag.item.value"
+                label
+                size="large"
+                :color="observable?.tags[tag.item.value].fresh ? 'primary' : 'grey'"
+            /></template>
             <template v-slot:append>
               <v-btn variant="tonal" color="primary" class="me-2" @click="saveTags">Save</v-btn>
             </template>
           </v-combobox>
         </v-card>
         <v-card class="ma-2 yeti-card" variant="outlined">
-          <v-card-title class="bg-grey-lighten-3">Available analytics</v-card-title>
-
-          more details
+          <v-card-title class="bg-grey-lighten-3">Enabled analytics for {{ observable?.type }}</v-card-title>
+          <task-list
+            v-if="observable"
+            task-type="oneshot"
+            :acts-on-filter="[observable.type]"
+            :act-on-value="observable.value"
+            :display-columns="['name', 'description', 'refresh']"
+            :only-enabled="true"
+          ></task-list>
         </v-card>
       </v-col>
     </v-row>
@@ -108,6 +120,8 @@
 <script lang="ts" setup>
 import axios from "axios";
 
+// import tasklist component
+import TaskList from "@/components/TaskList.vue";
 import { ENTITY_TYPES } from "@/definitions/entityDefinitions.js";
 import { OBSERVABLE_TYPES } from "@/definitions/observableDefinitions.js";
 </script>
@@ -119,6 +133,9 @@ export default {
       type: String,
       required: true
     }
+  },
+  components: {
+    TaskList
   },
   data() {
     return {
