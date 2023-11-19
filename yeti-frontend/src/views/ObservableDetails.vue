@@ -64,7 +64,7 @@
       <v-container fluid>
         <v-card variant="flat">
           <v-tabs v-model="activeTab" color="primary">
-            <v-tab value="context"><v-icon size="x-large">mdi-graph</v-icon>Context</v-tab>
+            <v-tab value="context"><v-icon size="x-large">mdi-information</v-icon>Context</v-tab>
             <v-tab value="related-observables"><v-icon size="x-large">mdi-graph</v-icon>Related observables</v-tab>
             <v-tab value="related-entities"><v-icon size="x-large">mdi-brain</v-icon>Related entities</v-tab>
             <v-tab value="tag-relationships"><v-icon size="x-large">mdi-tag</v-icon>Tag relationships</v-tab>
