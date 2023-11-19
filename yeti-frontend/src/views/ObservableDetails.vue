@@ -16,7 +16,7 @@
         <v-card title="Info" class="ma-2" variant="outlined">
           <table>
             <tbody>
-              <tr v-for="field in getObservableInfoFields()">
+              <tr v-for="field in getObservableInfoFields">
                 <th>{{ field.label }}</th>
                 <td>{{ observable[field.field] }}</td>
               </tr>
@@ -36,7 +36,7 @@
           >
             <template v-slot:chip="tag"> <v-chip :text="tag.item.value" label/></template>
             <template v-slot:append>
-              <v-btn variant="tonal" color="primary" class="me-2" @click="changeTags">Save</v-btn>
+              <v-btn variant="tonal" color="primary" class="me-2" @click="saveTags">Save</v-btn>
             </template>
           </v-combobox>
         </v-card>
@@ -114,12 +114,34 @@ export default {
         })
         .finally();
     },
+    saveTags() {
+      var params = {
+        ids: [this.id],
+        strict: true,
+        tags: this.observableTags
+      };
+      axios
+        .post(`/api/v2/observables/tag`, params)
+        .then(() => {
+          this.getObservableDetails();
+          this.$buefy.toast.open({
+            message: "Tags saved!",
+            type: "is-success"
+          });
+        })
+        .catch(error => {
+          console.log(error);
+        })
+        .finally();
+    }
+  },
+  computed: {
     getObservableTypeDefinition() {
       return this.observableTypes.find(typeDef => typeDef.type === this.observable?.type);
     },
     getObservableInfoFields() {
       const hideFields = ["value", "tags", "description"];
-      return this.getObservableTypeDefinition()?.fields.filter(field => !hideFields.includes(field.field));
+      return this.getObservableTypeDefinition?.fields.filter(field => !hideFields.includes(field.field));
     }
   },
   mounted() {
