@@ -31,9 +31,6 @@
       </v-col>
       <v-col cols="4">
         <v-card class="ma-2 yeti-card" variant="outlined">
-          <!-- <v-card-item class="bg-grey-lighten-3">
-            <v-card-title>Titlesss</v-card-title>
-          </v-card-item> -->
           <v-card-title class="bg-grey-lighten-3">Tags</v-card-title>
 
           <v-combobox
@@ -99,7 +96,12 @@
                 </v-card>
               </v-window-item>
               <v-window-item value="related-observables">
-                One
+                <related-objects
+                  :id="id"
+                  source-type="observables"
+                  :target-types="observableTypes.map(def => def.type)"
+                  @totalUpdated="value => (totalRelatedObservables = value)"
+                />
               </v-window-item>
 
               <v-window-item value="related-entities">
@@ -122,6 +124,7 @@ import axios from "axios";
 
 // import tasklist component
 import TaskList from "@/components/TaskList.vue";
+import RelatedObjects from "@/components/RelatedObjects.vue";
 import { ENTITY_TYPES } from "@/definitions/entityDefinitions.js";
 import { OBSERVABLE_TYPES } from "@/definitions/observableDefinitions.js";
 </script>
@@ -135,14 +138,16 @@ export default {
     }
   },
   components: {
-    TaskList
+    TaskList,
+    RelatedObjects
   },
   data() {
     return {
       observable: null,
       observableTags: [],
       activeTab: 0,
-      observableTypes: OBSERVABLE_TYPES
+      observableTypes: OBSERVABLE_TYPES,
+      totalRelatedObservables: 0
     };
   },
   methods: {
@@ -193,6 +198,11 @@ export default {
   },
   mounted() {
     this.getObservableDetails();
+  },
+  watch: {
+    id() {
+      this.getObservableDetails();
+    }
   }
 };
 </script>
