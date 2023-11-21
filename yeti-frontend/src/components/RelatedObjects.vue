@@ -98,7 +98,8 @@ export default {
   },
   data() {
     return {
-      links: [],
+      tempChains: [],
+      paths: [],
       vertices: {},
       page: 1,
       perPage: 20,
@@ -131,42 +132,9 @@ export default {
       axios
         .post(`/api/v2/graph/search`, graphSearchRequest)
         .then(response => {
-          let vertices = response.data.vertices;
-          let paths = [];
-          for (let i = 0; i < response.data.paths.length; i++) {
-            let edges = response.data.paths[i];
-            let nodeChain = [];
-            for (let j = 0; j < edges.length; j++) {
-              let edge = edges[j];
-              if (j === 0) {
-                if (edge.source === this.extendedId) {
-                  nodeChain.push(vertices[edge.source]);
-                  edge.direction = "out";
-                  nodeChain.push(edge);
-                  nodeChain.push(vertices[edge.target]);
-                } else {
-                  nodeChain.push(vertices[edge.target]);
-                  edge.direction = "in";
-                  nodeChain.push(edge);
-                  nodeChain.push(vertices[edge.source]);
-                }
-              } else {
-                if (edge.source != edges[j - 1].target) {
-                  edge.direction = "in";
-                  nodeChain.push(edge);
-                  nodeChain.push(vertices[edge.source]);
-                } else {
-                  edge.direction = "ou";
-                  nodeChain.push(edge);
-                  nodeChain.push(vertices[edge.target]);
-                }
-              }
-            }
-            paths.push({ edges: edges, nodeChain: nodeChain });
-          }
-          this.links = paths;
+          this.vertices = response.data.vertices;
+          this.paths = response.data.paths;
           this.total = response.data.total;
-          this.vertices = vertices;
           this.$emit("totalUpdated", this.total);
         })
         .catch(error => {
@@ -212,7 +180,39 @@ export default {
       return `${this.sourceType}/${this.id}`;
     },
     getNodeChain() {
-      return this.links;
+      let chains = [];
+      for (let i = 0; i < this.paths.length; i++) {
+        let edges = this.paths[i];
+        let nodeChain = [];
+        for (let j = 0; j < edges.length; j++) {
+          let edge = edges[j];
+          if (j === 0) {
+            if (edge.source === this.extendedId) {
+              nodeChain.push(this.vertices[edge.source]);
+              edge.direction = "out";
+              nodeChain.push(edge);
+              nodeChain.push(this.vertices[edge.target]);
+            } else {
+              nodeChain.push(this.vertices[edge.target]);
+              edge.direction = "in";
+              nodeChain.push(edge);
+              nodeChain.push(this.vertices[edge.source]);
+            }
+          } else {
+            if (edge.source != edges[j - 1].target) {
+              edge.direction = "in";
+              nodeChain.push(edge);
+              nodeChain.push(this.vertices[edge.source]);
+            } else {
+              edge.direction = "ou";
+              nodeChain.push(edge);
+              nodeChain.push(this.vertices[edge.target]);
+            }
+          }
+        }
+        chains.push({ edges: edges, nodeChain: nodeChain });
+      }
+      return chains;
     }
   },
   watch: {
