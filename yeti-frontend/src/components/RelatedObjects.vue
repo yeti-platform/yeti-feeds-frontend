@@ -63,15 +63,29 @@
             class="me-2"
           >
           </v-btn>
-          <v-btn
-            icon="mdi-pencil"
-            @click="editEdge(item.edges[0].id)"
-            density="compact"
-            variant="tonal"
-            color="primary"
-            class="me-2"
-          >
-          </v-btn>
+          <v-dialog width="700">
+            <template v-slot:activator="{ props }">
+              <v-btn icon="mdi-pencil" density="compact" variant="tonal" color="primary" class="me-2" v-bind="props">
+              </v-btn>
+            </template>
+
+            <template v-slot:default="{ isActive }">
+              <edit-link
+                :vertices="vertices"
+                :edge="item.edges[0]"
+                :is-active="isActive"
+                @success="linkUpdateSuccess(item.edges[0], $event)"
+              />
+            </template>
+          </v-dialog>
+          <v-snackbar v-model="displaySnackBar" :timeout="50000" variant="flat" color="green-lighten-2">
+            Link updated succesfully!
+            <template v-slot:actions>
+              <v-btn color="green-darken-2" variant="flat" rounded="2" @click="displaySnackBar = false">
+                OK
+              </v-btn>
+            </template>
+          </v-snackbar>
         </td>
       </tr>
     </template>
@@ -82,8 +96,9 @@
 import axios from "axios";
 import { ENTITY_TYPES } from "@/definitions/entityDefinitions.js";
 import { INDICATOR_TYPES } from "@/definitions/indicatorDefinitions.js";
-// import EditLink from "@/components/EditLink";
+import EditLink from "@/components/EditLink.vue";
 </script>
+
 <script lang="ts">
 export default {
   name: "RelatedObjects",
@@ -96,6 +111,9 @@ export default {
     graph: { type: String, default: "links" },
     hops: { type: Number, default: 1 }
   },
+  components: {
+    EditLink
+  },
   data() {
     return {
       tempChains: [],
@@ -105,13 +123,22 @@ export default {
       perPage: 20,
       total: 0,
       loading: false,
-      objectTypes: ENTITY_TYPES.concat(INDICATOR_TYPES)
+      objectTypes: ENTITY_TYPES.concat(INDICATOR_TYPES),
+      showEditLink: false,
+      displaySnackBar: false,
+      snackBarText: ""
     };
   },
   mounted() {
     this.fetchNeighbors();
   },
   methods: {
+    linkUpdateSuccess(edge, updatedEdge) {
+      edge.type = updatedEdge.type;
+      edge.description = updatedEdge.description;
+      this.snackBarText = "Link updated successfully!";
+      this.displaySnackBar = true;
+    },
     getLabelForField(field) {
       let fieldName = field.charAt(0).toUpperCase() + field.slice(1);
       fieldName = fieldName.replace(/_/g, " ");
