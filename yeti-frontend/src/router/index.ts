@@ -30,6 +30,23 @@ const routes = [
         props: { taskType: "feed" }
       }
     ]
+  },
+  {
+    path: "/entities",
+    component: () => import("@/layouts/default/Default.vue"),
+    children: [
+      {
+        path: "",
+        name: "Entities",
+        component: () => import("@/views/EntitySearch.vue")
+      },
+      {
+        path: "entity/:id([0-9]+)",
+        name: "EntityDetails",
+        component: () => import("@/views/EntityDetails.vue"),
+        props: true
+      }
+    ]
   }
 ];
 
