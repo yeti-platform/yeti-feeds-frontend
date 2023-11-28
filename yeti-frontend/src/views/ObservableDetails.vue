@@ -49,7 +49,7 @@
                 :text="tag.item.value"
                 label
                 size="large"
-                :color="observable?.tags[tag.item.value].fresh ? 'primary' : 'grey'"
+                :color="observable?.tags[tag.item.value]?.fresh ? 'primary' : 'grey'"
             /></template>
             <template v-slot:append>
               <v-btn variant="tonal" color="primary" class="me-2" @click="saveTags">Save</v-btn>
@@ -176,10 +176,7 @@ export default {
         .post(`/api/v2/observables/tag`, params)
         .then(() => {
           this.getObservableDetails();
-          this.$buefy.toast.open({
-            message: "Tags saved!",
-            type: "is-success"
-          });
+          this.$emit("displayMessage", { message: "Tags saved successfully", status: "success" });
         })
         .catch(error => {
           console.log(error);
