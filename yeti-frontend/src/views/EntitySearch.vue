@@ -1,5 +1,5 @@
 <template>
-  <v-card>
+  <v-card class="ma-5">
     <v-tabs v-model="activeTab" color="primary">
       <v-tab :value="typeDef.type" v-for="typeDef in displayedEntityTypes">
         <v-icon size="x-large">{{ typeDef.icon }}</v-icon
