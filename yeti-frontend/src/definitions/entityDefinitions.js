@@ -52,7 +52,11 @@ export const ENTITY_TYPES = [
       { field: "name", type: "text", label: "Name", displayList: true },
       { field: "tags", type: "list", label: "Relevant tags", displayList: true },
       { field: "aliases", type: "list", label: "Aliases", displayList: true },
-      { field: "description", type: "longtext", label: "Description", displayList: false }
+      { field: "description", type: "longtext", label: "Description", displayList: false },
+      { field: "threat_actor_types", type: "list", label: "Threat actor types", displayList: true },
+      { field: "created", type: "date", label: "Created", displayList: true },
+      { field: "first_seen", type: "date", label: "First seen", displayList: true },
+      { field: "last_seen", type: "date", label: "Last seen", displayList: true }
     ],
     icon: "user-secret"
   },
