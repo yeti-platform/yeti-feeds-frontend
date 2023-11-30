@@ -14,7 +14,7 @@
   >
     <template v-slot:item.name="{ item }">
       <router-link
-        :to="{ name: 'EntityDetails', params: { id: item.id } }"
+        :to="{ name: this.searchType === 'entities' ? 'EntityDetails' : 'IndicatorDetails', params: { id: item.id } }"
         class="text-blue"
         style="text-decoration:none"
         >{{ item.name }}</router-link
@@ -30,11 +30,17 @@
         size="small"
       ></v-chip>
     </template>
+    <template v-slot:item.relevant_tags="{ item }">
+      <v-chip v-for="name in item.relevant_tags" :text="name" class="mx-1" label size="small"></v-chip>
+    </template>
     <template v-slot:item.aliases="{ item }">
       <v-chip v-for="value in item.aliases" :text="value" class="mx-1" label size="small"></v-chip>
     </template>
     <template v-slot:item.threat_actor_types="{ item }">
       <v-chip v-for="value in item.threat_actor_types" :text="value" class="mx-1" label size="small"></v-chip>
+    </template>
+    <template v-slot:item.target_systems="{ item }">
+      <v-chip v-for="value in item.target_systems" :text="value" class="mx-1" label size="small"></v-chip>
     </template>
   </v-data-table-server>
 </template>
@@ -122,7 +128,7 @@ export default {
         query: this.extractParamsFromSearchQuery(this.searchQuery, "name")
       };
       axios.post(`/api/v2/${this.searchType}/search`, params).then(response => {
-        this.items = response.data.entities;
+        this.items = response.data[this.searchType];
         this.total = response.data.total;
         this.$emit("totalUpdated", this.total);
       });
