@@ -3,7 +3,7 @@ import { createRouter, createWebHistory } from "vue-router";
 
 const routes = [
   {
-    path: "/",
+    path: "/observables",
     component: () => import("@/layouts/default/Default.vue"),
     children: [
       {
@@ -12,7 +12,7 @@ const routes = [
         component: () => import("@/views/ObservableSearch.vue")
       },
       {
-        path: "observable/:id([0-9]+)",
+        path: ":id([0-9]+)",
         name: "ObservableDetails",
         component: () => import("@/views/ObservableDetails.vue"),
         props: true
@@ -41,9 +41,26 @@ const routes = [
         component: () => import("@/views/EntitySearch.vue")
       },
       {
-        path: "entity/:id([0-9]+)",
+        path: ":id([0-9]+)",
         name: "EntityDetails",
         component: () => import("@/views/EntityDetails.vue"),
+        props: true
+      }
+    ]
+  },
+  {
+    path: "/indicators",
+    component: () => import("@/layouts/default/Default.vue"),
+    children: [
+      {
+        path: "",
+        name: "Indicators",
+        component: () => import("@/views/IndicatorSearch.vue")
+      },
+      {
+        path: ":id([0-9]+)",
+        name: "IndicatorDetails",
+        component: () => import("@/views/IndicatorDetails.vue"),
         props: true
       }
     ]
