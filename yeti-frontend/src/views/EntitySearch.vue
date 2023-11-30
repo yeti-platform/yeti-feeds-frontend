@@ -75,9 +75,9 @@ export default {
       }
     },
     navigateToFirstPopulatedTab() {
-      for (const entityType of this.entityTypes) {
-        if (this.entityCount[entityType.type] > 0) {
-          this.activeTab = entityType.type;
+      for (const typeDef of this.entityTypes) {
+        if (this.entityCount[typeDef.type] > 0) {
+          this.activeTab = typeDef.type;
           break;
         }
       }
