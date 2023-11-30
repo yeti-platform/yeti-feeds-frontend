@@ -73,15 +73,21 @@
       <v-container fluid>
         <v-card variant="flat">
           <v-tabs v-model="activeTab" color="primary">
-            <v-tab value="context"><v-icon size="x-large">mdi-information</v-icon>Context</v-tab>
-            <v-tab value="related-observables"><v-icon size="x-large">mdi-graph</v-icon>Related observables</v-tab>
-            <v-tab value="related-entities"><v-icon size="x-large">mdi-brain</v-icon>Related entities</v-tab>
-            <v-tab value="tag-relationships"><v-icon size="x-large">mdi-tag</v-icon>Tag relationships</v-tab>
+            <v-tab value="context"
+              ><v-icon size="x-large">mdi-information</v-icon>Context {{ observable?.context.length }}</v-tab
+            >
+            <v-tab value="related-observables"
+              ><v-icon size="x-large">mdi-graph</v-icon>Related observables {{ totalRelatedObservables }}</v-tab
+            >
+            <v-tab value="related-entities"
+              ><v-icon size="x-large">mdi-brain</v-icon>Related entities
+              {{ totalRelatedEntities + totalTaggedRelationships }}</v-tab
+            >
           </v-tabs>
 
           <v-card-text>
             <v-window v-model="activeTab">
-              <v-window-item value="context">
+              <v-window-item value="context" eager>
                 <v-card v-for="(context, index) in observable?.context" variant="outlined" class="yeti-card">
                   <v-card-title class="bg-grey-lighten-3">{{ context.source }}</v-card-title>
 
@@ -94,8 +100,9 @@
                     </tbody>
                   </v-table>
                 </v-card>
+                <div v-if="observable?.context.length == 0"><em>No context for observable</em></div>
               </v-window-item>
-              <v-window-item value="related-observables">
+              <v-window-item value="related-observables" eager>
                 <related-objects
                   :id="id"
                   source-type="observables"
@@ -104,12 +111,25 @@
                 />
               </v-window-item>
 
-              <v-window-item value="related-entities">
-                Two
-              </v-window-item>
-
-              <v-window-item value="tag-relationships">
-                Three
+              <v-window-item value="related-entities" eager>
+                <v-card title="Direct links">
+                  <related-objects
+                    :id="id"
+                    source-type="observables"
+                    :target-types="entityTypes.map(def => def.type)"
+                    @totalUpdated="value => (totalRelatedEntities = value)"
+                  />
+                </v-card>
+                <v-card title="Tagged">
+                  <related-objects
+                    :id="id"
+                    source-type="observables"
+                    :hops="2"
+                    graph="tagged"
+                    :target-types="entityTypes.map(def => def.type)"
+                    @totalUpdated="value => (totalTaggedRelationships = value)"
+                  ></related-objects>
+                </v-card>
               </v-window-item>
             </v-window>
           </v-card-text>
@@ -147,7 +167,10 @@ export default {
       observableTags: [],
       activeTab: 0,
       observableTypes: OBSERVABLE_TYPES,
-      totalRelatedObservables: 0
+      entityTypes: ENTITY_TYPES,
+      totalRelatedObservables: 0,
+      totalTaggedRelationships: 0,
+      totalRelatedEntities: 0
     };
   },
   methods: {
