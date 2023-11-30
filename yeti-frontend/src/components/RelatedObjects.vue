@@ -129,9 +129,6 @@ export default {
       snackBarText: ""
     };
   },
-  mounted() {
-    this.fetchNeighbors();
-  },
   methods: {
     linkUpdateSuccess(edge, updatedEdge) {
       edge.type = updatedEdge.type;
@@ -156,6 +153,8 @@ export default {
         count: this.perPage,
         page: this.page - 1
       };
+      console.log("Fetching neighbors", graphSearchRequest);
+
       axios
         .post(`/api/v2/graph/search`, graphSearchRequest)
         .then(response => {
