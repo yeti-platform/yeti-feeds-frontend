@@ -21,23 +21,23 @@ export default createVuetify({
     sets: {
       mdi
     }
+  },
+  blueprint: md3,
+  theme: {
+    defaultTheme: "dark",
+    themes: {
+      light: {
+        colors: {
+          primary: "#1867C0",
+          secondary: "#5CBBF6"
+        }
+      },
+      dark: {
+        colors: {
+          // primary: "#1867C0",
+          // secondary: "#5CBBF6"
+        }
+      }
+    }
   }
-  //blueprint: md3
-  // theme: {
-  //   defaultTheme: "light",
-  //   themes: {
-  //     light: {
-  //       colors: {
-  //         primary: "#1867C0",
-  //         secondary: "#5CBBF6",
-  //       },
-  //     },
-  //     dark: {
-  //       colors: {
-  //         primary: "#1867C0",
-  //         secondary: "#5CBBF6",
-  //       },
-  //     },
-  //   },
-  // },
 });
