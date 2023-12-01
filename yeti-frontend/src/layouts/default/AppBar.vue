@@ -1,7 +1,7 @@
 <template>
   <v-app-bar :elevation="2" title="Yeti">
     <template v-slot:append>
-      <v-btn :to="{ path: '/' }">Observables</v-btn>
+      <v-btn :to="{ path: '/observables' }">Observables</v-btn>
       <v-btn :to="{ path: '/entities' }">Entities</v-btn>
       <v-btn :to="{ path: '/indicators' }">Indicators</v-btn>
       <v-btn :to="{ path: '/feeds' }">Feeds</v-btn>
