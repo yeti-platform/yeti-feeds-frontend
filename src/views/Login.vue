@@ -4,7 +4,9 @@
       <div class="card is-wide has-text-centered loginform">
         <div class="card-content">
           <p class="title">Log in to Yeti</p>
-          <form @submit="logIn">
+
+          <a v-if="systemAuth === 'oidc'" href="/api/v2/auth/oidc-login">OIDC login</a>
+          <form v-if="systemAuth === 'local'" @submit="logIn">
             <b-field label="Username">
               <b-input v-model="username"></b-input>
             </b-field>
@@ -52,6 +54,11 @@ export default {
         .finally(() => {
           this.loading = false;
         });
+    }
+  },
+  computed: {
+    systemAuth() {
+      return this.$store.getters.appConfig?.auth.module;
     }
   }
 };
