@@ -3,6 +3,19 @@ import { createRouter, createWebHistory } from "vue-router";
 
 const routes = [
   {
+    path: "/login",
+    name: "Login",
+    component: () => import("@/views/Login.vue")
+    // component: () => import("@/layouts/default/Default.vue"),
+    // children: [
+    //   {
+    //     path: "",
+    //     name: "Login",
+    //     component: () => import("@/views/Login.vue")
+    //   }
+    // ]
+  },
+  {
     path: "/observables",
     component: () => import("@/layouts/default/Default.vue"),
     children: [
@@ -70,6 +83,34 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(process.env.BASE_URL),
   routes
+});
+
+import { useUserStore } from "../store/user";
+
+router.beforeEach((to, _from, next) => {
+  const userStore = useUserStore();
+  if (to.name === "Login") {
+    next();
+  } else if (userStore.user === null) {
+    userStore
+      .userCheck()
+      .then(() => {
+        if (userStore.user === null) {
+          console.log("Pinia: user null, redirecting to login");
+          next({ name: "Login" });
+        } else {
+          console.log("Pinia: got user, continuing");
+          next();
+        }
+      })
+      .catch(error => {
+        console.log(error);
+        console.log("Pinia: Not authed; redirecting to Login");
+        next({ name: "Login" });
+      });
+  } else {
+    next();
+  }
 });
 
 export default router;

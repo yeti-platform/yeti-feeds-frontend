@@ -6,13 +6,27 @@
       <v-btn :to="{ path: '/indicators' }">Indicators</v-btn>
       <v-btn :to="{ path: '/feeds' }">Feeds</v-btn>
       <v-divider vertical></v-divider>
-      <v-btn icon>
-        <v-icon>mdi-tag-outline</v-icon>
+      <v-btn prepend-icon="mdi-check-circle">
+        {{ user?.username }}
       </v-btn>
     </template>
   </v-app-bar>
 </template>
 
 <script lang="ts" setup>
-//
+import { useUserStore } from "@/store/user";
+</script>
+
+<script lang="ts">
+export default {
+  data() {
+    return {};
+  },
+  methods: {},
+  computed: {
+    user() {
+      return useUserStore().user;
+    }
+  }
+};
 </script>
