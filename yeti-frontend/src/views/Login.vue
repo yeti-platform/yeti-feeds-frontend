@@ -37,7 +37,8 @@ export default {
       username: null,
       password: null,
       userStore: useUserStore(),
-      appStore: useAppStore()
+      appStore: useAppStore(),
+      landing: "/observables"
     };
   },
   methods: {
@@ -45,9 +46,10 @@ export default {
       this.userStore
         .OIDCRefresh()
         .then(() => {
-          this.$router.push("/observables");
+          console.log("Successfully refreshed OIDC token!");
         })
         .catch(error => {
+          this.$evenBus.emit("displayMessage", { message: "Could not refresh OIDC token: " + error, status: "error" });
           console.log("Could not refresh OIDC token: " + error);
         });
     },
@@ -60,7 +62,6 @@ export default {
         .userLocalLogin(form)
         .then(() => {
           console.log("Successfully logged in!");
-          this.$router.push("/observables");
         })
         .catch(error => {
           this.$eventBus.emit("displayMessage", { message: error.response.data.detail, status: "error" });
@@ -76,7 +77,17 @@ export default {
     }
   },
   mounted() {
+    this.userStore.userCheck().then(() => {
+      this.$router.replace(this.landing);
+    });
     this.appStore.fetchSystemConfig();
+  },
+  watch: {
+    user(newUser) {
+      if (newUser !== null) {
+        this.$router.replace(this.landing);
+      }
+    }
   }
 };
 </script>
