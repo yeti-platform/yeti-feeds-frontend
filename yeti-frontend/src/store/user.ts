@@ -39,6 +39,22 @@ export const useUserStore = defineStore("user", {
             reject(err);
           });
       });
+    },
+    async userLocalLogin(form) {
+      return new Promise((resolve, reject) => {
+        axios
+          .post("/api/v2/auth/token", form)
+          .then(response => {
+            console.log("User login success");
+            this.userCheck().then(() => resolve(response));
+          })
+          .catch(err => {
+            console.log(err);
+            console.log(`User login fail: ${err.response.data.detail}`);
+            this.user = null;
+            reject(err);
+          });
+      });
     }
   }
 });
