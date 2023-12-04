@@ -19,10 +19,6 @@ import { useUserStore } from "@/store/user";
 
 <script lang="ts">
 export default {
-  data() {
-    return {};
-  },
-  methods: {},
   computed: {
     user() {
       return useUserStore().user;
