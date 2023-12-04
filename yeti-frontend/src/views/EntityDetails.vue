@@ -162,7 +162,7 @@ export default {
         .post("/api/v2/entities/tag", params)
         .then(() => {
           this.getEntityDetails();
-          this.$emit("displayMessage", { message: "Tags saved successfully", status: "success" });
+          this.$eventBus.emit("displayMessage", { message: "Tags saved successfully", status: "success" });
         })
         .catch(error => {
           console.log(error);

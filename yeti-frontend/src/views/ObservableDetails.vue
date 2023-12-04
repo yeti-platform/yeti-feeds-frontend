@@ -199,7 +199,7 @@ export default {
         .post(`/api/v2/observables/tag`, params)
         .then(() => {
           this.getObservableDetails();
-          this.$emit("displayMessage", { message: "Tags saved successfully", status: "success" });
+          this.$eventBus.emit("displayMessage", { message: "Tags saved successfully", status: "success" });
         })
         .catch(error => {
           console.log(error);

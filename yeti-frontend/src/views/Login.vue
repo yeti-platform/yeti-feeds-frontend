@@ -63,10 +63,7 @@ export default {
           this.$router.push("/observables");
         })
         .catch(error => {
-          this.$buefy.notification.open({
-            message: error.response.data.detail,
-            type: "is-danger"
-          });
+          this.$eventBus.emit("displayMessage", { message: error.response.data.detail, status: "error" });
         });
     }
   },
