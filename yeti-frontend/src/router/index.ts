@@ -48,8 +48,8 @@ const routes = [
       {
         path: ":id([0-9]+)",
         name: "EntityDetails",
-        component: () => import("@/views/EntityDetails.vue"),
-        props: true
+        component: () => import("@/views/ObjectDetails.vue"),
+        props: route => ({ id: String(route.params.id), objectType: "entity" })
       }
     ]
   },
@@ -65,8 +65,8 @@ const routes = [
       {
         path: ":id([0-9]+)",
         name: "IndicatorDetails",
-        component: () => import("@/views/IndicatorDetails.vue"),
-        props: true
+        component: () => import("@/views/ObjectDetails.vue"),
+        props: route => ({ id: String(route.params.id), objectType: "indicator" })
       }
     ]
   }
