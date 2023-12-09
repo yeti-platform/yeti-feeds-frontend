@@ -1,9 +1,9 @@
 <template>
   <v-card>
     <template v-slot:title>
-      Edit: {{ vertices[edge.source].value }}
+      Edit: {{ vertices[edge.source].value || vertices[edge.source].name }}
       <v-icon>mdi-arrow-right</v-icon>
-      {{ vertices[edge.target].value }}</template
+      {{ vertices[edge.target].value || vertices[edge.target].name }}</template
     >
     <v-card-text>
       <v-text-field label="Type" v-model="localEdge.type"></v-text-field>
