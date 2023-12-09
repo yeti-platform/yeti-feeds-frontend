@@ -1,14 +1,11 @@
 <template>
-  <div>
+  <v-sheet class="ma-5">
     <v-data-table
       :items="tasks"
       :headers="displayedHeaders"
+      :items-per-page="100"
       density="compact"
-      :sort-by="[
-        { key: 'enabled', order: 'desc' },
-        { key: 'name', order: 'asc' }
-      ]"
-      class="ma-4"
+      :sort-by="[{ key: 'name', order: 'asc' }]"
     >
       <template v-slot:item="{ item }">
         <tr :class="getRowClass(item)">
@@ -61,7 +58,7 @@
         >
       </template>
     </v-data-table>
-  </div>
+  </v-sheet>
 </template>
 
 <script lang="ts" setup>
@@ -105,7 +102,8 @@ export default {
         { key: "status", title: "Status", width: "120px" },
         { key: "toggle", title: "Toggle", width: "80px" },
         { key: "refresh", title: "", width: "80px" }
-      ]
+      ],
+      sortBy: [{ key: "name", order: "asc" }]
     };
   },
   mounted() {

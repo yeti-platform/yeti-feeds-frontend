@@ -2,15 +2,12 @@
   <v-container fluid>
     <v-row align="start" no-gutters>
       <v-col>
-        <v-card class="ma-2" variant="flat">
+        <v-card class="ma-2" variant="tonal">
           <template v-slot:title>
-            <code>{{ observable?.value }}</code>
-          </template>
-          <template v-slot:subtitle>
-            <v-chip color="primary" :text="observable?.type" label></v-chip>
+            <v-chip color="primary" :text="observable?.type" label></v-chip> <code>{{ observable?.value }}</code>
           </template>
         </v-card>
-        <v-card class="ma-2" variant="flat">
+        <v-sheet class="ma-2">
           <v-table density="compact">
             <tbody>
               <tr>
@@ -27,10 +24,10 @@
               </tr>
             </tbody>
           </v-table>
-        </v-card>
+        </v-sheet>
       </v-col>
       <v-col cols="4">
-        <v-card class="ma-2" variant="flat">
+        <v-card class="ma-2" variant="tonal">
           <v-card-title>Tags</v-card-title>
 
           <v-combobox
@@ -55,7 +52,7 @@
             </template>
           </v-combobox>
         </v-card>
-        <v-card class="ma-2" variant="flat">
+        <v-card class="ma-2" variant="tonal">
           <v-card-title>Enabled analytics for {{ observable?.type }}</v-card-title>
           <task-list
             v-if="observable"
@@ -70,7 +67,7 @@
     </v-row>
     <v-row>
       <v-container fluid>
-        <v-card variant="flat">
+        <v-sheet>
           <v-tabs v-model="activeTab" color="primary">
             <v-tab value="context"
               ><v-icon size="x-large">mdi-information</v-icon>Context {{ observable?.context.length }}</v-tab
@@ -84,55 +81,53 @@
             >
           </v-tabs>
 
-          <v-card-text>
-            <v-window v-model="activeTab">
-              <v-window-item value="context" eager>
-                <v-card v-for="(context, index) in observable?.context" variant="outlined">
-                  <v-card-title>{{ context.source }}</v-card-title>
+          <v-window v-model="activeTab" class="pa-5">
+            <v-window-item value="context" eager>
+              <v-card v-for="(context, index) in observable?.context" elevation="0" variant="outlined">
+                <v-card-title>{{ context.source }}</v-card-title>
 
-                  <v-table>
-                    <tbody>
-                      <tr v-for="key in Object.keys(context).filter(k => k !== 'source')" v-bind:key="key">
-                        <th>{{ key }}</th>
-                        <td>{{ context[key] }}</td>
-                      </tr>
-                    </tbody>
-                  </v-table>
-                </v-card>
-                <div v-if="observable?.context.length == 0"><em>No context for observable</em></div>
-              </v-window-item>
-              <v-window-item value="related-observables" eager>
+                <v-table>
+                  <tbody>
+                    <tr v-for="key in Object.keys(context).filter(k => k !== 'source')" v-bind:key="key">
+                      <th>{{ key }}</th>
+                      <td>{{ context[key] }}</td>
+                    </tr>
+                  </tbody>
+                </v-table>
+              </v-card>
+              <div v-if="observable?.context.length == 0"><em>No context for observable</em></div>
+            </v-window-item>
+            <v-window-item value="related-observables" eager>
+              <related-objects
+                :id="id"
+                source-type="observables"
+                :target-types="observableTypes.map(def => def.type)"
+                @totalUpdated="value => (totalRelatedObservables = value)"
+              />
+            </v-window-item>
+
+            <v-window-item value="related-entities" eager>
+              <v-card title="Direct links">
                 <related-objects
                   :id="id"
                   source-type="observables"
-                  :target-types="observableTypes.map(def => def.type)"
-                  @totalUpdated="value => (totalRelatedObservables = value)"
+                  :target-types="entityTypes.map(def => def.type)"
+                  @totalUpdated="value => (totalRelatedEntities = value)"
                 />
-              </v-window-item>
-
-              <v-window-item value="related-entities" eager>
-                <v-card title="Direct links">
-                  <related-objects
-                    :id="id"
-                    source-type="observables"
-                    :target-types="entityTypes.map(def => def.type)"
-                    @totalUpdated="value => (totalRelatedEntities = value)"
-                  />
-                </v-card>
-                <v-card title="Tagged">
-                  <related-objects
-                    :id="id"
-                    source-type="observables"
-                    :hops="2"
-                    graph="tagged"
-                    :target-types="entityTypes.map(def => def.type)"
-                    @totalUpdated="value => (totalTaggedRelationships = value)"
-                  ></related-objects>
-                </v-card>
-              </v-window-item>
-            </v-window>
-          </v-card-text>
-        </v-card>
+              </v-card>
+              <v-card title="Tagged">
+                <related-objects
+                  :id="id"
+                  source-type="observables"
+                  :hops="2"
+                  graph="tagged"
+                  :target-types="entityTypes.map(def => def.type)"
+                  @totalUpdated="value => (totalTaggedRelationships = value)"
+                ></related-objects>
+              </v-card>
+            </v-window-item>
+          </v-window>
+        </v-sheet>
       </v-container>
     </v-row>
   </v-container>
@@ -226,4 +221,8 @@ export default {
 };
 </script>
 
-<style></style>
+<style>
+.v-card-text.yeti-description {
+  font-size: 1rem;
+}
+</style>

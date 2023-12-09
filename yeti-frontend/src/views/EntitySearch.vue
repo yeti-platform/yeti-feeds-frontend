@@ -1,25 +1,23 @@
 <template>
-  <v-card class="ma-5">
+  <v-sheet class="ma-5">
     <v-tabs v-model="activeTab" color="primary">
       <v-tab :value="typeDef.type" v-for="typeDef in displayedEntityTypes">
-        <v-icon size="x-large">{{ typeDef.icon }}</v-icon
-        >{{ typeDef.name }} ({{ entityCount[typeDef.type] }})
+        <v-icon size="x-large" start>{{ typeDef.icon }}</v-icon
+        >{{ typeDef.name }} <v-chip class="ml-3" density="comfortable">{{ entityCount[typeDef.type] }}</v-chip>
       </v-tab>
     </v-tabs>
-    <v-card-text>
-      <v-window v-model="activeTab">
-        <v-window-item v-for="typeDef in entityTypes" :value="typeDef.type" v-bind:key="typeDef.type" eager>
-          <object-list
-            searchType="entities"
-            :search-subtype="typeDef.type"
-            :search-query="searchQuery"
-            :headers="getFieldForType(typeDef.type)"
-            @totalUpdated="countEntities(typeDef.type, $event)"
-          />
-        </v-window-item>
-      </v-window>
-    </v-card-text>
-  </v-card>
+    <v-window v-model="activeTab">
+      <v-window-item v-for="typeDef in entityTypes" :value="typeDef.type" v-bind:key="typeDef.type" eager>
+        <object-list
+          searchType="entities"
+          :search-subtype="typeDef.type"
+          :search-query="searchQuery"
+          :headers="getFieldForType(typeDef.type)"
+          @totalUpdated="countEntities(typeDef.type, $event)"
+        />
+      </v-window-item>
+    </v-window>
+  </v-sheet>
 
   <v-navigation-drawer permament location="right" width="400" ref="drawer">
     <v-list-item class="mt-4">
@@ -35,7 +33,6 @@
 </template>
 
 <script lang="ts" setup>
-import axios from "axios";
 import { ENTITY_TYPES } from "@/definitions/entityDefinitions.js";
 import ObjectList from "@/components/ObjectList.vue";
 </script>

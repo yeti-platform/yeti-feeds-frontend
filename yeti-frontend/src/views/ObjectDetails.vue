@@ -2,21 +2,18 @@
   <v-container fluid>
     <v-row align="start" no-gutters>
       <v-col>
-        <v-card class="ma-2" variant="flat">
+        <v-card class="ma-2 yeti-description">
           <template v-slot:title>
             <v-chip color="primary" :text="object?.type" label></v-chip> <code>{{ object?.name }}</code>
           </template>
           <template v-slot:subtitle> </template>
-          <v-card-text v-if="object?.description">
-            {{ object?.description }}
-          </v-card-text>
-          <v-card-text v-else>
-            <em>No description provided</em>
+          <v-card-text class="yeti-description">
+            {{ object?.description || "No description provided" }}
           </v-card-text>
         </v-card>
       </v-col>
       <v-col cols="4">
-        <v-card class="ma-2" variant="flat">
+        <v-card class="ma-2">
           <v-card-title>Info</v-card-title>
           <v-table density="compact">
             <tbody>
@@ -52,74 +49,76 @@
     </v-row>
     <v-row>
       <v-container fluid>
-        <v-card variant="flat">
+        <v-sheet>
           <v-tabs v-model="activeTab" color="primary">
             <v-tab
               :value="'related-' + entityType.type"
               v-for="entityType in displayedEntityTypes"
               v-bind:key="entityType.type"
             >
-              <v-icon size="x-large">{{ entityType.icon }}</v-icon>
+              <v-icon size="x-large" start>{{ entityType.icon }}</v-icon>
               {{ entityType.name }} {{ relatedEntitiesCount[entityType.type] }}
             </v-tab>
             <v-tab value="related-indicators"
-              ><v-icon size="x-large">mdi-graph</v-icon>Related indicators {{ totalRelatedIndicators }}</v-tab
+              ><v-icon size="x-large" start>mdi-graph</v-icon>Related indicators
+              <v-chip class="ml-3" density="comfortable"> {{ totalRelatedIndicators }}</v-chip></v-tab
             >
             <v-tab value="related-observables"
-              ><v-icon size="x-large">mdi-graph</v-icon>Related observables {{ totalRelatedObservables }}</v-tab
+              ><v-icon size="x-large" start>mdi-graph</v-icon>Related observables
+              <v-chip class="ml-3" density="comfortable">{{ totalRelatedObservables }}</v-chip></v-tab
             >
             <v-tab value="tag-relationships"
-              ><v-icon size="x-large">mdi-tag</v-icon>Tag relationships {{ totalTaggedObservables }}</v-tab
+              ><v-icon size="x-large" start>mdi-tag</v-icon>Tag relationships
+              <v-chip class="ml-3" density="comfortable">{{ totalTaggedObservables }}</v-chip></v-tab
             >
           </v-tabs>
 
-          <v-card-text>
-            <v-window v-model="activeTab">
-              <v-window-item
-                v-for="entityType in objectTypes['entity']"
-                v-bind:key="entityType.type"
-                :value="'related-' + entityType.type"
-                eager
-              >
-                <related-objects
-                  :id="id"
-                  :source-type="typeToEndpointMapping[objectType]"
-                  :target-types="[entityType.type]"
-                  @totalUpdated="value => countEntities(entityType.type, value)"
-                />
-              </v-window-item>
+          <v-window v-model="activeTab">
+            <v-window-item
+              v-for="entityType in objectTypes['entity']"
+              v-bind:key="entityType.type"
+              :value="'related-' + entityType.type"
+              eager
+              class="my-4"
+            >
+              <related-objects
+                :id="id"
+                :source-type="typeToEndpointMapping[objectType]"
+                :target-types="[entityType.type]"
+                @totalUpdated="value => countEntities(entityType.type, value)"
+              />
+            </v-window-item>
 
-              <v-window-item value="related-indicators" eager>
-                <related-objects
-                  :id="id"
-                  :source-type="typeToEndpointMapping[objectType]"
-                  :target-types="objectTypes['indicator'].map(def => def.type)"
-                  @totalUpdated="value => (totalRelatedIndicators = value)"
-                />
-              </v-window-item>
+            <v-window-item value="related-indicators" eager class="my-4">
+              <related-objects
+                :id="id"
+                :source-type="typeToEndpointMapping[objectType]"
+                :target-types="objectTypes['indicator'].map(def => def.type)"
+                @totalUpdated="value => (totalRelatedIndicators = value)"
+              />
+            </v-window-item>
 
-              <v-window-item value="related-observables" eager>
-                <related-objects
-                  :id="id"
-                  :source-type="typeToEndpointMapping[objectType]"
-                  :target-types="objectTypes['observable'].map(def => def.type)"
-                  @totalUpdated="value => (totalRelatedObservables = value)"
-                />
-              </v-window-item>
+            <v-window-item value="related-observables" eager class="my-4">
+              <related-objects
+                :id="id"
+                :source-type="typeToEndpointMapping[objectType]"
+                :target-types="objectTypes['observable'].map(def => def.type)"
+                @totalUpdated="value => (totalRelatedObservables = value)"
+              />
+            </v-window-item>
 
-              <v-window-item value="tag-relationships" eager>
-                <related-objects
-                  :id="id"
-                  :source-type="typeToEndpointMapping[objectType]"
-                  :hops="2"
-                  graph="tagged"
-                  :target-types="objectTypes['observable'].map(def => def.type)"
-                  @totalUpdated="value => (totalTaggedObservables = value)"
-                ></related-objects>
-              </v-window-item>
-            </v-window>
-          </v-card-text>
-        </v-card>
+            <v-window-item value="tag-relationships" eager class="my-4">
+              <related-objects
+                :id="id"
+                :source-type="typeToEndpointMapping[objectType]"
+                :hops="2"
+                graph="tagged"
+                :target-types="objectTypes['observable'].map(def => def.type)"
+                @totalUpdated="value => (totalTaggedObservables = value)"
+              ></related-objects>
+            </v-window-item>
+          </v-window>
+        </v-sheet>
       </v-container>
     </v-row>
   </v-container>
@@ -240,4 +239,8 @@ export default {
 };
 </script>
 
-<style></style>
+<style>
+.v-card-text.yeti-description {
+  font-size: 1rem;
+}
+</style>
