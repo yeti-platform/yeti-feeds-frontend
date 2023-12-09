@@ -57,11 +57,19 @@
       <v-container fluid>
         <v-card variant="flat">
           <v-tabs v-model="activeTab" color="primary">
+            <v-tab
+              :value="'related-' + entityType.type"
+              v-for="entityType in displayedEntityTypes"
+              v-bind:key="entityType.type"
+            >
+              <v-icon size="x-large">{{ entityType.icon }}</v-icon>
+              {{ entityType.name }} {{ relatedEntitiesCount[entityType.type] }}
+            </v-tab>
+            <v-tab value="related-indicators"
+              ><v-icon size="x-large">mdi-graph</v-icon>Related indicators {{ totalRelatedIndicators }}</v-tab
+            >
             <v-tab value="related-observables"
               ><v-icon size="x-large">mdi-graph</v-icon>Related observables {{ totalRelatedObservables }}</v-tab
-            >
-            <v-tab value="related-entities"
-              ><v-icon size="x-large">mdi-brain</v-icon>Related entities {{ totalRelatedEntities }}</v-tab
             >
             <v-tab value="tag-relationships"
               ><v-icon size="x-large">mdi-tag</v-icon>Tag relationships {{ totalTaggedObservables }}</v-tab
@@ -70,21 +78,35 @@
 
           <v-card-text>
             <v-window v-model="activeTab">
+              <v-window-item
+                v-for="entityType in objectTypes['entity']"
+                v-bind:key="entityType.type"
+                :value="'related-' + entityType.type"
+                eager
+              >
+                <related-objects
+                  :id="id"
+                  :source-type="typeToEndpointMapping[objectType]"
+                  :target-types="[entityType.type]"
+                  @totalUpdated="value => countEntities(entityType.type, value)"
+                />
+              </v-window-item>
+
+              <v-window-item value="related-indicators" eager>
+                <related-objects
+                  :id="id"
+                  :source-type="typeToEndpointMapping[objectType]"
+                  :target-types="objectTypes['indicator'].map(def => def.type)"
+                  @totalUpdated="value => (totalRelatedIndicators = value)"
+                />
+              </v-window-item>
+
               <v-window-item value="related-observables" eager>
                 <related-objects
                   :id="id"
                   :source-type="typeToEndpointMapping[objectType]"
                   :target-types="objectTypes['observable'].map(def => def.type)"
                   @totalUpdated="value => (totalRelatedObservables = value)"
-                />
-              </v-window-item>
-
-              <v-window-item value="related-entities" eager>
-                <related-objects
-                  :id="id"
-                  :source-type="typeToEndpointMapping[objectType]"
-                  :target-types="objectTypes['entity'].map(def => def.type)"
-                  @totalUpdated="value => (totalRelatedEntities = value)"
                 />
               </v-window-item>
 
@@ -133,7 +155,7 @@ export default {
   data() {
     return {
       object: null,
-      activeTab: 0,
+      activeTab: "related-indicators",
       objectTypes: {
         entity: ENTITY_TYPES,
         observable: OBSERVABLE_TYPES,
@@ -146,7 +168,11 @@ export default {
       },
       objectTags: [],
       totalRelatedObservables: 0,
-      totalRelatedEntities: 0,
+      totalRelatedIndicators: 0,
+      relatedEntitiesCount: ENTITY_TYPES.reduce((acc, cur) => {
+        acc[cur.type] = 0;
+        return acc;
+      }, {}),
       totalTaggedObservables: 0
     };
   },
@@ -158,7 +184,6 @@ export default {
           let tagNames: string[] = [];
           this.object = response.data;
           this.objectTags = Object.keys(this.object.tags);
-          this.activeTab = 0;
         })
         .catch(error => {
           console.log(error);
@@ -181,6 +206,18 @@ export default {
           console.log(error);
         })
         .finally();
+    },
+    countEntities(entityType: string, value: number) {
+      this.relatedEntitiesCount[entityType] = value;
+      this.navigateToFirstPopulatedTab();
+    },
+    navigateToFirstPopulatedTab() {
+      for (const entityType of this.objectTypes.entity) {
+        if (this.relatedEntitiesCount[entityType.type] > 0) {
+          this.activeTab = `related-${entityType.type}`;
+          return;
+        }
+      }
     }
   },
   computed: {
@@ -190,6 +227,9 @@ export default {
     getObjectInfoFields() {
       const hideFields = ["name", "description", "tags"];
       return this.getObjectTypeDefintiions?.fields.filter(field => !hideFields.includes(field.field));
+    },
+    displayedEntityTypes() {
+      return this.objectTypes[this.objectType].filter(type => this.relatedEntitiesCount[type.type] > 0);
     }
   },
   mounted() {
