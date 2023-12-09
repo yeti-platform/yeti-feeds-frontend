@@ -5,9 +5,20 @@
       <v-btn :to="{ path: '/entities' }">Entities</v-btn>
       <v-btn :to="{ path: '/indicators' }">Indicators</v-btn>
       <v-btn :to="{ path: '/feeds' }">Feeds</v-btn>
-      <v-divider vertical></v-divider>
-      <v-btn prepend-icon="mdi-check-circle">
+      <v-divider vertical class="mx-2"></v-divider>
+      <v-btn prepend-icon="mdi-account-circle">
         {{ user?.username }}
+
+        <v-menu activator="parent">
+          <v-list>
+            <v-list-item prepend-icon="mdi-cog">
+              Profile and settings
+            </v-list-item>
+            <v-list-item @click="toggleTheme" prepend-icon="mdi-brightness-4">
+              Dark mode
+            </v-list-item>
+          </v-list>
+        </v-menu>
       </v-btn>
     </template>
   </v-app-bar>
@@ -15,6 +26,13 @@
 
 <script lang="ts" setup>
 import { useUserStore } from "@/store/user";
+import { useTheme } from "vuetify";
+
+const theme = useTheme();
+
+function toggleTheme() {
+  theme.global.name.value = theme.global.current.value.dark ? "light" : "dark";
+}
 </script>
 
 <script lang="ts">
