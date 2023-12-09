@@ -1,48 +1,49 @@
 <template>
-  <v-data-table-server
-    v-model:page="page"
-    :itemsLength="total"
-    :items-per-page="perPage"
-    :headers="headers"
-    density="compact"
-    :items="items"
-    @update:options="loadOjects"
-    :search="searchQuery"
-    :item-value="item => item.id"
-    hover
-    class="ma-5"
-  >
-    <template v-slot:item.name="{ item }">
-      <router-link
-        :to="{ name: this.searchType === 'entities' ? 'EntityDetails' : 'IndicatorDetails', params: { id: item.id } }"
-        class="text-blue"
-        style="text-decoration:none"
-        >{{ item.name }}</router-link
-      >
-    </template>
-    <template v-slot:item.tags="{ item }">
-      <v-chip
-        v-for="name in Object.keys(item.tags)"
-        :color="item.tags[name].fresh ? 'blue ' : 'red'"
-        :text="name"
-        class="mx-1"
-        label
-        size="small"
-      ></v-chip>
-    </template>
-    <template v-slot:item.relevant_tags="{ item }">
-      <v-chip v-for="name in item.relevant_tags" :text="name" class="mx-1" label size="small"></v-chip>
-    </template>
-    <template v-slot:item.aliases="{ item }">
-      <v-chip v-for="value in item.aliases" :text="value" class="mx-1" label size="small"></v-chip>
-    </template>
-    <template v-slot:item.threat_actor_types="{ item }">
-      <v-chip v-for="value in item.threat_actor_types" :text="value" class="mx-1" label size="small"></v-chip>
-    </template>
-    <template v-slot:item.target_systems="{ item }">
-      <v-chip v-for="value in item.target_systems" :text="value" class="mx-1" label size="small"></v-chip>
-    </template>
-  </v-data-table-server>
+  <v-sheet class="mt-2">
+    <v-data-table-server
+      v-model:page="page"
+      :itemsLength="total"
+      :items-per-page="perPage"
+      :headers="headers"
+      density="compact"
+      :items="items"
+      @update:options="loadOjects"
+      :search="searchQuery"
+      :item-value="item => item.id"
+      hover
+    >
+      <template v-slot:item.name="{ item }">
+        <router-link
+          :to="{ name: this.searchType === 'entities' ? 'EntityDetails' : 'IndicatorDetails', params: { id: item.id } }"
+          class="text-blue"
+          style="text-decoration:none"
+          >{{ item.name }}</router-link
+        >
+      </template>
+      <template v-slot:item.tags="{ item }">
+        <v-chip
+          v-for="name in Object.keys(item.tags)"
+          :color="item.tags[name].fresh ? 'blue ' : 'red'"
+          :text="name"
+          class="mx-1"
+          label
+          size="small"
+        ></v-chip>
+      </template>
+      <template v-slot:item.relevant_tags="{ item }">
+        <v-chip v-for="name in item.relevant_tags" :text="name" class="mx-1" label size="small"></v-chip>
+      </template>
+      <template v-slot:item.aliases="{ item }">
+        <v-chip v-for="value in item.aliases" :text="value" class="mx-1" label size="small"></v-chip>
+      </template>
+      <template v-slot:item.threat_actor_types="{ item }">
+        <v-chip v-for="value in item.threat_actor_types" :text="value" class="mx-1" label size="small"></v-chip>
+      </template>
+      <template v-slot:item.target_systems="{ item }">
+        <v-chip v-for="value in item.target_systems" :text="value" class="mx-1" label size="small"></v-chip>
+      </template>
+    </v-data-table-server>
+  </v-sheet>
 </template>
 
 <script lang="ts" setup>
