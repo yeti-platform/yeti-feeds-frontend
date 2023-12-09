@@ -19,7 +19,7 @@ export const INDICATOR_TYPES = [
       },
       { field: "description", type: "longtext", label: "Description", displayList: false }
     ],
-    icon: "code"
+    icon: "mdi-regex"
   },
   {
     name: "Queries",
@@ -40,7 +40,7 @@ export const INDICATOR_TYPES = [
       },
       { field: "description", type: "longtext", label: "Description", displayList: false }
     ],
-    icon: "database"
+    icon: "mdi-database-search"
   },
   {
     name: "Yara rules",
@@ -59,7 +59,7 @@ export const INDICATOR_TYPES = [
       },
       { field: "description", type: "longtext", label: "Description", displayList: false }
     ],
-    icon: "bolt"
+    icon: "mdi-code-braces"
   },
   {
     name: "Sigma rules",
@@ -78,6 +78,6 @@ export const INDICATOR_TYPES = [
       },
       { field: "description", type: "longtext", label: "Description", displayList: false }
     ],
-    icon: "bolt"
+    icon: "mdi-xml"
   }
 ];

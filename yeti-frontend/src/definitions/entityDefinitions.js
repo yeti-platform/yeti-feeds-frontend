@@ -8,7 +8,7 @@ export const ENTITY_TYPES = [
       { field: "tags", type: "list", label: "Relevant tags", displayList: true },
       { field: "description", type: "longtext", label: "Description", displayList: false }
     ],
-    icon: "fire"
+    icon: "mdi-fire"
   },
   {
     name: "Malware",
@@ -20,7 +20,7 @@ export const ENTITY_TYPES = [
       { field: "aliases", type: "list", label: "Aliases", displayList: true },
       { field: "description", type: "longtext", label: "Description", displayList: false }
     ],
-    icon: "bug"
+    icon: "mdi-spider"
   },
   {
     name: "Tool",
@@ -32,7 +32,7 @@ export const ENTITY_TYPES = [
       { field: "kill_chain_phases", type: "list", label: "Kill chain phases", displayList: true },
       { field: "description", type: "longtext", label: "Description", displayList: false }
     ],
-    icon: "wrench"
+    icon: "mdi-tools"
   },
   {
     name: "Attack pattern",
@@ -43,7 +43,7 @@ export const ENTITY_TYPES = [
       { field: "kill_chain_phases", type: "list", label: "Kill chain phases", displayList: true },
       { field: "description", type: "longtext", label: "Description", displayList: false }
     ],
-    icon: "bolt"
+    icon: "mdi-flash"
   },
   {
     name: "Threat actor",
@@ -58,7 +58,7 @@ export const ENTITY_TYPES = [
       { field: "first_seen", type: "date", label: "First seen", displayList: true },
       { field: "last_seen", type: "date", label: "Last seen", displayList: true }
     ],
-    icon: "user-secret"
+    icon: "mdi-incognito"
   },
   {
     name: "Intrusion set",
@@ -69,7 +69,7 @@ export const ENTITY_TYPES = [
       { field: "aliases", type: "list", label: "Aliases", displayList: true },
       { field: "description", type: "longtext", label: "Description", displayList: false }
     ],
-    icon: "user"
+    icon: "mdi-account-tie"
   },
   {
     name: "Campaign",
@@ -80,7 +80,7 @@ export const ENTITY_TYPES = [
       { field: "aliases", type: "list", label: "Aliases", displayList: true },
       { field: "description", type: "longtext", label: "Description", displayList: false }
     ],
-    icon: "bullhorn"
+    icon: "mdi-bullhorn"
   },
   {
     name: "Identity",
@@ -91,7 +91,7 @@ export const ENTITY_TYPES = [
       { field: "aliases", type: "list", label: "Aliases", displayList: true },
       { field: "description", type: "longtext", label: "Description", displayList: false }
     ],
-    icon: "code"
+    icon: "mdi-user"
   },
   {
     name: "Company",
@@ -101,7 +101,7 @@ export const ENTITY_TYPES = [
       { field: "tags", type: "list", label: "Relevant tags", displayList: true },
       { field: "description", type: "longtext", label: "Description", displayList: false }
     ],
-    icon: "building"
+    icon: "mdi-office-building"
   },
   {
     name: "Vulnerability",
@@ -110,7 +110,8 @@ export const ENTITY_TYPES = [
       { field: "name", type: "text", label: "Name", displayList: true },
       { field: "tags", type: "list", label: "Relevant tags", displayList: true },
       { field: "description", type: "longtext", label: "Description", displayList: false }
-    ]
+    ],
+    icon: "mdi-shield-alert"
   },
   {
     name: "Course of action",
@@ -120,6 +121,6 @@ export const ENTITY_TYPES = [
       { field: "tags", type: "list", label: "Relevant tags", displayList: true },
       { field: "description", type: "longtext", label: "Description", displayList: false }
     ],
-    icon: "briefcase-medical"
+    icon: "mdi-medical-bag"
   }
 ];
