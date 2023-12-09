@@ -4,11 +4,9 @@
       <v-col>
         <v-card class="ma-2" variant="flat">
           <template v-slot:title>
-            <code>{{ object?.name }}</code>
+            <v-chip color="primary" :text="object?.type" label></v-chip> <code>{{ object?.name }}</code>
           </template>
-          <template v-slot:subtitle>
-            <v-chip color="primary" :text="object?.type" label></v-chip>
-          </template>
+          <template v-slot:subtitle> </template>
           <v-card-text v-if="object?.description">
             {{ object?.description }}
           </v-card-text>
@@ -18,8 +16,8 @@
         </v-card>
       </v-col>
       <v-col cols="4">
-        <v-card class="ma-2 yeti-card" variant="flat">
-          <v-card-title class="bg-grey-lighten-3">Info</v-card-title>
+        <v-card class="ma-2" variant="flat">
+          <v-card-title>Info</v-card-title>
           <v-table density="compact">
             <tbody>
               <tr v-for="field in getObjectInfoFields">
@@ -32,14 +30,13 @@
             </tbody>
           </v-table>
         </v-card>
-        <v-card class="ma-2" variant="outlined">
-          <v-card-title class="bg-grey-lighten-3">Tags</v-card-title>
+        <v-card class="ma-2" variant="flat">
+          <v-card-title>Tags</v-card-title>
           <v-combobox
             v-model="objectTags"
             chips
             clearable
             multiple
-            variant="outlined"
             density="compact"
             :delimiters="[',', ' ', ';']"
             prepend-inner-icon="mdi-tag"
@@ -243,8 +240,4 @@ export default {
 };
 </script>
 
-<style>
-.yeti-card.v-card {
-  border-color: #e0e0e0;
-}
-</style>
+<style></style>

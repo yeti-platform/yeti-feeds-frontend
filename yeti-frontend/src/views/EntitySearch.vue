@@ -27,7 +27,6 @@
         v-model="searchQuery"
         prepend-inner-icon="mdi-magnify"
         label="Search entities"
-        variant="outlined"
         density="compact"
         class="mt-2"
       />

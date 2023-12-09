@@ -6,8 +6,8 @@
           <v-card-title>Log in to Yeti</v-card-title>
           <v-card-text v-if="authModule === 'local'">
             <v-form @submit="logIn">
-              <v-text-field v-model="username" variant="outlined" label="Username"></v-text-field>
-              <v-text-field v-model="password" variant="outlined" label="Password" type="password"></v-text-field>
+              <v-text-field v-model="username" label="Username"></v-text-field>
+              <v-text-field v-model="password" label="Password" type="password"></v-text-field>
               <v-btn block rounded="xs" size="large" variant="tonal" color="primary" class="mt-2" type="submit"
                 >Log in</v-btn
               >

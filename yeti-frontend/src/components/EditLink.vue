@@ -6,8 +6,8 @@
       {{ vertices[edge.target].value }}</template
     >
     <v-card-text>
-      <v-text-field label="Type" variant="outlined" v-model="localEdge.type"></v-text-field>
-      <v-textarea label="Description" variant="outlined" v-model="localEdge.description"></v-textarea>
+      <v-text-field label="Type" v-model="localEdge.type"></v-text-field>
+      <v-textarea label="Description" v-model="localEdge.description"></v-textarea>
     </v-card-text>
 
     <v-card-actions>

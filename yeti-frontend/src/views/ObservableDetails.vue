@@ -10,7 +10,7 @@
             <v-chip color="primary" :text="observable?.type" label></v-chip>
           </template>
         </v-card>
-        <v-card class="ma-2 yeti-card" variant="flat">
+        <v-card class="ma-2" variant="flat">
           <v-table density="compact">
             <tbody>
               <tr>
@@ -30,15 +30,14 @@
         </v-card>
       </v-col>
       <v-col cols="4">
-        <v-card class="ma-2 yeti-card" variant="outlined">
-          <v-card-title class="bg-grey-lighten-3">Tags</v-card-title>
+        <v-card class="ma-2" variant="flat">
+          <v-card-title>Tags</v-card-title>
 
           <v-combobox
             v-model="observableTags"
             chips
             clearable
             multiple
-            variant="outlined"
             density="compact"
             :delimiters="[',', ' ', ';']"
             prepend-inner-icon="mdi-tag"
@@ -56,8 +55,8 @@
             </template>
           </v-combobox>
         </v-card>
-        <v-card class="ma-2 yeti-card" variant="outlined">
-          <v-card-title class="bg-grey-lighten-3">Enabled analytics for {{ observable?.type }}</v-card-title>
+        <v-card class="ma-2" variant="flat">
+          <v-card-title>Enabled analytics for {{ observable?.type }}</v-card-title>
           <task-list
             v-if="observable"
             task-type="oneshot"
@@ -88,8 +87,8 @@
           <v-card-text>
             <v-window v-model="activeTab">
               <v-window-item value="context" eager>
-                <v-card v-for="(context, index) in observable?.context" variant="outlined" class="yeti-card">
-                  <v-card-title class="bg-grey-lighten-3">{{ context.source }}</v-card-title>
+                <v-card v-for="(context, index) in observable?.context" variant="outlined">
+                  <v-card-title>{{ context.source }}</v-card-title>
 
                   <v-table>
                     <tbody>
@@ -227,8 +226,4 @@ export default {
 };
 </script>
 
-<style>
-.yeti-card.v-card {
-  border-color: #e0e0e0;
-}
-</style>
+<style></style>

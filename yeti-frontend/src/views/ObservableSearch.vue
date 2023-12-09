@@ -52,7 +52,6 @@
         v-model="searchQuery"
         prepend-inner-icon="mdi-magnify"
         label="Search observables"
-        variant="outlined"
         density="compact"
         class="mt-2"
       />
@@ -62,7 +61,7 @@
       <v-expansion-panel title="Bulk actions" @group:selected="showSelect = $event.value">
         <v-expansion-panel-text>
           <v-card title="Bulk tag" class="pb-4" rounded="0" variant="flat">
-            <v-combobox v-model="bulkTags" chips clearable multiple variant="outlined" density="compact">
+            <v-combobox v-model="bulkTags" chips clearable multiple density="compact">
               <template v-slot:chip="tag"> <v-chip :text="tag.item.value" label/></template>
             </v-combobox>
             <v-btn density="compact" variant="tonal" color="primary" class="me-2" @click="changeTags">Apply</v-btn>
@@ -71,7 +70,6 @@
           <v-card title="Export observables" class="pb-4" rounded="0" variant="flat">
             <v-autocomplete
               label="Select template"
-              variant="outlined"
               density="compact"
               :items="exportTemplates"
               item-title="name"
