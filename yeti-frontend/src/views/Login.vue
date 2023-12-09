@@ -45,11 +45,11 @@ export default {
     OIDCRefresh() {
       this.userStore
         .OIDCRefresh()
-        .then(() => {
+        .then(result => {
           console.log("Successfully refreshed OIDC token!");
         })
         .catch(error => {
-          this.$evenBus.emit("displayMessage", { message: "Could not refresh OIDC token: " + error, status: "error" });
+          this.$eventBus.emit("displayMessage", { message: "Error logging in: " + error, status: "error" });
           console.log("Could not refresh OIDC token: " + error);
         });
     },

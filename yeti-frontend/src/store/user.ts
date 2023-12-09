@@ -8,21 +8,27 @@ export const useUserStore = defineStore("user", {
   }),
   actions: {
     async OIDCRefresh() {
-      var popup = window.open("/api/v2/auth/oidc-login", "OIDC Login", "width=800,height=600");
-      const store = this;
-      var timer = setInterval(function() {
-        store
-          .userCheck()
-          .then(() => {
-            if (store.user !== null) {
+      return new Promise((resolve, reject) => {
+        var popup = window.open("/api/v2/auth/oidc-login", "OIDC Login", "width=800,height=600");
+        const store = this;
+        var timer = setInterval(function() {
+          store
+            .userCheck()
+            .then(() => {
+              if (store.user !== null) {
+                popup?.close();
+                clearInterval(timer);
+                resolve(store.user);
+              }
+            })
+            .catch(error => {
               popup?.close();
+              console.log(error);
               clearInterval(timer);
-            }
-          })
-          .catch(error => {
-            console.log(error);
-          });
-      }, 500);
+              reject(error);
+            });
+        }, 500);
+      });
     },
     async userCheck() {
       return new Promise((resolve, reject) => {
@@ -36,7 +42,7 @@ export const useUserStore = defineStore("user", {
           .catch(err => {
             console.log("User check fail");
             this.user = null;
-            reject(err);
+            reject(err.response.data.detail);
           });
       });
     },
