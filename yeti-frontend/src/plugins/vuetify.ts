@@ -11,9 +11,9 @@ import { md3 } from "vuetify/blueprints";
 import { aliases, mdi } from "vuetify/iconsets/mdi";
 
 // Composables
-import { createVuetify } from "vuetify";
+import { createVuetify , type ThemeDefinition} from "vuetify";
 
-const yetiDarkTheme = {
+const yetiDarkTheme: ThemeDefinition = {
   dark: true,
   colors: {
     // primary: "#1867C0",
@@ -26,14 +26,17 @@ const yetiDarkTheme = {
     // info: "#2196F3",
     // success: "#4CAF50",
     // warning: "#FB8C00"
-  }
+  },
 };
 
 // https://vuetifyjs.com/en/introduction/why-vuetify/#feature-guides
 export default createVuetify({
   defaults: {
     global: {
-      ripple: false
+      ripple: false,
+    },
+    VApp: {
+     style: 'font-family: "system-ui", sans-serif;'
     },
     VCombobox: {
       variant: "outlined"
@@ -44,8 +47,11 @@ export default createVuetify({
     VAutocomplete: {
       variant: "outlined"
     },
-    VTextArea: {
+    VTextarea: {
       variant: "outlined"
+    },
+    VBtn: {
+      rounded: 1
     }
   },
   icons: {
