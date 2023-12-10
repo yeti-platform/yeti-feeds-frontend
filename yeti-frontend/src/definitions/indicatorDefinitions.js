@@ -3,84 +3,95 @@ export const QUERY_TYPES = ["opensearch", "osquery", "sql", "splunk"];
 
 export const INDICATOR_TYPES = [
   {
-    name: "Regular expressions",
+    name: "Regular expression",
     type: "regex",
     fields: [
-      { field: "name", type: "text", label: "Name", displayList: true },
-      { field: "pattern", type: "code", label: "Pattern", displayList: false },
-      { field: "relevant_tags", type: "list", label: "Relevant tags", displayList: true },
-      { field: "location", type: "text", label: "Location", displayList: true },
+      { field: "name", type: "text", label: "Name", displayList: true, editable: true },
+      { field: "pattern", type: "code", label: "Pattern", displayList: false, editable: true },
+      { field: "relevant_tags", type: "list", label: "Relevant tags", displayList: true, editable: true },
+      { field: "location", type: "text", label: "Location", displayList: true, editable: true },
       {
         field: "diamond",
         type: "option",
         choices: DIAMOND_MODEL,
         label: "Diamond model",
-        displayList: true
+        displayList: true,
+        editable: true
       },
-      { field: "created", type: "date", label: "Created", displayList: true },
-      { field: "description", type: "longtext", label: "Description", displayList: false }
+      { field: "created", type: "date", label: "Created", displayList: true, editable: false },
+      { field: "description", type: "longtext", label: "Description", displayList: false, editable: true }
     ],
     icon: "mdi-regex"
   },
   {
-    name: "Queries",
+    name: "Query",
     type: "query",
     fields: [
-      { field: "name", type: "text", label: "Name", displayList: true },
-      { field: "pattern", type: "longcode", label: "Rule text", displayList: false },
-      { field: "relevant_tags", type: "list", label: "Relevant tags", displayList: true },
-      { field: "query_type", type: "option", choices: QUERY_TYPES, label: "Query type", displayList: true },
-      { field: "target_systems", type: "list", label: "Target systems", displayList: true },
-      { field: "location", type: "text", label: "Location", displayList: true },
+      { field: "name", type: "text", label: "Name", displayList: true, editable: true },
+      { field: "pattern", type: "longcode", label: "Rule text", displayList: false, editable: true },
+      { field: "relevant_tags", type: "list", label: "Relevant tags", displayList: true, editable: true },
+      {
+        field: "query_type",
+        type: "option",
+        choices: QUERY_TYPES,
+        label: "Query type",
+        displayList: true,
+        editable: true
+      },
+      { field: "target_systems", type: "list", label: "Target systems", displayList: true, editable: true },
+      { field: "location", type: "text", label: "Location", displayList: true, editable: true },
       {
         field: "diamond",
         type: "option",
         choices: DIAMOND_MODEL,
         label: "Diamond model",
-        displayList: true
+        displayList: true,
+        editable: true
       },
-      { field: "created", type: "date", label: "Created", displayList: true },
-      { field: "description", type: "longtext", label: "Description", displayList: false }
+      { field: "created", type: "date", label: "Created", displayList: true, editable: false },
+      { field: "description", type: "longtext", label: "Description", displayList: false, editable: true }
     ],
     icon: "mdi-database-search"
   },
   {
-    name: "Yara rules",
+    name: "Yara",
     type: "yara",
     fields: [
-      { field: "name", type: "text", label: "Name", displayList: true },
-      { field: "pattern", type: "longcode", label: "Rule text", displayList: false },
-      { field: "relevant_tags", type: "list", label: "Relevant tags", displayList: true },
-      { field: "location", type: "text", label: "Location", displayList: true },
+      { field: "name", type: "text", label: "Name", displayList: true, editable: true },
+      { field: "pattern", type: "longcode", label: "Rule text", displayList: false, editable: true },
+      { field: "relevant_tags", type: "list", label: "Relevant tags", displayList: true, editable: true },
+      { field: "location", type: "text", label: "Location", displayList: true, editable: true },
       {
         field: "diamond",
         type: "option",
         choices: DIAMOND_MODEL,
         label: "Diamond model",
-        displayList: true
+        displayList: true,
+        editable: true
       },
-      { field: "created", type: "date", label: "Created", displayList: true },
-      { field: "description", type: "longtext", label: "Description", displayList: false }
+      { field: "created", type: "date", label: "Created", displayList: true, editable: false },
+      { field: "description", type: "longtext", label: "Description", displayList: false, editable: true }
     ],
     icon: "mdi-code-braces"
   },
   {
-    name: "Sigma rules",
+    name: "Sigma",
     type: "sigma",
     fields: [
-      { field: "name", type: "text", label: "Name", displayList: true },
-      { field: "pattern", type: "longcode", label: "Rule text", displayList: false },
-      { field: "relevant_tags", type: "list", label: "Relevant tags", displayList: true },
-      { field: "location", type: "text", label: "Location", displayList: true },
+      { field: "name", type: "text", label: "Name", displayList: true, editable: true },
+      { field: "pattern", type: "longcode", label: "Rule text", displayList: false, editable: true },
+      { field: "relevant_tags", type: "list", label: "Relevant tags", displayList: true, editable: true },
+      { field: "location", type: "text", label: "Location", displayList: true, editable: true },
       {
         field: "diamond",
         type: "option",
         choices: DIAMOND_MODEL,
         label: "Diamond model",
-        displayList: true
+        displayList: true,
+        editable: true
       },
-      { field: "created", type: "date", label: "Created", displayList: true },
-      { field: "description", type: "longtext", label: "Description", displayList: false }
+      { field: "created", type: "date", label: "Created", displayList: true, editable: false },
+      { field: "description", type: "longtext", label: "Description", displayList: false, editable: true }
     ],
     icon: "mdi-xml"
   }
