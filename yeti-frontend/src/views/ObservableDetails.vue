@@ -76,15 +76,17 @@
         <v-sheet>
           <v-tabs v-model="activeTab" color="primary">
             <v-tab value="context"
-              ><v-icon size="x-large">mdi-information</v-icon>Context {{ observable?.context.length }}</v-tab
+              ><v-icon size="x-large" start>mdi-information</v-icon>Context
+              <v-chip class="ml-3" density="comfortable">{{ observable?.context.length }}</v-chip></v-tab
             >
             <v-tab value="related-observables"
-              ><v-icon size="x-large">mdi-graph</v-icon>Related observables {{ totalRelatedObservables }}</v-tab
+              ><v-icon size="x-large" start>mdi-graph</v-icon>Related observables
+              <v-chip class="ml-3" density="comfortable">{{ totalRelatedObservables }}</v-chip></v-tab
             >
             <v-tab value="related-entities"
-              ><v-icon size="x-large">mdi-brain</v-icon>Related entities
-              {{ totalRelatedEntities + totalTaggedRelationships }}</v-tab
-            >
+              ><v-icon size="x-large" start>mdi-brain</v-icon>Related entities
+              <v-chip class="ml-3" density="comfortable">{{ totalRelatedEntities + totalTaggedRelationships }}</v-chip>
+            </v-tab>
           </v-tabs>
 
           <v-window v-model="activeTab" class="pa-5">
