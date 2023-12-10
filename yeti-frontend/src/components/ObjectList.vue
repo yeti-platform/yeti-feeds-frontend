@@ -23,25 +23,30 @@
           v-for="name in Object.keys(item.tags)"
           :color="item.tags[name].fresh ? 'blue ' : 'red'"
           :text="name"
-          class="mx-1"
-          label
+          class="mr-1"
           size="small"
         ></v-chip>
       </template>
       <template v-slot:item.relevant_tags="{ item }">
-        <v-chip v-for="name in item.relevant_tags" :text="name" class="mx-1" label size="small"></v-chip>
+        <v-chip v-for="name in item.relevant_tags" :text="name" class="mr-1" size="small"></v-chip>
       </template>
       <template v-slot:item.aliases="{ item }">
-        <v-chip v-for="value in item.aliases" :text="value" class="mx-1" label size="small"></v-chip>
+        <v-chip v-for="value in item.aliases" :text="value" class="mr-1" size="small"></v-chip>
       </template>
       <template v-slot:item.threat_actor_types="{ item }">
-        <v-chip v-for="value in item.threat_actor_types" :text="value" class="mx-1" label size="small"></v-chip>
+        <v-chip v-for="value in item.threat_actor_types" :text="value" class="mr-1" size="small"></v-chip>
       </template>
       <template v-slot:item.target_systems="{ item }">
-        <v-chip v-for="value in item.target_systems" :text="value" class="mx-1" label size="small"></v-chip>
+        <v-chip v-for="value in item.target_systems" :text="value" class="mr-1" size="small"></v-chip>
       </template>
       <template v-slot:item.created="{ item }">
         {{ moment(item.created).format("YYYY-MM-DD HH:mm:ss") }}
+      </template>
+      <template v-slot:item.last_seen="{ item }">
+        {{ moment(item.last_seen).format("YYYY-MM-DD HH:mm:ss") }}
+      </template>
+      <template v-slot:item.first_seen="{ item }">
+        {{ moment(item.first_seen).format("YYYY-MM-DD HH:mm:ss") }}
       </template>
     </v-data-table-server>
   </v-sheet>

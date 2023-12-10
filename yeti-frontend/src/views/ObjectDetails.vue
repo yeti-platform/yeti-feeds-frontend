@@ -36,7 +36,7 @@
               <tr v-for="field in getObjectInfoFields">
                 <th>{{ field.label }}</th>
                 <td v-if="field.type === 'list'">
-                  <v-chip v-for="item in object[field.field]" :text="item" label />
+                  <v-chip v-for="item in object[field.field]" :text="item" class="mr-1" />
                 </td>
                 <td v-else-if="field.type === 'date'">
                   {{ moment(object[field.field]).toISOString() }}
