@@ -17,6 +17,7 @@ export const INDICATOR_TYPES = [
         label: "Diamond model",
         displayList: true
       },
+      { field: "created", type: "date", label: "Created", displayList: true },
       { field: "description", type: "longtext", label: "Description", displayList: false }
     ],
     icon: "mdi-regex"
@@ -38,6 +39,7 @@ export const INDICATOR_TYPES = [
         label: "Diamond model",
         displayList: true
       },
+      { field: "created", type: "date", label: "Created", displayList: true },
       { field: "description", type: "longtext", label: "Description", displayList: false }
     ],
     icon: "mdi-database-search"
@@ -57,6 +59,7 @@ export const INDICATOR_TYPES = [
         label: "Diamond model",
         displayList: true
       },
+      { field: "created", type: "date", label: "Created", displayList: true },
       { field: "description", type: "longtext", label: "Description", displayList: false }
     ],
     icon: "mdi-code-braces"
@@ -76,6 +79,7 @@ export const INDICATOR_TYPES = [
         label: "Diamond model",
         displayList: true
       },
+      { field: "created", type: "date", label: "Created", displayList: true },
       { field: "description", type: "longtext", label: "Description", displayList: false }
     ],
     icon: "mdi-xml"

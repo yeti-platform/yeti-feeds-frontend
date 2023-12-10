@@ -6,6 +6,7 @@ export const ENTITY_TYPES = [
       { field: "name", type: "text", label: "Name", displayList: true },
       { field: "reference", type: "text", label: "Reference", displayList: true },
       { field: "tags", type: "list", label: "Relevant tags", displayList: true },
+      { field: "created", type: "date", label: "Created", displayList: true },
       { field: "description", type: "longtext", label: "Description", displayList: false }
     ],
     icon: "mdi-fire"
@@ -18,6 +19,7 @@ export const ENTITY_TYPES = [
       { field: "tags", type: "list", label: "Relevant tags", displayList: true },
       { field: "family", type: "text", label: "Family", displayList: true },
       { field: "aliases", type: "list", label: "Aliases", displayList: true },
+      { field: "created", type: "date", label: "Created", displayList: true },
       { field: "description", type: "longtext", label: "Description", displayList: false }
     ],
     icon: "mdi-spider"
@@ -30,6 +32,7 @@ export const ENTITY_TYPES = [
       { field: "tags", type: "list", label: "Relevant tags", displayList: true },
       { field: "aliases", type: "list", label: "Aliases", displayList: true },
       { field: "kill_chain_phases", type: "list", label: "Kill chain phases", displayList: true },
+      { field: "created", type: "date", label: "Created", displayList: true },
       { field: "description", type: "longtext", label: "Description", displayList: false }
     ],
     icon: "mdi-tools"
@@ -41,6 +44,7 @@ export const ENTITY_TYPES = [
       { field: "name", type: "text", label: "Name", displayList: true },
       { field: "tags", type: "list", label: "Relevant tags", displayList: true },
       { field: "kill_chain_phases", type: "list", label: "Kill chain phases", displayList: true },
+      { field: "created", type: "date", label: "Created", displayList: true },
       { field: "description", type: "longtext", label: "Description", displayList: false }
     ],
     icon: "mdi-flash"
@@ -67,6 +71,7 @@ export const ENTITY_TYPES = [
       { field: "name", type: "text", label: "Name", displayList: true },
       { field: "tags", type: "list", label: "Relevant tags", displayList: true },
       { field: "aliases", type: "list", label: "Aliases", displayList: true },
+      { field: "created", type: "date", label: "Created", displayList: true },
       { field: "description", type: "longtext", label: "Description", displayList: false }
     ],
     icon: "mdi-account-tie"
@@ -78,6 +83,7 @@ export const ENTITY_TYPES = [
       { field: "name", type: "text", label: "Name", displayList: true },
       { field: "tags", type: "list", label: "Relevant tags", displayList: true },
       { field: "aliases", type: "list", label: "Aliases", displayList: true },
+      { field: "created", type: "date", label: "Created", displayList: true },
       { field: "description", type: "longtext", label: "Description", displayList: false }
     ],
     icon: "mdi-bullhorn"
@@ -89,6 +95,7 @@ export const ENTITY_TYPES = [
       { field: "name", type: "text", label: "Name", displayList: true },
       { field: "tags", type: "list", label: "Relevant tags", displayList: true },
       { field: "aliases", type: "list", label: "Aliases", displayList: true },
+      { field: "created", type: "date", label: "Created", displayList: true },
       { field: "description", type: "longtext", label: "Description", displayList: false }
     ],
     icon: "mdi-user"
@@ -99,6 +106,7 @@ export const ENTITY_TYPES = [
     fields: [
       { field: "name", type: "text", label: "Name", displayList: true },
       { field: "tags", type: "list", label: "Relevant tags", displayList: true },
+      { field: "created", type: "date", label: "Created", displayList: true },
       { field: "description", type: "longtext", label: "Description", displayList: false }
     ],
     icon: "mdi-office-building"
@@ -109,6 +117,7 @@ export const ENTITY_TYPES = [
     fields: [
       { field: "name", type: "text", label: "Name", displayList: true },
       { field: "tags", type: "list", label: "Relevant tags", displayList: true },
+      { field: "created", type: "date", label: "Created", displayList: true },
       { field: "description", type: "longtext", label: "Description", displayList: false }
     ],
     icon: "mdi-shield-alert"
@@ -119,6 +128,7 @@ export const ENTITY_TYPES = [
     fields: [
       { field: "name", type: "text", label: "Name", displayList: true },
       { field: "tags", type: "list", label: "Relevant tags", displayList: true },
+      { field: "created", type: "date", label: "Created", displayList: true },
       { field: "description", type: "longtext", label: "Description", displayList: false }
     ],
     icon: "mdi-medical-bag"
