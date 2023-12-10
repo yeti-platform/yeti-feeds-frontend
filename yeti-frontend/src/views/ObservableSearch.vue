@@ -7,7 +7,7 @@
     density="compact"
     :items="items"
     @update:options="loadOjects"
-    :search="searchQuery"
+    :search="searchQueryDebounced"
     :show-select="showSelect"
     :item-value="item => item.id"
     v-model="selectedObservables"
@@ -81,6 +81,7 @@
 <script lang="ts" setup>
 import axios from "axios";
 import moment from "moment";
+import _ from "lodash";
 </script>
 
 <script lang="ts">
@@ -98,6 +99,7 @@ export default {
       perPage: 25,
       total: 0,
       searchQuery: "",
+      searchQueryDebounced: "",
       showSelect: false,
       selectedObservables: [],
       bulkTags: [],
@@ -204,6 +206,11 @@ export default {
   },
   mounted() {
     this.loadExportTemplates();
+  },
+  watch: {
+    searchQuery: _.debounce(function() {
+      this.searchQueryDebounced = this.searchQuery;
+    }, 200)
   }
 };
 </script>

@@ -11,7 +11,7 @@
         <object-list
           searchType="indicators"
           :search-subtype="typeDef.type"
-          :search-query="searchQuery"
+          :search-query="searchQueryDebounced"
           :headers="getFieldForType(typeDef.type)"
           @totalUpdated="countIndicators(typeDef.type, $event)"
         />
@@ -35,6 +35,7 @@
 <script lang="ts" setup>
 import { INDICATOR_TYPES } from "@/definitions/indicatorDefinitions.js";
 import ObjectList from "@/components/ObjectList.vue";
+import _ from "lodash";
 </script>
 
 <script lang="ts">
@@ -55,6 +56,7 @@ export default {
       perPage: 20,
       total: 0,
       searchQuery: "",
+      searchQueryDebounced: "",
       indicatorTypes: INDICATOR_TYPES,
       indicatorCount: INDICATOR_TYPES.reduce((acc, cur) => {
         acc[cur.type] = 0;
@@ -92,6 +94,11 @@ export default {
     displayedindicatorTypes() {
       return this.indicatorTypes.filter(type => this.indicatorCount[type.type] > 0);
     }
+  },
+  watch: {
+    searchQuery: _.debounce(function() {
+      this.searchQueryDebounced = this.searchQuery;
+    }, 200)
   }
 };
 </script>
