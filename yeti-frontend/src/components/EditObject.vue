@@ -1,6 +1,7 @@
 <template>
   <v-card>
-    <template v-slot:title>Edit: {{ object.name }} ({{ typeDefinition.name }})</template>
+    <v-card-title>{{ object.name }}</v-card-title>
+    <v-card-subtitle>Editing {{ typeDefinition.name }}</v-card-subtitle>
     <v-card-text>
       <div v-for="field in editableFields">
         <v-text-field
@@ -26,13 +27,32 @@
         >
           <template v-slot:chip="tag"> <v-chip :text="tag.item.value" label size="large" color="primary"/></template>
         </v-combobox>
-        <div v-if="field.type === 'date'">
-          <v-text-field v-model="localObject[field.field]" :label="field.label"></v-text-field>
-        </div>
+
+        <v-text-field
+          v-if="field.type === 'date'"
+          v-model="localObject[field.field]"
+          :label="field.label"
+        ></v-text-field>
+
+        <v-textarea
+          v-if="field.type === 'code'"
+          :label="field.label"
+          v-model="localObject[field.field]"
+          class="yeti-code"
+        ></v-textarea>
+
+        <v-select
+          v-if="field.type === 'option'"
+          v-model="localObject[field.field]"
+          :items="field.choices"
+          :label="field.label"
+          variant="outlined"
+        ></v-select>
       </div>
     </v-card-text>
 
     <v-card-actions>
+      <v-btn text="Toggle full screen" color="primary" @click="toggleFullScreen"></v-btn>
       <v-spacer></v-spacer>
       <v-btn text="Cancel" color="cancel" @click="isActive.value = false"></v-btn>
       <v-btn text="Save" color="primary" @click="saveObject" variant="tonal"></v-btn>
@@ -66,6 +86,7 @@ export default {
     return {
       localObject: { ...this.object },
       error: null,
+      fullScreen: false,
       typeToEndpointMapping: {
         entity: "entities",
         observable: "observables",
@@ -97,6 +118,10 @@ export default {
           console.log(error);
         })
         .finally();
+    },
+    toggleFullScreen() {
+      this.fullScreen = !this.fullScreen;
+      this.$emit("toggle-fullscreen", this.fullScreen);
     }
   },
   computed: {
@@ -111,3 +136,9 @@ export default {
   }
 };
 </script>
+
+<style>
+.yeti-code textarea {
+  font-family: monospace;
+}
+</style>
