@@ -42,6 +42,9 @@
       <template v-slot:item.target_systems="{ item }">
         <v-chip v-for="value in item.target_systems" :text="value" class="mx-1" label size="small"></v-chip>
       </template>
+      <template v-slot:item.created="{ item }">
+        {{ moment(item.created).format("YYYY-MM-DD HH:mm:ss") }}
+      </template>
     </v-data-table-server>
   </v-sheet>
 </template>
@@ -49,6 +52,8 @@
 <script lang="ts" setup>
 import axios from "axios";
 import { ENTITY_TYPES } from "@/definitions/entityDefinitions.js";
+
+import moment from "moment";
 </script>
 
 <script lang="ts">

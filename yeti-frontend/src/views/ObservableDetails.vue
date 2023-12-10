@@ -20,7 +20,8 @@
               </tr>
               <tr v-for="field in getObservableInfoFields">
                 <th>{{ field.label }}</th>
-                <td>{{ observable[field.field] }}</td>
+                <td v-if="field.field === 'created'">{{ moment(observable[field.field]).toISOString() }}</td>
+                <td v-else>{{ observable[field.field] }}</td>
               </tr>
             </tbody>
           </v-table>
@@ -141,6 +142,7 @@ import TaskList from "@/components/TaskList.vue";
 import RelatedObjects from "@/components/RelatedObjects.vue";
 import { ENTITY_TYPES } from "@/definitions/entityDefinitions.js";
 import { OBSERVABLE_TYPES } from "@/definitions/observableDefinitions.js";
+import moment from "moment";
 </script>
 
 <script lang="ts">

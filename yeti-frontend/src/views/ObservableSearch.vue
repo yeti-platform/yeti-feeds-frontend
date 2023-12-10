@@ -42,9 +42,7 @@
         size="small"
       ></v-chip>
     </template>
-    <template v-slot:item.created="{ item }">
-      {{ item.created }}
-    </template>
+    <template v-slot:item.created="{ item }"> {{ moment(item.created).format("YYYY-MM-DD HH:mm:ss") }} </template>
   </v-data-table-server>
   <v-navigation-drawer permament location="right" width="400" ref="drawer">
     <v-list-item class="mt-4">
@@ -87,6 +85,7 @@
 
 <script lang="ts" setup>
 import axios from "axios";
+import moment from "moment";
 </script>
 
 <script lang="ts">

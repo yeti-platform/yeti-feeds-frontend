@@ -22,6 +22,9 @@
                 <td v-if="field.type === 'list'">
                   <v-chip v-for="item in object[field.field]" color="primary" :text="item" label />
                 </td>
+                <td v-else-if="field.type === 'date'">
+                  {{ moment(object[field.field]).toISOString() }}
+                </td>
                 <td v-else>{{ object[field.field] }}</td>
               </tr>
             </tbody>
@@ -131,6 +134,8 @@ import RelatedObjects from "@/components/RelatedObjects.vue";
 import { ENTITY_TYPES } from "@/definitions/entityDefinitions.js";
 import { OBSERVABLE_TYPES } from "@/definitions/observableDefinitions.js";
 import { INDICATOR_TYPES } from "@/definitions/indicatorDefinitions.js";
+
+import moment from "moment";
 </script>
 
 <script lang="ts">

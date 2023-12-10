@@ -24,7 +24,15 @@
             >
           </td>
 
-          <td v-if="displayColumn('frequency')">{{ item.frequency }}</td>
+          <td v-if="displayColumn('frequency')">
+            {{
+              moment
+                .duration(item.frequency)
+                .humanize()
+                .replace("an ", "1 ")
+                .replace("a ", "1 ")
+            }}
+          </td>
           <td v-if="displayColumn('last_run')">
             {{ item.last_run }}
           </td>
@@ -63,6 +71,8 @@
 
 <script lang="ts" setup>
 import axios from "axios";
+
+import moment from "moment";
 </script>
 
 <script lang="ts">
