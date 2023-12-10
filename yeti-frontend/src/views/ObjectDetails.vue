@@ -2,7 +2,7 @@
   <v-container fluid>
     <v-row align="start" no-gutters>
       <v-col>
-        <v-card class="ma-2 yeti-description">
+        <v-card class="ma-2" variant="flat">
           <template v-slot:title>
             <v-chip color="primary" :text="object?.type" label></v-chip> <code>{{ object?.name }}</code>
           </template>
@@ -11,16 +11,22 @@
             {{ object?.description || "No description provided" }}
           </v-card-text>
         </v-card>
+        <v-card v-if="object?.pattern" class="ma-2" variant="flat">
+          <v-card-title>Pattern</v-card-title>
+          <v-card-text class=" yeti-pattern-code"
+            ><code>{{ object.pattern }}</code></v-card-text
+          ></v-card
+        >
       </v-col>
       <v-col cols="4">
-        <v-card class="ma-2">
+        <v-card class="ma-2" variant="flat">
           <v-card-title>Info</v-card-title>
           <v-table density="compact">
             <tbody>
               <tr v-for="field in getObjectInfoFields">
                 <th>{{ field.label }}</th>
                 <td v-if="field.type === 'list'">
-                  <v-chip v-for="item in object[field.field]" color="primary" :text="item" label />
+                  <v-chip v-for="item in object[field.field]" :text="item" label />
                 </td>
                 <td v-else-if="field.type === 'date'">
                   {{ moment(object[field.field]).toISOString() }}
@@ -174,7 +180,8 @@ export default {
         acc[cur.type] = 0;
         return acc;
       }, {}),
-      totalTaggedObservables: 0
+      totalTaggedObservables: 0,
+      hideFieldsInfoBox: ["name", "description", "tags", "pattern"]
     };
   },
   methods: {
@@ -226,8 +233,7 @@ export default {
       return this.objectTypes[this.objectType].find(typeDef => typeDef.type === this.object?.type);
     },
     getObjectInfoFields() {
-      const hideFields = ["name", "description", "tags"];
-      return this.getObjectTypeDefintiions?.fields.filter(field => !hideFields.includes(field.field));
+      return this.getObjectTypeDefintiions?.fields.filter(field => !this.hideFieldsInfoBox.includes(field.field));
     },
     displayedEntityTypes() {
       return this.objectTypes[this.objectType].filter(type => this.relatedEntitiesCount[type.type] > 0);
@@ -245,7 +251,8 @@ export default {
 </script>
 
 <style>
-.v-card-text.yeti-description {
+.v-card-text.yeti-description,
+.v-card-text.yeti-pattern-code {
   font-size: 1rem;
 }
 </style>

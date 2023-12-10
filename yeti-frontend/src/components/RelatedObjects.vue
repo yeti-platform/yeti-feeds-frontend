@@ -18,11 +18,7 @@
             {{ node.type }}
           </span>
           <span v-else-if="node.root_type === 'observable'" class="short-links">
-            <router-link
-              :to="{ name: 'ObservableDetails', params: { id: node.id } }"
-              class="text-blue mr-2"
-              style="text-decoration:none"
-            >
+            <router-link :to="{ name: 'ObservableDetails', params: { id: node.id } }">
               {{ node.value }}
             </router-link>
             <span v-if="fields.includes('tags')">
@@ -38,13 +34,13 @@
             </span>
           </span>
           <span v-else-if="node.root_type === 'entity'">
-            <v-icon size="is-small" :icon="getIconForType(node.type)"></v-icon>
+            <v-icon :icon="getIconForType(node.type)" start></v-icon>
             <router-link :to="{ name: 'EntityDetails', params: { id: node.id } }">
               {{ node.name }}
             </router-link>
           </span>
           <span v-else-if="node.root_type === 'indicator'">
-            <v-icon size="is-small" :icon="getIconForType(node.type)"></v-icon>
+            <v-icon :icon="getIconForType(node.type)" start></v-icon>
             <router-link :to="{ name: 'IndicatorDetails', params: { id: node.id } }">
               {{ node.name }}
             </router-link>
@@ -78,14 +74,6 @@
               />
             </template>
           </v-dialog>
-          <v-snackbar v-model="displaySnackBar" :timeout="50000" variant="flat" color="green-lighten-2">
-            Link updated succesfully!
-            <template v-slot:actions>
-              <v-btn color="green-darken-2" variant="flat" rounded="2" @click="displaySnackBar = false">
-                OK
-              </v-btn>
-            </template>
-          </v-snackbar>
         </td>
       </tr>
     </template>
@@ -124,17 +112,13 @@ export default {
       total: 0,
       loading: false,
       objectTypes: ENTITY_TYPES.concat(INDICATOR_TYPES),
-      showEditLink: false,
-      displaySnackBar: false,
-      snackBarText: ""
+      showEditLink: false
     };
   },
   methods: {
     linkUpdateSuccess(edge, updatedEdge) {
       edge.type = updatedEdge.type;
       edge.description = updatedEdge.description;
-      this.snackBarText = "Link updated successfully!";
-      this.displaySnackBar = true;
     },
     getLabelForField(field) {
       let fieldName = field.charAt(0).toUpperCase() + field.slice(1);

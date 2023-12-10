@@ -2,7 +2,7 @@
   <v-container fluid>
     <v-row align="start" no-gutters>
       <v-col>
-        <v-card class="ma-2" variant="tonal">
+        <v-card class="ma-2" variant="flat">
           <template v-slot:title>
             <v-chip color="primary" :text="observable?.type" label></v-chip> <code>{{ observable?.value }}</code>
           </template>
@@ -13,7 +13,12 @@
               <tr>
                 <th>Context sources</th>
                 <td>
-                  <v-chip label v-for="source in new Set(observable?.context.map(c => c.source))" v-bind:key="source">
+                  <v-chip
+                    label
+                    color="green"
+                    v-for="source in new Set(observable?.context.map(c => c.source))"
+                    v-bind:key="source"
+                  >
                     {{ source }}
                   </v-chip>
                 </td>
@@ -28,7 +33,7 @@
         </v-sheet>
       </v-col>
       <v-col cols="4">
-        <v-card class="ma-2" variant="tonal">
+        <v-card class="ma-2" variant="flat">
           <v-card-title>Tags</v-card-title>
 
           <v-combobox
@@ -53,7 +58,7 @@
             </template>
           </v-combobox>
         </v-card>
-        <v-card class="ma-2" variant="tonal">
+        <v-card class="ma-2" variant="flat">
           <v-card-title>Enabled analytics for {{ observable?.type }}</v-card-title>
           <task-list
             v-if="observable"

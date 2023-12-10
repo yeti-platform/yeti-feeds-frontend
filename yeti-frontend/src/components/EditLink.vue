@@ -12,8 +12,8 @@
 
     <v-card-actions>
       <v-spacer></v-spacer>
-      <v-btn text="Cancel" color="grey-darken-1" @click="isActive.value = false"></v-btn>
-      <v-btn text="Save" color="primary" @click="saveLink"></v-btn>
+      <v-btn text="Cancel" color="cancel" @click="isActive.value = false"></v-btn>
+      <v-btn text="Save" color="primary" @click="saveLink" variant="tonal"></v-btn>
     </v-card-actions>
     <v-alert v-if="error" type="error">Error updating link: {{ error }}</v-alert>
   </v-card>
@@ -55,7 +55,7 @@ export default {
           link_type: this.localEdge.type
         })
         .then(response => {
-          this.$emit("success", response.data);
+          this.$eventBus.emit("displayMessage", { message: "Link updated succesfully!", status: "success" });
           this.isActive.value = false;
         })
         .catch(error => {

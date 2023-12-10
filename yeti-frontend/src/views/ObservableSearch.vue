@@ -15,12 +15,7 @@
     class="ma-5"
   >
     <template v-slot:item.value="{ item }">
-      <router-link
-        :to="{ name: 'ObservableDetails', params: { id: item.id } }"
-        class="text-blue"
-        style="text-decoration:none"
-        >{{ item.value }}</router-link
-      >
+      <router-link :to="{ name: 'ObservableDetails', params: { id: item.id } }">{{ item.value }}</router-link>
     </template>
     <template v-slot:item.tags="{ item }">
       <v-chip
@@ -100,7 +95,7 @@ export default {
         { title: "Created on", key: "created" }
       ],
       page: 1,
-      perPage: 20,
+      perPage: 25,
       total: 0,
       searchQuery: "",
       showSelect: false,

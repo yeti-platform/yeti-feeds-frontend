@@ -15,8 +15,6 @@
       <template v-slot:item.name="{ item }">
         <router-link
           :to="{ name: this.searchType === 'entities' ? 'EntityDetails' : 'IndicatorDetails', params: { id: item.id } }"
-          class="text-blue"
-          style="text-decoration:none"
           >{{ item.name }}</router-link
         >
       </template>
