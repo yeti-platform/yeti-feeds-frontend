@@ -6,7 +6,17 @@
           <template v-slot:title>
             <v-chip color="primary" :text="object?.type" label></v-chip> <code>{{ object?.name }}</code>
           </template>
-          <template v-slot:subtitle> </template>
+          <template v-slot:subtitle>
+            <v-dialog width="700">
+              <template v-slot:activator="{ props }">
+                <v-btn variant="tonal" color="primary" class="me-2" v-bind="props">Edit </v-btn>
+              </template>
+
+              <template v-slot:default="{ isActive }">
+                <edit-object :object="object" :is-active="isActive" @success="obj => (object = obj)" />
+              </template>
+            </v-dialog>
+          </template>
           <v-card-text class="yeti-description">
             {{ object?.description || "No description provided" }}
           </v-card-text>
@@ -137,6 +147,8 @@
 import axios from "axios";
 
 import RelatedObjects from "@/components/RelatedObjects.vue";
+import EditObject from "@/components/EditObject.vue";
+
 import { ENTITY_TYPES } from "@/definitions/entityDefinitions.js";
 import { OBSERVABLE_TYPES } from "@/definitions/observableDefinitions.js";
 import { INDICATOR_TYPES } from "@/definitions/indicatorDefinitions.js";

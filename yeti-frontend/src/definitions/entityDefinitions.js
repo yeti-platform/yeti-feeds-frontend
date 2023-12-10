@@ -3,11 +3,11 @@ export const ENTITY_TYPES = [
     name: "Investigation",
     type: "investigation",
     fields: [
-      { field: "name", type: "text", label: "Name", displayList: true },
-      { field: "reference", type: "text", label: "Reference", displayList: true },
-      { field: "tags", type: "list", label: "Relevant tags", displayList: true },
-      { field: "created", type: "date", label: "Created", displayList: true },
-      { field: "description", type: "longtext", label: "Description", displayList: false }
+      { field: "name", type: "text", label: "Name", displayList: true, editable: true },
+      { field: "reference", type: "text", label: "Reference", displayList: true, editable: true },
+      { field: "tags", type: "list", label: "Relevant tags", displayList: true, editable: false },
+      { field: "created", type: "date", label: "Created", displayList: true, editable: false },
+      { field: "description", type: "longtext", label: "Description", displayList: false, editable: true }
     ],
     icon: "mdi-fire"
   },
@@ -15,12 +15,12 @@ export const ENTITY_TYPES = [
     name: "Malware",
     type: "malware",
     fields: [
-      { field: "name", type: "text", label: "Name", displayList: true },
-      { field: "tags", type: "list", label: "Relevant tags", displayList: true },
-      { field: "family", type: "text", label: "Family", displayList: true },
-      { field: "aliases", type: "list", label: "Aliases", displayList: true },
-      { field: "created", type: "date", label: "Created", displayList: true },
-      { field: "description", type: "longtext", label: "Description", displayList: false }
+      { field: "name", type: "text", label: "Name", displayList: true, editable: true },
+      { field: "tags", type: "list", label: "Relevant tags", displayList: true, editable: false },
+      { field: "family", type: "text", label: "Family", displayList: true, editable: true },
+      { field: "aliases", type: "list", label: "Aliases", displayList: true, editable: true },
+      { field: "created", type: "date", label: "Created", displayList: true, editable: false },
+      { field: "description", type: "longtext", label: "Description", displayList: false, editable: true }
     ],
     icon: "mdi-spider"
   },
@@ -28,12 +28,12 @@ export const ENTITY_TYPES = [
     name: "Tool",
     type: "tool",
     fields: [
-      { field: "name", type: "text", label: "Name", displayList: true },
-      { field: "tags", type: "list", label: "Relevant tags", displayList: true },
-      { field: "aliases", type: "list", label: "Aliases", displayList: true },
-      { field: "kill_chain_phases", type: "list", label: "Kill chain phases", displayList: true },
-      { field: "created", type: "date", label: "Created", displayList: true },
-      { field: "description", type: "longtext", label: "Description", displayList: false }
+      { field: "name", type: "text", label: "Name", displayList: true, editable: true },
+      { field: "tags", type: "list", label: "Relevant tags", displayList: true, editable: false },
+      { field: "aliases", type: "list", label: "Aliases", displayList: true, editable: true },
+      { field: "kill_chain_phases", type: "list", label: "Kill chain phases", displayList: true, editable: true },
+      { field: "created", type: "date", label: "Created", displayList: true, editable: false },
+      { field: "description", type: "longtext", label: "Description", displayList: false, editable: true }
     ],
     icon: "mdi-tools"
   },
@@ -41,11 +41,11 @@ export const ENTITY_TYPES = [
     name: "Attack pattern",
     type: "attack-pattern",
     fields: [
-      { field: "name", type: "text", label: "Name", displayList: true },
-      { field: "tags", type: "list", label: "Relevant tags", displayList: true },
-      { field: "kill_chain_phases", type: "list", label: "Kill chain phases", displayList: true },
-      { field: "created", type: "date", label: "Created", displayList: true },
-      { field: "description", type: "longtext", label: "Description", displayList: false }
+      { field: "name", type: "text", label: "Name", displayList: true, editable: true },
+      { field: "tags", type: "list", label: "Relevant tags", displayList: true, editable: false },
+      { field: "kill_chain_phases", type: "list", label: "Kill chain phases", displayList: true, editable: true },
+      { field: "created", type: "date", label: "Created", displayList: true, editable: false },
+      { field: "description", type: "longtext", label: "Description", displayList: false, editable: true }
     ],
     icon: "mdi-flash"
   },
@@ -53,14 +53,14 @@ export const ENTITY_TYPES = [
     name: "Threat actor",
     type: "threat-actor",
     fields: [
-      { field: "name", type: "text", label: "Name", displayList: true },
-      { field: "tags", type: "list", label: "Relevant tags", displayList: true },
-      { field: "aliases", type: "list", label: "Aliases", displayList: true },
-      { field: "description", type: "longtext", label: "Description", displayList: false },
-      { field: "threat_actor_types", type: "list", label: "Threat actor types", displayList: true },
-      { field: "created", type: "date", label: "Created", displayList: true },
-      { field: "first_seen", type: "date", label: "First seen", displayList: true },
-      { field: "last_seen", type: "date", label: "Last seen", displayList: true }
+      { field: "name", type: "text", label: "Name", displayList: true, editable: true },
+      { field: "tags", type: "list", label: "Relevant tags", displayList: true, editable: false },
+      { field: "aliases", type: "list", label: "Aliases", displayList: true, editable: true },
+      { field: "description", type: "longtext", label: "Description", displayList: false, editable: true },
+      { field: "threat_actor_types", type: "list", label: "Threat actor types", displayList: true, editable: true },
+      { field: "created", type: "date", label: "Created", displayList: true, editable: false },
+      { field: "first_seen", type: "date", label: "First seen", displayList: true, editable: true },
+      { field: "last_seen", type: "date", label: "Last seen", displayList: true, editable: true }
     ],
     icon: "mdi-incognito"
   },
@@ -68,11 +68,11 @@ export const ENTITY_TYPES = [
     name: "Intrusion set",
     type: "intrusion-set",
     fields: [
-      { field: "name", type: "text", label: "Name", displayList: true },
-      { field: "tags", type: "list", label: "Relevant tags", displayList: true },
+      { field: "name", type: "text", label: "Name", displayList: true, editable: true },
+      { field: "tags", type: "list", label: "Relevant tags", displayList: true, editable: false },
       { field: "aliases", type: "list", label: "Aliases", displayList: true },
-      { field: "created", type: "date", label: "Created", displayList: true },
-      { field: "description", type: "longtext", label: "Description", displayList: false }
+      { field: "created", type: "date", label: "Created", displayList: true, editable: false },
+      { field: "description", type: "longtext", label: "Description", displayList: false, editable: true }
     ],
     icon: "mdi-account-tie"
   },
@@ -80,11 +80,11 @@ export const ENTITY_TYPES = [
     name: "Campaign",
     type: "campaign",
     fields: [
-      { field: "name", type: "text", label: "Name", displayList: true },
-      { field: "tags", type: "list", label: "Relevant tags", displayList: true },
+      { field: "name", type: "text", label: "Name", displayList: true, editable: true },
+      { field: "tags", type: "list", label: "Relevant tags", displayList: true, editable: false },
       { field: "aliases", type: "list", label: "Aliases", displayList: true },
-      { field: "created", type: "date", label: "Created", displayList: true },
-      { field: "description", type: "longtext", label: "Description", displayList: false }
+      { field: "created", type: "date", label: "Created", displayList: true, editable: false },
+      { field: "description", type: "longtext", label: "Description", displayList: false, editable: true }
     ],
     icon: "mdi-bullhorn"
   },
@@ -92,11 +92,11 @@ export const ENTITY_TYPES = [
     name: "Identity",
     type: "identity",
     fields: [
-      { field: "name", type: "text", label: "Name", displayList: true },
-      { field: "tags", type: "list", label: "Relevant tags", displayList: true },
+      { field: "name", type: "text", label: "Name", displayList: true, editable: true },
+      { field: "tags", type: "list", label: "Relevant tags", displayList: true, editable: false },
       { field: "aliases", type: "list", label: "Aliases", displayList: true },
-      { field: "created", type: "date", label: "Created", displayList: true },
-      { field: "description", type: "longtext", label: "Description", displayList: false }
+      { field: "created", type: "date", label: "Created", displayList: true, editable: false },
+      { field: "description", type: "longtext", label: "Description", displayList: false, editable: true }
     ],
     icon: "mdi-user"
   },
@@ -104,10 +104,10 @@ export const ENTITY_TYPES = [
     name: "Company",
     type: "company",
     fields: [
-      { field: "name", type: "text", label: "Name", displayList: true },
-      { field: "tags", type: "list", label: "Relevant tags", displayList: true },
-      { field: "created", type: "date", label: "Created", displayList: true },
-      { field: "description", type: "longtext", label: "Description", displayList: false }
+      { field: "name", type: "text", label: "Name", displayList: true, editable: true },
+      { field: "tags", type: "list", label: "Relevant tags", displayList: true, editable: false },
+      { field: "created", type: "date", label: "Created", displayList: true, editable: false },
+      { field: "description", type: "longtext", label: "Description", displayList: false, editable: true }
     ],
     icon: "mdi-office-building"
   },
@@ -115,10 +115,10 @@ export const ENTITY_TYPES = [
     name: "Vulnerability",
     type: "vulnerability",
     fields: [
-      { field: "name", type: "text", label: "Name", displayList: true },
-      { field: "tags", type: "list", label: "Relevant tags", displayList: true },
-      { field: "created", type: "date", label: "Created", displayList: true },
-      { field: "description", type: "longtext", label: "Description", displayList: false }
+      { field: "name", type: "text", label: "Name", displayList: true, editable: true },
+      { field: "tags", type: "list", label: "Relevant tags", displayList: true, editable: false },
+      { field: "created", type: "date", label: "Created", displayList: true, editable: false },
+      { field: "description", type: "longtext", label: "Description", displayList: false, editable: true }
     ],
     icon: "mdi-shield-alert"
   },
@@ -126,10 +126,10 @@ export const ENTITY_TYPES = [
     name: "Course of action",
     type: "course-of-action",
     fields: [
-      { field: "name", type: "text", label: "Name", displayList: true },
-      { field: "tags", type: "list", label: "Relevant tags", displayList: true },
-      { field: "created", type: "date", label: "Created", displayList: true },
-      { field: "description", type: "longtext", label: "Description", displayList: false }
+      { field: "name", type: "text", label: "Name", displayList: true, editable: true },
+      { field: "tags", type: "list", label: "Relevant tags", displayList: true, editable: false },
+      { field: "created", type: "date", label: "Created", displayList: true, editable: false },
+      { field: "description", type: "longtext", label: "Description", displayList: false, editable: true }
     ],
     icon: "mdi-medical-bag"
   }
