@@ -4,18 +4,24 @@
       <v-col>
         <v-card class="ma-2" variant="flat">
           <template v-slot:title>
-            <v-chip color="primary" :text="object?.type" label></v-chip> <code>{{ object?.name }}</code>
-          </template>
-          <template v-slot:subtitle>
-            <v-dialog width="700">
-              <template v-slot:activator="{ props }">
-                <v-btn variant="tonal" color="primary" class="me-2" v-bind="props">Edit </v-btn>
-              </template>
+            <div class="d-flex">
+              <v-chip class="mr-3" color="primary" :text="object?.type" label></v-chip>
+              <code class="me-auto">{{ object?.name }}</code>
+              <v-dialog :width="editWidth" :fullscreen="fullScreenEdit">
+                <template v-slot:activator="{ props }">
+                  <v-btn variant="tonal" color="primary" v-bind="props">Edit </v-btn>
+                </template>
 
-              <template v-slot:default="{ isActive }">
-                <edit-object :object="object" :is-active="isActive" @success="obj => (object = obj)" />
-              </template>
-            </v-dialog>
+                <template v-slot:default="{ isActive }">
+                  <edit-object
+                    :object="object"
+                    :is-active="isActive"
+                    @success="obj => (object = obj)"
+                    @toggle-fullscreen="toggleFullscreen"
+                  />
+                </template>
+              </v-dialog>
+            </div>
           </template>
           <v-card-text class="yeti-description">
             {{ object?.description || "No description provided" }}
@@ -23,7 +29,7 @@
         </v-card>
         <v-card v-if="object?.pattern" class="ma-2" variant="flat">
           <v-card-title>Pattern</v-card-title>
-          <v-card-text class=" yeti-pattern-code"
+          <v-card-text class="yeti-pattern-code"
             ><code>{{ object.pattern }}</code></v-card-text
           ></v-card
         >
@@ -193,7 +199,9 @@ export default {
         return acc;
       }, {}),
       totalTaggedObservables: 0,
-      hideFieldsInfoBox: ["name", "description", "tags", "pattern"]
+      hideFieldsInfoBox: ["name", "description", "tags", "pattern"],
+      fullScreenEdit: false,
+      editWidth: "50%"
     };
   },
   methods: {
@@ -238,6 +246,10 @@ export default {
           return;
         }
       }
+    },
+    toggleFullscreen(fullscreen: boolean) {
+      this.fullScreenEdit = !this.fullScreenEdit;
+      this.editWidth = fullscreen ? "100%" : "50%";
     }
   },
   computed: {
