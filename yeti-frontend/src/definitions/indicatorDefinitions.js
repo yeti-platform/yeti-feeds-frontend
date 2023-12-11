@@ -6,6 +6,7 @@ export const INDICATOR_TYPES = [
     name: "Regular expression",
     type: "regex",
     fields: [
+      { field: "created", type: "date", label: "Created", displayList: true, editable: false },
       { field: "name", type: "text", label: "Name", displayList: true, editable: true },
       { field: "pattern", type: "code", label: "Pattern", displayList: false, editable: true },
       { field: "relevant_tags", type: "list", label: "Relevant tags", displayList: true, editable: true },
@@ -18,7 +19,6 @@ export const INDICATOR_TYPES = [
         displayList: true,
         editable: true
       },
-      { field: "created", type: "date", label: "Created", displayList: true, editable: false },
       { field: "description", type: "longtext", label: "Description", displayList: false, editable: true }
     ],
     icon: "mdi-regex"
@@ -27,6 +27,7 @@ export const INDICATOR_TYPES = [
     name: "Query",
     type: "query",
     fields: [
+      { field: "created", type: "date", label: "Created", displayList: true, editable: false },
       { field: "name", type: "text", label: "Name", displayList: true, editable: true },
       { field: "pattern", type: "longcode", label: "Rule text", displayList: false, editable: true },
       { field: "relevant_tags", type: "list", label: "Relevant tags", displayList: true, editable: true },
@@ -48,7 +49,6 @@ export const INDICATOR_TYPES = [
         displayList: true,
         editable: true
       },
-      { field: "created", type: "date", label: "Created", displayList: true, editable: false },
       { field: "description", type: "longtext", label: "Description", displayList: false, editable: true }
     ],
     icon: "mdi-database-search"
@@ -57,6 +57,7 @@ export const INDICATOR_TYPES = [
     name: "Yara",
     type: "yara",
     fields: [
+      { field: "created", type: "date", label: "Created", displayList: true, editable: false },
       { field: "name", type: "text", label: "Name", displayList: true, editable: true },
       { field: "pattern", type: "longcode", label: "Rule text", displayList: false, editable: true },
       { field: "relevant_tags", type: "list", label: "Relevant tags", displayList: true, editable: true },
@@ -69,7 +70,6 @@ export const INDICATOR_TYPES = [
         displayList: true,
         editable: true
       },
-      { field: "created", type: "date", label: "Created", displayList: true, editable: false },
       { field: "description", type: "longtext", label: "Description", displayList: false, editable: true }
     ],
     icon: "mdi-code-braces"
@@ -78,6 +78,7 @@ export const INDICATOR_TYPES = [
     name: "Sigma",
     type: "sigma",
     fields: [
+      { field: "created", type: "date", label: "Created", displayList: true, editable: false },
       { field: "name", type: "text", label: "Name", displayList: true, editable: true },
       { field: "pattern", type: "longcode", label: "Rule text", displayList: false, editable: true },
       { field: "relevant_tags", type: "list", label: "Relevant tags", displayList: true, editable: true },
@@ -90,7 +91,6 @@ export const INDICATOR_TYPES = [
         displayList: true,
         editable: true
       },
-      { field: "created", type: "date", label: "Created", displayList: true, editable: false },
       { field: "description", type: "longtext", label: "Description", displayList: false, editable: true }
     ],
     icon: "mdi-xml"
