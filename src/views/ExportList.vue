@@ -66,7 +66,8 @@ import utils from "@/utils";
 import TaskList from "@/views/TaskList.vue";
 
 var defaultTypes = {
-  ip: "IP",
+  ipv4: "IPv4",
+  ipv6: "IPv6",
   // AutonomousSystem: "Autonomous System",
   url: "URL",
   hostname: "Hostname"
