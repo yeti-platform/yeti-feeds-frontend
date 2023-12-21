@@ -37,6 +37,18 @@ const routes = [
     ]
   },
   {
+    path: "/analytics",
+    component: () => import("@/layouts/default/Default.vue"),
+    children: [
+      {
+        path: "",
+        name: "Analytics",
+        component: () => import("@/views/AnalyticsList.vue"),
+        props: true
+      }
+    ]
+  },
+  {
     path: "/entities",
     component: () => import("@/layouts/default/Default.vue"),
     children: [

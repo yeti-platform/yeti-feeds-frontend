@@ -7,7 +7,15 @@
       <v-btn :to="{ path: '/observables' }">Observables</v-btn>
       <v-btn :to="{ path: '/entities' }">Entities</v-btn>
       <v-btn :to="{ path: '/indicators' }">Indicators</v-btn>
-      <v-btn :to="{ path: '/feeds' }">Feeds</v-btn>
+      <v-btn>
+        Automation
+        <v-menu activator="parent">
+          <v-list>
+            <v-list-item :to="{ path: '/feeds' }">Feeds </v-list-item>
+            <v-list-item :to="{ path: '/analytics' }">Analytics </v-list-item>
+          </v-list>
+        </v-menu>
+      </v-btn>
       <v-divider vertical class="mx-2"></v-divider>
       <v-btn prepend-icon="mdi-account-circle">
         {{ user?.username }}
