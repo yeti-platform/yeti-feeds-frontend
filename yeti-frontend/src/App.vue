@@ -23,7 +23,6 @@ export default {
   },
   methods: {
     displayMessage(event) {
-      console.log("message displayed!");
       this.snackBarMessage = event.message;
       this.snackBarStatus = event.status;
       this.displaySnackBar = true;
