@@ -6,9 +6,21 @@
       :items-per-page="100"
       density="compact"
       :sort-by="[{ key: 'name', order: 'asc' }]"
+      :show-select="selectableTasks"
+      select-strategy="single"
     >
       <template v-slot:item="{ item }">
         <tr :class="getRowClass(item)">
+          <td v-if="selectableTasks">
+            <v-checkbox
+              @update:modelValue="selectTask"
+              v-model="selectedTask"
+              :multiple="false"
+              :value="item"
+              density="compact"
+              hide-details
+            />
+          </td>
           <td v-if="displayColumn('name')">
             <strong> {{ item.name }} </strong>
           </td>
@@ -96,6 +108,10 @@ export default {
     onlyEnabled: {
       type: Boolean,
       default: false
+    },
+    selectableTasks: {
+      type: Boolean,
+      default: false
     }
   },
   data() {
@@ -113,7 +129,8 @@ export default {
         { key: "toggle", title: "Toggle", width: "80px" },
         { key: "refresh", title: "", width: "80px" }
       ],
-      sortBy: [{ key: "name", order: "asc" }]
+      sortBy: [{ key: "name", order: "asc" }],
+      selectedTask: null
     };
   },
   mounted() {
@@ -153,6 +170,7 @@ export default {
             tasks = tasks.filter(task => task.enabled);
           }
           this.tasks = tasks;
+          this.selectedTask = null;
         })
         .catch(error => {
           console.log(error);
@@ -202,6 +220,9 @@ export default {
     },
     displayColumn(name) {
       return this.displayColumns.includes(name);
+    },
+    selectTask(task) {
+      this.$emit("task-selected", task);
     }
   },
   computed: {
