@@ -49,6 +49,18 @@ const routes = [
     ]
   },
   {
+    path: "/exports",
+    component: () => import("@/layouts/default/Default.vue"),
+    children: [
+      {
+        path: "",
+        name: "Exports",
+        component: () => import("@/views/ExportList.vue"),
+        props: true
+      }
+    ]
+  },
+  {
     path: "/entities",
     component: () => import("@/layouts/default/Default.vue"),
     children: [
