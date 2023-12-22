@@ -1,7 +1,7 @@
 <template>
   <v-sheet class="ma-5" width="98%">
     <v-tabs v-model="activeTab" color="primary">
-      <v-tab :value="typeDef.type" v-for="typeDef in displayedEntityTypes">
+      <v-tab :value="typeDef.type" v-for="typeDef in displayedEntityTypes" @click="autoTab = false">
         <v-icon size="x-large" start>{{ typeDef.icon }}</v-icon
         >{{ typeDef.name }} <v-chip class="ml-3" density="comfortable">{{ entityCount[typeDef.type] }}</v-chip>
       </v-tab>
@@ -62,13 +62,14 @@ export default {
         acc[cur.type] = 0;
         return acc;
       }, {}),
-      activeTab: ""
+      activeTab: "",
+      autoTab: true
     };
   },
   methods: {
     countEntities(type, count) {
       this.entityCount[type] = count;
-      if (!this.$route.hash) {
+      if (!this.$route.hash && this.autoTab) {
         this.navigateToFirstPopulatedTab();
       }
     },
