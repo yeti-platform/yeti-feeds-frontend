@@ -1,44 +1,45 @@
 <template>
-  <v-data-table-server
-    v-model:page="page"
-    :itemsLength="total"
-    :items-per-page="perPage"
-    :headers="headers"
-    density="compact"
-    :items="items"
-    @update:options="loadOjects"
-    :search="searchQueryDebounced"
-    :show-select="showSelect"
-    :item-value="item => item.id"
-    v-model="selectedObservables"
-    hover
-    class="ma-5"
-  >
-    <template v-slot:item.value="{ item }">
-      <router-link :to="{ name: 'ObservableDetails', params: { id: item.id } }">{{ item.value }}</router-link>
-    </template>
-    <template v-slot:item.tags="{ item }">
-      <v-chip
-        v-for="name in Object.keys(item.tags)"
-        :color="item.tags[name].fresh ? 'blue ' : 'red'"
-        :text="name"
-        class="mx-1"
-        label
-        size="small"
-      ></v-chip>
-    </template>
-    <template v-slot:item.context="{ item }">
-      <v-chip
-        v-for="context in item.context"
-        color="green"
-        :text="context.source"
-        class="mx-1"
-        label
-        size="small"
-      ></v-chip>
-    </template>
-    <template v-slot:item.created="{ item }"> {{ moment(item.created).format("YYYY-MM-DD HH:mm:ss") }} </template>
-  </v-data-table-server>
+  <v-sheet class="ma-5" width="98%">
+    <v-data-table-server
+      v-model:page="page"
+      :itemsLength="total"
+      :items-per-page="perPage"
+      :headers="headers"
+      density="compact"
+      :items="items"
+      @update:options="loadOjects"
+      :search="searchQueryDebounced"
+      :show-select="showSelect"
+      :item-value="item => item.id"
+      v-model="selectedObservables"
+      hover
+    >
+      <template v-slot:item.value="{ item }">
+        <router-link :to="{ name: 'ObservableDetails', params: { id: item.id } }">{{ item.value }}</router-link>
+      </template>
+      <template v-slot:item.tags="{ item }">
+        <v-chip
+          v-for="name in Object.keys(item.tags)"
+          :color="item.tags[name].fresh ? 'blue ' : 'red'"
+          :text="name"
+          class="mx-1"
+          label
+          size="small"
+        ></v-chip>
+      </template>
+      <template v-slot:item.context="{ item }">
+        <v-chip
+          v-for="context in item.context"
+          color="green"
+          :text="context.source"
+          class="mx-1"
+          label
+          size="small"
+        ></v-chip>
+      </template>
+      <template v-slot:item.created="{ item }"> {{ moment(item.created).format("YYYY-MM-DD HH:mm:ss") }} </template>
+    </v-data-table-server>
+  </v-sheet>
   <v-navigation-drawer permament location="right" width="400" ref="drawer">
     <v-list-item class="mt-4">
       <v-text-field

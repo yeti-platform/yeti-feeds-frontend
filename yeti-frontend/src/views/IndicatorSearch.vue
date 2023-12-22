@@ -1,5 +1,5 @@
 <template>
-  <v-sheet class="ma-5">
+  <v-sheet class="ma-5" width="98%">
     <v-tabs v-model="activeTab" color="primary">
       <v-tab :value="typeDef.type" v-for="typeDef in displayedindicatorTypes">
         <v-icon size="x-large" start>{{ typeDef.icon }}</v-icon
