@@ -138,8 +138,10 @@ export default {
       };
       axios.post(`/api/v2/${this.searchType}/search`, params).then(response => {
         this.items = response.data[this.searchType];
-        this.total = response.data.total;
-        this.$emit("totalUpdated", this.total);
+        if (response.data.total != this.total) {
+          this.total = response.data.total;
+          this.$emit("totalUpdated", this.total);
+        }
       });
     }
   }
