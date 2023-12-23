@@ -14,6 +14,7 @@
             <v-list-item :to="{ path: '/feeds' }">Feeds </v-list-item>
             <v-list-item :to="{ path: '/analytics' }">Analytics </v-list-item>
             <v-list-item :to="{ path: '/exports' }">Exports </v-list-item>
+            <v-list-item :to="{ path: '/exports/templates' }">Export templates </v-list-item>
           </v-list>
         </v-menu>
       </v-btn>

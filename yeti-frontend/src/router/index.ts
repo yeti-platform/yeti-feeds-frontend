@@ -61,6 +61,18 @@ const routes = [
     ]
   },
   {
+    path: "/exports/templates",
+    component: () => import("@/layouts/default/Default.vue"),
+    children: [
+      {
+        path: "",
+        name: "ExportTemplates",
+        component: () => import("@/views/ExportTemplates.vue"),
+        props: true
+      }
+    ]
+  },
+  {
     path: "/entities",
     component: () => import("@/layouts/default/Default.vue"),
     children: [

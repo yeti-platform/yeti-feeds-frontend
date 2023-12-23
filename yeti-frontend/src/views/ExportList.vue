@@ -69,6 +69,16 @@
           <v-btn color="primary" density="compact" v-if="!selectedExport.id" @click="newExport">Add new export</v-btn>
           <v-btn color="light" density="compact" @click="selectedExport = {}">Clear</v-btn>
         </v-btn-group>
+        <v-btn
+          color="blue-darken-1"
+          density="compact"
+          variant="text"
+          to="/exports/templates"
+          target="_blank"
+          class="pa-0 mt-5"
+        >
+          Open new template page
+        </v-btn>
       </v-sheet>
     </v-navigation-drawer>
   </div>
