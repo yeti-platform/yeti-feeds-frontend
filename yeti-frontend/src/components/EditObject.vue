@@ -3,52 +3,7 @@
     <v-card-title>{{ object.name }}</v-card-title>
     <v-card-subtitle>Editing {{ typeDefinition.name }}</v-card-subtitle>
     <v-card-text>
-      <div v-for="field in editableFields">
-        <v-text-field
-          v-if="field.type === 'text'"
-          :label="field.label"
-          v-model="localObject[field.field]"
-        ></v-text-field>
-        <v-textarea
-          v-if="field.type === 'longtext'"
-          :label="field.label"
-          v-model="localObject[field.field]"
-        ></v-textarea>
-        <v-combobox
-          v-if="field.type === 'list' && field.field !== 'tags'"
-          v-model="localObject[field.field]"
-          :label="field.label"
-          chips
-          clearable
-          multiple
-          density="compact"
-          :delimiters="[',', ' ', ';']"
-          prepend-inner-icon="mdi-tag"
-        >
-          <template v-slot:chip="tag"> <v-chip :text="tag.item.value" label size="large" color="primary"/></template>
-        </v-combobox>
-
-        <v-text-field
-          v-if="field.type === 'date'"
-          v-model="localObject[field.field]"
-          :label="field.label"
-        ></v-text-field>
-
-        <v-textarea
-          v-if="field.type === 'code'"
-          :label="field.label"
-          v-model="localObject[field.field]"
-          class="yeti-code"
-        ></v-textarea>
-
-        <v-select
-          v-if="field.type === 'option'"
-          v-model="localObject[field.field]"
-          :items="field.choices"
-          :label="field.label"
-          variant="outlined"
-        ></v-select>
-      </div>
+      <object-fields :fields="editableFields" :object="localObject" />
     </v-card-text>
 
     <v-card-actions>
@@ -66,12 +21,13 @@ import axios from "axios";
 
 import { ENTITY_TYPES } from "@/definitions/entityDefinitions.js";
 import { INDICATOR_TYPES } from "@/definitions/indicatorDefinitions.js";
+import ObjectFields from "@/components/ObjectFields.vue";
 import { objectTypeAnnotation } from "@babel/types";
 </script>
 
 <script lang="ts">
 export default {
-  components: {},
+  components: { ObjectFields },
   props: {
     object: {
       type: Object,
@@ -109,7 +65,10 @@ export default {
           [this.object.root_type]: patchRequest
         })
         .then(response => {
-          this.$eventBus.emit("displayMessage", { message: "Object updated succesfully!", status: "success" });
+          this.$eventBus.emit("displayMessage", {
+            message: `${this.object.name} succesfully updated`,
+            status: "success"
+          });
           this.$emit("success", response.data);
           this.isActive.value = false;
         })
