@@ -36,6 +36,11 @@
       <template v-slot:item.threat_actor_types="{ item }">
         <v-chip v-for="value in item.threat_actor_types" :text="value" class="mr-1" size="small"></v-chip>
       </template>
+      <template v-slot:item.kill_chain_phases="{ item }">
+        <v-chip v-for="value in item.kill_chain_phases" :text="value" class="mr-1" size="small">
+          {{ value.split(":")[1] }}
+        </v-chip>
+      </template>
       <template v-slot:item.target_systems="{ item }">
         <v-chip v-for="value in item.target_systems" :text="value" class="mr-1" size="small"></v-chip>
       </template>

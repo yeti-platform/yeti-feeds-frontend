@@ -98,7 +98,7 @@ export const ENTITY_TYPES = [
       { field: "aliases", type: "list", label: "Aliases", displayList: true },
       { field: "description", type: "longtext", label: "Description", displayList: false, editable: true }
     ],
-    icon: "mdi-user"
+    icon: "mdi-information-outline"
   },
   {
     name: "Company",
