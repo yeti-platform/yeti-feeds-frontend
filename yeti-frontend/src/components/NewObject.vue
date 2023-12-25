@@ -61,19 +61,19 @@ export default {
       });
 
       axios
-        .post(`/api/v2/${this.typeToEndpointMapping[this.newObject.root_type]}`, {
+        .post(`/api/v2/${this.typeToEndpointMapping[this.newObject.root_type]}/`, {
           [this.newObject.root_type]: request
         })
         .then(response => {
           this.$eventBus.emit("displayMessage", { message: `New ${this.objectType} created`, status: "success" });
           this.$router.push({
-            name: response.data.root_type == "entity" ? "EntityDetails" : "IndicatorDetials",
+            name: response.data.root_type == "entity" ? "EntityDetails" : "IndicatorDetails",
             params: { id: response.data.id, type: response.data.type }
           });
         })
         .catch(error => {
-          this.error = error.response.data.detail;
           console.log(error);
+          this.error = error.response.data.detail;
         })
         .finally();
     },
