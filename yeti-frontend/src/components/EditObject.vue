@@ -12,7 +12,15 @@
       <v-btn text="Cancel" color="cancel" @click="isActive.value = false"></v-btn>
       <v-btn text="Save" color="primary" @click="saveObject" variant="tonal"></v-btn>
     </v-card-actions>
-    <v-alert v-if="error" type="error">Error updating object: {{ error }}</v-alert>
+    <v-alert v-if="errors.length > 0" type="error">
+      Error saving {{ typeDefinition.name }}:
+      <ul>
+        <li v-for="error in errors">
+          <strong>{{ error.field }}</strong
+          >: {{ error.message }}
+        </li>
+      </ul>
+    </v-alert>
   </v-card>
 </template>
 
@@ -41,7 +49,7 @@ export default {
   data() {
     return {
       localObject: { ...this.object },
-      error: null,
+      errors: [],
       fullScreen: false,
       typeToEndpointMapping: {
         entity: "entities",
@@ -73,8 +81,12 @@ export default {
           this.isActive.value = false;
         })
         .catch(error => {
-          this.error = error.response.data.detail;
           console.log(error);
+          this.errors = error.response.data.detail
+            .filter(detail => detail.loc[1] !== "type")
+            .map(detail => {
+              return { field: detail.loc[1], message: detail.msg };
+            });
         })
         .finally();
     },
