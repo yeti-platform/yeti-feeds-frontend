@@ -29,7 +29,7 @@ export const INDICATOR_TYPES = [
     fields: [
       { field: "created", type: "date", label: "Created", displayList: true, editable: false },
       { field: "name", type: "text", label: "Name", displayList: true, editable: true },
-      { field: "pattern", type: "longcode", label: "Rule text", displayList: false, editable: true },
+      { field: "pattern", type: "code", label: "Query text", displayList: false, editable: true },
       { field: "relevant_tags", type: "list", label: "Relevant tags", displayList: true, editable: true },
       {
         field: "query_type",
@@ -59,7 +59,7 @@ export const INDICATOR_TYPES = [
     fields: [
       { field: "created", type: "date", label: "Created", displayList: true, editable: false },
       { field: "name", type: "text", label: "Name", displayList: true, editable: true },
-      { field: "pattern", type: "longcode", label: "Rule text", displayList: false, editable: true },
+      { field: "pattern", type: "code", label: "Rule text", displayList: false, editable: true },
       { field: "relevant_tags", type: "list", label: "Relevant tags", displayList: true, editable: true },
       { field: "location", type: "text", label: "Location", displayList: true, editable: true },
       {
@@ -80,7 +80,7 @@ export const INDICATOR_TYPES = [
     fields: [
       { field: "created", type: "date", label: "Created", displayList: true, editable: false },
       { field: "name", type: "text", label: "Name", displayList: true, editable: true },
-      { field: "pattern", type: "longcode", label: "Rule text", displayList: false, editable: true },
+      { field: "pattern", type: "code", label: "Rule text", displayList: false, editable: true },
       { field: "relevant_tags", type: "list", label: "Relevant tags", displayList: true, editable: true },
       { field: "location", type: "text", label: "Location", displayList: true, editable: true },
       {
