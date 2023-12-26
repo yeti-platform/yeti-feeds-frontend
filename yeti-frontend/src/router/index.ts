@@ -117,9 +117,21 @@ const routes = [
         props: true
       },
       {
-        path: "/:id([0-9]+)",
+        path: ":id([0-9]+)",
         name: "UserProfileAdmin",
         component: () => import("@/views/UserProfile.vue"),
+        props: true
+      }
+    ]
+  },
+  {
+    path: "/admin",
+    component: () => import("@/layouts/default/Default.vue"),
+    children: [
+      {
+        path: "/users",
+        name: "UserAdmin",
+        component: () => import("@/views/UserAdmin.vue"),
         props: true
       }
     ]
