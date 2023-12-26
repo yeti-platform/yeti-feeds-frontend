@@ -24,7 +24,7 @@
 
         <v-menu activator="parent">
           <v-list>
-            <v-list-item prepend-icon="mdi-cog">
+            <v-list-item :to="{ path: '/profile' }" prepend-icon="mdi-cog">
               Profile and settings
             </v-list-item>
             <v-list-item @click="toggleTheme" prepend-icon="mdi-brightness-4">

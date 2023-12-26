@@ -25,6 +25,40 @@ const routes = [
     ]
   },
   {
+    path: "/entities",
+    component: () => import("@/layouts/default/Default.vue"),
+    children: [
+      {
+        path: "",
+        name: "Entities",
+        component: () => import("@/views/EntitySearch.vue")
+      },
+      {
+        path: ":id([0-9]+)",
+        name: "EntityDetails",
+        component: () => import("@/views/ObjectDetails.vue"),
+        props: route => ({ id: String(route.params.id), objectType: "entity" })
+      }
+    ]
+  },
+  {
+    path: "/indicators",
+    component: () => import("@/layouts/default/Default.vue"),
+    children: [
+      {
+        path: "",
+        name: "Indicators",
+        component: () => import("@/views/IndicatorSearch.vue")
+      },
+      {
+        path: ":id([0-9]+)",
+        name: "IndicatorDetails",
+        component: () => import("@/views/ObjectDetails.vue"),
+        props: route => ({ id: String(route.params.id), objectType: "indicator" })
+      }
+    ]
+  },
+  {
     path: "/feeds",
     component: () => import("@/layouts/default/Default.vue"),
     children: [
@@ -73,36 +107,20 @@ const routes = [
     ]
   },
   {
-    path: "/entities",
+    path: "/profile",
     component: () => import("@/layouts/default/Default.vue"),
     children: [
       {
         path: "",
-        name: "Entities",
-        component: () => import("@/views/EntitySearch.vue")
+        name: "UserProfile",
+        component: () => import("@/views/UserProfile.vue"),
+        props: true
       },
       {
-        path: ":id([0-9]+)",
-        name: "EntityDetails",
-        component: () => import("@/views/ObjectDetails.vue"),
-        props: route => ({ id: String(route.params.id), objectType: "entity" })
-      }
-    ]
-  },
-  {
-    path: "/indicators",
-    component: () => import("@/layouts/default/Default.vue"),
-    children: [
-      {
-        path: "",
-        name: "Indicators",
-        component: () => import("@/views/IndicatorSearch.vue")
-      },
-      {
-        path: ":id([0-9]+)",
-        name: "IndicatorDetails",
-        component: () => import("@/views/ObjectDetails.vue"),
-        props: route => ({ id: String(route.params.id), objectType: "indicator" })
+        path: "/:id([0-9]+)",
+        name: "UserProfileAdmin",
+        component: () => import("@/views/UserProfile.vue"),
+        props: true
       }
     ]
   }
