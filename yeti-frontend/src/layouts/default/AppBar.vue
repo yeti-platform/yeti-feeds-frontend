@@ -19,13 +19,30 @@
         </v-menu>
       </v-btn>
       <v-divider vertical class="mx-2"></v-divider>
+      <v-btn prepend-icon="mdi-key" v-if="user.admin">
+        Admin
+
+        <v-menu activator="parent">
+          <v-list>
+            <v-list-item :to="{ name: 'UserAdmin' }" prepend-icon="mdi-account-multiple">
+              Users
+            </v-list-item>
+            <v-list-item prepend-icon="mdi-tag">
+              Tags
+            </v-list-item>
+            <v-list-item prepend-icon="mdi-application-cog">
+              System
+            </v-list-item>
+          </v-list>
+        </v-menu>
+      </v-btn>
       <v-btn prepend-icon="mdi-account-circle">
         {{ user?.username }}
 
         <v-menu activator="parent">
           <v-list>
             <v-list-item :to="{ path: '/profile' }" prepend-icon="mdi-cog">
-              Profile and settings
+              Account settings
             </v-list-item>
             <v-list-item @click="toggleTheme" prepend-icon="mdi-brightness-4">
               Dark mode
