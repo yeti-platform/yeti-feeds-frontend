@@ -30,7 +30,7 @@
             <v-list-item :to="{ name: 'TagsAdmin' }" prepend-icon="mdi-tag">
               Tags
             </v-list-item>
-            <v-list-item prepend-icon="mdi-application-cog">
+            <v-list-item :to="{ name: 'System' }" prepend-icon="mdi-application-cog">
               System
             </v-list-item>
           </v-list>

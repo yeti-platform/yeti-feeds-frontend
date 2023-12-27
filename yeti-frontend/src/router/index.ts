@@ -139,6 +139,12 @@ const routes = [
         name: "TagsAdmin",
         component: () => import("@/views/TagsAdmin.vue"),
         props: true
+      },
+      {
+        path: "system",
+        name: "System",
+        component: () => import("@/views/System.vue"),
+        props: true
       }
     ]
   }
