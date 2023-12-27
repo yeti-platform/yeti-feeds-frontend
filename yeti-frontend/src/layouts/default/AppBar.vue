@@ -27,7 +27,7 @@
             <v-list-item :to="{ name: 'UserAdmin' }" prepend-icon="mdi-account-multiple">
               Users
             </v-list-item>
-            <v-list-item prepend-icon="mdi-tag">
+            <v-list-item :to="{ name: 'TagsAdmin' }" prepend-icon="mdi-tag">
               Tags
             </v-list-item>
             <v-list-item prepend-icon="mdi-application-cog">

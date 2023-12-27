@@ -129,9 +129,15 @@ const routes = [
     component: () => import("@/layouts/default/Default.vue"),
     children: [
       {
-        path: "/users",
+        path: "users",
         name: "UserAdmin",
         component: () => import("@/views/UserAdmin.vue"),
+        props: true
+      },
+      {
+        path: "tags",
+        name: "TagsAdmin",
+        component: () => import("@/views/TagsAdmin.vue"),
         props: true
       }
     ]
