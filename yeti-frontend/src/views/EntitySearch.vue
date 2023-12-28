@@ -69,15 +69,6 @@ export default {
   },
   data() {
     return {
-      items: [],
-      headers: [
-        { title: "Name", key: "name" },
-        { title: "Tags", key: "tags" },
-        { title: "Created on", key: "created" }
-      ],
-      page: 1,
-      perPage: 20,
-      total: 0,
       searchQuery: "",
       searchQueryDebounced: "",
       entityTypes: ENTITY_TYPES,
@@ -112,7 +103,8 @@ export default {
       return fields.map(field => {
         return {
           title: field.label,
-          key: field.field
+          key: field.field,
+          width: field.width
         };
       });
     },
