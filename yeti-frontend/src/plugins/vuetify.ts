@@ -59,6 +59,12 @@ export default createVuetify({
     global: {
       ripple: false,
     },
+    VDataTableServer: {
+      class: 'fixed-layout',
+    },
+    VDataTable: {
+      class: 'fixed-layout',
+    },
     VApp: {
      style: 'font-family: "system-ui", sans-serif;'
     },
