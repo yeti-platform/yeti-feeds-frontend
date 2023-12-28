@@ -1,9 +1,12 @@
 <template>
   <v-app-bar :elevation="2" color="app-bar-color">
     <v-app-bar-title>
-      <span class="mx-4 text-uppercase font-weight-black">Yeti</span>
+      <router-link style="color:white" class="mx-4 text-uppercase font-weight-black" :to="{ name: 'Home' }"
+        >Yeti</router-link
+      >
     </v-app-bar-title>
     <template v-slot:append>
+      <v-btn :to="{ path: '/search' }">Search</v-btn>
       <v-btn :to="{ path: '/observables' }">Observables</v-btn>
       <v-btn :to="{ path: '/entities' }">Entities</v-btn>
       <v-btn :to="{ path: '/indicators' }">Indicators</v-btn>

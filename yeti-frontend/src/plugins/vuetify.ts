@@ -26,7 +26,6 @@ const yetiDarkTheme: ThemeDefinition = {
     // "secondary-darken-1": "#018786",
     // error: "#B00020",
     // info: "#2196F3",
-    // success: colors.green.darken3,
     success: colors.green.lighten3,
     error: colors.red.lighten3,
     warning: colors.orange.lighten3,
@@ -82,6 +81,9 @@ export default createVuetify({
       VChip: {
         rounded: 1
       }
+    },
+    VCard: {
+      elevation: 0
     }
   },
   icons: {

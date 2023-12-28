@@ -8,6 +8,22 @@ const routes = [
     component: () => import("@/views/Login.vue")
   },
   {
+    path: "/",
+    redirect: { name: "ObservableMatch" },
+    name: "Home"
+  },
+  {
+    path: "/search",
+    component: () => import("@/layouts/default/Default.vue"),
+    children: [
+      {
+        path: "",
+        name: "ObservableMatch",
+        component: () => import("@/views/ObservableMatch.vue")
+      }
+    ]
+  },
+  {
     path: "/observables",
     component: () => import("@/layouts/default/Default.vue"),
     children: [
