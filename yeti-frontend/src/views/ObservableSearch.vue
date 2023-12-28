@@ -1,5 +1,5 @@
 <template>
-  <v-sheet class="ma-5" width="98%">
+  <v-sheet class="ma-5" width="100%">
     <v-data-table-server
       v-model:page="page"
       :itemsLength="total"

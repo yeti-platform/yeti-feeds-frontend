@@ -1,5 +1,5 @@
 <template>
-  <v-sheet class="ma-5">
+  <v-sheet class="ma-5" width="100%">
     <v-data-table
       :items="tasks"
       :headers="displayedHeaders"
