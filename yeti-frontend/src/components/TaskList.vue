@@ -73,7 +73,7 @@
       </template>
       <template v-slot:no-data>
         No <span v-if="onlyEnabled">enabled</span> tasks found
-        <span v-if="actsOnFilter">
+        <span v-if="actsOnFilter.length > 0">
           for <code>{{ actsOnFilter.join(", ") }}</code></span
         >
       </template>
