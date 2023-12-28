@@ -259,6 +259,8 @@ export default {
   },
   methods: {
     searchObservables() {
+      this.selectedKnown = [];
+      this.selectedUnknown = [];
       var params = {
         // split newlines, trim whitespace, remove empty lines
         observables: this.textSearch
