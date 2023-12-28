@@ -1,87 +1,80 @@
 <template>
-  <div class="columns">
-    <task-list
-      selectable-tasks
-      task-type="export"
-      ref="exportList"
-      @taskSelected="task => (this.selectedExport = task)"
-    >
-    </task-list>
+  <task-list selectable-tasks task-type="export" ref="exportList" @taskSelected="task => (this.selectedExport = task)">
+  </task-list>
 
-    <v-navigation-drawer permament location="right" width="400" ref="drawer">
-      <v-sheet class="ma-4">
-        <v-text-field
-          density="compact"
-          label="Name"
-          v-model="selectedExport.name"
-          required
-          ref="exportName"
-        ></v-text-field>
-        <v-text-field density="compact" label="Description" v-model="selectedExport.description"></v-text-field>
-        <v-combobox
-          chips
-          clearable
-          multiple
-          density="compact"
-          :delimiters="[',', ' ', ';']"
-          label="Include tags"
-          v-model="selectedExport.include_tags"
-        ></v-combobox>
-        <v-combobox
-          chips
-          clearable
-          multiple
-          density="compact"
-          :delimiters="[',', ' ', ';']"
-          label="Ignore tags"
-          v-model="selectedExport.ignore_tags"
-        ></v-combobox>
-        <v-combobox
-          chips
-          clearable
-          multiple
-          density="compact"
-          :delimiters="[',', ' ', ';']"
-          label="Exclude tags"
-          v-model="selectedExport.exclude_tags"
-        ></v-combobox>
-        <v-autocomplete
-          label="Acts on"
-          density="compact"
-          multiple
-          chips
-          v-model="selectedExport.acts_on"
-          :items="defaultTypes"
-          placeholder="Add observable types"
-        ></v-autocomplete>
-        <v-autocomplete
-          density="compact"
-          variant="outlined"
-          v-model="selectedExport.template_name"
-          :items="exportTemplates"
-          placeholder="Select template to use"
-          required
-          ref="exportTemplate"
-        ></v-autocomplete>
-        <v-btn-group rounded="1" density="compact">
-          <v-btn color="primary" density="compact" v-if="selectedExport.id" @click="updateExport">Save changes</v-btn>
-          <v-btn color="error" density="compact" v-if="selectedExport.id" @click="confirmDeleteExport">Delete</v-btn>
-          <v-btn color="primary" density="compact" v-if="!selectedExport.id" @click="newExport">Add new export</v-btn>
-          <v-btn color="light" density="compact" @click="selectedExport = {}">Clear</v-btn>
-        </v-btn-group>
-        <v-btn
-          color="blue-darken-1"
-          density="compact"
-          variant="text"
-          to="/exports/templates"
-          target="_blank"
-          class="pa-0 mt-5"
-        >
-          Open new template page
-        </v-btn>
-      </v-sheet>
-    </v-navigation-drawer>
-  </div>
+  <v-navigation-drawer permament location="right" width="400" ref="drawer">
+    <v-sheet class="ma-4">
+      <v-text-field
+        density="compact"
+        label="Name"
+        v-model="selectedExport.name"
+        required
+        ref="exportName"
+      ></v-text-field>
+      <v-text-field density="compact" label="Description" v-model="selectedExport.description"></v-text-field>
+      <v-combobox
+        chips
+        clearable
+        multiple
+        density="compact"
+        :delimiters="[',', ' ', ';']"
+        label="Include tags"
+        v-model="selectedExport.include_tags"
+      ></v-combobox>
+      <v-combobox
+        chips
+        clearable
+        multiple
+        density="compact"
+        :delimiters="[',', ' ', ';']"
+        label="Ignore tags"
+        v-model="selectedExport.ignore_tags"
+      ></v-combobox>
+      <v-combobox
+        chips
+        clearable
+        multiple
+        density="compact"
+        :delimiters="[',', ' ', ';']"
+        label="Exclude tags"
+        v-model="selectedExport.exclude_tags"
+      ></v-combobox>
+      <v-autocomplete
+        label="Acts on"
+        density="compact"
+        multiple
+        chips
+        v-model="selectedExport.acts_on"
+        :items="defaultTypes"
+        placeholder="Add observable types"
+      ></v-autocomplete>
+      <v-autocomplete
+        density="compact"
+        variant="outlined"
+        v-model="selectedExport.template_name"
+        :items="exportTemplates"
+        placeholder="Select template to use"
+        required
+        ref="exportTemplate"
+      ></v-autocomplete>
+      <v-btn-group rounded="1" density="compact">
+        <v-btn color="primary" density="compact" v-if="selectedExport.id" @click="updateExport">Save changes</v-btn>
+        <v-btn color="error" density="compact" v-if="selectedExport.id" @click="confirmDeleteExport">Delete</v-btn>
+        <v-btn color="primary" density="compact" v-if="!selectedExport.id" @click="newExport">Add new export</v-btn>
+        <v-btn color="light" density="compact" @click="selectedExport = {}">Clear</v-btn>
+      </v-btn-group>
+      <v-btn
+        color="blue-darken-1"
+        density="compact"
+        variant="text"
+        to="/exports/templates"
+        target="_blank"
+        class="pa-0 mt-5"
+      >
+        Open new template page
+      </v-btn>
+    </v-sheet>
+  </v-navigation-drawer>
 </template>
 
 <script lang="ts" setup>
