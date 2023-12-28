@@ -8,6 +8,7 @@
       :sort-by="[{ key: 'name', order: 'asc' }]"
       :show-select="selectableTasks"
       select-strategy="single"
+      class="auto-layout"
     >
       <template v-slot:item="{ item }">
         <tr :class="getRowClass(item)">
@@ -234,7 +235,7 @@ export default {
 };
 </script>
 
-<style scoped>
+<style>
 /* Your component styles go here */
 .disabled {
   opacity: 0.5;
@@ -265,5 +266,9 @@ export default {
 
 .error:hover {
   background-color: #f5bfc4;
+}
+
+.v-data-table.auto-layout table {
+  table-layout: auto !important;
 }
 </style>
