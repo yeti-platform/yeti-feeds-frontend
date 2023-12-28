@@ -18,9 +18,13 @@
             {{ node.type }}
           </span>
           <span v-else-if="node.root_type === 'observable'" class="short-links">
-            <router-link :to="{ name: 'ObservableDetails', params: { id: node.id } }">
-              {{ node.value }}
-            </router-link>
+            <span class="short-links">
+              <v-tooltip activator="parent" location="top" :open-delay="200">{{ node.value }}</v-tooltip>
+              <router-link :to="{ name: 'ObservableDetails', params: { id: node.id } }">
+                {{ node.value }}
+              </router-link>
+            </span>
+
             <span v-if="fields.includes('tags')">
               <v-chip
                 v-for="tag in Object.keys(node.tags)"
@@ -35,15 +39,21 @@
           </span>
           <span v-else-if="node.root_type === 'entity'">
             <v-icon :icon="getIconForType(node.type)" start></v-icon>
-            <router-link :to="{ name: 'EntityDetails', params: { id: node.id } }">
-              {{ node.name }}
-            </router-link>
+            <span class="short-links">
+              <v-tooltip activator="parent" location="top" :open-delay="200">{{ node.name }}</v-tooltip>
+              <router-link :to="{ name: 'EntityDetails', params: { id: node.id } }">
+                {{ node.name }}
+              </router-link>
+            </span>
           </span>
           <span v-else-if="node.root_type === 'indicator'">
             <v-icon :icon="getIconForType(node.type)" start></v-icon>
-            <router-link :to="{ name: 'IndicatorDetails', params: { id: node.id } }">
-              {{ node.name }}
-            </router-link>
+            <span class="short-links">
+              <v-tooltip activator="parent" location="top" :open-delay="200">{{ node.name }}</v-tooltip>
+              <router-link :to="{ name: 'IndicatorDetails', params: { id: node.id } }">
+                {{ node.name }}
+              </router-link>
+            </span>
           </span>
           <span v-else>
             <v-chip> {{ node.name }}</v-chip>
@@ -235,4 +245,11 @@ export default {
 };
 </script>
 
-<style></style>
+<style>
+.short-links {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  display: block;
+}
+</style>

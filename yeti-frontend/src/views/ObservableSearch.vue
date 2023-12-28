@@ -15,7 +15,10 @@
       hover
     >
       <template v-slot:item.value="{ item }">
-        <router-link :to="{ name: 'ObservableDetails', params: { id: item.id } }">{{ item.value }}</router-link>
+        <span class="short-links">
+          <v-tooltip activator="parent" location="top" :open-delay="200">{{ item.value }}</v-tooltip>
+          <router-link :to="{ name: 'ObservableDetails', params: { id: item.id } }">{{ item.value }}</router-link>
+        </span>
       </template>
       <template v-slot:item.tags="{ item }">
         <v-chip
@@ -215,3 +218,12 @@ export default {
   }
 };
 </script>
+
+<style>
+.short-links {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  display: block;
+}
+</style>

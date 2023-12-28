@@ -13,10 +13,16 @@
       hover
     >
       <template v-slot:item.name="{ item }">
-        <router-link
-          :to="{ name: this.searchType === 'entities' ? 'EntityDetails' : 'IndicatorDetails', params: { id: item.id } }"
-          >{{ item.name }}</router-link
-        >
+        <span class="short-links">
+          <v-tooltip activator="parent" location="top" :open-delay="200">{{ item.name }}</v-tooltip>
+          <router-link
+            :to="{
+              name: this.searchType === 'entities' ? 'EntityDetails' : 'IndicatorDetails',
+              params: { id: item.id }
+            }"
+            >{{ item.name }}</router-link
+          >
+        </span>
       </template>
       <template v-slot:item.tags="{ item }">
         <v-chip
@@ -152,3 +158,12 @@ export default {
   }
 };
 </script>
+
+<style>
+.short-links {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  display: block;
+}
+</style>
