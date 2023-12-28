@@ -95,9 +95,9 @@ export default {
       items: [],
       headers: [
         { title: "Value", key: "value" },
-        { title: "Tags", key: "tags" },
-        { title: "Context", key: "context" },
-        { title: "Created on", key: "created" }
+        { title: "Tags", key: "tags", width: "300px" },
+        { title: "Context", key: "context", width: "300px" },
+        { title: "Created on", key: "created", width: "200px" }
       ],
       page: 1,
       perPage: 25,

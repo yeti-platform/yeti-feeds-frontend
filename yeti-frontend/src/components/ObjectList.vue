@@ -91,7 +91,7 @@ export default {
       default: () => [
         { title: "Name", key: "name" },
         { title: "Tags", key: "tags" },
-        { title: "Created on", key: "created" }
+        { title: "Created on", key: "created", width: "200px" }
       ]
     },
     checkable: {

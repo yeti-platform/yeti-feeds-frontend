@@ -3,7 +3,7 @@ export const ENTITY_TYPES = [
     name: "Investigation",
     type: "investigation",
     fields: [
-      { field: "created", type: "date", label: "Created", displayList: true, editable: false },
+      { field: "created", type: "date", label: "Created", displayList: true, editable: false, width: "190px" },
       { field: "name", type: "text", label: "Name", displayList: true, editable: true },
       { field: "reference", type: "text", label: "Reference", displayList: true, editable: true },
       { field: "tags", type: "list", label: "Relevant tags", displayList: true, editable: false },
@@ -15,7 +15,7 @@ export const ENTITY_TYPES = [
     name: "Malware",
     type: "malware",
     fields: [
-      { field: "created", type: "date", label: "Created", displayList: true, editable: false },
+      { field: "created", type: "date", label: "Created", displayList: true, editable: false, width: "190px" },
       { field: "name", type: "text", label: "Name", displayList: true, editable: true },
       { field: "tags", type: "list", label: "Relevant tags", displayList: true, editable: false },
       { field: "family", type: "text", label: "Family", displayList: true, editable: true },
@@ -28,7 +28,7 @@ export const ENTITY_TYPES = [
     name: "Tool",
     type: "tool",
     fields: [
-      { field: "created", type: "date", label: "Created", displayList: true, editable: false },
+      { field: "created", type: "date", label: "Created", displayList: true, editable: false, width: "190px" },
       { field: "name", type: "text", label: "Name", displayList: true, editable: true },
       { field: "tags", type: "list", label: "Relevant tags", displayList: true, editable: false },
       { field: "aliases", type: "list", label: "Aliases", displayList: true, editable: true },
@@ -41,7 +41,7 @@ export const ENTITY_TYPES = [
     name: "Attack pattern",
     type: "attack-pattern",
     fields: [
-      { field: "created", type: "date", label: "Created", displayList: true, editable: false },
+      { field: "created", type: "date", label: "Created", displayList: true, editable: false, width: "190px" },
       { field: "name", type: "text", label: "Name", displayList: true, editable: true },
       { field: "tags", type: "list", label: "Relevant tags", displayList: true, editable: false },
       { field: "kill_chain_phases", type: "list", label: "Kill chain phases", displayList: true, editable: true },
@@ -53,14 +53,14 @@ export const ENTITY_TYPES = [
     name: "Threat actor",
     type: "threat-actor",
     fields: [
-      { field: "created", type: "date", label: "Created", displayList: true, editable: false },
+      { field: "created", type: "date", label: "Created", displayList: true, editable: false, width: "190px" },
       { field: "name", type: "text", label: "Name", displayList: true, editable: true },
       { field: "tags", type: "list", label: "Relevant tags", displayList: true, editable: false },
       { field: "aliases", type: "list", label: "Aliases", displayList: true, editable: true },
       { field: "description", type: "longtext", label: "Description", displayList: false, editable: true },
       { field: "threat_actor_types", type: "list", label: "Threat actor types", displayList: true, editable: true },
-      { field: "first_seen", type: "date", label: "First seen", displayList: true, editable: true },
-      { field: "last_seen", type: "date", label: "Last seen", displayList: true, editable: true }
+      { field: "first_seen", type: "date", label: "First seen", displayList: true, editable: true, width: "190px" },
+      { field: "last_seen", type: "date", label: "Last seen", displayList: true, editable: true, width: "190px" }
     ],
     icon: "mdi-incognito"
   },
@@ -68,7 +68,7 @@ export const ENTITY_TYPES = [
     name: "Intrusion set",
     type: "intrusion-set",
     fields: [
-      { field: "created", type: "date", label: "Created", displayList: true, editable: false },
+      { field: "created", type: "date", label: "Created", displayList: true, editable: false, width: "190px" },
       { field: "name", type: "text", label: "Name", displayList: true, editable: true },
       { field: "tags", type: "list", label: "Relevant tags", displayList: true, editable: false },
       { field: "aliases", type: "list", label: "Aliases", displayList: true },
@@ -80,7 +80,7 @@ export const ENTITY_TYPES = [
     name: "Campaign",
     type: "campaign",
     fields: [
-      { field: "created", type: "date", label: "Created", displayList: true, editable: false },
+      { field: "created", type: "date", label: "Created", displayList: true, editable: false, width: "190px" },
       { field: "name", type: "text", label: "Name", displayList: true, editable: true },
       { field: "tags", type: "list", label: "Relevant tags", displayList: true, editable: false },
       { field: "aliases", type: "list", label: "Aliases", displayList: true },
@@ -92,7 +92,7 @@ export const ENTITY_TYPES = [
     name: "Identity",
     type: "identity",
     fields: [
-      { field: "created", type: "date", label: "Created", displayList: true, editable: false },
+      { field: "created", type: "date", label: "Created", displayList: true, editable: false, width: "190px" },
       { field: "name", type: "text", label: "Name", displayList: true, editable: true },
       { field: "tags", type: "list", label: "Relevant tags", displayList: true, editable: false },
       { field: "aliases", type: "list", label: "Aliases", displayList: true },
@@ -104,7 +104,7 @@ export const ENTITY_TYPES = [
     name: "Company",
     type: "company",
     fields: [
-      { field: "created", type: "date", label: "Created", displayList: true, editable: false },
+      { field: "created", type: "date", label: "Created", displayList: true, editable: false, width: "190px" },
       { field: "name", type: "text", label: "Name", displayList: true, editable: true },
       { field: "tags", type: "list", label: "Relevant tags", displayList: true, editable: false },
       { field: "description", type: "longtext", label: "Description", displayList: false, editable: true }
@@ -115,7 +115,7 @@ export const ENTITY_TYPES = [
     name: "Vulnerability",
     type: "vulnerability",
     fields: [
-      { field: "created", type: "date", label: "Created", displayList: true, editable: false },
+      { field: "created", type: "date", label: "Created", displayList: true, editable: false, width: "190px" },
       { field: "name", type: "text", label: "Name", displayList: true, editable: true },
       { field: "tags", type: "list", label: "Relevant tags", displayList: true, editable: false },
       { field: "description", type: "longtext", label: "Description", displayList: false, editable: true }
@@ -126,7 +126,7 @@ export const ENTITY_TYPES = [
     name: "Course of action",
     type: "course-of-action",
     fields: [
-      { field: "created", type: "date", label: "Created", displayList: true, editable: false },
+      { field: "created", type: "date", label: "Created", displayList: true, editable: false, width: "190px" },
       { field: "name", type: "text", label: "Name", displayList: true, editable: true },
       { field: "tags", type: "list", label: "Relevant tags", displayList: true, editable: false },
       { field: "description", type: "longtext", label: "Description", displayList: false, editable: true }
