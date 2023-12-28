@@ -2,7 +2,7 @@
   <v-container fluid>
     <v-row align="start" no-gutters>
       <v-col>
-        <v-card class="ma-2" variant="flat">
+        <v-card class="ma-2 break-title" variant="flat">
           <template v-slot:title>
             <v-chip color="primary" :text="observable?.type" label></v-chip> <code>{{ observable?.value }}</code>
           </template>
@@ -233,5 +233,9 @@ export default {
 <style>
 .v-card-text.yeti-description {
   font-size: 1rem;
+}
+
+.break-title .v-card-title {
+  white-space: normal;
 }
 </style>
