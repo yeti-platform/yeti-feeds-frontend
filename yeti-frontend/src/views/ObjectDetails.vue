@@ -80,6 +80,7 @@
               :value="'related-' + entityType.type"
               v-for="entityType in displayedEntityTypes"
               v-bind:key="entityType.type"
+              @click="autoTab = false"
             >
               <v-icon size="x-large" start>{{ entityType.icon }}</v-icon>
               {{ entityType.name }} {{ relatedEntitiesCount[entityType.type] }}
@@ -185,6 +186,7 @@ export default {
     return {
       object: null,
       activeTab: "related-indicators",
+      autoTab: true,
       objectTypes: {
         entity: ENTITY_TYPES,
         observable: OBSERVABLE_TYPES,
@@ -241,7 +243,9 @@ export default {
     },
     countEntities(entityType: string, value: number) {
       this.relatedEntitiesCount[entityType] = value;
-      this.navigateToFirstPopulatedTab();
+      if (!this.$route.hash && this.autoTab) {
+        this.navigateToFirstPopulatedTab();
+      }
     },
     navigateToFirstPopulatedTab() {
       for (const entityType of this.objectTypes.entity) {
