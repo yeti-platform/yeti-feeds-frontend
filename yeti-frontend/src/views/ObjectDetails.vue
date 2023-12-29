@@ -24,7 +24,7 @@
             </div>
           </template>
           <v-card-text class="yeti-description">
-            <div v-html="markdownify(object?.description || 'No description provided')"></div>
+            <yeti-markdown :text="object?.description || 'No description provided'" />
           </v-card-text>
         </v-card>
         <v-card v-if="object?.pattern" class="ma-2" variant="flat">
@@ -156,6 +156,7 @@ import DOMPurify from "dompurify";
 
 import RelatedObjects from "@/components/RelatedObjects.vue";
 import EditObject from "@/components/EditObject.vue";
+import YetiMarkdown from "@/components/YetiMarkdown.vue";
 
 import { ENTITY_TYPES } from "@/definitions/entityDefinitions.js";
 import { OBSERVABLE_TYPES } from "@/definitions/observableDefinitions.js";
@@ -177,7 +178,8 @@ export default {
     }
   },
   components: {
-    RelatedObjects
+    RelatedObjects,
+    YetiMarkdown
   },
   data() {
     return {
@@ -252,9 +254,6 @@ export default {
     toggleFullscreen(fullscreen: boolean) {
       this.fullScreenEdit = !this.fullScreenEdit;
       this.editWidth = fullscreen ? "100%" : "50%";
-    },
-    markdownify(text) {
-      return DOMPurify.sanitize(marked.parse(text || ""));
     }
   },
   computed: {
@@ -283,20 +282,5 @@ export default {
 .v-card-text.yeti-description,
 .v-card-text.yeti-pattern-code {
   font-size: 1rem;
-}
-
-div.v-card-text.yeti-description h2 {
-  margin-bottom: 1.5rem;
-  margin-top: 1rem;
-}
-
-div.v-card-text.yeti-description p {
-  margin-bottom: 0.5rem;
-  margin-top: 0.5rem;
-}
-
-div.v-card-text.yeti-description li {
-  margin-left: 2rem;
-  margin-bottom: 0.5rem;
 }
 </style>
