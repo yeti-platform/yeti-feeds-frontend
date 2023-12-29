@@ -82,7 +82,10 @@ const routes = [
         path: "",
         name: "Feeds",
         component: () => import("@/components/TaskList.vue"),
-        props: { taskType: "feed" }
+        props: {
+          taskType: "feed",
+          displayColumns: ["name", "frequency", "last_run", "description", "status", "toggle", "refresh"]
+        }
       }
     ]
   },
