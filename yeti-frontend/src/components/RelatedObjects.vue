@@ -7,7 +7,6 @@
     v-model:page="page"
     @update:options="fetchNeighbors"
     hover
-    :headers="[]"
   >
     <template v-slot:item="{ item }">
       <tr>
