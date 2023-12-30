@@ -14,7 +14,7 @@
         :delimiters="[',', ' ', ';']"
         prepend-inner-icon="mdi-tag"
       >
-        <template v-slot:chip="tag"> <v-chip :text="tag.item.value" label size="large" color="primary"/></template>
+        <template v-slot:chip="tag"> <v-chip :text="tag.item.value" label size="large" color="primary" /></template>
       </v-combobox>
 
       <v-text-field v-if="field.type === 'date'" v-model="object[field.field]" :label="field.label"></v-text-field>

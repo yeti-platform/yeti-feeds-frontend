@@ -19,9 +19,7 @@
                       <code>{{ profile.api_key }}</code>
                     </td>
                     <td>
-                      <v-btn size="small" variant="outlined" @click="resetApiKey(profile)">
-                        Reset key
-                      </v-btn>
+                      <v-btn size="small" variant="outlined" @click="resetApiKey(profile)"> Reset key </v-btn>
                     </td>
                   </tr>
                 </tbody>
@@ -158,7 +156,7 @@ export default {
     this.appStore.fetchSystemConfig();
   },
   watch: {
-    id: function() {
+    id: function () {
       this.getUserProfile();
     }
   }

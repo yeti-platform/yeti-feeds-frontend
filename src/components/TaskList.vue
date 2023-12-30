@@ -38,13 +38,7 @@
           </td>
 
           <td v-if="displayColumn('frequency')">
-            {{
-              moment
-                .duration(item.frequency)
-                .humanize()
-                .replace("an ", "1 ")
-                .replace("a ", "1 ")
-            }}
+            {{ moment.duration(item.frequency).humanize().replace("an ", "1 ").replace("a ", "1 ") }}
           </td>
           <td v-if="displayColumn('last_run')">
             {{ item.last_run }}

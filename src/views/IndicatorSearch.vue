@@ -120,7 +120,7 @@ export default {
     }
   },
   watch: {
-    searchQuery: _.debounce(function() {
+    searchQuery: _.debounce(function () {
       this.searchQueryDebounced = this.searchQuery;
     }, 200)
   }

@@ -60,7 +60,7 @@
         <v-expansion-panel-text>
           <v-card title="Bulk tag" class="pb-4" rounded="0" variant="flat">
             <v-combobox v-model="bulkTags" chips clearable multiple density="compact">
-              <template v-slot:chip="tag"> <v-chip :text="tag.item.value" label/></template>
+              <template v-slot:chip="tag"> <v-chip :text="tag.item.value" label /></template>
             </v-combobox>
             <v-btn density="compact" variant="tonal" color="primary" class="me-2" @click="changeTags">Apply</v-btn>
             <small>Will apply {{ bulkTags.length }} tags to {{ selectedObservables.length }} observables</small>
@@ -114,7 +114,8 @@ export default {
   },
   methods: {
     extractParamsFromSearchQuery(searchQuery, defaultKey) {
-      const pattern = /(?<key>\w+)=(?<keyed_terms>[^\s,]+(?:,[^\s,]+)*)|(?<isolated_term>[^"\s]+)|"(?<quoted_term>[^"]+)"/g;
+      const pattern =
+        /(?<key>\w+)=(?<keyed_terms>[^\s,]+(?:,[^\s,]+)*)|(?<isolated_term>[^"\s]+)|"(?<quoted_term>[^"]+)"/g;
 
       let resultObj: Record<string, string | string[]> = {};
       let match;
@@ -213,7 +214,7 @@ export default {
     this.loadExportTemplates();
   },
   watch: {
-    searchQuery: _.debounce(function() {
+    searchQuery: _.debounce(function () {
       this.searchQueryDebounced = this.searchQuery;
     }, 200)
   }

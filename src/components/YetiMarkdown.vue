@@ -43,7 +43,9 @@ export default {
 }
 
 .yeti-markdown pre {
-  font-family: Roboto Mono, monospace;
+  font-family:
+    Roboto Mono,
+    monospace;
   border: 1px solid #e0e0e0;
   margin: 0.5rem 0 0.5rem 0;
   padding: 0.5rem;

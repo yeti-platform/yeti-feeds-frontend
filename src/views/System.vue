@@ -37,9 +37,7 @@
           </v-card-text>
         </v-card>
         <v-divider class="my-6"></v-divider>
-        <v-btn variant="flat" @click="restartWorker('all')" :disabled="restartDisabled">
-          Restart All workers
-        </v-btn>
+        <v-btn variant="flat" @click="restartWorker('all')" :disabled="restartDisabled"> Restart All workers </v-btn>
       </v-col>
       <v-col>
         <p class="mb-5 text-h4">System config</p>

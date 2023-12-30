@@ -25,7 +25,7 @@
               </template>
               {{ node.type }}
               <v-menu activator="parent">
-                <v-sheet class="px-5 py-2" color="background" width="auto" elevation="10" style="font-size: 0.8rem;">
+                <v-sheet class="px-5 py-2" color="background" width="auto" elevation="10" style="font-size: 0.8rem">
                   <yeti-markdown :text="node.description" />
                 </v-sheet>
               </v-menu>
@@ -224,7 +224,7 @@ export default {
     }
   },
   watch: {
-    id: function() {
+    id: function () {
       this.page = 1;
       this.total = 500;
       this.fetchNeighbors();

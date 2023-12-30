@@ -198,7 +198,7 @@ export default {
     }
   },
   watch: {
-    tagFilter: _.debounce(function() {
+    tagFilter: _.debounce(function () {
       this.tagFilterDebounced = this.tagFilter;
     }, 200)
   }
