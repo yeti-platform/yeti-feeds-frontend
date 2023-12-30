@@ -13,6 +13,7 @@
       :item-value="item => item.id"
       v-model="selectedObservables"
       hover
+      class="fixed-table"
     >
       <template v-slot:item.value="{ item }">
         <span class="short-links">
@@ -225,5 +226,9 @@ export default {
   text-overflow: ellipsis;
   overflow: hidden;
   display: block;
+}
+
+.fixed-table table {
+  table-layout: fixed;
 }
 </style>

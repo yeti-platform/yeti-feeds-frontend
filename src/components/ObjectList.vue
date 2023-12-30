@@ -11,6 +11,7 @@
       :search="searchQuery"
       :item-value="item => item.id"
       hover
+      class="fixed-table"
     >
       <template v-slot:item.name="{ item }">
         <span class="short-links">
@@ -165,5 +166,9 @@ export default {
   text-overflow: ellipsis;
   overflow: hidden;
   display: block;
+}
+
+.fixed-table {
+  table-layout: fixed;
 }
 </style>
