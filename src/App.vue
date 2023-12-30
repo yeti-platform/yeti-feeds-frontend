@@ -3,9 +3,7 @@
   <v-snackbar v-model="displaySnackBar" :timeout="50000" variant="flat" :color="snackBarStatus">
     {{ snackBarMessage }}
     <template v-slot:actions>
-      <v-btn :color="snackBarStatus" variant="flat" rounded="2" @click="displaySnackBar = false">
-        OK
-      </v-btn>
+      <v-btn :color="snackBarStatus" variant="flat" rounded="2" @click="displaySnackBar = false"> OK </v-btn>
     </template>
   </v-snackbar>
 </template>

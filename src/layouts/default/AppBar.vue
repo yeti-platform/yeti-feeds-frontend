@@ -1,7 +1,7 @@
 <template>
   <v-app-bar :elevation="2" color="app-bar-color">
     <v-app-bar-title>
-      <router-link style="color:white" class="mx-4 text-uppercase font-weight-black" :to="{ name: 'Home' }"
+      <router-link style="color: white" class="mx-4 text-uppercase font-weight-black" :to="{ name: 'Home' }"
         >Yeti</router-link
       >
     </v-app-bar-title>
@@ -27,15 +27,9 @@
 
         <v-menu activator="parent">
           <v-list>
-            <v-list-item :to="{ name: 'UserAdmin' }" prepend-icon="mdi-account-multiple">
-              Users
-            </v-list-item>
-            <v-list-item :to="{ name: 'TagsAdmin' }" prepend-icon="mdi-tag">
-              Tags
-            </v-list-item>
-            <v-list-item :to="{ name: 'System' }" prepend-icon="mdi-application-cog">
-              System
-            </v-list-item>
+            <v-list-item :to="{ name: 'UserAdmin' }" prepend-icon="mdi-account-multiple"> Users </v-list-item>
+            <v-list-item :to="{ name: 'TagsAdmin' }" prepend-icon="mdi-tag"> Tags </v-list-item>
+            <v-list-item :to="{ name: 'System' }" prepend-icon="mdi-application-cog"> System </v-list-item>
           </v-list>
         </v-menu>
       </v-btn>
@@ -44,12 +38,8 @@
 
         <v-menu activator="parent">
           <v-list>
-            <v-list-item :to="{ path: '/profile' }" prepend-icon="mdi-cog">
-              Account settings
-            </v-list-item>
-            <v-list-item @click="toggleTheme" prepend-icon="mdi-brightness-4">
-              Dark mode
-            </v-list-item>
+            <v-list-item :to="{ path: '/profile' }" prepend-icon="mdi-cog"> Account settings </v-list-item>
+            <v-list-item @click="toggleTheme" prepend-icon="mdi-brightness-4"> Dark mode </v-list-item>
           </v-list>
         </v-menu>
       </v-btn>
