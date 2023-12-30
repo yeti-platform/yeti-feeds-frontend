@@ -25,7 +25,9 @@ export default {
 </script>
 
 <style>
-.yeti-markdown h2 {
+.yeti-markdown h1,
+.yeti-markdown h2,
+.yeti-markdown h3 {
   margin-bottom: 1.5rem;
   margin-top: 1rem;
 }
@@ -38,5 +40,18 @@ export default {
 .yeti-markdown li {
   margin-left: 2rem;
   margin-bottom: 0.5rem;
+}
+
+.yeti-markdown pre {
+  font-family: Roboto Mono, monospace;
+  border: 1px solid #e0e0e0;
+  margin: 0.5rem 0 0.5rem 0;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+}
+
+.yeti-markdown p {
+  margin-bottom: 0.5rem;
+  margin-top: 0.5rem;
 }
 </style>

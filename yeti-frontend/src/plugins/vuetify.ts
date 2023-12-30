@@ -60,7 +60,7 @@ export default createVuetify({
       ripple: false,
     },
     VApp: {
-     style: 'font-family: "system-ui", sans-serif;'
+     style: 'font-family: "Roboto", sans-serif;'
     },
     VCombobox: {
       variant: "outlined"
