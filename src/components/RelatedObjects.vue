@@ -1,76 +1,105 @@
 <template>
-  <div>
-    <b-table
-      :data="links"
-      :hoverable="true"
-      :narrowed="true"
-      v-if="links"
-      :loading="loading"
-      :paginated="total > perPage"
-      backend-pagination
-      :total="total"
-      :per-page="perPage"
-      :current-page.sync="page"
-      @page-change="onPageChange"
-      class="related-objects"
-    >
-      <template v-slot:default="link">
-        <b-table-column v-for="node in link.row.nodeChain" v-bind:key="node.id" :class="{ object: !node.direction }">
-          <span v-if="node.direction">{{
-            node.direction == "out" ? `→ ${node.type || ""}` : `← ${node.type || ""}`
-          }}</span>
+  <v-data-table-server
+    density="compact"
+    :items="getNodeChain"
+    :itemsLength="total"
+    :items-per-page="perPage"
+    v-model:page="page"
+    @update:options="fetchNeighbors"
+    hover
+  >
+    <template v-slot:item="{ item }">
+      <tr>
+        <td
+          v-for="node in item.nodeChain"
+          v-bind:key="node.id"
+          :class="{ object: !node.direction, link: node.direction }"
+        >
+          <span v-if="node.direction">
+            <v-icon v-if="node.direction == 'out'">mdi-arrow-right</v-icon>
+            <v-icon v-else-if="node.direction == 'in'">mdi-arrow-left</v-icon>
+
+            <v-btn size="small" variant="text" append-icon="mdi-information" v-if="node.description">
+              <template v-slot:append>
+                <v-icon class="on-surface"></v-icon>
+              </template>
+              {{ node.type }}
+              <v-menu activator="parent">
+                <v-sheet class="px-5 py-2" color="background" width="auto" elevation="10" style="font-size: 0.8rem;">
+                  <yeti-markdown :text="node.description" />
+                </v-sheet>
+              </v-menu>
+            </v-btn>
+          </span>
           <span v-else-if="node.root_type === 'observable'" class="short-links">
+            <v-tooltip activator="parent" location="top" :open-delay="200">{{ node.value }}</v-tooltip>
             <router-link :to="{ name: 'ObservableDetails', params: { id: node.id } }">
               {{ node.value }}
             </router-link>
-            <span v-if="fields.includes('tags')">
-              <b-taglist>
-                <b-tag
-                  v-for="tag in Object.keys(node.tags)"
-                  :key="tag"
-                  :type="node.tags[tag].fresh ? 'is-primary' : ''"
-                  size="is-small"
-                >
-                  {{ tag }}
-                </b-tag>
-              </b-taglist>
+          </span>
+          <span v-else-if="node.root_type === 'entity'" class="short-links">
+            <v-icon :icon="getIconForType(node.type)" start size="small"></v-icon>
+            <span>
+              <v-tooltip activator="parent" location="top" :open-delay="200">{{ node.name }}</v-tooltip>
+              <router-link :to="{ name: 'EntityDetails', params: { id: node.id } }">
+                {{ node.name }}
+              </router-link>
             </span>
           </span>
-          <span v-else-if="node.root_type === 'entity'">
-            <b-icon size="is-small" :icon="getIconForType(node.type)"></b-icon>
-            <router-link :to="{ name: 'EntityDetails', params: { id: node.id } }">
-              {{ node.name }}
-            </router-link>
-          </span>
-          <span v-else-if="node.root_type === 'indicator'">
-            <b-icon size="is-small" :icon="getIconForType(node.type)"></b-icon>
-            <router-link :to="{ name: 'IndicatorDetails', params: { id: node.id } }">
-              {{ node.name }}
-            </router-link>
+          <span v-else-if="node.root_type === 'indicator'" class="short-links">
+            <v-icon :icon="getIconForType(node.type)" start size="small"></v-icon>
+            <span>
+              <v-tooltip activator="parent" location="top" :open-delay="200">{{ node.name }}</v-tooltip>
+              <router-link :to="{ name: 'IndicatorDetails', params: { id: node.id } }">
+                {{ node.name }}
+              </router-link>
+            </span>
           </span>
           <span v-else>
-            <b-tag> {{ node.name }}</b-tag>
+            <v-chip> {{ node.name }}</v-chip>
           </span>
-        </b-table-column>
+        </td>
+        <td class="controls" v-if="hops === 1">
+          <v-btn
+            icon="mdi-link-off"
+            @click="unlink(item.edges[0].id)"
+            density="compact"
+            variant="tonal"
+            color="primary"
+            class="me-2"
+          >
+          </v-btn>
+          <v-dialog width="700">
+            <template v-slot:activator="{ props }">
+              <v-btn icon="mdi-pencil" density="compact" variant="tonal" color="primary" class="me-2" v-bind="props">
+              </v-btn>
+            </template>
 
-        <b-table-column v-if="hops === 1" field="unlink" label="Controls" width="10">
-          <b-button type="is-text" icon-left="unlink" size="is-small" @click="unlink(link.row.edges[0].id)"> </b-button>
-          <b-button type="is-text" icon-left="pen" size="is-small" @click="editEdge(link.row.edges[0])"> </b-button>
-        </b-table-column>
-      </template>
-      <template #empty>
-        <div class="has-text-centered">No related objects.</div>
-      </template>
-    </b-table>
-  </div>
+            <template v-slot:default="{ isActive }">
+              <edit-link
+                :vertices="vertices"
+                :edge="item.edges[0]"
+                :is-active="isActive"
+                @success="linkUpdateSuccess(item.edges[0], $event)"
+              />
+            </template>
+          </v-dialog>
+        </td>
+      </tr>
+    </template>
+  </v-data-table-server>
 </template>
 
-<script>
+<script lang="ts" setup>
 import axios from "axios";
+
 import { ENTITY_TYPES } from "@/definitions/entityDefinitions.js";
 import { INDICATOR_TYPES } from "@/definitions/indicatorDefinitions.js";
-import EditLink from "@/components/EditLink";
+import EditLink from "@/components/EditLink.vue";
+import YetiMarkdown from "@/components/YetiMarkdown.vue";
+</script>
 
+<script lang="ts">
 export default {
   name: "RelatedObjects",
   props: {
@@ -82,21 +111,28 @@ export default {
     graph: { type: String, default: "links" },
     hops: { type: Number, default: 1 }
   },
+  components: {
+    EditLink,
+    YetiMarkdown
+  },
   data() {
     return {
-      links: [],
+      tempChains: [],
+      paths: [],
       vertices: {},
       page: 1,
       perPage: 20,
-      total: 500,
+      total: 0,
       loading: false,
-      objectTypes: ENTITY_TYPES.concat(INDICATOR_TYPES)
+      objectTypes: ENTITY_TYPES.concat(INDICATOR_TYPES),
+      showEditLink: false
     };
   },
-  mounted() {
-    this.fetchNeighbors();
-  },
   methods: {
+    linkUpdateSuccess(edge, updatedEdge) {
+      edge.type = updatedEdge.type;
+      edge.description = updatedEdge.description;
+    },
     getLabelForField(field) {
       let fieldName = field.charAt(0).toUpperCase() + field.slice(1);
       fieldName = fieldName.replace(/_/g, " ");
@@ -114,45 +150,14 @@ export default {
         count: this.perPage,
         page: this.page - 1
       };
+      console.log("Fetching neighbors", graphSearchRequest);
+
       axios
         .post(`/api/v2/graph/search`, graphSearchRequest)
         .then(response => {
-          let vertices = response.data.vertices;
-          let paths = [];
-          for (let i = 0; i < response.data.paths.length; i++) {
-            let edges = response.data.paths[i];
-            let nodeChain = [];
-            for (let j = 0; j < edges.length; j++) {
-              let edge = edges[j];
-              if (j === 0) {
-                if (edge.source === this.extendedId) {
-                  nodeChain.push(vertices[edge.source]);
-                  edge.direction = "in";
-                  nodeChain.push(edge);
-                  nodeChain.push(vertices[edge.target]);
-                } else {
-                  nodeChain.push(vertices[edge.target]);
-                  edge.direction = "out";
-                  nodeChain.push(edge);
-                  nodeChain.push(vertices[edge.source]);
-                }
-              } else {
-                if (edge.source != edges[j - 1].target) {
-                  edge.direction = "out";
-                  nodeChain.push(edge);
-                  nodeChain.push(vertices[edge.source]);
-                } else {
-                  edge.direction = "in";
-                  nodeChain.push(edge);
-                  nodeChain.push(vertices[edge.target]);
-                }
-              }
-            }
-            paths.push({ edges: edges, nodeChain: nodeChain.reverse() });
-          }
-          this.links = paths;
+          this.vertices = response.data.vertices;
+          this.paths = response.data.paths;
           this.total = response.data.total;
-          this.vertices = vertices;
           this.$emit("totalUpdated", this.total);
         })
         .catch(error => {
@@ -170,21 +175,6 @@ export default {
           console.log(error);
         });
     },
-    editEdge(edge) {
-      this.$buefy.modal.open({
-        parent: this,
-        component: EditLink,
-        hasModalCard: true,
-        trapFocus: true,
-        props: {
-          edge: edge,
-          vertices: this.vertices
-        },
-        events: {
-          refresh: this.fetchNeighbors
-        }
-      });
-    },
     getIconForType(type) {
       return this.objectTypes.find(objectType => objectType.type === type).icon;
     },
@@ -196,6 +186,41 @@ export default {
   computed: {
     extendedId() {
       return `${this.sourceType}/${this.id}`;
+    },
+    getNodeChain() {
+      let chains = [];
+      for (let i = 0; i < this.paths.length; i++) {
+        let edges = this.paths[i];
+        let nodeChain = [];
+        for (let j = 0; j < edges.length; j++) {
+          let edge = edges[j];
+          if (j === 0) {
+            if (edge.source === this.extendedId) {
+              nodeChain.push(this.vertices[edge.source]);
+              edge.direction = "out";
+              nodeChain.push(edge);
+              nodeChain.push(this.vertices[edge.target]);
+            } else {
+              nodeChain.push(this.vertices[edge.target]);
+              edge.direction = "in";
+              nodeChain.push(edge);
+              nodeChain.push(this.vertices[edge.source]);
+            }
+          } else {
+            if (edge.source != edges[j - 1].target) {
+              edge.direction = "in";
+              nodeChain.push(edge);
+              nodeChain.push(this.vertices[edge.source]);
+            } else {
+              edge.direction = "out";
+              nodeChain.push(edge);
+              nodeChain.push(this.vertices[edge.target]);
+            }
+          }
+        }
+        chains.push({ edges: edges, nodeChain: nodeChain });
+      }
+      return chains;
     }
   },
   watch: {
@@ -209,18 +234,18 @@ export default {
 </script>
 
 <style>
-.related-objects thead {
-  display: none;
-}
-
-td.object {
-  max-width: 300px;
-}
-
-span.short-links {
+.short-links {
   white-space: nowrap;
-  overflow: hidden;
   text-overflow: ellipsis;
+  overflow: hidden;
   display: block;
+}
+
+td.controls {
+  width: 110px;
+}
+
+td.link {
+  width: 200px;
 }
 </style>

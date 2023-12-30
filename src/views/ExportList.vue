@@ -1,87 +1,89 @@
 <template>
-  <div class="columns">
-    <div class="column is-9 exportlist">
-      <task-list task-type="export" ref="exportList" @taskSelected="task => (this.selectedExport = task)"> </task-list>
-    </div>
-    <div class="column is-3">
-      <b-field label="Name">
-        <b-input v-model="selectedExport.name" required ref="exportName"></b-input>
-      </b-field>
-      <b-field label="Description">
-        <b-input v-model="selectedExport.description"></b-input>
-      </b-field>
-      <b-field label="Include tags">
-        <b-taginput label="Include tags" v-model="selectedExport.include_tags" icon="tag"></b-taginput>
-      </b-field>
-      <b-field label="Ignore tags">
-        <b-taginput label="Ignore tags" v-model="selectedExport.ignore_tags" icon="tag"></b-taginput>
-      </b-field>
-      <b-field label="Exclude tags">
-        <b-taginput label="Exclude tags" v-model="selectedExport.exclude_tags" icon="tag"></b-taginput>
-      </b-field>
-      <b-field label="Acts on">
-        <b-taginput
-          label="Acts on"
-          v-model="selectedExport.acts_on"
-          icon="tag"
-          autocomplete
-          :allow-new="false"
-          placeholder="Add observable types"
-          :data="Object.keys(defaultTypes)"
-        ></b-taginput>
-      </b-field>
-      <b-field>
-        <b-select
-          v-model="selectedExport.template_name"
-          placeholder="Select template to use"
-          required
-          ref="exportTemplate"
-          expanded
-        >
-          <option v-for="template in exportTemplates" v-bind:key="template">{{ template }}</option>
-        </b-select>
-      </b-field>
-      <b-field grouped>
-        <p class="control" v-if="selectedExport.id">
-          <button class="button is-primary" @click="updateExport">Save changes</button>
-        </p>
-        <p class="control" v-if="selectedExport.id">
-          <button class="button is-danger" @click="confirmDeleteExport">Delete export</button>
-        </p>
-        <p class="control" v-if="!selectedExport.id">
-          <button class="button is-primary" @click="newExport">Add new export</button>
-        </p>
+  <task-list selectable-tasks task-type="export" ref="exportList" @taskSelected="task => (this.selectedExport = task)">
+  </task-list>
 
-        <p class="control">
-          <button class="button is-light" @click="selectedExport = {}">Clear form</button>
-        </p>
-      </b-field>
-    </div>
-  </div>
+  <v-navigation-drawer permament location="right" width="400" ref="drawer">
+    <v-sheet class="ma-4">
+      <v-text-field
+        density="compact"
+        label="Name"
+        v-model="selectedExport.name"
+        required
+        ref="exportName"
+      ></v-text-field>
+      <v-text-field density="compact" label="Description" v-model="selectedExport.description"></v-text-field>
+      <v-combobox
+        chips
+        clearable
+        multiple
+        density="compact"
+        :delimiters="[',', ' ', ';']"
+        label="Include tags"
+        v-model="selectedExport.include_tags"
+      ></v-combobox>
+      <v-combobox
+        chips
+        clearable
+        multiple
+        density="compact"
+        :delimiters="[',', ' ', ';']"
+        label="Ignore tags"
+        v-model="selectedExport.ignore_tags"
+      ></v-combobox>
+      <v-combobox
+        chips
+        clearable
+        multiple
+        density="compact"
+        :delimiters="[',', ' ', ';']"
+        label="Exclude tags"
+        v-model="selectedExport.exclude_tags"
+      ></v-combobox>
+      <v-autocomplete
+        label="Acts on"
+        density="compact"
+        multiple
+        chips
+        v-model="selectedExport.acts_on"
+        :items="defaultTypes"
+        placeholder="Add observable types"
+      ></v-autocomplete>
+      <v-autocomplete
+        density="compact"
+        variant="outlined"
+        v-model="selectedExport.template_name"
+        :items="exportTemplates"
+        placeholder="Select template to use"
+        required
+        ref="exportTemplate"
+      ></v-autocomplete>
+      <v-btn-group rounded="1" density="compact">
+        <v-btn color="primary" density="compact" v-if="selectedExport.id" @click="updateExport">Save changes</v-btn>
+        <v-btn color="error" density="compact" v-if="selectedExport.id" @click="confirmDeleteExport">Delete</v-btn>
+        <v-btn color="primary" density="compact" v-if="!selectedExport.id" @click="newExport">Add new export</v-btn>
+        <v-btn color="light" density="compact" @click="selectedExport = {}">Clear</v-btn>
+      </v-btn-group>
+      <v-btn
+        color="blue-darken-1"
+        density="compact"
+        variant="text"
+        to="/exports/templates"
+        target="_blank"
+        class="pa-0 mt-5"
+      >
+        Open new template page
+      </v-btn>
+    </v-sheet>
+  </v-navigation-drawer>
 </template>
 
-<script>
+<script lang="ts" setup>
+import { OBSERVABLE_TYPES } from "@/definitions/observableDefinitions.js";
 import axios from "axios";
-import utils from "@/utils";
-import TaskList from "@/views/TaskList.vue";
+import TaskList from "@/components/TaskList.vue";
+</script>
 
-var defaultTypes = {
-  ipv4: "IPv4",
-  ipv6: "IPv6",
-  // AutonomousSystem: "Autonomous System",
-  url: "URL",
-  hostname: "Hostname"
-  // Hash: "Hash",
-  // File: "File",
-  // Certificate: "Certificate",
-  // CertificateSubject: "Certificate Subject",
-  // Email: "Email",
-  // Text: "Text",
-  // Bitcoin: "Bitcoin address",
-  // Path: "Path",
-  // MacAddress: "MAC address"
-};
-
+<script lang="ts">
 export default {
   name: "ExportList",
   components: {
@@ -89,7 +91,9 @@ export default {
   },
   data() {
     return {
-      defaultTypes: defaultTypes,
+      defaultTypes: OBSERVABLE_TYPES.map(type => {
+        return { value: type.type, title: type.name };
+      }),
       exports: [],
       exportTemplates: [],
       selectedExport: {},
@@ -130,7 +134,11 @@ export default {
       axios
         .patch(`/api/v2/tasks/export/${this.selectedExport.name}`, { export: exportTask })
         .then(() => {
-          this.$refs.exportList.listTasks();
+          this.$eventBus.emit("displayMessage", {
+            status: "success",
+            message: `Export ${this.selectedExport.name} succesfully updated`
+          });
+          this.$eventBus.emit("taskUpdated", this.selectedExport);
           this.selectedExport = {};
         })
         .catch(error => console.log(error))
@@ -149,29 +157,30 @@ export default {
       axios
         .post(`/api/v2/tasks/export/new`, { export: exportTask })
         .then(() => {
-          this.$refs.exportList.listTasks();
+          this.$eventBus.emit("displayMessage", {
+            status: "success",
+            message: `Export ${this.selectedExport.name} succesfully created`
+          });
+          this.$eventBus.emit("taskUpdated", this.selectedExport);
           this.selectedExport = {};
-          console.log("clear");
         })
         .catch(error => console.log(error))
         .finally(() => {});
     },
     confirmDeleteExport() {
-      this.$buefy.dialog.confirm({
-        title: "Delete export",
-        message: `You're about to <b>delete</b> export <code>${this.selectedExport.name}</code>. Proceed?`,
-        confirmText: "Delete Export",
-        type: "is-danger",
-        hasIcon: true,
-        onConfirm: this.deleteExport,
-        focusOn: "cancel"
-      });
+      if (confirm("Are you sure you want to delete this export?")) {
+        this.deleteExport();
+      }
     },
     deleteExport() {
       axios
         .delete(`/api/v2/tasks/export/${this.selectedExport.name}`)
         .then(() => {
-          this.$refs.exportList.listTasks();
+          this.$eventBus.emit("displayMessage", {
+            status: "success",
+            message: `Export ${this.selectedExport.name} succesfully deleted`
+          });
+          this.$eventBus.emit("taskUpdated", this.selectedExport);
           this.selectedExport = {};
         })
         .catch(error => console.log(error))
@@ -199,50 +208,3 @@ export default {
   }
 };
 </script>
-
-<style scoped lang="scss">
-@import "@/style.scss";
-
-.exportlist ::v-deep .disabled {
-  opacity: 0.5;
-}
-
-.exportlist .is-success strong {
-  color: $success-fontcolor;
-}
-
-.exportlist .is-danger strong {
-  color: $danger-fontcolor;
-}
-
-.exportlist .is-warning strong {
-  color: $warning-fontcolor;
-}
-
-.exportlist ::v-deep .is-success {
-  background: $success;
-  color: $success-fontcolor;
-}
-
-.exportlist ::v-deep tbody tr.is-success:hover {
-  background-color: $success-hover;
-}
-
-.exportlist ::v-deep .is-danger {
-  background: $danger;
-  color: $danger-fontcolor;
-}
-
-.exportlist ::v-deep tbody tr.is-danger:hover {
-  background: $danger-hover;
-}
-
-.exportlist ::v-deep .is-warning {
-  background: $warning;
-  color: $warning-fontcolor;
-}
-
-.exportlist ::v-deep tbody tr.is-warning:hover {
-  background: $warning-hover;
-}
-</style>

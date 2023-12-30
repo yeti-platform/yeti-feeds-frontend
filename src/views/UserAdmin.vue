@@ -1,124 +1,104 @@
 <template>
-  <div class="columns">
-    <div class="column is-9">
-      <b-table :data="users" paginated backend-pagination @page-change="onPageChange" :total="totalUsers">
-        <template v-slot:default="user">
-          <b-table-column field="username" label="Username">
-            <router-link :to="{ name: 'UserProfileAdmin', params: { id: user.row.id } }">
-              {{ user.row.username }}
-            </router-link>
-          </b-table-column>
-          <b-table-column field="api_key" label="API key">
-            <code>{{ user.row.api_key }}</code>
-            <b-button class="button is-outline reset-button" size="is-small" @click="resetApiKey(user.row)">
-              <span>Reset key</span>
-            </b-button>
-          </b-table-column>
-          <b-table-column field="admin" label="Admin">
-            <b-checkbox
-              v-model="user.row.admin"
-              @input="toggleUser(user.row, 'admin')"
-              :disabled="user.row.username === currentUserName"
-            ></b-checkbox>
-          </b-table-column>
-          <b-table-column field="enabled" label="Enabled">
-            <b-checkbox
-              v-model="user.row.enabled"
-              @input="toggleUser(user.row, 'enabled')"
-              :disabled="user.row.username === currentUserName"
-            ></b-checkbox>
-          </b-table-column>
-          <b-table-column custom-key="remove" label="Remove">
-            <b-button
-              class="button is-warning"
-              size="is-small"
-              @click="confirmDeleteUser(user.row)"
-              :disabled="user.row.username === currentUserName"
+  <v-sheet class="ma-5" width="100%">
+    <v-data-table :items="users" :headers="headers" :search="userFilter" class="yeti-table" density="compact">
+      <!-- insert link to profile page on username field -->
+      <template v-slot:item.username="{ item }">
+        <router-link :to="{ name: 'UserProfileAdmin', params: { id: item.id } }">{{ item.username }}</router-link>
+      </template>
+      <template v-slot:item.admin="{ item }">
+        <v-switch density="compact" color="green" v-model="item.admin" @change="toggleUser(item, 'admin')"></v-switch>
+      </template>
+      <template v-slot:item.enabled="{ item }">
+        <v-switch
+          density="compact"
+          color="green"
+          v-model="item.enabled"
+          @change="toggleUser(item, 'enabled')"
+        ></v-switch>
+      </template>
+      <template v-slot:item.api_key="{ item }">
+        <code>{{ item.api_key }}</code>
+      </template>
+
+      <template v-slot:item.actions="{ item }">
+        <v-btn size="small" variant="outlined" @click="resetApiKey(item)">
+          <v-icon class="me-2">mdi-key</v-icon>
+          Reset API key
+        </v-btn>
+        <v-btn class="ms-2" size="small" variant="outlined" color="error" @click="showDeleteDialog(item)">
+          <v-icon>mdi-delete</v-icon>
+        </v-btn>
+        <v-dialog v-model="dialogDelete" max-width="500px">
+          <v-card>
+            <v-card-title class="text-h5"
+              >Are you sure you want to delete user "{{ deletionCandidate?.username }}"?</v-card-title
             >
-              <b-icon pack="fas" icon="trash-alt" size="is-small"></b-icon>
-              <span>Remove</span>
-            </b-button>
-          </b-table-column>
-        </template>
-      </b-table>
-    </div>
-    <div class="column is-3">
-      <b-tabs v-model="activeTab" position="is-centered" :animated="false">
-        <!-- Search tab item -->
-        <b-tab-item label="Search users">
-          <div class="search">
-            <div class="field">
-              <b-input
-                v-model="userFilter"
-                type="text"
-                placeholder="Filter user list"
-                icon="search"
-                v-on:keyup.native.enter="listUsers"
-              />
-            </div>
-          </div>
-          <br />
-          <article class="message tip">
-            <div class="message-body content">
-              <p>
-                You can reset a user's API key by clicking on the
-                <code>reset</code> button.
-              </p>
-              <p>
-                To temporarily prevent a user from logging in, you can disable their account by clicking on the checkbox
-              </p>
-              <p><strong>Warning</strong>: Removing users cannot be undone</p>
-            </div>
-          </article>
-        </b-tab-item>
-
-        <b-tab-item label="Add user">
-          <form>
-            <b-field label="Username">
-              <b-input v-model="newUsername"></b-input>
-            </b-field>
-            <b-field label="Password">
-              <b-input v-model="newPassword"></b-input>
-            </b-field>
-            <b-field grouped>
-              <b-checkbox v-model="newAdmin" class="control">Admin</b-checkbox>
-              <p class="control">
-                <button class="button is-primary" @click="addUser">Add user</button>
-              </p>
-            </b-field>
-          </form>
-          <br />
-
-          <article class="message tip">
-            <div class="message-body content">
-              <p>
-                The
-                <code>yeti</code> user exists to enable anonymous access to Yeti. Disable it after logging in as a new
-                user if you only want to allow authenticated access.
-              </p>
-            </div>
-          </article>
-        </b-tab-item>
-      </b-tabs>
-    </div>
-  </div>
+            <v-card-actions>
+              <v-spacer></v-spacer>
+              <v-btn variant="text" @click="dialogDelete = false">Cancel</v-btn>
+              <v-btn variant="text" @click="deleteUser">OK</v-btn>
+              <v-spacer></v-spacer>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
+      </template>
+    </v-data-table>
+  </v-sheet>
+  <v-navigation-drawer permament location="right" width="400" ref="drawer">
+    <v-list-item class="mt-4">
+      <v-text-field
+        v-model="userFilter"
+        prepend-inner-icon="mdi-magnify"
+        label="Search users"
+        density="compact"
+        class="mt-2"
+      />
+    </v-list-item>
+    <v-divider></v-divider>
+    <v-list-item class="mt-4">
+      <v-list-item-title class="text-h5 mb-5">Add new user</v-list-item-title>
+      <v-text-field v-model="newUsername" prepend-inner-icon="mdi-account" label="Username" density="compact" />
+      <v-text-field
+        v-model="newPassword"
+        prepend-inner-icon="mdi-lock"
+        label="Password"
+        :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
+        :type="showPassword ? 'text' : 'password'"
+        @click:append="showPassword = !showPassword"
+        density="compact"
+      />
+      <div class="d-flex">
+        <v-checkbox-btn v-model="newAdmin" label="Admin"></v-checkbox-btn>
+        <v-btn color="primary" @click="addUser">Add user</v-btn>
+      </div>
+    </v-list-item>
+  </v-navigation-drawer>
 </template>
 
-<script>
+<script lang="ts" setup>
 import axios from "axios";
+</script>
 
+<script lang="ts">
 export default {
   name: "UserAdmin",
   data() {
     return {
       users: [],
+      headers: [
+        { key: "username", sortable: true, title: "Username" },
+        { key: "api_key", sortable: false, title: "API key" },
+        { key: "admin", sortable: false, title: "Admin" },
+        { key: "enabled", sortable: false, title: "Enabled" },
+        { key: "actions", sortable: false, title: "Actions" }
+      ],
       userFilter: "",
-      page: 1,
-      totalUsers: 100,
-      activeTab: 0,
       newUsername: null,
       newPassword: null,
-      newAdmin: false
+      newAdmin: false,
+      dialogDelete: false,
+      deletionCandidate: {},
+      showPassword: false
     };
   },
   mounted() {
@@ -127,41 +107,38 @@ export default {
   methods: {
     listUsers() {
       axios
-        .post("/api/v2/users/search", this.searchParams)
+        .post("/api/v2/users/search", {
+          page: 0,
+          count: 1000,
+          username: this.userFilter
+        })
         .then(response => {
           this.users = response.data.users;
-          this.totalUsers = response.data.total;
         })
         .catch(error => {
           console.log(error);
         })
         .finally(() => {});
     },
-    onPageChange(page) {
-      this.page = page;
-      this.listUsers();
-    },
-
     clearForm() {
       this.newUsername = this.newPassword = null;
       this.newAdmin = false;
     },
-    addUser(e) {
-      e.preventDefault();
+    addUser() {
       axios
         .post("/api/v2/users", { username: this.newUsername, password: this.newPassword, admin: this.newAdmin })
         .then(response => {
           this.listUsers();
           this.clearForm();
-          this.$buefy.notification.open({
-            message: `Success! User <strong>${response.data.username}</strong> succesfully added.`,
-            type: "is-success"
+          this.$eventBus.emit("displayMessage", {
+            message: `User ${response.data.username} successfully added`,
+            status: "success"
           });
         })
         .catch(error => {
-          this.$buefy.notification.open({
+          this.$eventBus.emit("displayMessage", {
             message: "Error: " + error.response.data.error,
-            type: "is-danger"
+            status: "error"
           });
         })
         .finally(() => {});
@@ -170,9 +147,9 @@ export default {
       axios
         .post(`/api/v2/users/toggle`, { user_id: user.id, field: field })
         .then(() => {
-          this.$buefy.notification.open({
-            message: `Changes saved.`,
-            type: "is-success"
+          this.$eventBus.emit("displayMessage", {
+            message: `Changes saved`,
+            status: "success"
           });
         })
         .catch(error => {
@@ -180,27 +157,17 @@ export default {
         })
         .finally(() => {});
     },
-    confirmDeleteUser(user) {
-      this.$buefy.dialog.confirm({
-        title: "Delete User",
-        message: `You're about to <strong>delete</strong> user <code>${user.username}</code>. Proceed?`,
-        confirmText: "Delete User",
-        type: "is-danger",
-        hasIcon: true,
-        onConfirm: () => {
-          this.deleteUser(user);
-        }
-      });
+    showDeleteDialog(user) {
+      this.deletionCandidate = user;
+      this.dialogDelete = true;
     },
-    deleteUser(user) {
+    deleteUser() {
       axios
-        .delete(`/api/v2/users/${user.id}`)
+        .delete(`/api/v2/users/${this.deletionCandidate.id}`)
         .then(() => {
+          this.dialogDelete = false;
+          this.deletionCandidate = null;
           this.listUsers();
-          this.$buefy.notification.open({
-            message: `User <strong>${user.username}</strong> succesfully deleted.`,
-            type: "is-success"
-          });
         })
         .catch(error => {
           console.log(error);
@@ -212,9 +179,9 @@ export default {
         .post(`/api/v2/users/reset-api-key`, { user_id: user.id })
         .then(response => {
           user.api_key = response.data.api_key;
-          this.$buefy.notification.open({
-            message: `API key for user <strong>${user.username}</strong> succesfully reset.`,
-            type: "is-success"
+          this.$eventBus.emit("displayMessage", {
+            status: "success",
+            message: `API key for user ${user.username} succesfully reset`
           });
         })
         .catch(error => {
@@ -222,29 +189,12 @@ export default {
         })
         .finally(() => {});
     }
-  },
-  computed: {
-    searchParams() {
-      var params = {
-        page: this.page - 1,
-        count: 50,
-        username: this.userFilter
-      };
-      return params;
-    },
-    currentUserName() {
-      return this.$store.getters.tokenSubject;
-    }
   }
 };
 </script>
 
 <style>
-span.icon {
-  vertical-align: middle;
-}
-
-.reset-button {
-  margin-left: 1rem;
+.yeti-table table {
+  table-layout: auto !important;
 }
 </style>

@@ -1,60 +1,64 @@
 <template>
-  <div>
-    <div class="columns">
-      <div class="column is-7">
-        <div class="card">
-          <header class="card-header is-info">
-            <p class="card-header-title">Profile info</p>
-          </header>
-          <div class="card-content">
-            <table class="table is-fullwidth" v-if="profile">
-              <tbody>
-                <tr>
-                  <th>Username</th>
-                  <td>{{ profile.username }}</td>
-                  <td></td>
-                </tr>
-                <tr>
-                  <th>API key</th>
-                  <td>
-                    <code>{{ profile.api_key }}</code>
-                  </td>
-                  <td>
-                    <b-button class="button is-outline reset-button" size="is-small" @click="resetApiKey(profile)">
-                      <span>Reset key</span>
-                    </b-button>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+  <v-container fluid>
+    <v-row>
+      <v-col>
+        <v-card v-if="profile" variant="flat">
+          <v-card-title>Profile information</v-card-title>
+          <v-card-text>
+            <v-table>
+              <template v-slot:default>
+                <tbody>
+                  <tr>
+                    <th>Username</th>
+                    <td>{{ profile.username }}</td>
+                    <td></td>
+                  </tr>
+                  <tr>
+                    <td>API key</td>
+                    <td>
+                      <code>{{ profile.api_key }}</code>
+                    </td>
+                    <td>
+                      <v-btn size="small" variant="outlined" @click="resetApiKey(profile)">
+                        Reset key
+                      </v-btn>
+                    </td>
+                  </tr>
+                </tbody>
+              </template>
+            </v-table>
+          </v-card-text>
+        </v-card>
+      </v-col>
+      <v-col cols="4">
+        <v-card v-if="authModule === 'local'" variant="flat">
+          <v-card-title>Change password</v-card-title>
+          <v-card-text>
+            <v-text-field
+              v-model="newPassword"
+              placeholder="New password"
+              :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
+              :type="showPassword ? 'text' : 'password'"
+              @click:append="showPassword = !showPassword"
+            ></v-text-field>
+            <v-btn type="is-primary" @click="changeUserPassword">Save</v-btn>
+          </v-card-text>
+        </v-card>
+        <div v-if="authModule === 'oidc'">
+          Authentication is handled by Open ID Connect. There is no password to change.
         </div>
-      </div>
-      <div class="column is-5">
-        <div class="card">
-          <header class="card-header is-warning">
-            <p class="card-header-title">Change password</p>
-          </header>
-          <div class="card-content" v-if="systemAuth === 'local'">
-            <b-field>
-              <b-input v-model="newPassword" type="password" placeholder="New password" password-reveal></b-input>
-            </b-field>
-            <p class="control">
-              <b-button type="is-primary" @click="changeUserPassword">Save</b-button>
-            </p>
-          </div>
-          <div class="card-content" v-if="systemAuth === 'oidc'">
-            Authentication is handled by Open ID Connect. There is no password to change.
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
+      </v-col>
+    </v-row>
+  </v-container>
 </template>
 
-<script>
+<script lang="ts" setup>
 import axios from "axios";
+import { useUserStore } from "@/store/user";
+import { useAppStore } from "@/store/app";
+</script>
 
+<script lang="ts">
 export default {
   name: "UserProfile",
   data() {
@@ -63,7 +67,10 @@ export default {
       currentPassword: null,
       newPassword: null,
       availableSettings: [],
-      activeTab: 0
+      activeTab: 0,
+      userStore: useUserStore(),
+      appStore: useAppStore(),
+      showPassword: false
     };
   },
   props: {
@@ -74,10 +81,7 @@ export default {
   },
   methods: {
     getUserProfile() {
-      let id = this.id;
-      if (id === null) {
-        id = this.userId;
-      }
+      const id = this.id || this.user.id;
       axios
         .get(`/api/v2/users/${id}`)
         .then(response => {
@@ -90,12 +94,12 @@ export default {
     },
     resetApiKey() {
       axios
-        .post(`/api/v2/users/reset-api-key`, { user_id: this.userId })
+        .post(`/api/v2/users/reset-api-key`, { user_id: this.profile.id })
         .then(response => {
           this.profile.api_key = response.data.api_key;
-          this.$buefy.notification.open({
-            message: `API key succesfully reset.`,
-            type: "is-success"
+          this.$eventBus.emit("displayMessage", {
+            message: "API key succesfully reset.",
+            status: "success"
           });
         })
         .catch(error => {
@@ -105,21 +109,21 @@ export default {
     },
     changeUserPassword() {
       var params = {
-        user_id: this.userId,
+        user_id: this.user.id,
         new_password: this.newPassword
       };
       axios
         .post("/api/v2/users/reset-password", params)
         .then(() => {
-          this.$buefy.notification.open({
-            message: `Password succesfully changed.`,
-            type: "is-success"
+          this.$eventBus.emit("displayMessage", {
+            message: "Password succesfully changed.",
+            status: "success"
           });
         })
         .catch(error => {
-          this.$buefy.notification.open({
+          this.$eventBus.emit("displayMessage", {
             message: "Error: " + error.response.data.error,
-            type: "is-danger"
+            status: "error"
           });
         })
         .finally(() => {
@@ -130,9 +134,9 @@ export default {
       axios
         .post("/api/v2/users", this.profile)
         .then(() => {
-          this.$buefy.notification.open({
-            message: `Settings successfully updated.`,
-            type: "is-success"
+          this.$eventBus.emit("displayMessage", {
+            message: "Settings successfully updated.",
+            status: "success"
           });
         })
         .catch(error => {
@@ -142,18 +146,16 @@ export default {
     }
   },
   computed: {
-    isAdmin() {
-      return this.$store.getters.isAdmin;
+    user() {
+      return this.userStore.user;
     },
-    userId() {
-      return this.$store.getters.userId;
-    },
-    systemAuth() {
-      return this.$store.getters.appConfig.auth.module;
+    authModule() {
+      return this.appStore.systemConfig?.auth.module;
     }
   },
   mounted() {
     this.getUserProfile();
+    this.appStore.fetchSystemConfig();
   },
   watch: {
     id: function() {
@@ -163,22 +165,6 @@ export default {
 };
 </script>
 
-<style scoped lang="scss">
-@import "@/style.scss";
-
-.card-header.is-warning {
-  background: $warning;
-}
-
-.card-header.is-danger {
-  background: $danger;
-}
-
-.card-header.is-info {
-  background: $info;
-}
-
-.card-header.is-light {
-  background: $light;
-}
+<style scoped>
+/* Add custom styles here */
 </style>

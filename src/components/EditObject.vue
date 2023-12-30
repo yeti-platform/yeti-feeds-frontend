@@ -1,99 +1,115 @@
 <template>
-  <div class="modal-card" v-if="localObject">
-    <header class="modal-card-head">
-      <p v-if="localObject.id" class="modal-card-title">
-        Editing {{ objectType.name.toLowerCase() }} <strong>{{ localObject.name }}</strong>
-      </p>
-      <p v-else class="modal-card-title">New {{ objectType.name }}</p>
-    </header>
-    <section class="modal-card-body">
-      <b-field :label="field.label" v-for="field in objectType.fields" :key="field.field">
-        <b-input v-model="localObject[field.field]" v-if="field.type === 'text'" />
-        <b-input v-model="localObject[field.field]" v-if="field.type === 'code'" custom-class="longcode" />
-        <b-input type="textarea" v-model="localObject[field.field]" v-if="field.type === 'longtext'" />
-        <b-input
-          type="textarea"
-          custom-class="longcode"
-          v-model="localObject[field.field]"
-          v-if="field.type === 'longcode'"
-        />
-        <b-select v-if="field.type === 'option'" v-model="localObject[field.field]">
-          <option v-for="option in field.choices" :value="option" :key="option"> {{ option }}</option>
-        </b-select>
-        <b-taginput
-          label="Tags"
-          v-model="localObject[field.field]"
-          v-if="field.type === 'list'"
-          icon="tag"
-        ></b-taginput>
-      </b-field>
-      <div class="buttons">
-        <b-button type="is-primary" @click="saveObject">
-          Save
-        </b-button>
-        <b-button @click="$parent.close()">
-          Cancel
-        </b-button>
-      </div>
-    </section>
-  </div>
+  <v-card>
+    <v-card-title>{{ object.name }}</v-card-title>
+    <v-card-subtitle>Editing {{ typeDefinition.name }}</v-card-subtitle>
+    <v-card-text>
+      <object-fields :fields="editableFields" :object="localObject" />
+    </v-card-text>
+
+    <v-card-actions>
+      <v-btn text="Toggle full screen" color="primary" @click="toggleFullScreen"></v-btn>
+      <v-spacer></v-spacer>
+      <v-btn text="Cancel" color="cancel" @click="isActive.value = false"></v-btn>
+      <v-btn text="Save" color="primary" @click="saveObject" variant="tonal"></v-btn>
+    </v-card-actions>
+    <v-alert v-if="errors.length > 0" type="error">
+      Error saving {{ typeDefinition.name }}:
+      <ul>
+        <li v-for="error in errors">
+          <strong>{{ error.field }}</strong
+          >: {{ error.message }}
+        </li>
+      </ul>
+    </v-alert>
+  </v-card>
 </template>
 
-<script>
+<script lang="ts" setup>
 import axios from "axios";
-import { INDICATOR_TYPES } from "@/definitions/indicatorDefinitions.js";
-import { ENTITY_TYPES } from "@/definitions/entityDefinitions.js";
 
+import { ENTITY_TYPES } from "@/definitions/entityDefinitions.js";
+import { INDICATOR_TYPES } from "@/definitions/indicatorDefinitions.js";
+import ObjectFields from "@/components/ObjectFields.vue";
+import { objectTypeAnnotation } from "@babel/types";
+</script>
+
+<script lang="ts">
 export default {
-  components: {},
+  components: { ObjectFields },
   props: {
     object: {
       type: Object,
       default: () => {}
     },
-    objectTypeName: {
-      type: String,
-      default: "",
-      required: true
-    },
-    endpoint: {
-      type: String,
-      default: "",
-      required: true
+    isActive: {
+      type: Object,
+      default: () => {}
     }
   },
   data() {
     return {
-      objectTypes: ENTITY_TYPES.concat(INDICATOR_TYPES),
-      localObject: { ...this.object } // shallow copy of the object
+      localObject: { ...this.object },
+      errors: [],
+      fullScreen: false,
+      typeToEndpointMapping: {
+        entity: "entities",
+        observable: "observables",
+        indicator: "indicators"
+      }
     };
   },
   mounted() {},
   methods: {
     saveObject() {
+      let patchRequest = {
+        type: this.object.type
+      };
+      this.editableFields.forEach(field => {
+        patchRequest[field.field] = this.localObject[field.field];
+      });
+
       axios
-        .patch(`/api/v2/${this.endpoint}/${this.object.id}`, { [this.localObject.root_type]: this.localObject })
+        .patch(`/api/v2/${this.typeToEndpointMapping[this.object.root_type]}/${this.object.id}`, {
+          [this.object.root_type]: patchRequest
+        })
         .then(response => {
-          this.$parent.close();
-          this.$buefy.toast.open({
-            message: "Update successful!",
-            type: "is-success"
+          this.$eventBus.emit("displayMessage", {
+            message: `${this.object.name} succesfully updated`,
+            status: "success"
           });
-          this.$emit("refresh", response.data);
+          this.$emit("success", response.data);
+          this.isActive.value = false;
         })
         .catch(error => {
-          this.$buefy.toast.open({
-            message: "Error saving object: " + error,
-            type: "is-danger"
-          });
+          console.log(error);
+          this.errors = error.response.data.detail
+            .filter(detail => detail.loc[1] !== "type")
+            .map(detail => {
+              return { field: detail.loc[1], message: detail.msg };
+            });
         })
         .finally();
+    },
+    toggleFullScreen() {
+      this.fullScreen = !this.fullScreen;
+      this.$emit("toggle-fullscreen", this.fullScreen);
     }
   },
   computed: {
-    objectType() {
-      return this.objectTypes.find(type => type.type === this.objectTypeName);
+    typeDefinition() {
+      return (
+        ENTITY_TYPES.find(t => t.type === this.object.type) || INDICATOR_TYPES.find(t => t.type === this.object.type)
+      );
+    },
+    editableFields() {
+      return this.typeDefinition.fields.filter(field => field.editable);
     }
   }
 };
 </script>
+
+<style>
+.yeti-code textarea {
+  font-family: monospace;
+}
+</style>

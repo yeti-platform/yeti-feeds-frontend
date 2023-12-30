@@ -1,177 +1,189 @@
 <template>
-  <div>
-    <div class="columns" v-if="observable">
-      <div class="column is-8">
-        <div class="tile is-ancestor">
-          <div class="tile is-vertical is-parent observable-tile">
-            <nav class="tile panel is-child">
-              <p class="panel-heading">
-                <span class="observable-value">{{ observable.value }}</span>
-                <b-taglist>
-                  <b-tag size="is-large" type="is-info">{{ observable.type }}</b-tag>
-                </b-taglist>
-              </p>
-            </nav>
-          </div>
-        </div>
-      </div>
-      <div class="column">
-        <div class="tile is-ancestor">
-          <div class="tile is-vertical is-parent">
-            <nav class="tile panel is-child">
-              <p class="panel-heading">Info</p>
-              <div class="panel-block">
-                <observable-info-table :observable="observable"></observable-info-table>
-              </div>
-            </nav>
-            <nav class="tile panel is-child">
-              <p class="panel-heading">Tags</p>
-              <div class="panel-block">
-                <b-field>
-                  <b-taginput v-model="newTags" expanded icon="tag" placeholder="e.g. CobaltStrike"></b-taginput>
-                  <p class="control">
-                    <button class="button is-primary" @click="saveTags">Save</button>
-                  </p>
-                </b-field>
-              </div>
-            </nav>
+  <v-container fluid>
+    <v-row align="start" no-gutters>
+      <v-col>
+        <v-card class="ma-2 break-title" variant="flat">
+          <template v-slot:title>
+            <v-chip color="primary" :text="observable?.type" label></v-chip> <code>{{ observable?.value }}</code>
+          </template>
+        </v-card>
+        <v-sheet class="ma-2">
+          <v-table density="compact">
+            <tbody>
+              <tr>
+                <th>Context sources</th>
+                <td>
+                  <v-chip
+                    label
+                    color="green"
+                    v-for="source in new Set(observable?.context.map(c => c.source))"
+                    v-bind:key="source"
+                  >
+                    {{ source }}
+                  </v-chip>
+                </td>
+              </tr>
+              <tr v-for="field in getObservableInfoFields">
+                <th>{{ field.label }}</th>
+                <td v-if="field.field === 'created'">{{ moment(observable[field.field]).toISOString() }}</td>
+                <td v-else>{{ observable[field.field] }}</td>
+              </tr>
+            </tbody>
+          </v-table>
+        </v-sheet>
+      </v-col>
+      <v-col cols="4">
+        <v-card class="ma-2" variant="flat">
+          <v-card-title>Tags</v-card-title>
 
-            <nav class="tile panel is-child">
-              <p class="panel-heading">Available analytics for {{ observable.type }}</p>
-              <div class="panel-block">
-                <task-list
-                  task-type="oneshot"
-                  :acts-on-filter="[observable.type]"
-                  :act-on-value="observable.value"
-                  :display-columns="['name', 'description', 'run']"
-                >
-                </task-list>
-              </div>
-            </nav>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="columns">
-      <div class="column">
-        <b-tabs v-model="activeTab" position="is-left" :animated="false">
-          <b-tab-item>
-            <template slot="header">
-              <b-icon icon="info"></b-icon>
-              <span>
-                Context
-                <b-tag rounded>{{ observable.context.length }}</b-tag>
-              </span>
+          <v-combobox
+            v-model="observableTags"
+            chips
+            clearable
+            multiple
+            density="compact"
+            :delimiters="[',', ' ', ';']"
+            prepend-inner-icon="mdi-tag"
+            class="ma-2"
+          >
+            <template v-slot:chip="tag">
+              <v-chip
+                :text="tag.item.value"
+                label
+                size="large"
+                :color="observable?.tags[tag.item.value]?.fresh ? 'primary' : 'grey'"
+            /></template>
+            <template v-slot:append>
+              <v-btn variant="tonal" color="primary" class="me-2" @click="saveTags">Save</v-btn>
             </template>
-            <nav class="panel" v-for="(context, index) in observable.context" v-bind:key="index">
-              <p class="panel-heading">{{ context.source }}</p>
-              <div class="panel-block">
-                <table class="table">
+          </v-combobox>
+        </v-card>
+        <v-card class="ma-2" variant="flat">
+          <v-card-title>Enabled analytics for {{ observable?.type }}</v-card-title>
+          <task-list
+            v-if="observable"
+            task-type="oneshot"
+            :acts-on-filter="[observable.type]"
+            :act-on-value="observable.value"
+            :display-columns="['name', 'description', 'refresh']"
+            :only-enabled="true"
+          ></task-list>
+        </v-card>
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-container fluid>
+        <v-sheet>
+          <v-tabs v-model="activeTab" color="primary">
+            <v-tab value="context"
+              ><v-icon size="x-large" start>mdi-information</v-icon>Context
+              <v-chip class="ml-3" density="comfortable">{{ observable?.context.length }}</v-chip></v-tab
+            >
+            <v-tab value="related-observables"
+              ><v-icon size="x-large" start>mdi-graph</v-icon>Related observables
+              <v-chip class="ml-3" density="comfortable">{{ totalRelatedObservables }}</v-chip></v-tab
+            >
+            <v-tab value="related-entities"
+              ><v-icon size="x-large" start>mdi-brain</v-icon>Related entities
+              <v-chip class="ml-3" density="comfortable">{{ totalRelatedEntities + totalTaggedRelationships }}</v-chip>
+            </v-tab>
+          </v-tabs>
+
+          <v-window v-model="activeTab" class="pa-5">
+            <v-window-item value="context" eager>
+              <v-card v-for="(context, index) in observable?.context" elevation="0" variant="outlined">
+                <v-card-title>{{ context.source }}</v-card-title>
+
+                <v-table>
                   <tbody>
                     <tr v-for="key in Object.keys(context).filter(k => k !== 'source')" v-bind:key="key">
                       <th>{{ key }}</th>
                       <td>{{ context[key] }}</td>
                     </tr>
                   </tbody>
-                </table>
-              </div>
-            </nav>
-          </b-tab-item>
-          <b-tab-item>
-            <template slot="header">
-              <b-icon icon="sitemap"></b-icon>
-              <span>
-                Related observables
-                <b-tag rounded> {{ totalRelatedObservables == null ? "?" : totalRelatedObservables }}</b-tag>
-              </span>
-            </template>
-            <related-objects
-              :id="id"
-              source-type="observables"
-              :target-types="observableTypes.map(def => def.type)"
-              @totalUpdated="value => (totalRelatedObservables = value)"
-            ></related-objects>
-          </b-tab-item>
-          <b-tab-item>
-            <template slot="header">
-              <b-icon icon="tags"></b-icon>
-              <span>
-                Entities from tags
-                <b-tag rounded> {{ globalRelatedEntities }}</b-tag>
-              </span>
-            </template>
-            <b-tabs v-model="activeSubTab" position="is-left" :animated="false" v-if="globalRelatedEntities > 0">
-              <b-tab-item v-for="entity in entityTypes" :key="entity.name" :visible="displayEntityType(entity.type)">
-                <template slot="header">
-                  <b-icon :icon="entity.icon"></b-icon>
-                  <span>
-                    {{ entity.name }}
-                    <b-tag rounded>
-                      {{ totalRelatedEntities[entity.type] == null ? "?" : totalRelatedEntities[entity.type] }}</b-tag
-                    >
-                  </span>
-                </template>
+                </v-table>
+              </v-card>
+              <div v-if="observable?.context.length == 0"><em>No context for observable</em></div>
+            </v-window-item>
+            <v-window-item value="related-observables" eager>
+              <related-objects
+                :id="id"
+                source-type="observables"
+                :target-types="observableTypes.map(def => def.type)"
+                @totalUpdated="value => (totalRelatedObservables = value)"
+              />
+            </v-window-item>
+
+            <v-window-item value="related-entities" eager>
+              <v-card title="Direct links">
                 <related-objects
                   :id="id"
-                  :fields="['name', 'tags']"
+                  source-type="observables"
+                  :target-types="entityTypes.map(def => def.type)"
+                  @totalUpdated="value => (totalRelatedEntities = value)"
+                />
+              </v-card>
+              <v-card title="Tagged">
+                <related-objects
+                  :id="id"
                   source-type="observables"
                   :hops="2"
                   graph="tagged"
-                  :target-types="[entity.type]"
-                  @totalUpdated="countRelatedEntities(entity.type, $event)"
-                >
-                </related-objects>
-              </b-tab-item>
-            </b-tabs>
-            <span v-if="globalRelatedEntities === 0">No related entities.</span>
-          </b-tab-item>
-        </b-tabs>
-      </div>
-    </div>
-  </div>
+                  :target-types="entityTypes.map(def => def.type)"
+                  @totalUpdated="value => (totalTaggedRelationships = value)"
+                ></related-objects>
+              </v-card>
+            </v-window-item>
+          </v-window>
+        </v-sheet>
+      </v-container>
+    </v-row>
+  </v-container>
 </template>
 
-<script>
+<script lang="ts" setup>
 import axios from "axios";
-import RelatedObjects from "@/components/RelatedObjects";
-import TaskList from "@/views/TaskList.vue";
-import ObservableInfoTable from "@/components/ObservableInfoTable";
 
+// import tasklist component
+import TaskList from "@/components/TaskList.vue";
+import RelatedObjects from "@/components/RelatedObjects.vue";
 import { ENTITY_TYPES } from "@/definitions/entityDefinitions.js";
 import { OBSERVABLE_TYPES } from "@/definitions/observableDefinitions.js";
+import moment from "moment";
+</script>
 
+<script lang="ts">
 export default {
-  props: ["id"],
+  props: {
+    id: {
+      type: String,
+      required: true
+    }
+  },
   components: {
-    RelatedObjects,
-    ObservableInfoTable,
-    TaskList
+    TaskList,
+    RelatedObjects
   },
   data() {
     return {
       observable: null,
-      newTags: [],
-      activeTab: null,
-      activeSubTab: null,
-      totalRelatedObservables: null,
-      totalRelatedEntities: ENTITY_TYPES.reduce((acc, cur) => {
-        acc[cur.type] = null;
-        return acc;
-      }, {}),
+      observableTags: [],
+      activeTab: 0,
+      observableTypes: OBSERVABLE_TYPES,
       entityTypes: ENTITY_TYPES,
-      observableTypes: OBSERVABLE_TYPES
+      totalRelatedObservables: 0,
+      totalTaggedRelationships: 0,
+      totalRelatedEntities: 0
     };
-  },
-  mounted() {
-    this.getObservableDetails();
   },
   methods: {
     getObservableDetails() {
       axios
         .get(`/api/v2/observables/${this.id}`)
         .then(response => {
+          let tagNames: string[] = [];
           this.observable = response.data;
-          this.newTags = Object.keys(this.observable.tags);
+          this.observableTags = Object.keys(this.observable.tags);
           // Switch back to Context view when reloading the page.
           this.activeTab = 0;
         })
@@ -184,61 +196,46 @@ export default {
       var params = {
         ids: [this.id],
         strict: true,
-        tags: this.newTags
+        tags: this.observableTags
       };
       axios
         .post(`/api/v2/observables/tag`, params)
         .then(() => {
           this.getObservableDetails();
-          this.$buefy.toast.open({
-            message: "Tags saved!",
-            type: "is-success"
-          });
+          this.$eventBus.emit("displayMessage", { message: "Tags saved successfully", status: "success" });
         })
         .catch(error => {
           console.log(error);
         })
         .finally();
-    },
-    countRelatedEntities(type, count) {
-      this.totalRelatedEntities[type] = count;
-      for (let i = 0; i < this.entityTypes.length; i++) {
-        if (this.totalRelatedEntities[this.entityTypes[i].type] > 0) {
-          this.activeSubTab = i;
-          break;
-        }
-      }
-    },
-    displayEntityType(type) {
-      return this.totalRelatedEntities[type] > 0;
     }
   },
   computed: {
-    globalRelatedEntities() {
-      return Object.values(this.totalRelatedEntities).reduce((a, b) => a + b, 0);
+    getObservableTypeDefinition() {
+      return this.observableTypes.find(typeDef => typeDef.type === this.observable?.type);
+    },
+    getObservableInfoFields() {
+      const hideFields = ["value", "tags", "description"];
+      return this.getObservableTypeDefinition?.fields.filter(field => !hideFields.includes(field.field));
     }
   },
+  mounted() {
+    this.getObservableDetails();
+  },
   watch: {
-    id: "getObservableDetails"
+    id() {
+      this.getObservableDetails();
+    }
   }
 };
 </script>
 
-<style scoped lang="css">
-.observable-tile {
-  width: 100%;
+<style>
+.v-card-text.yeti-description {
+  font-size: 1rem;
 }
 
-.observable-tile .tag {
-  margin-top: 0.5rem;
-}
-.observable-value {
-  font-family: monospace;
-  overflow-wrap: break-word;
-  width: 100%;
-  border-radius: 4px;
-  background: hsl(0, 0%, 21%);
-  color: hsl(0, 0%, 96%);
-  padding: 0.2rem 0.6rem 0.2rem 0.6rem;
+.break-title .v-card-title {
+  white-space: normal;
 }
 </style>

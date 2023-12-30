@@ -1,64 +1,79 @@
 <template>
-  <div>
-    <div class="columns">
-      <div class="column is-6">
-        <h1 class="is-size-2">Worker status</h1>
-        <b-progress size="is-medium" show-value v-if="infoLoading">
-          Pinging Celery workers...
-        </b-progress>
-        <table class="table is-narrow is-fullwidth" v-if="info">
-          <tbody>
-            <tr>
-              <th>Host</th>
-              <th>Active workers</th>
-            </tr>
-          </tbody>
-          <tr v-for="entry in Object.keys(info.registered)" v-bind:key="entry">
-            <td>{{ entry }}</td>
-            <td>{{ info.registered[entry] }}</td>
-          </tr>
-        </table>
-
-        <table class="table is-narrow is-fullwidth" v-if="info">
-          <tbody>
-            <tr>
-              <th>Task name</th>
-              <th>Params</th>
-            </tr>
-            <tr v-for="workerData in info.active" v-bind:key="workerData[0]">
-              <td>{{ workerData[0] }}</td>
-              <td>{{ workerData[1] }}</td>
-            </tr>
-          </tbody>
-        </table>
-        <div class="buttons">
-          <b-button type="is-danger" @click="restartWorker('all')">Restart All workers</b-button>
-        </div>
-      </div>
-      <div class="column is-6">
-        <h1 class="is-size-2">System config</h1>
-        <pre>{{ appConfig }}</pre>
-      </div>
-    </div>
-  </div>
+  <v-container>
+    <v-row>
+      <v-col>
+        <div class="mb-5 text-h4">Celery worker information</div>
+        <v-card variant="flat" :loading="infoLoading">
+          <v-card-title>Worker status</v-card-title>
+          <v-card-subtitle v-if="infoLoading">Loading...</v-card-subtitle>
+          <v-card-text>
+            <v-table v-if="info">
+              <tr>
+                <th>Host</th>
+                <th>Registered tasks</th>
+              </tr>
+              <tr v-for="key in Object.keys(info.registered)" v-bind:key="key">
+                <td>{{ key }}</td>
+                <td>{{ info.registered[key] }}</td>
+              </tr>
+            </v-table>
+          </v-card-text>
+        </v-card>
+        <v-divider class="my-6"></v-divider>
+        <v-card variant="flat" :loading="infoLoading">
+          <v-card-title>Active tasks</v-card-title>
+          <v-card-subtitle v-if="infoLoading">Loading...</v-card-subtitle>
+          <v-card-text>
+            <v-table v-if="info">
+              <tr>
+                <th>Task name</th>
+                <th>Params</th>
+              </tr>
+              <tr v-for="workerData in info.active" v-bind:key="workerData[0]">
+                <td>{{ workerData[0] }}</td>
+                <td>{{ workerData[1] }}</td>
+              </tr>
+            </v-table>
+          </v-card-text>
+        </v-card>
+        <v-divider class="my-6"></v-divider>
+        <v-btn variant="flat" @click="restartWorker('all')" :disabled="restartDisabled">
+          Restart All workers
+        </v-btn>
+      </v-col>
+      <v-col>
+        <p class="mb-5 text-h4">System config</p>
+        <pre>{{ appStore.systemConfig }}</pre>
+      </v-col>
+    </v-row>
+  </v-container>
 </template>
 
-<script>
+<script setup lang="ts">
 import axios from "axios";
+import { useAppStore } from "@/store/app";
+</script>
 
+<script lang="ts">
 export default {
   name: "System",
   data() {
     return {
       info: null,
-      infoLoading: true
+      infoLoading: true,
+      appStore: useAppStore(),
+      restartDisabled: false
     };
   },
   mounted() {
-    this.getWorkerInfo();
+    this.appStore.fetchSystemConfig();
+    setTimeout(() => {
+      this.getWorkerInfo();
+    }, 200);
   },
   methods: {
     getWorkerInfo() {
+      this.infoLoading = true;
       axios
         .get(`/api/v2/system/workers`)
         .then(response => {
@@ -70,33 +85,35 @@ export default {
         });
     },
     restartWorker(workerName) {
+      this.restartDisabled = true;
       axios
         .post(`/api/v2/system/restartworker/${workerName}`)
         .then(response => {
           if (response.data.failures.length > 0) {
-            this.$buefy.notification.alert({
-              title: "Some workers could not be restarted",
-              message: response.data.failures.join("\n"),
-              type: "is-danger"
+            this.$eventBus.emit("displayMesasge", {
+              message: "Some workers could not be restarted:\n" + response.data.failures.join("\n"),
+              status: "error"
             });
           } else {
-            this.$buefy.notification.open({
+            this.$eventBus.emit("displayMessage", {
               message: "Workers succesfully restarted!",
-              type: "is-success"
+              status: "success"
             });
           }
         })
         .catch(error => {
           console.log(error);
+        })
+        .finally(() => {
+          this.restartDisabled = false;
         });
-    }
-  },
-  computed: {
-    appConfig() {
-      return this.$store.getters.appConfig;
     }
   }
 };
 </script>
 
-<style></style>
+<style>
+.v-card-text .v-table {
+  font-size: 1rem;
+}
+</style>

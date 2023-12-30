@@ -1,29 +1,29 @@
 <template>
-  <div class="modal-card" v-if="localEdge">
-    <header class="modal-card-head">
-      <p class="modal-card-title">
-        Editing link <strong>{{ vertices[edge.source].name }}</strong> →
-        <strong>{{ vertices[edge.target].name }}</strong>
-      </p>
-    </header>
-    <section class="modal-card-body">
-      <b-field horizontal label="Type"> <b-input v-model="localEdge.type" /> </b-field>
-      <b-field horizontal label="Description"> <b-input type="textarea" v-model="localEdge.description" /> </b-field>
-      <div class="buttons">
-        <b-button type="is-primary" @click="saveLink">
-          Save
-        </b-button>
-        <b-button @click="$parent.close()">
-          Cancel
-        </b-button>
-      </div>
-    </section>
-  </div>
+  <v-card>
+    <template v-slot:title>
+      Edit: {{ vertices[edge.source].value || vertices[edge.source].name }}
+      <v-icon>mdi-arrow-right</v-icon>
+      {{ vertices[edge.target].value || vertices[edge.target].name }}</template
+    >
+    <v-card-text>
+      <v-text-field label="Type" v-model="localEdge.type"></v-text-field>
+      <v-textarea label="Description" v-model="localEdge.description"></v-textarea>
+    </v-card-text>
+
+    <v-card-actions>
+      <v-spacer></v-spacer>
+      <v-btn text="Cancel" color="cancel" @click="isActive.value = false"></v-btn>
+      <v-btn text="Save" color="primary" @click="saveLink" variant="tonal"></v-btn>
+    </v-card-actions>
+    <v-alert v-if="error" type="error">Error updating link: {{ error }}</v-alert>
+  </v-card>
 </template>
 
-<script>
+<script lang="ts" setup>
 import axios from "axios";
+</script>
 
+<script lang="ts">
 export default {
   components: {},
   props: {
@@ -34,11 +34,16 @@ export default {
     edge: {
       type: Object,
       default: () => {}
+    },
+    isActive: {
+      type: Object,
+      default: () => {}
     }
   },
   data() {
     return {
-      localEdge: { ...this.edge }
+      localEdge: { ...this.edge },
+      error: null
     };
   },
   mounted() {},
@@ -50,18 +55,12 @@ export default {
           link_type: this.localEdge.type
         })
         .then(response => {
-          this.$parent.close();
-          this.$buefy.toast.open({
-            message: "Update successful!",
-            type: "is-success"
-          });
-          this.$emit("refresh", response.data);
+          this.$eventBus.emit("displayMessage", { message: "Link updated succesfully!", status: "success" });
+          this.isActive.value = false;
         })
         .catch(error => {
-          this.$buefy.toast.open({
-            message: "Error saving object: " + error,
-            type: "is-danger"
-          });
+          this.error = error;
+          console.log(error);
         })
         .finally();
     }

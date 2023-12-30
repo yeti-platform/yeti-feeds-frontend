@@ -1,55 +1,41 @@
 {
-  "name": "Yeti",
-  "version": "0.1.0",
+  "name": "yeti-frontend",
+  "version": "0.0.0",
   "private": true,
   "scripts": {
-    "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build",
-    "test:unit": "vue-cli-service test:unit",
-    "lint": "vue-cli-service lint"
+    "dev": "vite --host",
+    "build": "vue-tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "lint": "eslint . --fix --ignore-path .gitignore"
   },
   "dependencies": {
-    "@fortawesome/fontawesome-svg-core": "^1.2.28",
-    "@fortawesome/free-solid-svg-icons": "^5.13.0",
-    "@fortawesome/vue-fontawesome": "^0.1.9",
-    "axios": "^0.19.2",
-    "buefy": "^0.8.15",
-    "core-js": "^3.6.4",
-    "isomorphic-dompurify": "^1.9.0",
-    "lodash": "^4.17.20",
-    "marked": "^5.1.2",
-    "moment": "^2.29.1",
-    "moment-timezone": "^0.5.34",
-    "vue": "^2.6.11",
-    "vue-router": "^3.1.6",
-    "vuex": "^3.1.3"
+    "@date-io/moment": "^2.17.0",
+    "@mdi/font": "7.0.96",
+    "axios": "^1.6.2",
+    "core-js": "^3.29.0",
+    "dompurify": "^3.0.6",
+    "lodash": "^4.17.21",
+    "marked": "^11.1.0",
+    "mitt": "^3.0.1",
+    "moment": "^2.30.1",
+    "pinia": "^2.0.0",
+    "roboto-fontface": "*",
+    "vue": "^3.2.0",
+    "vue-router": "^4.0.0",
+    "vuetify": "^3.0.0"
   },
   "devDependencies": {
-    "@vue/cli-plugin-babel": "~4.3.0",
-    "@vue/cli-plugin-eslint": "~4.3.0",
-    "@vue/cli-plugin-router": "~4.3.0",
-    "@vue/cli-plugin-unit-jest": "~4.3.0",
-    "@vue/cli-plugin-vuex": "~4.3.0",
-    "@vue/cli-service": "~4.3.0",
-    "@vue/eslint-config-prettier": "^6.0.0",
-    "@vue/test-utils": "1.0.0-beta.31",
-    "babel-eslint": "^10.1.0",
-    "eslint": "^6.7.2",
-    "eslint-plugin-prettier": "^3.1.1",
-    "eslint-plugin-vue": "^6.2.2",
-    "lint-staged": "^9.5.0",
-    "prettier": "^1.19.1",
-    "sass": "^1.26.3",
-    "sass-loader": "^8.0.2",
-    "vue-template-compiler": "^2.6.11"
-  },
-  "gitHooks": {
-
-  },
-  "lint-staged": {
-    "*.{js,jsx,vue}": [
-      "vue-cli-service lint",
-      "git add"
-    ]
+    "@babel/types": "^7.21.4",
+    "@types/node": "^18.15.0",
+    "@vitejs/plugin-vue": "^4.0.0",
+    "@vue/eslint-config-typescript": "^11.0.0",
+    "eslint": "^8.37.0",
+    "eslint-plugin-vue": "^9.3.0",
+    "sass": "^1.60.0",
+    "typescript": "^5.0.0",
+    "unplugin-fonts": "^1.0.3",
+    "vite": "^4.2.0",
+    "vite-plugin-vuetify": "^1.0.0",
+    "vue-tsc": "^1.2.0"
   }
 }

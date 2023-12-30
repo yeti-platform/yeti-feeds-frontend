@@ -1,21 +1,46 @@
 <template>
-  <div>
-    <navbar></navbar>
-    <div id="app" class="container is-fluid">
-      <router-view />
-    </div>
-  </div>
+  <router-view />
+  <v-snackbar v-model="displaySnackBar" :timeout="50000" variant="flat" :color="snackBarStatus">
+    {{ snackBarMessage }}
+    <template v-slot:actions>
+      <v-btn :color="snackBarStatus" variant="flat" rounded="2" @click="displaySnackBar = false">
+        OK
+      </v-btn>
+    </template>
+  </v-snackbar>
 </template>
 
-<script>
-import Navbar from "@/components/Navbar";
+<script lang="ts" setup></script>
 
+<script lang="ts">
 export default {
-  components: {
-    Navbar
+  data() {
+    return {
+      displaySnackBar: false,
+      snackBarMessage: "",
+      snackBarStatus: ""
+    };
+  },
+  methods: {
+    displayMessage(event) {
+      this.snackBarMessage = event.message;
+      this.snackBarStatus = event.status;
+      this.displaySnackBar = true;
+    }
+  },
+  created() {
+    this.$eventBus.on("displayMessage", this.displayMessage);
   }
 };
 </script>
-<style lang="scss">
-@import "style.scss";
+
+<style>
+a {
+  color: rgb(var(--v-theme-primary));
+  text-decoration: none;
+}
+
+.v-snackbar__content {
+  font-size: 1rem !important;
+}
 </style>

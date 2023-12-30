@@ -1,179 +1,229 @@
 <template>
-  <div class="observable-search">
-    <div class="columns">
-      <div class="column is-one-third">
-        <h1 class="is-size-2">Search & add</h1>
-        <div class="content">
-          <p><strong>Format</strong>: one observable per line (for both text and file)</p>
-          <p>
-            Use the checkbox to automatically <strong>add</strong> unknown observables to the database (write operation)
-          </p>
-        </div>
-        <div class="card">
-          <div class="card-header info"><p class="card-header-title">Advanced search</p></div>
-          <div class="card-content">
-            <div class="search">
-              <div class="field">
-                <form v-on:submit="advancedSearchSubmit">
-                  <b-input v-model="searchQuery" type="text" placeholder="Search query + ⏎" icon="search" />
-                </form>
-              </div>
-            </div>
-            <br />
-            <article class="message tip">
-              <div class="message-body content ">
-                <p>
-                  By default, the query will be matched against the
-                  <code>value</code> attribute of the observables. To match against other attributes, use
-                  <code>attribute=query</code>.
-                </p>
-
-                <p>Examples:</p>
-                <ul>
-                  <li>
-                    <strong>Generic tag query</strong>:
-                    <code>tags=lolbas</code>
-                  </li>
-                  <li><strong>Gate URLs</strong>: <code>tags=cobaltstrike .php$</code></li>
-                  <li>
-                    <strong>Ransomware C2s</strong>:
-                    <code>tags=c2,ransomware</code>
-                  </li>
-                </ul>
-              </div>
-            </article>
-          </div>
-        </div>
-      </div>
-      <div class="column is-two-thirds ">
-        <b-field grouped class="add-tags">
-          <b-field>
-            <b-checkbox v-model="addMissing" class="add-missing-control">Add and tag missing observables</b-checkbox>
-          </b-field>
-          <b-field :class="{ hidden: !addMissing }"
-            ><b-taginput v-model="addTags" icon="tag" placeholder="e.g. CobaltStrike"></b-taginput
-          ></b-field>
-          <b-field :class="{ hidden: !addMissing }">
-            <b-select v-model="addType" placeholder="Force observable type">
-              <option :value="null">Guess type</option>
-              <option v-for="def in defaultTypes" v-bind:key="def.type" :value="def.type">
-                {{ def.name }}
-              </option>
-            </b-select>
-          </b-field>
-        </b-field>
-
-        <b-field label="Search">
-          <b-input type="textarea" v-model="textSearch"></b-input>
-        </b-field>
-
-        <b-field class="file">
-          <b-upload v-model="uploadFile">
-            <a class="button is-outlined">
-              <span>Upload file</span>
-            </a>
-          </b-upload>
-          <span class="file-name" v-if="uploadFile">
-            {{ uploadFile.name }}
-          </span>
-        </b-field>
-        <small>
-          Uploaded file will take precedence over text. Format is the same as text, one observable per line.
-        </small>
-        <br /><br />
-        <b-field>
-          <b-button icon-left="search" type="is-primary" @click="searchObservables">Launch search</b-button>
-        </b-field>
-      </div>
-    </div>
-    <div class="columns" v-if="searching">
-      <div class="column is-4 is-offset-4">
-        <b-progress size="is-medium" show-value>
-          Searching...
-        </b-progress>
-      </div>
-    </div>
-    <div class="columns">
-      <div class="column" v-if="searchResults">
-        <h1 class="is-size-2">Search results</h1>
-        <br />
-        <search-results :searchResults="searchResults"></search-results>
-      </div>
-    </div>
-  </div>
+  <v-sheet class="ma-5" width="100%">
+    <v-data-table-server
+      v-model:page="page"
+      :itemsLength="total"
+      :items-per-page="perPage"
+      :headers="headers"
+      density="compact"
+      :items="items"
+      @update:options="loadOjects"
+      :search="searchQueryDebounced"
+      :show-select="showSelect"
+      :item-value="item => item.id"
+      v-model="selectedObservables"
+      hover
+    >
+      <template v-slot:item.value="{ item }">
+        <span class="short-links">
+          <v-tooltip activator="parent" location="top" :open-delay="200">{{ item.value }}</v-tooltip>
+          <router-link :to="{ name: 'ObservableDetails', params: { id: item.id } }">{{ item.value }}</router-link>
+        </span>
+      </template>
+      <template v-slot:item.tags="{ item }">
+        <v-chip
+          v-for="name in Object.keys(item.tags)"
+          :color="item.tags[name].fresh ? 'blue ' : 'red'"
+          :text="name"
+          class="mx-1"
+          label
+          size="small"
+        ></v-chip>
+      </template>
+      <template v-slot:item.context="{ item }">
+        <v-chip
+          v-for="context in item.context"
+          color="green"
+          :text="context.source"
+          class="mx-1"
+          label
+          size="small"
+        ></v-chip>
+      </template>
+      <template v-slot:item.created="{ item }"> {{ moment(item.created).format("YYYY-MM-DD HH:mm:ss") }} </template>
+    </v-data-table-server>
+  </v-sheet>
+  <v-navigation-drawer permament location="right" width="400" ref="drawer">
+    <v-list-item class="mt-4">
+      <v-text-field
+        v-model="searchQuery"
+        prepend-inner-icon="mdi-magnify"
+        label="Search observables"
+        density="compact"
+        class="mt-2"
+      />
+    </v-list-item>
+    <v-divider></v-divider>
+    <v-expansion-panels>
+      <v-expansion-panel title="Bulk actions" @group:selected="showSelect = $event.value">
+        <v-expansion-panel-text>
+          <v-card title="Bulk tag" class="pb-4" rounded="0" variant="flat">
+            <v-combobox v-model="bulkTags" chips clearable multiple density="compact">
+              <template v-slot:chip="tag"> <v-chip :text="tag.item.value" label/></template>
+            </v-combobox>
+            <v-btn density="compact" variant="tonal" color="primary" class="me-2" @click="changeTags">Apply</v-btn>
+            <small>Will apply {{ bulkTags.length }} tags to {{ selectedObservables.length }} observables</small>
+          </v-card>
+          <v-card title="Export observables" class="pb-4" rounded="0" variant="flat">
+            <v-autocomplete
+              label="Select template"
+              density="compact"
+              :items="exportTemplates"
+              item-title="name"
+              item-value="id"
+              v-model="selectedExportTemplate"
+            ></v-autocomplete>
+            <v-btn density="compact" variant="tonal" color="primary" class="me-2" @click="downloadExport">Export</v-btn>
+            <small>Will export {{ selectedObservables.length || total }} observables</small>
+          </v-card>
+        </v-expansion-panel-text>
+      </v-expansion-panel>
+    </v-expansion-panels>
+  </v-navigation-drawer>
 </template>
 
-<script>
+<script lang="ts" setup>
 import axios from "axios";
+import moment from "moment";
+import _ from "lodash";
+</script>
 
-import SearchResults from "@/components/SearchResults";
-import { OBSERVABLE_TYPES } from "@/definitions/observableDefinitions.js";
-
+<script lang="ts">
 export default {
-  name: "ObservableSearch",
-  components: {
-    SearchResults
-  },
   data() {
     return {
-      addMissing: false,
-      addTags: [],
-      defaultTypes: OBSERVABLE_TYPES,
-      addType: null,
-      uploadFile: null,
-      textSearch: "",
-      searchResults: null,
-      searchQuery: null,
-      searching: false,
-      notFound: false
+      items: [],
+      headers: [
+        { title: "Value", key: "value" },
+        { title: "Tags", key: "tags", width: "300px" },
+        { title: "Context", key: "context", width: "300px" },
+        { title: "Created on", key: "created", width: "200px" }
+      ],
+      page: 1,
+      perPage: 25,
+      total: 0,
+      searchQuery: "",
+      searchQueryDebounced: "",
+      showSelect: false,
+      selectedObservables: [],
+      bulkTags: [],
+      exportTemplates: [],
+      selectedExportTemplate: null
     };
   },
   methods: {
-    searchObservables() {
-      this.searching = true;
-      this.searchResults = null;
+    extractParamsFromSearchQuery(searchQuery, defaultKey) {
+      const pattern = /(?<key>\w+)=(?<keyed_terms>[^\s,]+(?:,[^\s,]+)*)|(?<isolated_term>[^"\s]+)|"(?<quoted_term>[^"]+)"/g;
+
+      let resultObj: Record<string, string | string[]> = {};
+      let match;
+
+      while ((match = pattern.exec(searchQuery)) !== null) {
+        let isolatedTerm = match.groups.isolated_term;
+        let quotedTerm = match.groups.quoted_term;
+        let key = match.groups.key;
+        let keyedTerms = match.groups.keyed_terms;
+
+        let values;
+        if (key) {
+          if (key.startsWith("in__") || key.endsWith("__in") || key == "tags" || keyedTerms.includes(",")) {
+            values = keyedTerms.split(",").map(term => term.trim());
+          } else {
+            values = keyedTerms;
+          }
+          resultObj[key] = values;
+        }
+
+        // Logging isolated and quoted terms (optional)
+        if (isolatedTerm) {
+          resultObj[defaultKey] = isolatedTerm;
+        }
+        if (quotedTerm) {
+          resultObj[defaultKey] = quotedTerm;
+        }
+      }
+      return resultObj;
+    },
+    loadOjects({ page, itemsPerPage, sortBy }: { page: number; itemsPerPage: number; sortBy: string }) {
+      let params = {
+        page: page - 1,
+        count: itemsPerPage,
+        query: this.extractParamsFromSearchQuery(this.searchQuery, "value")
+      };
+      axios.post("http://localhost:3000/api/v2/observables/search", params).then(response => {
+        this.items = response.data.observables;
+        this.total = response.data.total;
+      });
+    },
+    loadExportTemplates() {
+      axios
+        .post("/api/v2/templates/search", { query: { name: "" } })
+        .then(response => {
+          this.exportTemplates = response.data.templates;
+        })
+        .catch(error => {});
+    },
+    changeTags() {
       var params = {
-        observables: this.textSearch.split("\n"),
-        add_unknown: this.addMissing,
-        add_tags: this.addTags,
-        add_type: this.addType
+        tags: this.bulkTags,
+        ids: this.selectedObservables,
+        strict: false
       };
       axios
-        .post("/api/v2/graph/match", params)
-        .then(response => {
-          console.log(response);
-          this.searchResults = response.data;
+        .post(`/api/v2/observables/tag`, params)
+        .then(() => {
+          this.loadOjects({ page: this.page, itemsPerPage: this.perPage, sortBy: "" });
+          this.bulkTags = [];
         })
         .catch(error => {
           return console.log(error);
-        })
-        .finally(() => {
-          this.searching = false;
         });
     },
-    advancedSearchSubmit(e) {
-      this.$router.push({
-        name: "ObservableList",
-        query: { q: this.searchQuery }
-      });
-      e.preventDefault();
+    downloadExport() {
+      var params = {
+        template_id: this.selectedExportTemplate,
+        observable_ids: [],
+        search_query: ""
+      };
+      if (this.selectedObservables.length) {
+        params.observable_ids = this.selectedObservables;
+      } else {
+        params.search_query = this.searchQuery;
+      }
+
+      axios
+        .post("/api/v2/templates/render", params)
+        .then(response => {
+          var fileURL = window.URL.createObjectURL(new Blob([response.data]));
+          var fileLink = document.createElement("a");
+          var fileName = response.headers["content-disposition"].split("filename=")[1];
+          fileLink.href = fileURL;
+          fileLink.setAttribute("download", fileName);
+          document.body.appendChild(fileLink);
+
+          fileLink.click();
+        })
+        .catch(error => {
+          console.log(error);
+        });
     }
+  },
+  mounted() {
+    this.loadExportTemplates();
+  },
+  watch: {
+    searchQuery: _.debounce(function() {
+      this.searchQueryDebounced = this.searchQuery;
+    }, 200)
   }
 };
 </script>
 
-<style lang="scss">
-@import "@/style.scss";
-
-.add-tags label {
-  vertical-align: middle;
-}
-
-.hidden {
-  opacity: 0;
-}
-
-.searching.column {
-  margin-top: 5em;
+<style>
+.short-links {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  display: block;
 }
 </style>
