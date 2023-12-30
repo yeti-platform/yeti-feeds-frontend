@@ -8,11 +8,7 @@ if [[ "$1" =~ "dev" ]]; then
       npm install
       touch .node_installed
     fi
-    if [[ ! -z "${VUE_API_BACKEND}" ]]; then
-      # this is the busybox version of sed
-      sed -i s/localhost/${VUE_API_BACKEND}/ vue.config.js
-    fi
-    npm run serve
+    npm run dev
 fi
 
 if [[ "$1" =~ "shell" ]]; then

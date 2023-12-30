@@ -1,81 +1,79 @@
 <template>
-  <b-table
-    :data="objects"
-    :hoverable="true"
-    :narrowed="true"
-    :checkable="checkable"
-    :total="tableTotal"
-    :perPage="tablePerPage"
-    backend-pagination
-    @page-change="onPageChange"
-    :loading="loading"
-    paginated
-    class="object-table"
-  >
-    <template v-slot:default="object">
-      <b-table-column field="created" label="Created" width="180"
-        ><span :title="'Localtime: ' + formatTimestamp(object.row.created, true)">{{
-          formatTimestamp(object.row.created)
-        }}</span>
-      </b-table-column>
-
-      <b-table-column
-        v-for="field in fields.filter(field => field.displayList)"
-        :field="field.field"
-        :label="field.label"
-        v-bind:key="field.field"
-      >
-        <span v-if="field.field === 'value' || field.field === 'name'">
-          <router-link :to="`/${object.row.root_type}/${object.row.id}`">
-            {{ object.row[field.field] }}
-          </router-link>
-        </span>
-
-        <code v-else-if="field.type === 'code'"> {{ object.row[field.field] }} </code>
-        <code v-else-if="field.type === 'longcode'"> {{ object.row[field.field] }} </code>
-        <b-taglist v-else-if="field.field === 'tags'">
-          <b-tag
-            v-for="tag in Object.keys(object.row['tags'])"
-            v-bind:key="tag"
-            :type="object.row['tags'][tag].fresh ? 'is-primary' : ''"
+  <v-sheet class="mt-2">
+    <v-data-table-server
+      v-model:page="page"
+      :itemsLength="total"
+      :items-per-page="perPage"
+      :headers="headers"
+      density="compact"
+      :items="items"
+      @update:options="loadOjects"
+      :search="searchQuery"
+      :item-value="item => item.id"
+      hover
+      class="fixed-table"
+    >
+      <template v-slot:item.name="{ item }">
+        <span class="short-links">
+          <v-tooltip activator="parent" location="top" :open-delay="200">{{ item.name }}</v-tooltip>
+          <router-link
+            :to="{
+              name: this.searchType === 'entities' ? 'EntityDetails' : 'IndicatorDetails',
+              params: { id: item.id }
+            }"
+            >{{ item.name }}</router-link
           >
-            {{ tag }}
-          </b-tag>
-        </b-taglist>
-
-        <b-taglist v-else-if="field.type == 'list'">
-          <b-tag
-            v-for="tag in object.row[field.field]"
-            v-bind:key="tag.name ? tag.name : tag"
-            :type="tag.fresh ? 'is-primary' : ''"
-          >
-            {{ tag.name ? tag.name : tag }}
-          </b-tag>
-        </b-taglist>
-
-        <span
-          v-else-if="field.type === 'timestamp'"
-          :title="'Localtime: ' + formatTimestamp(object.row[field.field], true)"
-          >{{ formatTimestamp(object.row[field.field]) }}
         </span>
-
-        <span v-else-if="field.type !== 'longtext'">{{ object.row[field.field] }}</span>
-      </b-table-column>
-    </template>
-    <template #empty>
-      <div class="has-text-centered">No records</div>
-    </template>
-  </b-table>
+      </template>
+      <template v-slot:item.tags="{ item }">
+        <v-chip
+          v-for="name in Object.keys(item.tags)"
+          :color="item.tags[name].fresh ? 'blue ' : 'red'"
+          :text="name"
+          class="mr-1"
+          size="small"
+        ></v-chip>
+      </template>
+      <template v-slot:item.relevant_tags="{ item }">
+        <v-chip v-for="name in item.relevant_tags" :text="name" class="mr-1" size="small"></v-chip>
+      </template>
+      <template v-slot:item.aliases="{ item }">
+        <v-chip v-for="value in item.aliases" :text="value" class="mr-1" size="small"></v-chip>
+      </template>
+      <template v-slot:item.threat_actor_types="{ item }">
+        <v-chip v-for="value in item.threat_actor_types" :text="value" class="mr-1" size="small"></v-chip>
+      </template>
+      <template v-slot:item.kill_chain_phases="{ item }">
+        <v-chip v-for="value in item.kill_chain_phases" :text="value" class="mr-1" size="small">
+          {{ value.split(":")[1] }}
+        </v-chip>
+      </template>
+      <template v-slot:item.target_systems="{ item }">
+        <v-chip v-for="value in item.target_systems" :text="value" class="mr-1" size="small"></v-chip>
+      </template>
+      <template v-slot:item.created="{ item }">
+        {{ moment(item.created).format("YYYY-MM-DD HH:mm:ss") }}
+      </template>
+      <template v-slot:item.last_seen="{ item }">
+        {{ moment(item.last_seen).format("YYYY-MM-DD HH:mm:ss") }}
+      </template>
+      <template v-slot:item.first_seen="{ item }">
+        {{ moment(item.first_seen).format("YYYY-MM-DD HH:mm:ss") }}
+      </template>
+    </v-data-table-server>
+  </v-sheet>
 </template>
 
-<script>
+<script lang="ts" setup>
 import axios from "axios";
-import utils from "@/utils";
-import _ from "lodash";
+import { ENTITY_TYPES } from "@/definitions/entityDefinitions.js";
 
+import moment from "moment";
+</script>
+
+<script lang="ts">
 export default {
   name: "objectList",
-  components: {},
   props: {
     searchQuery: {
       type: String,
@@ -89,9 +87,13 @@ export default {
       type: String,
       default: ""
     },
-    fields: {
+    headers: {
       type: Array,
-      default: () => []
+      default: () => [
+        { title: "Name", key: "name" },
+        { title: "Tags", key: "tags" },
+        { title: "Created on", key: "created", width: "200px" }
+      ]
     },
     checkable: {
       type: Boolean,
@@ -100,37 +102,18 @@ export default {
   },
   data() {
     return {
-      regexSearch: true,
-      ignoreCase: true,
-      objects: [],
-      tablePage: 1,
-      tablePerPage: 50,
-      tableTotal: 500, // 5 pages worth should be enough to have time to get a more accurate count
-      loading: false
+      items: [],
+      page: 1,
+      perPage: 20,
+      total: 0
     };
   },
-  mounted() {
-    this.searchObjects();
-  },
-  created() {
-    // This has to come here because we want the debounce functions to be created
-    // within each component.
-    this.$watch(
-      "searchQuery",
-      _.debounce(function() {
-        this.searchObjects();
-      }, 300)
-    );
-  },
   methods: {
-    onPageChange(tablePage) {
-      this.tablePage = tablePage;
-      this.searchObjects(false);
-    },
     extractParamsFromSearchQuery(searchQuery, defaultKey) {
-      const pattern = /(?<key>\w+)=(?<keyed_terms>[^\s,]+(?:,[^\s,]+)*)|(?<isolated_term>[^"\s]+)|"(?<quoted_term>[^"]+)"/g;
+      const pattern =
+        /(?<key>\w+)=(?<keyed_terms>[^\s,]+(?:,[^\s,]+)*)|(?<isolated_term>[^"\s]+)|"(?<quoted_term>[^"]+)"/g;
 
-      let resultObj = {};
+      let resultObj: Record<string, string | string[]> = {};
       let match;
 
       while ((match = pattern.exec(searchQuery)) !== null) {
@@ -141,13 +124,7 @@ export default {
 
         let values;
         if (key) {
-          if (
-            key.startsWith("in__") ||
-            key.endsWith("__in") ||
-            key == "tags" ||
-            key == "relevant_tags" ||
-            keyedTerms.includes(",")
-          ) {
+          if (key.startsWith("in__") || key.endsWith("__in") || key == "tags" || keyedTerms.includes(",")) {
             values = keyedTerms.split(",").map(term => term.trim());
           } else {
             values = keyedTerms;
@@ -165,43 +142,34 @@ export default {
       }
       return resultObj;
     },
-    searchObjects() {
-      var params = {
-        query: this.extractParamsFromSearchQuery(this.searchQuery, "name"),
+    loadOjects({ page, itemsPerPage, sortBy }: { page: number; itemsPerPage: number; sortBy: string }) {
+      let params = {
+        page: page - 1,
+        count: itemsPerPage,
         type: this.searchSubtype,
-        count: this.tablePerPage,
-        page: this.tablePage - 1
+        query: this.extractParamsFromSearchQuery(this.searchQuery, "name")
       };
-      this.loading = true;
-      axios
-        .post(`/api/v2/${this.searchType}/search`, params)
-        .then(response => {
-          this.objects = response.data[this.searchType];
-          this.tableTotal = response.data.total;
-          this.$emit("totalUpdated", this.tableTotal);
-        })
-        .catch(error => {
-          console.log(error);
-        })
-        .finally(() => {
-          this.loading = false;
-        });
-    },
-    formatTimestamp(timestamp, local) {
-      return utils.formatTimestamp(timestamp, local);
-    }
-  },
-  computed: {
-    detailView() {
-      let type = this.searchType.charAt(0).toUpperCase() + this.searchType.slice(1);
-      return type + "Details";
+      axios.post(`/api/v2/${this.searchType}/search`, params).then(response => {
+        this.items = response.data[this.searchType];
+        if (response.data.total != this.total) {
+          this.total = response.data.total;
+          this.$emit("totalUpdated", this.total);
+        }
+      });
     }
   }
 };
 </script>
 
 <style>
-.entity-table {
-  margin-top: 0.4em;
+.short-links {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  display: block;
+}
+
+.fixed-table {
+  table-layout: fixed;
 }
 </style>

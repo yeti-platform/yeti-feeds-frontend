@@ -5,7 +5,8 @@ export const OBSERVABLE_TYPES = [
     fields: [
       { field: "value", type: "text", label: "Value", displayList: true },
       { field: "tags", type: "list", label: "tags", displayList: true },
-      { field: "description", type: "longtext", label: "Description", displayList: false }
+      { field: "description", type: "longtext", label: "Description", displayList: false },
+      { field: "created", type: "datetime", label: "Created", displayList: true }
     ]
   },
   {
@@ -14,7 +15,8 @@ export const OBSERVABLE_TYPES = [
     fields: [
       { field: "value", type: "text", label: "Value", displayList: true },
       { field: "tags", type: "list", label: "tags", displayList: true },
-      { field: "description", type: "longtext", label: "Description", displayList: false }
+      { field: "description", type: "longtext", label: "Description", displayList: false },
+      { field: "created", type: "datetime", label: "Created", displayList: true }
     ],
     icon: "globe"
   },
@@ -24,7 +26,8 @@ export const OBSERVABLE_TYPES = [
     fields: [
       { field: "value", type: "text", label: "Value", displayList: true },
       { field: "tags", type: "list", label: "tags", displayList: true },
-      { field: "description", type: "longtext", label: "Description", displayList: false }
+      { field: "description", type: "longtext", label: "Description", displayList: false },
+      { field: "created", type: "datetime", label: "Created", displayList: true }
     ],
     icon: "globe"
   },
@@ -34,7 +37,8 @@ export const OBSERVABLE_TYPES = [
     fields: [
       { field: "value", type: "text", label: "Value", displayList: true },
       { field: "tags", type: "list", label: "tags", displayList: true },
-      { field: "description", type: "longtext", label: "Description", displayList: false }
+      { field: "description", type: "longtext", label: "Description", displayList: false },
+      { field: "created", type: "datetime", label: "Created", displayList: true }
     ],
     icon: "globe"
   },
@@ -44,7 +48,8 @@ export const OBSERVABLE_TYPES = [
     fields: [
       { field: "value", type: "text", label: "Value", displayList: true },
       { field: "tags", type: "list", label: "tags", displayList: true },
-      { field: "description", type: "longtext", label: "Description", displayList: false }
+      { field: "description", type: "longtext", label: "Description", displayList: false },
+      { field: "created", type: "datetime", label: "Created", displayList: true }
     ],
     icon: "globe"
   },
@@ -54,7 +59,8 @@ export const OBSERVABLE_TYPES = [
     fields: [
       { field: "value", type: "text", label: "Value", displayList: true },
       { field: "tags", type: "list", label: "tags", displayList: true },
-      { field: "description", type: "longtext", label: "Description", displayList: false }
+      { field: "description", type: "longtext", label: "Description", displayList: false },
+      { field: "created", type: "datetime", label: "Created", displayList: true }
     ],
     icon: "file"
   },
@@ -64,7 +70,8 @@ export const OBSERVABLE_TYPES = [
     fields: [
       { field: "value", type: "text", label: "Value", displayList: true },
       { field: "tags", type: "list", label: "tags", displayList: true },
-      { field: "description", type: "longtext", label: "Description", displayList: false }
+      { field: "description", type: "longtext", label: "Description", displayList: false },
+      { field: "created", type: "datetime", label: "Created", displayList: true }
     ],
     icon: "lock"
   },
@@ -74,7 +81,8 @@ export const OBSERVABLE_TYPES = [
     fields: [
       { field: "value", type: "text", label: "Value", displayList: true },
       { field: "tags", type: "list", label: "tags", displayList: true },
-      { field: "description", type: "longtext", label: "Description", displayList: false }
+      { field: "description", type: "longtext", label: "Description", displayList: false },
+      { field: "created", type: "datetime", label: "Created", displayList: true }
     ],
     icon: "lock"
   },
@@ -84,7 +92,8 @@ export const OBSERVABLE_TYPES = [
     fields: [
       { field: "value", type: "text", label: "Value", displayList: true },
       { field: "tags", type: "list", label: "tags", displayList: true },
-      { field: "description", type: "longtext", label: "Description", displayList: false }
+      { field: "description", type: "longtext", label: "Description", displayList: false },
+      { field: "created", type: "datetime", label: "Created", displayList: true }
     ],
     icon: "lock"
   },
@@ -94,7 +103,8 @@ export const OBSERVABLE_TYPES = [
     fields: [
       { field: "value", type: "text", label: "Value", displayList: true },
       { field: "tags", type: "list", label: "tags", displayList: true },
-      { field: "description", type: "longtext", label: "Description", displayList: false }
+      { field: "description", type: "longtext", label: "Description", displayList: false },
+      { field: "created", type: "datetime", label: "Created", displayList: true }
     ],
     icon: "sitemap"
   },
@@ -104,7 +114,8 @@ export const OBSERVABLE_TYPES = [
     fields: [
       { field: "value", type: "text", label: "Value", displayList: true },
       { field: "tags", type: "list", label: "tags", displayList: true },
-      { field: "description", type: "longtext", label: "Description", displayList: false }
+      { field: "description", type: "longtext", label: "Description", displayList: false },
+      { field: "created", type: "datetime", label: "Created", displayList: true }
     ]
   },
   {
@@ -113,7 +124,8 @@ export const OBSERVABLE_TYPES = [
     fields: [
       { field: "value", type: "text", label: "Value", displayList: true },
       { field: "tags", type: "list", label: "tags", displayList: true },
-      { field: "description", type: "longtext", label: "Description", displayList: false }
+      { field: "description", type: "longtext", label: "Description", displayList: false },
+      { field: "created", type: "datetime", label: "Created", displayList: true }
     ]
   },
   {
@@ -122,7 +134,8 @@ export const OBSERVABLE_TYPES = [
     fields: [
       { field: "value", type: "text", label: "Value", displayList: true },
       { field: "tags", type: "list", label: "tags", displayList: true },
-      { field: "description", type: "longtext", label: "Description", displayList: false }
+      { field: "description", type: "longtext", label: "Description", displayList: false },
+      { field: "created", type: "datetime", label: "Created", displayList: true }
     ]
   },
   {
@@ -131,7 +144,8 @@ export const OBSERVABLE_TYPES = [
     fields: [
       { field: "value", type: "text", label: "Value", displayList: true },
       { field: "tags", type: "list", label: "tags", displayList: true },
-      { field: "description", type: "longtext", label: "Description", displayList: false }
+      { field: "description", type: "longtext", label: "Description", displayList: false },
+      { field: "created", type: "datetime", label: "Created", displayList: true }
     ]
   },
   {
@@ -140,7 +154,8 @@ export const OBSERVABLE_TYPES = [
     fields: [
       { field: "value", type: "text", label: "Value", displayList: true },
       { field: "tags", type: "list", label: "tags", displayList: true },
-      { field: "description", type: "longtext", label: "Description", displayList: false }
+      { field: "description", type: "longtext", label: "Description", displayList: false },
+      { field: "created", type: "datetime", label: "Created", displayList: true }
     ]
   },
   {
@@ -149,7 +164,8 @@ export const OBSERVABLE_TYPES = [
     fields: [
       { field: "value", type: "text", label: "Value", displayList: true },
       { field: "tags", type: "list", label: "tags", displayList: true },
-      { field: "description", type: "longtext", label: "Description", displayList: false }
+      { field: "description", type: "longtext", label: "Description", displayList: false },
+      { field: "created", type: "datetime", label: "Created", displayList: true }
     ]
   },
   {
@@ -158,7 +174,8 @@ export const OBSERVABLE_TYPES = [
     fields: [
       { field: "value", type: "text", label: "Value", displayList: true },
       { field: "tags", type: "list", label: "tags", displayList: true },
-      { field: "description", type: "longtext", label: "Description", displayList: false }
+      { field: "description", type: "longtext", label: "Description", displayList: false },
+      { field: "created", type: "datetime", label: "Created", displayList: true }
     ]
   },
   {
@@ -167,7 +184,8 @@ export const OBSERVABLE_TYPES = [
     fields: [
       { field: "value", type: "text", label: "Value", displayList: true },
       { field: "tags", type: "list", label: "tags", displayList: true },
-      { field: "description", type: "longtext", label: "Description", displayList: false }
+      { field: "description", type: "longtext", label: "Description", displayList: false },
+      { field: "created", type: "datetime", label: "Created", displayList: true }
     ]
   },
   {
@@ -176,7 +194,8 @@ export const OBSERVABLE_TYPES = [
     fields: [
       { field: "value", type: "text", label: "Value", displayList: true },
       { field: "tags", type: "list", label: "tags", displayList: true },
-      { field: "description", type: "longtext", label: "Description", displayList: false }
+      { field: "description", type: "longtext", label: "Description", displayList: false },
+      { field: "created", type: "datetime", label: "Created", displayList: true }
     ]
   },
   {
@@ -185,7 +204,8 @@ export const OBSERVABLE_TYPES = [
     fields: [
       { field: "value", type: "text", label: "Value", displayList: true },
       { field: "tags", type: "list", label: "tags", displayList: true },
-      { field: "description", type: "longtext", label: "Description", displayList: false }
+      { field: "description", type: "longtext", label: "Description", displayList: false },
+      { field: "created", type: "datetime", label: "Created", displayList: true }
     ]
   },
   {
@@ -194,7 +214,8 @@ export const OBSERVABLE_TYPES = [
     fields: [
       { field: "value", type: "text", label: "Value", displayList: true },
       { field: "tags", type: "list", label: "tags", displayList: true },
-      { field: "description", type: "longtext", label: "Description", displayList: false }
+      { field: "description", type: "longtext", label: "Description", displayList: false },
+      { field: "created", type: "datetime", label: "Created", displayList: true }
     ]
   },
   {
@@ -203,7 +224,8 @@ export const OBSERVABLE_TYPES = [
     fields: [
       { field: "value", type: "text", label: "Value", displayList: true },
       { field: "tags", type: "list", label: "tags", displayList: true },
-      { field: "description", type: "longtext", label: "Description", displayList: false }
+      { field: "description", type: "longtext", label: "Description", displayList: false },
+      { field: "created", type: "datetime", label: "Created", displayList: true }
     ]
   },
   {
@@ -212,7 +234,8 @@ export const OBSERVABLE_TYPES = [
     fields: [
       { field: "value", type: "text", label: "Value", displayList: true },
       { field: "tags", type: "list", label: "tags", displayList: true },
-      { field: "description", type: "longtext", label: "Description", displayList: false }
+      { field: "description", type: "longtext", label: "Description", displayList: false },
+      { field: "created", type: "datetime", label: "Created", displayList: true }
     ]
   }
 ];

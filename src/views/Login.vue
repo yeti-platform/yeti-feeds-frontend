@@ -1,71 +1,95 @@
 <template>
-  <div class="columns">
-    <div class="column is-4 is-offset-4">
-      <div class="card is-wide has-text-centered loginform">
-        <div class="card-content">
-          <p class="title">Log in to Yeti</p>
-
-          <a v-if="systemAuth === 'oidc'" href="/api/v2/auth/oidc-login">OIDC login</a>
-          <form v-if="systemAuth === 'local'" @submit="logIn">
-            <b-field label="Username">
-              <b-input v-model="username"></b-input>
-            </b-field>
-            <b-field label="Password">
-              <b-input type="password" v-model="password"></b-input>
-            </b-field>
-            <b-button type="is-primary" native-type="submit">Login</b-button>
-          </form>
-        </div>
-      </div>
-    </div>
-  </div>
+  <v-app>
+    <v-main>
+      <v-container>
+        <v-card class="mx-auto pa-6" max-width="600">
+          <v-card-title>Log in to Yeti</v-card-title>
+          <v-card-text v-if="authModule === 'local'">
+            <v-form @submit="logIn">
+              <v-text-field v-model="username" label="Username"></v-text-field>
+              <v-text-field v-model="password" label="Password" type="password"></v-text-field>
+              <v-btn block rounded="xs" size="large" variant="tonal" color="primary" class="mt-2" type="submit"
+                >Log in</v-btn
+              >
+            </v-form>
+          </v-card-text>
+          <v-card-text v-if="authModule === 'oidc'">
+            <v-btn @click="OIDCRefresh" block rounded="xs" size="large" variant="tonal" color="primary" class="mt-2"
+              >OIDC login</v-btn
+            >
+          </v-card-text>
+        </v-card>
+      </v-container>
+    </v-main>
+  </v-app>
 </template>
 
-<script>
+<script lang="ts" setup>
+import { useUserStore } from "@/store/user";
+import { useAppStore } from "@/store/app";
+</script>
+
+<script lang="ts">
 export default {
   name: "Login",
   data() {
     return {
       username: null,
       password: null,
-      loading: false
+      userStore: useUserStore(),
+      appStore: useAppStore(),
+      landing: "/observables"
     };
   },
   methods: {
+    OIDCRefresh() {
+      this.userStore
+        .OIDCRefresh()
+        .then(result => {
+          console.log("Successfully refreshed OIDC token!");
+        })
+        .catch(error => {
+          this.$eventBus.emit("displayMessage", { message: "Error logging in: " + error, status: "error" });
+          console.log("Could not refresh OIDC token: " + error);
+        });
+    },
     logIn(e) {
-      console.log("submitted");
       e.preventDefault();
-      this.loading = true;
       let form = new FormData();
       form.append("username", this.username);
       form.append("password", this.password);
-      this.$store
-        .dispatch("login", form)
+      this.userStore
+        .userLocalLogin(form)
         .then(() => {
           console.log("Successfully logged in!");
-          this.$router.push("/");
         })
         .catch(error => {
-          this.$buefy.notification.open({
-            message: error.response.data.detail,
-            type: "is-danger"
-          });
-        })
-        .finally(() => {
-          this.loading = false;
+          this.$eventBus.emit("displayMessage", { message: error.response.data.detail, status: "error" });
         });
     }
   },
   computed: {
-    systemAuth() {
-      return this.$store.getters.appConfig?.auth.module;
+    user() {
+      return this.userStore.user;
+    },
+    authModule() {
+      return this.appStore.systemConfig?.auth.module;
+    }
+  },
+  mounted() {
+    this.userStore.userCheck().then(() => {
+      this.$router.replace(this.landing);
+    });
+    this.appStore.fetchSystemConfig();
+  },
+  watch: {
+    user(newUser) {
+      if (newUser !== null) {
+        this.$router.replace(this.landing);
+      }
     }
   }
 };
 </script>
 
-<style>
-.loginform {
-  margin-top: 30px;
-}
-</style>
+<style></style>
