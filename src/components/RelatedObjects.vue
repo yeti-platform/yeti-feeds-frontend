@@ -115,6 +115,15 @@ export default {
     EditLink,
     YetiMarkdown
   },
+  mounted() {
+    this.$eventBus.on("linkCreated", data => {
+      const souceType = data.source.type;
+      const targetType = data.target.type;
+      if (this.targetTypes.includes(targetType) || this.targetTypes.includes(souceType)) {
+        this.fetchNeighbors();
+      }
+    });
+  },
   data() {
     return {
       tempChains: [],
