@@ -1,4 +1,5 @@
 <template>
+  <!-- Empty headers array to not mess up with CSS borders -->
   <v-data-table-server
     density="compact"
     :items="getNodeChain"
@@ -6,6 +7,7 @@
     :items-per-page="perPage"
     v-model:page="page"
     @update:options="fetchNeighbors"
+    :headers="[]"
     hover
   >
     <template v-slot:item="{ item }">
