@@ -37,7 +37,8 @@
             prepend-icon="mdi-open-in-new"
             size="x-small"
             rounded="sm"
-            >open</v-btn
+            class="mt-2"
+            >details</v-btn
           >
         </div>
       </v-list-item>
