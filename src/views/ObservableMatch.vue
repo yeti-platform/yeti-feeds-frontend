@@ -33,9 +33,9 @@
     </v-row>
     <v-row v-if="searchResults">
       <v-col>
-        <v-row>
-          <v-col cols="3">
-            <v-card class="mb-4">
+        <v-row class="mb-4">
+          <v-col cols="5">
+            <v-card>
               <v-card-title
                 >Related entities
                 <v-chip density="comfortable" class="ml-3">{{ entityMatches.length }}</v-chip></v-card-title
@@ -111,13 +111,13 @@
             <v-chip density="comfortable" class="ml-3">{{ searchResults.known.length }}</v-chip></v-card-title
           >
           <v-card-text v-if="searchResults.known.length > 0">
-            <div class="d-flex v-col-4 pl-0">
+            <div class="d-flex pl-0 mb-2">
               <v-btn
                 prepend-icon="mdi-tag"
                 class="me-3"
                 variant="tonal"
                 @click="tagKnown"
-                :disabled="addTagsKnown.length === 0"
+                :disabled="selectedKnown.length === 0"
                 >Tag
                 {{
                   selectedKnown.length === 0 || selectedKnown.length == searchResults.unknown.length
@@ -134,6 +134,22 @@
                 placeholder="Tags"
                 :delimiters="[',', ' ', ';']"
               ></v-combobox>
+            </div>
+            <div class="d-flex pl-0">
+              <v-btn
+                prepend-icon="mdi-link"
+                class="me-3"
+                variant="tonal"
+                @click="tagKnown"
+                :disabled="selectedKnown.length === 0"
+                >Link
+                {{
+                  selectedKnown.length === 0 || selectedKnown.length == searchResults.unknown.length
+                    ? "all"
+                    : selectedKnown.length
+                }}
+              </v-btn>
+              <entity-selector inline @selected-object="selection => (linkTarget = selection)" />
             </div>
             <v-data-table
               density="compact"
@@ -183,7 +199,7 @@
             Add unknown observables, with optional tags. Type will be guessed unless specified.
           </v-card-subtitle>
           <v-card-text v-if="searchResults.unknown.length > 0">
-            <div class="d-flex v-col-4 pl-0">
+            <div class="d-flex pl-0">
               <v-btn
                 prepend-icon="mdi-plus"
                 class="me-3"
@@ -235,12 +251,15 @@ import axios from "axios";
 import moment from "moment";
 import { OBSERVABLE_TYPES } from "@/definitions/observableDefinitions.js";
 import { ENTITY_TYPES } from "@/definitions/entityDefinitions.js";
+import EntitySelector from "@/components/EntitySelector.vue";
 </script>
 
 <script lang="ts">
 export default {
   name: "ObservableMatch",
-  components: {},
+  components: {
+    EntitySelector
+  },
   data() {
     return {
       // search field

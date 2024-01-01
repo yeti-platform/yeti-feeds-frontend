@@ -4,48 +4,7 @@
       >New link for <span class="text-primary">{{ object.name }}</span>
     </v-card-title>
     <v-card-text>
-      <v-autocomplete
-        label="Search for entities or indicators"
-        :items="items"
-        item-title="name"
-        v-model="linkTarget"
-        return-object
-        clearable
-        @update:search="updateItemsDebounced"
-        :loading="autocompleteLoading"
-      >
-        <template v-slot:no-data>
-          <v-list-item>
-            <v-list-item-title>Start typing...</v-list-item-title>
-          </v-list-item>
-        </template>
-        <template v-slot:chip="{ props, item }">
-          <v-chip
-            v-if="item.raw.type"
-            v-bind="props"
-            :text="item.raw.name"
-            :prepend-icon="getIconForType(item.raw.type)"
-          ></v-chip>
-        </template>
-
-        <template v-slot:item="{ props, item }">
-          <v-list-item :prepend-icon="getIconForType(item.raw.type)">
-            <div class="d-flex">
-              <v-btn variant="text" v-bind="props">{{ item.raw.name }}</v-btn>
-              <v-spacer></v-spacer>
-              <v-btn
-                variant="text"
-                :to="{ name: 'EntityDetails', params: { id: item.raw.id } }"
-                target="_blank"
-                prepend-icon="mdi-open-in-new"
-                size="x-small"
-                rounded="sm"
-                >open</v-btn
-              >
-            </div>
-          </v-list-item>
-        </template>
-      </v-autocomplete>
+      <entity-selector @selected-object="selection => (linkTarget = selection)" />
       <v-text-field label="Link type" v-model="linkType"></v-text-field>
       <v-textarea label="Link description (supports markdown)" v-model="linkDescription"></v-textarea>
     </v-card-text>
@@ -72,6 +31,7 @@ import axios from "axios";
 
 import { ENTITY_TYPES } from "@/definitions/entityDefinitions.js";
 import { INDICATOR_TYPES } from "@/definitions/indicatorDefinitions.js";
+import EntitySelector from "@/components/EntitySelector.vue";
 
 import _ from "lodash";
 </script>
@@ -88,6 +48,9 @@ export default {
       default: () => {}
     }
   },
+  components: {
+    EntitySelector
+  },
   data() {
     return {
       errors: [],
@@ -99,27 +62,6 @@ export default {
     };
   },
   methods: {
-    async loadObjects(searchQuery: String = "") {
-      if (searchQuery.length == 0) {
-        this.items = [];
-        return;
-      }
-      const params = { query: { name: searchQuery }, count: 0 };
-      const entities = (await axios.post("/api/v2/entities/search", params)).data.entities;
-      const indicators = (await axios.post("/api/v2/indicators/search", params)).data.indicators;
-      this.autocompleteLoading = false;
-      this.items = entities.concat(indicators).map(item => {
-        return {
-          id: item.id,
-          root_type: item.root_type,
-          name: item.name,
-          type: item.type
-        };
-      });
-    },
-    updateItemsDebounced: _.debounce(function (searchQuery) {
-      this.loadObjects(searchQuery);
-    }, 200),
     createLink() {
       axios
         .post("/api/v2/graph/add", {
@@ -156,9 +98,6 @@ export default {
         .catch(error => {
           this.errors = error.response.data.errors;
         });
-    },
-    getIconForType(type) {
-      return (ENTITY_TYPES.find(t => t.type === type) || INDICATOR_TYPES.find(t => t.type === type)).icon;
     }
   }
 };
