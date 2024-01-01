@@ -140,16 +140,16 @@
                 prepend-icon="mdi-link"
                 class="me-3"
                 variant="tonal"
-                @click="tagKnown"
-                :disabled="selectedKnown.length === 0"
+                @click="linkKnown"
+                :disabled="selectedKnown.length === 0 || knownLinkTarget === null"
                 >Link
                 {{
-                  selectedKnown.length === 0 || selectedKnown.length == searchResults.unknown.length
+                  selectedKnown.length === 0 || selectedKnown.length == searchResults.known.length
                     ? "all"
                     : selectedKnown.length
                 }}
               </v-btn>
-              <entity-selector inline @selected-object="selection => (linkTarget = selection)" />
+              <entity-selector inline @selected-object="selection => (knownLinkTarget = selection)" />
             </div>
             <v-data-table
               density="compact"
@@ -270,6 +270,7 @@ export default {
       addTagsSearch: [],
       // add / tag known / unknown observables
       addTagsKnown: [],
+      knownLinkTarget: null,
       addTagsUnknown: [],
       addTypeUnknown: "guess",
       selectedUnknown: [],
@@ -325,6 +326,24 @@ export default {
           });
         })
         .finally(() => {});
+    },
+    linkKnown() {
+      this.selectedKnown.forEach(observable => {
+        this.linkKnownObservable(observable, this.knownLinkTarget);
+      });
+      this.$eventBus.emit("displayMessage", {
+        status: "success",
+        message: `${this.selectedKnown.length} link requests sent`
+      });
+    },
+    linkKnownObservable(observable, linkTarget) {
+      let params = {
+        source: `${observable.root_type}/${observable.id}`,
+        target: `${linkTarget.root_type}/${linkTarget.id}`,
+        link_type: "match",
+        description: "match"
+      };
+      axios.post("/api/v2/graph/add", params);
     },
     addUknown() {
       const observables = this.selectedUnknown.map(obs => {
