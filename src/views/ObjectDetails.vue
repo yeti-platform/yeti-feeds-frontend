@@ -96,19 +96,19 @@
               @click="autoTab = false"
             >
               <v-icon size="x-large" start>{{ entityType.icon }}</v-icon>
-              {{ entityType.name }} {{ relatedEntitiesCount[entityType.type] }}
+              {{ entityType.name }} {{ relatedObjectTabCount[entityType.type] }}
             </v-tab>
             <v-tab value="related-indicators"
               ><v-icon size="x-large" start>mdi-graph</v-icon>Related indicators
-              <v-chip class="ml-3" density="comfortable"> {{ totalRelatedIndicators }}</v-chip></v-tab
+              <v-chip class="ml-3" density="comfortable"> {{ relatedObjectTabCount["indicators"] }}</v-chip></v-tab
             >
             <v-tab value="related-observables"
               ><v-icon size="x-large" start>mdi-graph</v-icon>Related observables
-              <v-chip class="ml-3" density="comfortable">{{ totalRelatedObservables }}</v-chip></v-tab
+              <v-chip class="ml-3" density="comfortable">{{ relatedObjectTabCount["observables"] }}</v-chip></v-tab
             >
-            <v-tab value="tag-relationships"
+            <v-tab value="related-tagged"
               ><v-icon size="x-large" start>mdi-tag</v-icon>Tag relationships
-              <v-chip class="ml-3" density="comfortable">{{ totalTaggedObservables }}</v-chip></v-tab
+              <v-chip class="ml-3" density="comfortable">{{ relatedObjectTabCount["tagged"] }}</v-chip></v-tab
             >
           </v-tabs>
 
@@ -124,7 +124,7 @@
                 :id="id"
                 :source-type="typeToEndpointMapping[objectType]"
                 :target-types="[entityType.type]"
-                @totalUpdated="value => countEntities(entityType.type, value)"
+                @totalUpdated="value => countObjects(entityType.type, value)"
               />
             </v-window-item>
 
@@ -133,7 +133,7 @@
                 :id="id"
                 :source-type="typeToEndpointMapping[objectType]"
                 :target-types="objectTypes['indicator'].map(def => def.type)"
-                @totalUpdated="value => (totalRelatedIndicators = value)"
+                @totalUpdated="value => countObjects('indicators', value)"
               />
             </v-window-item>
 
@@ -142,18 +142,18 @@
                 :id="id"
                 :source-type="typeToEndpointMapping[objectType]"
                 :target-types="objectTypes['observable'].map(def => def.type)"
-                @totalUpdated="value => (totalRelatedObservables = value)"
+                @totalUpdated="value => countObjects('observables', value)"
               />
             </v-window-item>
 
-            <v-window-item value="tag-relationships" eager class="my-4">
+            <v-window-item value="related-tagged" eager class="my-4">
               <related-objects
                 :id="id"
                 :source-type="typeToEndpointMapping[objectType]"
                 :hops="2"
                 graph="tagged"
                 :target-types="objectTypes['observable'].map(def => def.type)"
-                @totalUpdated="value => (totalTaggedObservables = value)"
+                @totalUpdated="value => countObjects('tagged', value)"
               ></related-objects>
             </v-window-item>
           </v-window>
@@ -214,13 +214,7 @@ export default {
         indicator: "indicators"
       },
       objectTags: [],
-      totalRelatedObservables: 0,
-      totalRelatedIndicators: 0,
-      relatedEntitiesCount: ENTITY_TYPES.reduce((acc, cur) => {
-        acc[cur.type] = 0;
-        return acc;
-      }, {}),
-      totalTaggedObservables: 0,
+      relatedObjectTabCount: {},
       hideFieldsInfoBox: ["name", "description", "tags", "pattern"],
       fullScreenEdit: false,
       editWidth: "50%"
@@ -257,16 +251,19 @@ export default {
         })
         .finally();
     },
-    countEntities(entityType: string, value: number) {
-      this.relatedEntitiesCount[entityType] = value;
+    countObjects(key: string, value: number) {
+      this.relatedObjectTabCount[key] = value;
       if (!this.$route.hash && this.autoTab) {
         this.navigateToFirstPopulatedTab();
       }
     },
     navigateToFirstPopulatedTab() {
-      for (const entityType of this.objectTypes.entity) {
-        if (this.relatedEntitiesCount[entityType.type] > 0) {
-          this.activeTab = `related-${entityType.type}`;
+      let tabKeys = this.objectTypes.entity.map(entityType => entityType.type);
+      tabKeys = tabKeys.concat(["indicators", "observables", "tagged"]);
+
+      for (const key of tabKeys) {
+        if (this.relatedObjectTabCount[key] > 0) {
+          this.activeTab = `related-${key}`;
           return;
         }
       }
@@ -284,7 +281,7 @@ export default {
       return this.getObjectTypeDefintiions?.fields.filter(field => !this.hideFieldsInfoBox.includes(field.field));
     },
     displayedEntityTypes() {
-      return this.objectTypes["entity"].filter(type => this.relatedEntitiesCount[type.type] > 0);
+      return this.objectTypes["entity"].filter(type => this.relatedObjectTabCount[type.type] > 0);
     }
   },
   mounted() {
