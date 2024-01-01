@@ -11,7 +11,14 @@
         v-model="linkTarget"
         return-object
         clearable
+        @update:search="updateItemsDebounced"
+        :loading="autocompleteLoading"
       >
+        <template v-slot:no-data>
+          <v-list-item>
+            <v-list-item-title>Start typing...</v-list-item-title>
+          </v-list-item>
+        </template>
         <template v-slot:chip="{ props, item }">
           <v-chip
             v-if="item.raw.type"
@@ -87,17 +94,20 @@ export default {
       items: [],
       linkTarget: null,
       linkType: "",
-      linkDescription: ""
+      linkDescription: "",
+      autocompleteLoading: false
     };
   },
-  mounted() {
-    this.loadObjects();
-  },
   methods: {
-    async loadObjects() {
-      const params = { query: { name: "" }, count: 0 };
-      let entities = (await axios.post("/api/v2/entities/search", params)).data.entities;
-      let indicators = (await axios.post("/api/v2/indicators/search", params)).data.indicators;
+    async loadObjects(searchQuery: String = "") {
+      if (searchQuery.length == 0) {
+        this.items = [];
+        return;
+      }
+      const params = { query: { name: searchQuery }, count: 0 };
+      const entities = (await axios.post("/api/v2/entities/search", params)).data.entities;
+      const indicators = (await axios.post("/api/v2/indicators/search", params)).data.indicators;
+      this.autocompleteLoading = false;
       this.items = entities.concat(indicators).map(item => {
         return {
           id: item.id,
@@ -107,6 +117,9 @@ export default {
         };
       });
     },
+    updateItemsDebounced: _.debounce(function (searchQuery) {
+      this.loadObjects(searchQuery);
+    }, 200),
     createLink() {
       axios
         .post("/api/v2/graph/add", {
