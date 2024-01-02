@@ -1,4 +1,5 @@
 <template>
+  <!-- Empty headers array to not mess up with CSS borders -->
   <v-data-table-server
     density="compact"
     :items="getNodeChain"
@@ -6,6 +7,7 @@
     :items-per-page="perPage"
     v-model:page="page"
     @update:options="fetchNeighbors"
+    :headers="[]"
     hover
   >
     <template v-slot:item="{ item }">
@@ -115,6 +117,15 @@ export default {
     EditLink,
     YetiMarkdown
   },
+  mounted() {
+    this.$eventBus.on("linkCreated", data => {
+      const souceType = data.source.type;
+      const targetType = data.target.type;
+      if (this.targetTypes.includes(targetType) || this.targetTypes.includes(souceType)) {
+        this.fetchNeighbors();
+      }
+    });
+  },
   data() {
     return {
       tempChains: [],
@@ -150,7 +161,6 @@ export default {
         count: this.perPage,
         page: this.page - 1
       };
-      console.log("Fetching neighbors", graphSearchRequest);
 
       axios
         .post(`/api/v2/graph/search`, graphSearchRequest)

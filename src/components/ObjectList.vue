@@ -146,9 +146,11 @@ export default {
       let params = {
         page: page - 1,
         count: itemsPerPage,
-        type: this.searchSubtype,
         query: this.extractParamsFromSearchQuery(this.searchQuery, "name")
       };
+      if (this.searchSubtype != "") {
+        params["type"] = this.searchSubtype;
+      }
       axios.post(`/api/v2/${this.searchType}/search`, params).then(response => {
         this.items = response.data[this.searchType];
         if (response.data.total != this.total) {

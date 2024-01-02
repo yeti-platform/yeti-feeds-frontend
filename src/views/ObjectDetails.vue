@@ -7,9 +7,12 @@
             <div class="d-flex">
               <v-chip class="mr-3" color="primary" :text="object?.type" label></v-chip>
               <code class="me-auto">{{ object?.name }}</code>
+
               <v-dialog :width="editWidth" :fullscreen="fullScreenEdit">
                 <template v-slot:activator="{ props }">
-                  <v-btn variant="tonal" color="primary" v-bind="props">Edit </v-btn>
+                  <v-btn class="me-2" variant="tonal" color="primary" v-bind="props" append-icon="mdi-pencil"
+                    >Edit
+                  </v-btn>
                 </template>
 
                 <template v-slot:default="{ isActive }">
@@ -19,6 +22,16 @@
                     @success="obj => (object = obj)"
                     @toggle-fullscreen="toggleFullscreen"
                   />
+                </template>
+              </v-dialog>
+
+              <v-dialog :width="editWidth">
+                <template v-slot:activator="{ props }">
+                  <v-btn variant="tonal" color="primary" v-bind="props" append-icon="mdi-link">new link </v-btn>
+                </template>
+
+                <template v-slot:default="{ isActive }">
+                  <link-object :object="object" :is-active="isActive" />
                 </template>
               </v-dialog>
             </div>
@@ -157,6 +170,7 @@ import DOMPurify from "dompurify";
 
 import RelatedObjects from "@/components/RelatedObjects.vue";
 import EditObject from "@/components/EditObject.vue";
+import LinkObject from "@/components/LinkObject.vue";
 import YetiMarkdown from "@/components/YetiMarkdown.vue";
 
 import { ENTITY_TYPES } from "@/definitions/entityDefinitions.js";
@@ -180,6 +194,8 @@ export default {
   },
   components: {
     RelatedObjects,
+    EditObject,
+    LinkObject,
     YetiMarkdown
   },
   data() {
@@ -268,7 +284,7 @@ export default {
       return this.getObjectTypeDefintiions?.fields.filter(field => !this.hideFieldsInfoBox.includes(field.field));
     },
     displayedEntityTypes() {
-      return this.objectTypes[this.objectType].filter(type => this.relatedEntitiesCount[type.type] > 0);
+      return this.objectTypes["entity"].filter(type => this.relatedEntitiesCount[type.type] > 0);
     }
   },
   mounted() {
