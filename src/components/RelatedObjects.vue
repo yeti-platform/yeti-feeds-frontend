@@ -161,7 +161,6 @@ export default {
         count: this.perPage,
         page: this.page - 1
       };
-      console.log("Fetching neighbors", graphSearchRequest);
 
       axios
         .post(`/api/v2/graph/search`, graphSearchRequest)
