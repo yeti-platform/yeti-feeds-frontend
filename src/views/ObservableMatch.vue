@@ -120,7 +120,7 @@
                 :disabled="selectedKnown.length === 0"
                 >Tag
                 {{
-                  selectedKnown.length === 0 || selectedKnown.length == searchResults.unknown.length
+                  selectedKnown.length === 0 || selectedKnown.length == searchResults.known.length
                     ? "all"
                     : selectedKnown.length
                 }}</v-btn
