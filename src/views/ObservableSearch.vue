@@ -152,7 +152,7 @@ export default {
         count: itemsPerPage,
         query: this.extractParamsFromSearchQuery(this.searchQuery, "value")
       };
-      axios.post("http://localhost:3000/api/v2/observables/search", params).then(response => {
+      axios.post("/api/v2/observables/search", params).then(response => {
         this.items = response.data.observables;
         this.total = response.data.total;
       });
