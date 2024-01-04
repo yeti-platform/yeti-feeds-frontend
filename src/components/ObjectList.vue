@@ -18,7 +18,7 @@
           <v-tooltip activator="parent" location="top" :open-delay="200">{{ item.name }}</v-tooltip>
           <router-link
             :to="{
-              name: this.searchType === 'entities' ? 'EntityDetails' : 'IndicatorDetails',
+              name: searchType === 'entities' ? 'EntityDetails' : 'IndicatorDetails',
               params: { id: item.id }
             }"
             >{{ item.name }}</router-link
