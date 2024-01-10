@@ -7,11 +7,14 @@ export const useUserStore = defineStore("user", {
     user: null
   }),
   actions: {
-    async OIDCRefresh() {
+    async OIDCBrowserRedirect() {
+      window.location.href = "/api/v2/auth/oidc-login";
+    },
+    async OIDCAsyncRefresh() {
       return new Promise((resolve, reject) => {
         var popup = window.open("/api/v2/auth/oidc-login", "OIDC Login", "width=800,height=600");
         const store = this;
-        var timer = setInterval(function() {
+        var timer = setInterval(function () {
           store
             .userCheck()
             .then(() => {
@@ -27,7 +30,7 @@ export const useUserStore = defineStore("user", {
               clearInterval(timer);
               reject(error);
             });
-        }, 500);
+        }, 2000);
       });
     },
     async userCheck() {
