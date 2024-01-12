@@ -14,7 +14,14 @@
             </v-form>
           </v-card-text>
           <v-card-text v-if="authModule === 'oidc'">
-            <v-btn @click="OIDCRefresh" block rounded="xs" size="large" variant="tonal" color="primary" class="mt-2"
+            <v-btn
+              @click="userStore.OIDCBrowserRedirect"
+              block
+              rounded="xs"
+              size="large"
+              variant="tonal"
+              color="primary"
+              class="mt-2"
               >OIDC login</v-btn
             >
           </v-card-text>
@@ -42,9 +49,9 @@ export default {
     };
   },
   methods: {
-    OIDCRefresh() {
+    OIDCAsyncRefresh() {
       this.userStore
-        .OIDCRefresh()
+        .OIDCAsyncRefresh()
         .then(result => {
           console.log("Successfully refreshed OIDC token!");
         })
