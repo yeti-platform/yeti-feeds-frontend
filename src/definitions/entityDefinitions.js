@@ -117,6 +117,7 @@ export const ENTITY_TYPES = [
     fields: [
       { field: "created", type: "date", label: "Created", displayList: true, editable: false, width: "200px" },
       { field: "name", type: "text", label: "Name", displayList: true, editable: true },
+      { field: "title", type: "text", label: "Title", displayList: true, editable: true },
       { field: "tags", type: "list", label: "Relevant tags", displayList: true, editable: false },
       { field: "description", type: "longtext", label: "Description", displayList: false, editable: true }
     ],
