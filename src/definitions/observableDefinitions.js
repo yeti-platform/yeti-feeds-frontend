@@ -239,7 +239,7 @@ export const OBSERVABLE_TYPES = [
     ]
   },
   {
-    name: "User-Account",
+    name: "User Account",
     type: "user_account",
     fields: [
       { field: "value", type: "text", label: "Value", displayList: true },
