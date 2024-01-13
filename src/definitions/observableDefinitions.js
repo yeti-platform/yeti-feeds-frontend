@@ -237,5 +237,29 @@ export const OBSERVABLE_TYPES = [
       { field: "description", type: "longtext", label: "Description", displayList: false },
       { field: "created", type: "datetime", label: "Created", displayList: true }
     ]
+  },
+  {
+    name: "User Account",
+    type: "user_account",
+    fields: [
+      { field: "value", type: "text", label: "Value", displayList: true },
+      { field: "tags", type: "list", label: "tags", displayList: true },
+      { field: "description", type: "longtext", label: "Description", displayList: false },
+      { field: "created", type: "datetime", label: "Created", displayList: true },
+      { field: "user_id", type: "text", label: "Uid", displayList: false },
+      { field: "credential", type: "text", label: "Credential", displayList: false },
+      { field: "account_login", type: "text", label: "Login", displayList: false },
+      { field: "account_type", type: "text", label: "Type", displayList: false },
+      { field: "display_name", type: "text", label: "Display name", displayList: false },
+      { field: "is_service_account", type: "text", label: "Service account", displayList: false },
+      { field: "is_privileged", type: "text", label: "Priviledged", displayList: false },
+      { field: "can_escalate_privs", type: "text", label: "Can escalate priviledge", displayList: false },
+      { field: "is_disabled", type: "text", label: "Disabled", displayList: false },
+      { field: "account_created", type: "datetime", label: "Created on", displayList: false },
+      { field: "account_expires", type: "datetime", label: "Expires on", displayList: false },
+      { field: "credential_last_changed", type: "datetime", label: "Credential last changed", displayList: false },
+      { field: "account_first_login", type: "datetime", label: "First login", displayList: false },
+      { field: "account_last_login", type: "datetime", label: "Last login", displayList: false },
+    ]
   }
 ];
