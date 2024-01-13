@@ -33,6 +33,15 @@
         :label="field.label"
         variant="outlined"
       ></v-select>
+
+      <v-checkbox
+        density="compact"
+        :indeterminate="object[field.field] === null"
+        v-if="field.type === 'bool'"
+        :label="field.label"
+        v-model="object[field.field]"
+      >
+      </v-checkbox>
     </div>
   </div>
 </template>

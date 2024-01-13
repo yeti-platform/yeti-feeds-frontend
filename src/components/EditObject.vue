@@ -1,6 +1,6 @@
 <template>
   <v-card>
-    <v-card-title>{{ object.name }}</v-card-title>
+    <v-card-title>{{ object.name || object.value }}</v-card-title>
     <v-card-subtitle>Editing {{ typeDefinition.name }}</v-card-subtitle>
     <v-card-text>
       <object-fields :fields="editableFields" :object="localObject" />
@@ -29,6 +29,7 @@ import axios from "axios";
 
 import { ENTITY_TYPES } from "@/definitions/entityDefinitions.js";
 import { INDICATOR_TYPES } from "@/definitions/indicatorDefinitions.js";
+import { OBSERVABLE_TYPES } from "@/definitions/observableDefinitions.js";
 import ObjectFields from "@/components/ObjectFields.vue";
 import { objectTypeAnnotation } from "@babel/types";
 </script>
@@ -74,7 +75,7 @@ export default {
         })
         .then(response => {
           this.$eventBus.emit("displayMessage", {
-            message: `${this.object.name} succesfully updated`,
+            message: `${this.object.name || "Observable"} succesfully updated`,
             status: "success"
           });
           this.$emit("success", response.data);
@@ -98,7 +99,9 @@ export default {
   computed: {
     typeDefinition() {
       return (
-        ENTITY_TYPES.find(t => t.type === this.object.type) || INDICATOR_TYPES.find(t => t.type === this.object.type)
+        ENTITY_TYPES.find(t => t.type === this.object.type) ||
+        INDICATOR_TYPES.find(t => t.type === this.object.type) ||
+        OBSERVABLE_TYPES.find(t => t.type === this.object.type)
       );
     },
     editableFields() {
