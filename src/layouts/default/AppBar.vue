@@ -39,7 +39,7 @@
         <v-menu activator="parent">
           <v-list>
             <v-list-item :to="{ path: '/profile' }" prepend-icon="mdi-cog"> Account settings </v-list-item>
-            <v-list-item @click="toggleTheme" prepend-icon="mdi-brightness-4"> Dark mode </v-list-item>
+            <v-list-item @click="toggleTheme" prepend-icon="mdi-brightness-4"> Toggle dark mode </v-list-item>
           </v-list>
         </v-menu>
       </v-btn>
@@ -55,6 +55,7 @@ const theme = useTheme();
 
 function toggleTheme() {
   theme.global.name.value = theme.global.current.value.dark ? "yetiLightTheme" : "yetiDarkTheme";
+  localStorage.setItem("yetiTheme", theme.global.name.value);
 }
 </script>
 
