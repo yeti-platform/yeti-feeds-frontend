@@ -4,7 +4,26 @@
       <v-col>
         <v-card class="ma-2 break-title" variant="flat">
           <template v-slot:title>
-            <v-chip color="primary" :text="observable?.type" label></v-chip> <code>{{ observable?.value }}</code>
+            <div class="d-flex">
+              <v-chip class="mr-3" color="primary" :text="observable?.type" label></v-chip>
+              <code class="me-auto">{{ observable?.value }}</code>
+              <v-dialog :width="editWidth" :fullscreen="fullScreenEdit">
+                <template v-slot:activator="{ props }">
+                  <v-btn class="me-2" variant="tonal" color="primary" v-bind="props" append-icon="mdi-pencil"
+                    >Edit
+                  </v-btn>
+                </template>
+
+                <template v-slot:default="{ isActive }">
+                  <edit-object
+                    :object="observable"
+                    :is-active="isActive"
+                    @success="obs => (observable = obs)"
+                    @toggle-fullscreen="toggleFullscreen"
+                  />
+                </template>
+              </v-dialog>
+            </div>
           </template>
         </v-card>
         <v-sheet class="ma-2">
@@ -147,6 +166,8 @@ import axios from "axios";
 // import tasklist component
 import TaskList from "@/components/TaskList.vue";
 import RelatedObjects from "@/components/RelatedObjects.vue";
+import EditObject from "@/components/EditObject.vue";
+
 import { ENTITY_TYPES } from "@/definitions/entityDefinitions.js";
 import { OBSERVABLE_TYPES } from "@/definitions/observableDefinitions.js";
 import moment from "moment";
@@ -162,7 +183,8 @@ export default {
   },
   components: {
     TaskList,
-    RelatedObjects
+    RelatedObjects,
+    EditObject
   },
   data() {
     return {
@@ -173,7 +195,9 @@ export default {
       entityTypes: ENTITY_TYPES,
       totalRelatedObservables: 0,
       totalTaggedRelationships: 0,
-      totalRelatedEntities: 0
+      totalRelatedEntities: 0,
+      editWidth: 600,
+      fullScreenEdit: false
     };
   },
   methods: {
@@ -208,6 +232,10 @@ export default {
           console.log(error);
         })
         .finally();
+    },
+    toggleFullscreen(fullscreen: boolean) {
+      this.fullScreenEdit = !this.fullScreenEdit;
+      this.editWidth = fullscreen ? "100%" : "50%";
     }
   },
   computed: {
