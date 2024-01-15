@@ -99,10 +99,12 @@ export const OBSERVABLE_TYPES = [
     icon: "sitemap"
   },
   {
-    name: "Bitcoin Wallet",
-    type: "bitcoin_wallet",
+    name: "Wallet",
+    type: "wallet",
     fields: [
       { field: "value", type: "text", label: "Value", displayList: true, editable: true },
+      { field: "coin", type: "text", label: "Coin", displayList: false, editable: true },
+      { field: "address", type: "text", label: "Address", displayList: false, editable: true },
       { field: "tags", type: "list", label: "tags", displayList: true, editable: false },
       { field: "created", type: "datetime", label: "Created", displayList: true, editable: false }
     ]
