@@ -126,7 +126,7 @@ export default {
     },
     addUser() {
       axios
-        .post("/api/v2/users", { username: this.newUsername, password: this.newPassword, admin: this.newAdmin })
+        .post("/api/v2/users/", { username: this.newUsername, password: this.newPassword, admin: this.newAdmin })
         .then(response => {
           this.listUsers();
           this.clearForm();
