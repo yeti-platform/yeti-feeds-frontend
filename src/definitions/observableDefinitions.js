@@ -251,5 +251,25 @@ export const OBSERVABLE_TYPES = [
       { field: "account_first_login", type: "datetime", label: "First login", displayList: false, editable: true },
       { field: "account_last_login", type: "datetime", label: "Last login", displayList: false, editable: true }
     ]
+  },
+  {
+    name: "IBAN",
+    type: "iban",
+    fields: [
+      { field: "value", type: "text", label: "Value", displayList: true, editable: true },
+      { field: "tags", type: "list", label: "tags", displayList: true, editable: false },
+      { field: "created", type: "datetime", label: "Created", displayList: true, editable: false }
+    ],
+    icon: "mdi:bank-transfer"
+  },
+  {
+    name: "BIC",
+    type: "bic",
+    fields: [
+      { field: "value", type: "text", label: "Value", displayList: true, editable: true },
+      { field: "tags", type: "list", label: "tags", displayList: true, editable: false },
+      { field: "created", type: "datetime", label: "Created", displayList: true, editable: false }
+    ],
+    icon: "mdi:bank"
   }
 ];
