@@ -30,6 +30,7 @@ import axios from "axios";
 import { ENTITY_TYPES } from "@/definitions/entityDefinitions.js";
 import { INDICATOR_TYPES } from "@/definitions/indicatorDefinitions.js";
 import { OBSERVABLE_TYPES } from "@/definitions/observableDefinitions.js";
+import { DFIQ_TYPES } from "@/definitions/dfiqDefinitions.js";
 import ObjectFields from "@/components/ObjectFields.vue";
 import { objectTypeAnnotation } from "@babel/types";
 </script>
@@ -55,7 +56,8 @@ export default {
       typeToEndpointMapping: {
         entity: "entities",
         observable: "observables",
-        indicator: "indicators"
+        indicator: "indicators",
+        dfiq: "dfiq"
       }
     };
   },
@@ -68,6 +70,8 @@ export default {
       this.editableFields.forEach(field => {
         patchRequest[field.field] = this.localObject[field.field];
       });
+
+      console.log(this.object);
 
       axios
         .patch(`/api/v2/${this.typeToEndpointMapping[this.object.root_type]}/${this.object.id}`, {
@@ -101,7 +105,8 @@ export default {
       return (
         ENTITY_TYPES.find(t => t.type === this.object.type) ||
         INDICATOR_TYPES.find(t => t.type === this.object.type) ||
-        OBSERVABLE_TYPES.find(t => t.type === this.object.type)
+        OBSERVABLE_TYPES.find(t => t.type === this.object.type) ||
+        DFIQ_TYPES.find(t => t.type === this.object.type)
       );
     },
     editableFields() {
