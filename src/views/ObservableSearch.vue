@@ -54,6 +54,27 @@
         class="mt-2"
       />
     </v-list-item>
+    <v-list-item>
+      <v-btn prepend-icon="mdi-plus">
+          New Observable
+          <v-menu activator="parent">
+            <v-list>
+              <v-dialog v-for="typeDef in observableTypes" :width="editWidth" :fullscreen="fullScreenEdit">
+                <template v-slot:activator="{ props }">
+                  <v-list-item v-bind="props" :prepend-icon="typeDef.icon"> {{ typeDef.name }} </v-list-item>
+                </template>
+                <template v-slot:default="{ isActive }">
+                  <new-object
+                    :object-type="typeDef.type"
+                    @close="isActive.value = false"
+                    @toggle-fullscreen="toggleNewObjectFullscreen"
+                  />
+                </template>
+              </v-dialog>
+            </v-list>
+          </v-menu>
+        </v-btn>
+      </v-list-item>
     <v-divider></v-divider>
     <v-expansion-panels>
       <v-expansion-panel title="Bulk actions" @group:selected="showSelect = $event.value">
@@ -86,6 +107,9 @@
 <script lang="ts" setup>
 import axios from "axios";
 import moment from "moment";
+import { OBSERVABLE_TYPES } from "@/definitions/observableDefinitions.js";
+import NewObject from "@/components/NewObject.vue";
+
 import _ from "lodash";
 </script>
 
@@ -94,6 +118,7 @@ export default {
   data() {
     return {
       items: [],
+      observableTypes: OBSERVABLE_TYPES,
       headers: [
         { title: "Value", key: "value" },
         { title: "Tags", key: "tags", width: "300px" },
@@ -109,7 +134,10 @@ export default {
       selectedObservables: [],
       bulkTags: [],
       exportTemplates: [],
-      selectedExportTemplate: null
+      selectedExportTemplate: null,
+      fullScreenEdit: false,
+      editWidth: "50%",
+      newDialogActive: false
     };
   },
   methods: {
@@ -208,6 +236,10 @@ export default {
         .catch(error => {
           console.log(error);
         });
+    },
+    toggleNewObjectFullscreen(fullscreen: boolean) {
+      this.fullScreenEdit = !this.fullScreenEdit;
+      this.editWidth = fullscreen ? "100%" : "50%";
     }
   },
   mounted() {
