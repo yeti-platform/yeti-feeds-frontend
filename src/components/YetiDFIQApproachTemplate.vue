@@ -2,16 +2,20 @@
   <v-sheet>
     <div class="text-h6">{{ description.summary }}</div>
     {{ description.details }}
-    <div class="font-weight-bold mt-5">References:</div>
-    <v-list density="compact">
-      <v-list-item v-for="ref in description.references"><span v-html="markdownifyText(ref)"></span></v-list-item>
-    </v-list>
-    <v-list density="compact" v-if="description.references_internal.length > 0">
-      <v-list-item v-for="ref in description.references_internal"
-        ><span v-html="markdownifyText(ref)"></span
-      ></v-list-item>
-    </v-list>
+    <div class="mt-5">
+      <div class="font-weight-bold mb-2">References:</div>
+      <ul class="ml-5">
+        <li class="mb-2" v-for="ref in description.references"><span v-html="markdownifyText(ref)"></span></li>
+      </ul>
+      <ul class="ml-5" v-if="description.references_internal.length > 0">
+        <li class="mb-2" v-for="ref in description.references_internal">
+          <span v-html="markdownifyText(ref)"></span>
+        </li>
+      </ul>
+    </div>
   </v-sheet>
+
+  <v-divider class="my-7"></v-divider>
 
   <v-card class="dfiq-covered ma-4">
     <v-card-title>Covered</v-card-title>
@@ -31,15 +35,23 @@
     </v-card-text>
   </v-card>
 
+  <v-divider class="my-7"></v-divider>
+
   <v-sheet>
     <div class="text-h6">Data</div>
-    <v-list density="compact">
-      <v-list-item v-for="ref in view.data">
-        <v-chip class="ml-3" density="comfortable" variant="tonal" color="primary" rounded>{{ ref.type }}</v-chip>
-        {{ ref.value }}
-      </v-list-item>
-    </v-list>
+    <v-table class="mt-3">
+      <tbody>
+        <tr v-for="ref in view.data">
+          <td>
+            <v-chip class="mr-2" density="comfortable" variant="tonal" color="primary" rounded>{{ ref.type }}</v-chip>
+          </td>
+          <td>{{ ref.value }}</td>
+        </tr>
+      </tbody>
+    </v-table>
   </v-sheet>
+
+  <v-divider class="my-7"></v-divider>
 
   <v-card>
     <v-tabs v-model="dfiqTab">
@@ -55,23 +67,25 @@
               >--{{ option.type }} {{ option.value }}</code
             >
           </div>
-          <div class="text-h6">Analysis options</div>
+          <div class="text-h6 mb-2">Analysis options</div>
           <v-expansion-panels multiple>
             <v-expansion-panel v-for="opt in proc.analysis" :title="opt.name">
               <v-expansion-panel-text>
-                <v-list class="dfiq-step-list">
-                  <v-list-item v-for="(step, index) in opt.steps">
+                <ol class="dfiq-step-list">
+                  <li v-for="step in opt.steps" class="ml-2">
                     <div class="dfiq-step-description d-flex align-center">
-                      <div>{{ index + 1 }}. {{ step.description }}</div>
-                      <v-chip class="ml-3" density="comfortable" variant="tonal" color="primary" rounded>{{
-                        step.type
-                      }}</v-chip>
+                      <div>{{ step.description }}</div>
+                      <div>
+                        <v-chip class="ml-3" density="comfortable" variant="tonal" color="primary" rounded>{{
+                          step.type
+                        }}</v-chip>
+                      </div>
                     </div>
-                    <div class="dfiq-step-value ma-3 pa-3 rounded">
+                    <div class="dfiq-step-value my-4 mx-2 pa-3 rounded">
                       <code>{{ step.value }}</code>
                     </div>
-                  </v-list-item>
-                </v-list>
+                  </li>
+                </ol>
               </v-expansion-panel-text>
             </v-expansion-panel>
           </v-expansion-panels>
