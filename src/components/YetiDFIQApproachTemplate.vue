@@ -191,18 +191,8 @@ export default {
   margin-top: 0.5rem;
 }
 
-.dfiq-option {
-  /* border: 1px solid red; */
-}
-
 .dfiq-step-value {
   border: 1px solid #e0e0e0;
-  /* color: red; */
-}
-
-.dfiq-step-description {
-  /* margin-left: 1rem;
-  color: blue; */
 }
 
 .dfiq-covered {
