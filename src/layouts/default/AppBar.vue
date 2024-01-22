@@ -10,6 +10,7 @@
       <v-btn :to="{ path: '/observables' }">Observables</v-btn>
       <v-btn :to="{ path: '/entities' }">Entities</v-btn>
       <v-btn :to="{ path: '/indicators' }">Indicators</v-btn>
+      <v-btn :to="{ path: '/dfiq' }">DFIQ</v-btn>
       <v-btn>
         Automation
         <v-menu activator="parent">

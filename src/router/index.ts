@@ -75,6 +75,23 @@ const routes = [
     ]
   },
   {
+    path: "/dfiq",
+    component: () => import("@/layouts/default/Default.vue"),
+    children: [
+      {
+        path: "",
+        name: "DFIQ",
+        component: () => import("@/views/DFIQSearch.vue")
+      },
+      {
+        path: ":id([0-9]+)",
+        name: "DFIQDetails",
+        component: () => import("@/views/ObjectDetails.vue"),
+        props: route => ({ id: String(route.params.id), objectType: "dfiq" })
+      }
+    ]
+  },
+  {
     path: "/feeds",
     component: () => import("@/layouts/default/Default.vue"),
     children: [
