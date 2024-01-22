@@ -36,8 +36,14 @@
               </v-dialog>
             </div>
           </template>
-          <v-card-text class="yeti-description">
-            <yeti-markdown :text="object?.description || 'No description provided'" />
+          <v-card-text class="yeti-description" v-if="object">
+            <yeti-DFIQ-approach-template
+              v-if="object.root_type === 'dfiq' && object.type === 'approach'"
+              :description="object.description"
+              :view="object.view"
+              :dfiq-type="object.type"
+            />
+            <yeti-markdown v-else :text="object.description || 'No description provided'" />
           </v-card-text>
         </v-card>
         <v-card v-if="object?.pattern" class="ma-2" variant="flat">
@@ -99,12 +105,16 @@
               {{ entityType.name }} {{ relatedObjectTabCount[entityType.type] }}
             </v-tab>
             <v-tab value="related-indicators"
-              ><v-icon size="x-large" start>mdi-graph</v-icon>Related indicators
+              ><v-icon size="x-large" start>mdi-flash</v-icon>Related indicators
               <v-chip class="ml-3" density="comfortable"> {{ relatedObjectTabCount["indicators"] }}</v-chip></v-tab
             >
             <v-tab value="related-observables"
-              ><v-icon size="x-large" start>mdi-graph</v-icon>Related observables
+              ><v-icon size="x-large" start>mdi-text-search</v-icon>Related observables
               <v-chip class="ml-3" density="comfortable">{{ relatedObjectTabCount["observables"] }}</v-chip></v-tab
+            >
+            <v-tab value="related-dfiq"
+              ><v-icon size="x-large" start>mdi-chat-question</v-icon>Related DFIQ
+              <v-chip class="ml-3" density="comfortable">{{ relatedObjectTabCount["dfiq"] }}</v-chip></v-tab
             >
             <v-tab value="related-tagged"
               ><v-icon size="x-large" start>mdi-tag</v-icon>Tag relationships
@@ -146,6 +156,15 @@
               />
             </v-window-item>
 
+            <v-window-item value="related-dfiq" eager class="my-4">
+              <related-objects
+                :id="id"
+                :source-type="typeToEndpointMapping[objectType]"
+                :target-types="objectTypes['dfiq'].map(def => def.type)"
+                @totalUpdated="value => countObjects('dfiq', value)"
+              />
+            </v-window-item>
+
             <v-window-item value="related-tagged" eager class="my-4">
               <related-objects
                 :id="id"
@@ -165,17 +184,17 @@
 
 <script lang="ts" setup>
 import axios from "axios";
-import { marked } from "marked";
-import DOMPurify from "dompurify";
 
 import RelatedObjects from "@/components/RelatedObjects.vue";
 import EditObject from "@/components/EditObject.vue";
 import LinkObject from "@/components/LinkObject.vue";
 import YetiMarkdown from "@/components/YetiMarkdown.vue";
+import YetiDFIQApproachTemplate from "@/components/YetiDFIQApproachTemplate.vue";
 
 import { ENTITY_TYPES } from "@/definitions/entityDefinitions.js";
 import { OBSERVABLE_TYPES } from "@/definitions/observableDefinitions.js";
 import { INDICATOR_TYPES } from "@/definitions/indicatorDefinitions.js";
+import { DFIQ_TYPES } from "@/definitions/dfiqDefinitions.js";
 
 import moment from "moment";
 </script>
@@ -196,7 +215,8 @@ export default {
     RelatedObjects,
     EditObject,
     LinkObject,
-    YetiMarkdown
+    YetiMarkdown,
+    YetiDFIQApproachTemplate
   },
   data() {
     return {
@@ -206,12 +226,14 @@ export default {
       objectTypes: {
         entity: ENTITY_TYPES,
         observable: OBSERVABLE_TYPES,
-        indicator: INDICATOR_TYPES
+        indicator: INDICATOR_TYPES,
+        dfiq: DFIQ_TYPES
       },
       typeToEndpointMapping: {
         entity: "entities",
         observable: "observables",
-        indicator: "indicators"
+        indicator: "indicators",
+        dfiq: "dfiq"
       },
       objectTags: [],
       relatedObjectTabCount: {},
@@ -259,7 +281,7 @@ export default {
     },
     navigateToFirstPopulatedTab() {
       let tabKeys = this.objectTypes.entity.map(entityType => entityType.type);
-      tabKeys = tabKeys.concat(["indicators", "observables", "tagged"]);
+      tabKeys = tabKeys.concat(["indicators", "observables", "tagged", "dfiq"]);
 
       for (const key of tabKeys) {
         if (this.relatedObjectTabCount[key] > 0) {
@@ -274,11 +296,11 @@ export default {
     }
   },
   computed: {
-    getObjectTypeDefintiions() {
+    getObjectTypeDefintions() {
       return this.objectTypes[this.objectType].find(typeDef => typeDef.type === this.object?.type);
     },
     getObjectInfoFields() {
-      return this.getObjectTypeDefintiions?.fields.filter(field => !this.hideFieldsInfoBox.includes(field.field));
+      return this.getObjectTypeDefintions?.fields.filter(field => !this.hideFieldsInfoBox.includes(field.field));
     },
     displayedEntityTypes() {
       return this.objectTypes["entity"].filter(type => this.relatedObjectTabCount[type.type] > 0);

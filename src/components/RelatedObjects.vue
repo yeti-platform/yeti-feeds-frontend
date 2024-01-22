@@ -57,6 +57,15 @@
               </router-link>
             </span>
           </span>
+          <span v-else-if="node.root_type === 'dfiq'" class="short-links">
+            <v-icon :icon="getIconForType(node.type)" start size="small"></v-icon>
+            <span>
+              <v-tooltip activator="parent" location="top" :open-delay="200">{{ node.name }}</v-tooltip>
+              <router-link :to="{ name: 'DFIQDetails', params: { id: node.id } }">
+                {{ node.name }}
+              </router-link>
+            </span>
+          </span>
           <span v-else>
             <v-chip> {{ node.name }}</v-chip>
           </span>
@@ -97,6 +106,7 @@ import axios from "axios";
 
 import { ENTITY_TYPES } from "@/definitions/entityDefinitions.js";
 import { INDICATOR_TYPES } from "@/definitions/indicatorDefinitions.js";
+import { DFIQ_TYPES } from "@/definitions/dfiqDefinitions.js";
 import EditLink from "@/components/EditLink.vue";
 import YetiMarkdown from "@/components/YetiMarkdown.vue";
 </script>
@@ -135,7 +145,7 @@ export default {
       perPage: 20,
       total: 0,
       loading: false,
-      objectTypes: ENTITY_TYPES.concat(INDICATOR_TYPES),
+      objectTypes: ENTITY_TYPES.concat(INDICATOR_TYPES).concat(DFIQ_TYPES),
       showEditLink: false
     };
   },
