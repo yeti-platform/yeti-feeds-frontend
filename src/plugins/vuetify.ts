@@ -9,10 +9,10 @@ import "@mdi/font/css/materialdesignicons.css";
 import "vuetify/styles";
 import { md3 } from "vuetify/blueprints";
 import { aliases, mdi } from "vuetify/iconsets/mdi";
-import colors from 'vuetify/util/colors'
+import colors from "vuetify/util/colors";
 
 // Composables
-import { createVuetify , type ThemeDefinition} from "vuetify";
+import { createVuetify, type ThemeDefinition } from "vuetify";
 import { convertCompilerOptionsFromJson } from "typescript";
 
 const yetiDarkTheme: ThemeDefinition = {
@@ -30,8 +30,8 @@ const yetiDarkTheme: ThemeDefinition = {
     error: colors.red.lighten3,
     warning: colors.orange.lighten3,
     // custom
-    "app-bar-color": '#212121'
-  },
+    "app-bar-color": "#212121"
+  }
 };
 
 const yetiLightTheme: ThemeDefinition = {
@@ -40,27 +40,28 @@ const yetiLightTheme: ThemeDefinition = {
     // background: '#FFFFFF',
     surface: colors.grey.lighten5,
     primary: colors.blue.darken1,
-    'primary-darken-1': colors.blue.darken2,
+    "primary-darken-1": colors.blue.darken2,
     // secondary: '#03DAC6',
     // 'secondary-darken-1': '#018786',
     // error: '#B00020',
     // info: '#2196F3',
     // success: '#4CAF50',
+    error: colors.red.lighten3,
     // warning: '#FB8C00',
     // custom
     cancel: colors.red.darken1,
-    "app-bar-color": '#212121'
-  },
+    "app-bar-color": "#212121"
+  }
 };
 
 // https://vuetifyjs.com/en/introduction/why-vuetify/#feature-guides
 export default createVuetify({
   defaults: {
     global: {
-      ripple: false,
+      ripple: false
     },
     VApp: {
-     style: 'font-family: "Roboto", sans-serif;'
+      style: 'font-family: "Roboto", sans-serif;'
     },
     VCombobox: {
       variant: "outlined"
@@ -97,7 +98,8 @@ export default createVuetify({
   theme: {
     defaultTheme: "yetiDarkTheme",
     themes: {
-      yetiDarkTheme, yetiLightTheme
+      yetiDarkTheme,
+      yetiLightTheme
     }
   }
 });

@@ -13,21 +13,21 @@
     </v-list>
   </v-sheet>
 
-  <v-card>
+  <v-card class="dfiq-covered ma-4">
     <v-card-title>Covered</v-card-title>
     <v-card-text>
-      <v-list density="compact">
-        <v-list-item v-for="ref in view.notes.covered"><span v-html="markdownifyText(ref)"></span></v-list-item>
-      </v-list>
+      <ul>
+        <li class="mb-2 ml-5" v-for="ref in view.notes.covered"><span v-html="markdownifyText(ref)"></span></li>
+      </ul>
     </v-card-text>
   </v-card>
 
-  <v-card>
+  <v-card class="dfiq-not-covered ma-4">
     <v-card-title>Not covered</v-card-title>
     <v-card-text>
-      <v-list density="compact">
-        <v-list-item v-for="ref in view.notes.not_covered"><span v-html="markdownifyText(ref)"></span></v-list-item>
-      </v-list>
+      <ul>
+        <li class="mb-2 ml-5" v-for="ref in view.notes.not_covered"><span v-html="markdownifyText(ref)"></span></li>
+      </ul>
     </v-card-text>
   </v-card>
 
@@ -189,5 +189,15 @@ export default {
 .dfiq-step-description {
   /* margin-left: 1rem;
   color: blue; */
+}
+
+.dfiq-covered {
+  border: 2px solid rgb(var(--v-theme-success));
+  background: rgba(0, 160, 66, 0.1);
+}
+
+.dfiq-not-covered {
+  border: 2px solid rgb(var(--v-theme-error));
+  background: rgba(155, 0, 0, 0.1);
 }
 </style>
