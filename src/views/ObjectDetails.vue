@@ -4,36 +4,11 @@
       <v-col>
         <v-card class="ma-2" variant="flat">
           <template v-slot:title>
-            <div class="d-flex">
-              <v-chip class="mr-3" color="primary" :text="object?.type" label></v-chip>
+            <div class="d-flex yeti-object-title">
+              <div>
+                <v-chip class="mr-3" color="primary" :text="object?.type" label></v-chip>
+              </div>
               <code class="me-auto">{{ object?.name }}</code>
-
-              <v-dialog :width="editWidth" :fullscreen="fullScreenEdit">
-                <template v-slot:activator="{ props }">
-                  <v-btn class="me-2" variant="tonal" color="primary" v-bind="props" append-icon="mdi-pencil"
-                    >Edit
-                  </v-btn>
-                </template>
-
-                <template v-slot:default="{ isActive }">
-                  <edit-object
-                    :object="object"
-                    :is-active="isActive"
-                    @success="obj => (object = obj)"
-                    @toggle-fullscreen="toggleFullscreen"
-                  />
-                </template>
-              </v-dialog>
-
-              <v-dialog :width="editWidth">
-                <template v-slot:activator="{ props }">
-                  <v-btn variant="tonal" color="primary" v-bind="props" append-icon="mdi-link">new link </v-btn>
-                </template>
-
-                <template v-slot:default="{ isActive }">
-                  <link-object :object="object" :is-active="isActive" />
-                </template>
-              </v-dialog>
             </div>
           </template>
           <v-card-text class="yeti-description" v-if="object">
@@ -55,7 +30,37 @@
       </v-col>
       <v-col cols="4">
         <v-card class="ma-2" variant="flat">
-          <v-card-title>Info</v-card-title>
+          <v-card-title class="d-flex"
+            ><span class="me-auto"> Info</span>
+            <v-dialog :width="editWidth" :fullscreen="fullScreenEdit">
+              <template v-slot:activator="{ props }">
+                <v-btn class="me-2" variant="tonal" color="primary" size="small" v-bind="props" append-icon="mdi-pencil"
+                  >Edit
+                </v-btn>
+              </template>
+
+              <template v-slot:default="{ isActive }">
+                <edit-object
+                  :object="object"
+                  :is-active="isActive"
+                  @success="obj => (object = obj)"
+                  @toggle-fullscreen="toggleFullscreen"
+                />
+              </template>
+            </v-dialog>
+
+            <v-dialog :width="editWidth">
+              <template v-slot:activator="{ props }">
+                <v-btn variant="tonal" color="primary" v-bind="props" size="small" append-icon="mdi-link"
+                  >new link
+                </v-btn>
+              </template>
+
+              <template v-slot:default="{ isActive }">
+                <link-object :object="object" :is-active="isActive" />
+              </template>
+            </v-dialog>
+          </v-card-title>
           <v-table density="compact">
             <tbody>
               <tr v-for="field in getObjectInfoFields">
@@ -321,5 +326,9 @@ export default {
 .v-card-text.yeti-description,
 .v-card-text.yeti-pattern-code {
   font-size: 1rem;
+}
+
+.yeti-object-title code {
+  white-space: normal;
 }
 </style>
