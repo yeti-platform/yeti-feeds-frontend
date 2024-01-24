@@ -4,8 +4,6 @@ RUN apt update && apt install \
     python3 \
     git
 
-RUN npm install -g n && n 16
-
 ADD . /app
 WORKDIR /app
 
