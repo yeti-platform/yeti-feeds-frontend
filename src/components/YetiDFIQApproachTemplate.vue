@@ -7,7 +7,7 @@
       <ul class="ml-5">
         <li class="mb-2" v-for="ref in description.references"><span v-html="markdownifyText(ref)"></span></li>
       </ul>
-      <ul class="ml-5" v-if="description.references_internal.length > 0">
+      <ul class="ml-5" v-if="description.references_internal?.length > 0">
         <li class="mb-2" v-for="ref in description.references_internal">
           <span v-html="markdownifyText(ref)"></span>
         </li>

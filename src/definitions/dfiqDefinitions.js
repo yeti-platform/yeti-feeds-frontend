@@ -22,8 +22,9 @@ export const DFIQ_TYPES = [
       { field: "name", type: "text", label: "Name", displayList: true, editable: true },
       { field: "dfiq_version", type: "text", label: "DFIQ Version", displayList: false, editable: true },
       { field: "dfiq_tags", type: "list", label: "DFIQ tags", displayList: true, editable: true },
-      { field: "contributors", type: "list", label: "Contributors", displayList: false, editable: true },
+      { field: "parent_ids", type: "list", label: "Parent IDs", displayList: true, editable: true },
       { field: "description", type: "longtext", label: "Description", displayList: false, editable: true },
+      { field: "contributors", type: "list", label: "Contributors", displayList: false, editable: true },
       { field: "modified", type: "date", label: "Modified on", displayList: false, editable: false },
       { field: "created", type: "date", label: "Created on", displayList: true, editable: false, width: "200px" }
     ],
@@ -37,6 +38,7 @@ export const DFIQ_TYPES = [
       { field: "name", type: "text", label: "Name", displayList: true, editable: true },
       { field: "dfiq_version", type: "text", label: "DFIQ Version", displayList: false, editable: true },
       { field: "dfiq_tags", type: "list", label: "DFIQ tags", displayList: true, editable: true },
+      { field: "parent_ids", type: "list", label: "Parent IDs", displayList: true, editable: true },
       { field: "contributors", type: "list", label: "Contributors", displayList: false, editable: true },
       { field: "description", type: "longtext", label: "Description", displayList: false, editable: true },
       { field: "modified", type: "date", label: "Modified on", displayList: false, editable: false },
@@ -53,7 +55,6 @@ export const DFIQ_TYPES = [
       { field: "dfiq_version", type: "text", label: "DFIQ Version", displayList: false, editable: true },
       { field: "dfiq_tags", type: "list", label: "DFIQ tags", displayList: true, editable: true },
       { field: "contributors", type: "list", label: "Contributors", displayList: false, editable: true },
-      // { field: "description", type: "longtext", label: "Description", displayList: false, editable: false },
       { field: "modified", type: "date", label: "Modified on", displayList: false, editable: false },
       { field: "created", type: "date", label: "Created on", displayList: true, editable: false, width: "200px" }
     ],
