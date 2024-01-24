@@ -1,7 +1,7 @@
 <template>
   <v-sheet>
     <div class="text-h6">{{ description.summary }}</div>
-    {{ description.details }}
+    <div v-html="markdownifyText(description.details)"></div>
     <div class="mt-5">
       <div class="font-weight-bold mb-2">References:</div>
       <ul class="ml-5">
