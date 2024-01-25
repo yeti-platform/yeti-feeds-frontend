@@ -164,7 +164,7 @@ export const OBSERVABLE_TYPES = [
     ]
   },
   {
-    name: "TSLH",
+    name: "TLSH",
     type: "tlsh",
     fields: [
       { field: "value", type: "text", label: "Value", displayList: true, editable: true },
