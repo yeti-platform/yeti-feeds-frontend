@@ -54,27 +54,27 @@
         class="mt-2"
       />
     </v-list-item>
-    <v-list-item>
+    <v-list-item class="mb-4">
       <v-btn prepend-icon="mdi-plus">
-          New Observable
-          <v-menu activator="parent">
-            <v-list>
-              <v-dialog v-for="typeDef in observableTypes" :width="editWidth" :fullscreen="fullScreenEdit">
-                <template v-slot:activator="{ props }">
-                  <v-list-item v-bind="props"> {{ typeDef.name }} </v-list-item>
-                </template>
-                <template v-slot:default="{ isActive }">
-                  <new-object
-                    :object-type="typeDef.type"
-                    @close="isActive.value = false"
-                    @toggle-fullscreen="toggleNewObjectFullscreen"
-                  />
-                </template>
-              </v-dialog>
-            </v-list>
-          </v-menu>
-        </v-btn>
-      </v-list-item>
+        New Observable
+        <v-menu activator="parent">
+          <v-list>
+            <v-dialog v-for="typeDef in observableTypes" :width="editWidth" :fullscreen="fullScreenEdit">
+              <template v-slot:activator="{ props }">
+                <v-list-item v-bind="props"> {{ typeDef.name }} </v-list-item>
+              </template>
+              <template v-slot:default="{ isActive }">
+                <new-object
+                  :object-type="typeDef.type"
+                  @close="isActive.value = false"
+                  @toggle-fullscreen="toggleNewObjectFullscreen"
+                />
+              </template>
+            </v-dialog>
+          </v-list>
+        </v-menu>
+      </v-btn>
+    </v-list-item>
     <v-divider></v-divider>
     <v-expansion-panels>
       <v-expansion-panel title="Bulk actions" @group:selected="showSelect = $event.value">
