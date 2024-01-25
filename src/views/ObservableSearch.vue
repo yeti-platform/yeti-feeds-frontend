@@ -61,7 +61,7 @@
             <v-list>
               <v-dialog v-for="typeDef in observableTypes" :width="editWidth" :fullscreen="fullScreenEdit">
                 <template v-slot:activator="{ props }">
-                  <v-list-item v-bind="props" :prepend-icon="typeDef.icon"> {{ typeDef.name }} </v-list-item>
+                  <v-list-item v-bind="props"> {{ typeDef.name }} </v-list-item>
                 </template>
                 <template v-slot:default="{ isActive }">
                   <new-object
