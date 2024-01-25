@@ -51,6 +51,11 @@ export default {
         entity: "entities",
         observable: "observables/extended",
         indicator: "indicators"
+      },
+      typeToSavedObjectPath: {
+        entity: "entities",
+        observable: "observables",
+        indicator: "indicators"
       }
     };
   },
@@ -75,23 +80,7 @@ export default {
         })
         .then(response => {
           this.$eventBus.emit("displayMessage", { message: `New ${this.objectType} created`, status: "success" });
-          let _name = "";
-          if (response.data.root_type == "entity")
-          {
-            _name = "EntityDetails";
-          }
-          else if (response.data.root_type == "indicator")
-          {
-            _name = "IndicatorDetails";
-          }
-          else if (response.data.root_type == "observable")
-          {
-            _name = "ObservableDetails";
-          }
-          this.$router.push({
-            name: _name,
-            params: { id: response.data.id, type: response.data.type }
-          });
+          this.$router.push({ path: `/${this.typeToSavedObjectPath[this.newObject.root_type]}/${response.data.id}` });
         })
         .catch(error => {
           console.log(error);
@@ -134,7 +123,6 @@ export default {
       {
         return "unknown";
       }
-//      return ENTITY_TYPES.find(t => t.type === this.objectType) ? "entity" : "indicator";
     }
   }
 };
