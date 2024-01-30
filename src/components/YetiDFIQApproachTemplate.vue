@@ -1,7 +1,7 @@
 <template>
   <v-sheet>
     <div class="text-h6">{{ description.summary }}</div>
-    <div v-html="markdownifyText(description.details)"></div>
+    <div class="yeti-markdown" v-html="markdownifyText(description.details)"></div>
     <div class="mt-5">
       <div class="font-weight-bold mb-2">References:</div>
       <ul class="ml-5">
