@@ -28,6 +28,7 @@ import axios from "axios";
 
 import { ENTITY_TYPES } from "@/definitions/entityDefinitions.js";
 import { INDICATOR_TYPES } from "@/definitions/indicatorDefinitions.js";
+import { OBSERVABLE_TYPES } from "@/definitions/observableDefinitions.js";
 import ObjectFields from "@/components/ObjectFields.vue";
 import { objectTypeAnnotation } from "@babel/types";
 </script>
@@ -47,6 +48,11 @@ export default {
       errors: [],
       fullScreen: false,
       typeToEndpointMapping: {
+        entity: "entities",
+        observable: "observables/extended",
+        indicator: "indicators"
+      },
+      typeToSavedObjectPath: {
         entity: "entities",
         observable: "observables",
         indicator: "indicators"
@@ -74,10 +80,7 @@ export default {
         })
         .then(response => {
           this.$eventBus.emit("displayMessage", { message: `New ${this.objectType} created`, status: "success" });
-          this.$router.push({
-            name: response.data.root_type == "entity" ? "EntityDetails" : "IndicatorDetails",
-            params: { id: response.data.id, type: response.data.type }
-          });
+          this.$router.push({ path: `/${this.typeToSavedObjectPath[this.newObject.root_type]}/${response.data.id}` });
         })
         .catch(error => {
           console.log(error);
@@ -97,14 +100,29 @@ export default {
   computed: {
     typeDefinition() {
       return (
-        ENTITY_TYPES.find(t => t.type === this.objectType) || INDICATOR_TYPES.find(t => t.type === this.objectType)
-      );
+        ENTITY_TYPES.find(t => t.type === this.objectType) || INDICATOR_TYPES.find(t => t.type === this.objectType) || OBSERVABLE_TYPES.find(t => t.type === this.objectType)
+        );
     },
     editableFields() {
       return this.typeDefinition.fields.filter(field => field.editable);
     },
     objectRootType() {
-      return ENTITY_TYPES.find(t => t.type === this.objectType) ? "entity" : "indicator";
+      if ( ENTITY_TYPES.find(t => t.type === this.objectType) )
+      {
+        return "entity";
+      }
+      else if ( INDICATOR_TYPES.find(t => t.type === this.objectType) )
+      {
+        return "indicator";
+      }
+      else if ( OBSERVABLE_TYPES.find(t => t.type === this.objectType) )
+      {
+        return "observable";
+      }
+      else
+      {
+        return "unknown";
+      }
     }
   }
 };
