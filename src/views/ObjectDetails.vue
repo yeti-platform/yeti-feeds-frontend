@@ -40,7 +40,15 @@
               </template>
 
               <template v-slot:default="{ isActive }">
+                <edit-DFIQ-object
+                  v-if="object?.root_type === 'dfiq'"
+                  :object="object"
+                  :is-active="isActive"
+                  @success="obj => (object = obj)"
+                  @toggle-fullscreen="toggleFullscreen"
+                />
                 <edit-object
+                  v-else
                   :object="object"
                   :is-active="isActive"
                   @success="obj => (object = obj)"
@@ -192,6 +200,7 @@ import axios from "axios";
 
 import RelatedObjects from "@/components/RelatedObjects.vue";
 import EditObject from "@/components/EditObject.vue";
+import EditDFIQObject from "@/components/EditDFIQObject.vue";
 import LinkObject from "@/components/LinkObject.vue";
 import YetiMarkdown from "@/components/YetiMarkdown.vue";
 import YetiDFIQApproachTemplate from "@/components/YetiDFIQApproachTemplate.vue";
@@ -219,6 +228,7 @@ export default {
   components: {
     RelatedObjects,
     EditObject,
+    EditDFIQObject,
     LinkObject,
     YetiMarkdown,
     YetiDFIQApproachTemplate
