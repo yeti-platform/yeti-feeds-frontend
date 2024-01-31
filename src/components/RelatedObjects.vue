@@ -21,12 +21,12 @@
             <v-icon v-if="node.direction == 'out'">mdi-arrow-right</v-icon>
             <v-icon v-else-if="node.direction == 'in'">mdi-arrow-left</v-icon>
 
-            <v-btn size="small" variant="text" append-icon="mdi-information" v-if="node.description">
+            <v-btn size="small" variant="text" append-icon="mdi-information">
               <template v-slot:append>
-                <v-icon class="on-surface"></v-icon>
+                <v-icon class="on-surface" v-if="node.description"></v-icon>
               </template>
               {{ node.type }}
-              <v-menu activator="parent">
+              <v-menu activator="parent" v-if="node.description">
                 <v-sheet class="px-5 py-2" color="background" width="auto" elevation="10" style="font-size: 0.8rem">
                   <yeti-markdown :text="node.description" />
                 </v-sheet>
