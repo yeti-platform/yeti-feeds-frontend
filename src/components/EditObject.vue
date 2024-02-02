@@ -71,8 +71,6 @@ export default {
         patchRequest[field.field] = this.localObject[field.field];
       });
 
-      console.log(this.object);
-
       axios
         .patch(`/api/v2/${this.typeToEndpointMapping[this.object.root_type]}/${this.object.id}`, {
           [this.object.root_type]: patchRequest
