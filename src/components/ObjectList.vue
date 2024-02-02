@@ -16,13 +16,7 @@
       <template v-slot:item.name="{ item }">
         <span class="short-links">
           <v-tooltip activator="parent" location="top" :open-delay="200">{{ item.name }}</v-tooltip>
-          <router-link
-            :to="{
-              name: searchType === 'entities' ? 'EntityDetails' : 'IndicatorDetails',
-              params: { id: item.id }
-            }"
-            >{{ item.name }}</router-link
-          >
+          <router-link :to="`${searchType}/${item.id}`">{{ item.name }}</router-link>
         </span>
       </template>
       <template v-slot:item.tags="{ item }">
@@ -36,6 +30,9 @@
       </template>
       <template v-slot:item.relevant_tags="{ item }">
         <v-chip v-for="name in item.relevant_tags" :text="name" class="mr-1" size="small"></v-chip>
+      </template>
+      <template v-slot:item.dfiq_tags="{ item }">
+        <v-chip v-for="name in item.dfiq_tags" :text="name" class="mr-1" size="small"></v-chip>
       </template>
       <template v-slot:item.aliases="{ item }">
         <v-chip v-for="value in item.aliases" :text="value" class="mr-1" size="small"></v-chip>
@@ -53,6 +50,9 @@
       </template>
       <template v-slot:item.created="{ item }">
         {{ moment(item.created).format("YYYY-MM-DD HH:mm:ss") }}
+      </template>
+      <template v-slot:item.modified="{ item }">
+        {{ moment(item.modified).format("YYYY-MM-DD HH:mm:ss") }}
       </template>
       <template v-slot:item.last_seen="{ item }">
         {{ moment(item.last_seen).format("YYYY-MM-DD HH:mm:ss") }}

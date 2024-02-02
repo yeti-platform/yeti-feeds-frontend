@@ -1,11 +1,30 @@
 // Composables
 import { createRouter, createWebHistory } from "vue-router";
 
+import Default from "@/layouts/default/Default.vue";
+import Login from "@/views/Login.vue";
+
+import ObservableMatch from "@/views/ObservableMatch.vue";
+import ObservableSearch from "@/views/ObservableSearch.vue";
+import ObservableDetails from "@/views/ObservableDetails.vue";
+import ObjectDetails from "@/views/ObjectDetails.vue";
+import EntitySearch from "@/views/EntitySearch.vue";
+import IndicatorSearch from "@/views/IndicatorSearch.vue";
+import DFIQSearch from "@/views/DFIQSearch.vue";
+import AnalyticsList from "@/views/AnalyticsList.vue";
+import ExportList from "@/views/ExportList.vue";
+import ExportTemplates from "@/views/ExportTemplates.vue";
+import TaskList from "@/components/TaskList.vue";
+import UserProfile from "@/views/UserProfile.vue";
+import UserAdmin from "@/views/UserAdmin.vue";
+import TagsAdmin from "@/views/TagsAdmin.vue";
+import System from "@/views/System.vue";
+
 const routes = [
   {
     path: "/login",
     name: "Login",
-    component: () => import("@/views/Login.vue")
+    component: Login
   },
   {
     path: "/",
@@ -14,74 +33,91 @@ const routes = [
   },
   {
     path: "/search",
-    component: () => import("@/layouts/default/Default.vue"),
+    component: Default,
     children: [
       {
         path: "",
         name: "ObservableMatch",
-        component: () => import("@/views/ObservableMatch.vue")
+        component: ObservableMatch
       }
     ]
   },
   {
     path: "/observables",
-    component: () => import("@/layouts/default/Default.vue"),
+    component: Default,
     children: [
       {
         path: "",
         name: "ObservableSearch",
-        component: () => import("@/views/ObservableSearch.vue")
+        component: ObservableSearch
       },
       {
         path: ":id([0-9]+)",
         name: "ObservableDetails",
-        component: () => import("@/views/ObservableDetails.vue"),
+        component: ObservableDetails,
         props: true
       }
     ]
   },
   {
     path: "/entities",
-    component: () => import("@/layouts/default/Default.vue"),
+    component: Default,
     children: [
       {
         path: "",
         name: "Entities",
-        component: () => import("@/views/EntitySearch.vue")
+        component: EntitySearch
       },
       {
         path: ":id([0-9]+)",
         name: "EntityDetails",
-        component: () => import("@/views/ObjectDetails.vue"),
+        component: ObjectDetails,
         props: route => ({ id: String(route.params.id), objectType: "entity" })
       }
     ]
   },
   {
     path: "/indicators",
-    component: () => import("@/layouts/default/Default.vue"),
+    component: Default,
     children: [
       {
         path: "",
         name: "Indicators",
-        component: () => import("@/views/IndicatorSearch.vue")
+        component: IndicatorSearch
       },
       {
         path: ":id([0-9]+)",
         name: "IndicatorDetails",
-        component: () => import("@/views/ObjectDetails.vue"),
+        component: ObjectDetails,
         props: route => ({ id: String(route.params.id), objectType: "indicator" })
       }
     ]
   },
   {
+    path: "/dfiq",
+    component: Default,
+    children: [
+      {
+        path: "",
+        name: "DFIQ",
+        component: DFIQSearch
+      },
+      {
+        path: ":id([0-9]+)",
+        name: "DFIQDetails",
+        component: ObjectDetails,
+        props: route => ({ id: String(route.params.id), objectType: "dfiq" })
+      }
+    ]
+  },
+  {
     path: "/feeds",
-    component: () => import("@/layouts/default/Default.vue"),
+    component: Default,
     children: [
       {
         path: "",
         name: "Feeds",
-        component: () => import("@/components/TaskList.vue"),
+        component: TaskList,
         props: {
           taskType: "feed",
           displayColumns: ["name", "frequency", "last_run", "description", "status", "toggle", "refresh"]
@@ -91,78 +127,78 @@ const routes = [
   },
   {
     path: "/analytics",
-    component: () => import("@/layouts/default/Default.vue"),
+    component: Default,
     children: [
       {
         path: "",
         name: "Analytics",
-        component: () => import("@/views/AnalyticsList.vue"),
+        component: AnalyticsList,
         props: true
       }
     ]
   },
   {
     path: "/exports",
-    component: () => import("@/layouts/default/Default.vue"),
+    component: Default,
     children: [
       {
         path: "",
         name: "Exports",
-        component: () => import("@/views/ExportList.vue"),
+        component: ExportList,
         props: true
       }
     ]
   },
   {
     path: "/exports/templates",
-    component: () => import("@/layouts/default/Default.vue"),
+    component: Default,
     children: [
       {
         path: "",
         name: "ExportTemplates",
-        component: () => import("@/views/ExportTemplates.vue"),
+        component: ExportTemplates,
         props: true
       }
     ]
   },
   {
     path: "/profile",
-    component: () => import("@/layouts/default/Default.vue"),
+    component: Default,
     children: [
       {
         path: "",
         name: "UserProfile",
-        component: () => import("@/views/UserProfile.vue"),
+        component: UserProfile,
         props: true
       },
       {
         path: ":id([0-9]+)",
         name: "UserProfileAdmin",
-        component: () => import("@/views/UserProfile.vue"),
+        component: UserProfile,
         props: true
       }
     ]
   },
   {
     path: "/admin",
-    component: () => import("@/layouts/default/Default.vue"),
+    component: Default,
     children: [
       {
         path: "users",
         name: "UserAdmin",
-        component: () => import("@/views/UserAdmin.vue"),
+        component: UserAdmin,
         props: true
       },
       {
         path: "tags",
         name: "TagsAdmin",
-        component: () => import("@/views/TagsAdmin.vue"),
+        component: TagsAdmin,
         props: true
       },
       {
         path: "system",
         name: "System",
-        component: () => import("@/views/System.vue"),
+        component: System,
         props: true
       }
     ]
