@@ -1,5 +1,5 @@
 export const DIAMOND_MODEL = ["adversary", "capability", "infrastructure", "victim"];
-export const QUERY_TYPES = ["opensearch", "osquery", "sql", "splunk", "censys"];
+export const QUERY_TYPES = ["opensearch", "osquery", "sql", "splunk", "censys", "shodan"];
 
 export const INDICATOR_TYPES = [
   {
