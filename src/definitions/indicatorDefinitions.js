@@ -3,6 +3,29 @@ export const QUERY_TYPES = ["opensearch", "osquery", "sql", "splunk", "censys", 
 
 export const INDICATOR_TYPES = [
   {
+    name: "Forensic artifact",
+    type: "forensicartifact",
+    fields: [
+      { field: "created", type: "date", label: "Created", displayList: true, editable: false, width: "200px" },
+      { field: "name", type: "text", label: "Name", displayList: true, editable: true },
+      { field: "pattern", type: "code", label: "Pattern", displayList: false, editable: true },
+      { field: "relevant_tags", type: "list", label: "Relevant tags", displayList: true, editable: true },
+      { field: "aliases", type: "list", label: "Aliases", displayList: true, editable: true },
+      { field: "supported_os", type: "list", label: "Supported OS", displayList: true, editable: true },
+      { field: "location", type: "text", label: "Location", displayList: true, editable: true },
+      {
+        field: "diamond",
+        type: "option",
+        choices: DIAMOND_MODEL,
+        label: "Diamond model",
+        displayList: true,
+        editable: true
+      },
+      { field: "description", type: "longtext", label: "Description", displayList: false, editable: true }
+    ],
+    icon: "mdi-regex"
+  },
+  {
     name: "Regular expression",
     type: "regex",
     fields: [

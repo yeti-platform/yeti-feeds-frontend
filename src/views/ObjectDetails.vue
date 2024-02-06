@@ -23,9 +23,9 @@
         </v-card>
         <v-card v-if="object?.pattern" class="ma-2" variant="flat">
           <v-card-title>Pattern</v-card-title>
-          <v-card-text class="yeti-pattern-code"
-            ><code>{{ object.pattern }}</code></v-card-text
-          ></v-card
+          <v-card-text class="yeti-pattern-code">
+            <pre>{{ object.pattern }}</pre>
+          </v-card-text></v-card
         >
       </v-col>
       <v-col cols="4">

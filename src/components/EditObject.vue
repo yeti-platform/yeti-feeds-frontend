@@ -32,7 +32,6 @@ import { INDICATOR_TYPES } from "@/definitions/indicatorDefinitions.js";
 import { OBSERVABLE_TYPES } from "@/definitions/observableDefinitions.js";
 import { DFIQ_TYPES } from "@/definitions/dfiqDefinitions.js";
 import ObjectFields from "@/components/ObjectFields.vue";
-import { objectTypeAnnotation } from "@babel/types";
 </script>
 
 <script lang="ts">

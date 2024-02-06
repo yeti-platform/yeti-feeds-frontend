@@ -31,6 +31,9 @@
       <template v-slot:item.relevant_tags="{ item }">
         <v-chip v-for="name in item.relevant_tags" :text="name" class="mr-1" size="small"></v-chip>
       </template>
+      <template v-slot:item.supported_os="{ item }">
+        <v-chip v-for="name in item.supported_os" :text="name" class="mr-1" size="small"></v-chip>
+      </template>
       <template v-slot:item.dfiq_tags="{ item }">
         <v-chip v-for="name in item.dfiq_tags" :text="name" class="mr-1" size="small"></v-chip>
       </template>
