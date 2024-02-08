@@ -159,7 +159,7 @@ export default {
       fieldName = fieldName.replace(/_/g, " ");
       return fieldName;
     },
-    fetchNeighbors() {
+    fetchNeighbors({ page, itemsPerPage, sortBy }: { page: number; itemsPerPage: number; sortBy: string }) {
       this.loading = true;
       let graphSearchRequest = {
         source: `${this.sourceType}/${this.id}`,
@@ -168,8 +168,8 @@ export default {
         hops: this.hops,
         direction: "any",
         include_original: true,
-        count: this.perPage,
-        page: this.page - 1
+        count: itemsPerPage === -1 ? 0 : itemsPerPage,
+        page: page
       };
 
       axios

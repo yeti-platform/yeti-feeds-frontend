@@ -148,7 +148,7 @@ export default {
     loadOjects({ page, itemsPerPage, sortBy }: { page: number; itemsPerPage: number; sortBy: string }) {
       let params = {
         page: page - 1,
-        count: itemsPerPage,
+        count: itemsPerPage === -1 ? 0 : itemsPerPage,
         query: this.extractParamsFromSearchQuery(this.searchQuery, "name")
       };
       if (this.searchSubtype != "") {
