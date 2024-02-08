@@ -23,7 +23,7 @@ export const INDICATOR_TYPES = [
       },
       { field: "description", type: "longtext", label: "Description", displayList: false, editable: true }
     ],
-    icon: "mdi-regex"
+    icon: "mdi-script-text-outline"
   },
   {
     name: "Regular expression",
