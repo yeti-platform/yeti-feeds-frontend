@@ -145,11 +145,20 @@ export default {
       }
       return resultObj;
     },
-    loadOjects({ page, itemsPerPage, sortBy }: { page: number; itemsPerPage: number; sortBy: string }) {
+    loadOjects({
+      page,
+      itemsPerPage,
+      sortBy
+    }: {
+      page: number;
+      itemsPerPage: number;
+      sortBy: Array<{ key: string; order: string }>;
+    }) {
       let params = {
         page: page - 1,
         count: itemsPerPage === -1 ? 0 : itemsPerPage,
-        query: this.extractParamsFromSearchQuery(this.searchQuery, "name")
+        query: this.extractParamsFromSearchQuery(this.searchQuery, "name"),
+        sorting: sortBy.map(sort => [sort.key, sort.order === "desc"])
       };
       if (this.searchSubtype != "") {
         params["type"] = this.searchSubtype;
