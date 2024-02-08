@@ -264,7 +264,7 @@ export default {
         .then(response => {
           let tagNames: string[] = [];
           this.object = response.data;
-          this.objectTags = Object.keys(this.object.tags);
+          this.objectTags = this.object.tags ? Object.keys(this.object.tags) : [];
         })
         .catch(error => {
           console.log(error);
