@@ -132,7 +132,7 @@ export default {
       const souceType = data.source.type;
       const targetType = data.target.type;
       if (this.targetTypes.includes(targetType) || this.targetTypes.includes(souceType)) {
-        this.fetchNeighbors();
+        this.fetchNeighbors({ page: this.page, itemsPerPage: this.perPage });
       }
     });
   },
@@ -159,7 +159,7 @@ export default {
       fieldName = fieldName.replace(/_/g, " ");
       return fieldName;
     },
-    fetchNeighbors({ page, itemsPerPage, sortBy }: { page: number; itemsPerPage: number; sortBy: string }) {
+    fetchNeighbors({ page, itemsPerPage }: { page: number; itemsPerPage: number }) {
       this.loading = true;
       let graphSearchRequest = {
         source: `${this.sourceType}/${this.id}`,
@@ -169,7 +169,7 @@ export default {
         direction: "any",
         include_original: true,
         count: itemsPerPage === -1 ? 0 : itemsPerPage,
-        page: page
+        page: page - 1
       };
 
       axios
@@ -189,7 +189,7 @@ export default {
       axios
         .delete(`/api/v2/graph/${id}`)
         .then(() => {
-          this.fetchNeighbors();
+          this.fetchNeighbors({ page: this.page, itemsPerPage: this.perPage });
         })
         .catch(error => {
           console.log(error);
@@ -197,10 +197,6 @@ export default {
     },
     getIconForType(type) {
       return this.objectTypes.find(objectType => objectType.type === type).icon;
-    },
-    onPageChange(page) {
-      this.page = page;
-      this.fetchNeighbors();
     }
   },
   computed: {
@@ -246,8 +242,8 @@ export default {
   watch: {
     id: function () {
       this.page = 1;
-      this.total = 500;
-      this.fetchNeighbors();
+      this.perPage = 20;
+      this.fetchNeighbors({ page: this.page, itemsPerPage: this.perPage });
     }
   }
 };
