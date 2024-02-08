@@ -3,21 +3,46 @@ export const QUERY_TYPES = ["opensearch", "osquery", "sql", "splunk", "censys", 
 
 export const INDICATOR_TYPES = [
   {
-    name: "Regular expression",
-    type: "regex",
+    name: "Forensic artifact",
+    type: "forensicartifact",
     fields: [
-      { field: "created", type: "date", label: "Created", displayList: true, editable: false, width: "200px" },
+      { field: "created", type: "date", label: "Created", displayList: true, editable: false, width: "170px" },
       { field: "name", type: "text", label: "Name", displayList: true, editable: true },
       { field: "pattern", type: "code", label: "Pattern", displayList: false, editable: true },
       { field: "relevant_tags", type: "list", label: "Relevant tags", displayList: true, editable: true },
-      { field: "location", type: "text", label: "Location", displayList: true, editable: true },
+      { field: "aliases", type: "list", label: "Aliases", displayList: false, editable: true },
+      { field: "supported_os", type: "list", label: "Supported OS", displayList: true, editable: true, width: "140px" },
+      { field: "location", type: "text", label: "Location", displayList: false, editable: true },
       {
         field: "diamond",
         type: "option",
         choices: DIAMOND_MODEL,
         label: "Diamond model",
         displayList: true,
-        editable: true
+        editable: true,
+        width: "160px"
+      },
+      { field: "description", type: "longtext", label: "Description", displayList: false, editable: true }
+    ],
+    icon: "mdi-script-text-outline"
+  },
+  {
+    name: "Regular expression",
+    type: "regex",
+    fields: [
+      { field: "created", type: "date", label: "Created", displayList: true, editable: false, width: "170px" },
+      { field: "name", type: "text", label: "Name", displayList: true, editable: true },
+      { field: "pattern", type: "code", label: "Pattern", displayList: false, editable: true },
+      { field: "relevant_tags", type: "list", label: "Relevant tags", displayList: true, editable: true },
+      { field: "location", type: "text", label: "Location", displayList: false, editable: true },
+      {
+        field: "diamond",
+        type: "option",
+        choices: DIAMOND_MODEL,
+        label: "Diamond model",
+        displayList: true,
+        editable: true,
+        width: "160px"
       },
       { field: "description", type: "longtext", label: "Description", displayList: false, editable: true }
     ],
@@ -40,7 +65,7 @@ export const INDICATOR_TYPES = [
         editable: true
       },
       { field: "target_systems", type: "list", label: "Target systems", displayList: true, editable: true },
-      { field: "location", type: "text", label: "Location", displayList: true, editable: true },
+      { field: "location", type: "text", label: "Location", displayList: false, editable: true },
       {
         field: "diamond",
         type: "option",
@@ -61,7 +86,7 @@ export const INDICATOR_TYPES = [
       { field: "name", type: "text", label: "Name", displayList: true, editable: true },
       { field: "pattern", type: "code", label: "Rule text", displayList: false, editable: true },
       { field: "relevant_tags", type: "list", label: "Relevant tags", displayList: true, editable: true },
-      { field: "location", type: "text", label: "Location", displayList: true, editable: true },
+      { field: "location", type: "text", label: "Location", displayList: false, editable: true },
       {
         field: "diamond",
         type: "option",
@@ -82,7 +107,7 @@ export const INDICATOR_TYPES = [
       { field: "name", type: "text", label: "Name", displayList: true, editable: true },
       { field: "pattern", type: "code", label: "Rule text", displayList: false, editable: true },
       { field: "relevant_tags", type: "list", label: "Relevant tags", displayList: true, editable: true },
-      { field: "location", type: "text", label: "Location", displayList: true, editable: true },
+      { field: "location", type: "text", label: "Location", displayList: false, editable: true },
       {
         field: "diamond",
         type: "option",

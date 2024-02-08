@@ -32,7 +32,6 @@ import { INDICATOR_TYPES } from "@/definitions/indicatorDefinitions.js";
 import { OBSERVABLE_TYPES } from "@/definitions/observableDefinitions.js";
 import { DFIQ_TYPES } from "@/definitions/dfiqDefinitions.js";
 import ObjectFields from "@/components/ObjectFields.vue";
-import { objectTypeAnnotation } from "@babel/types";
 </script>
 
 <script lang="ts">
@@ -84,11 +83,10 @@ export default {
           this.isActive.value = false;
         })
         .catch(error => {
-          console.log(error);
           this.errors = error.response.data.detail
-            .filter(detail => detail.loc[1] !== "type")
+            .filter(detail => detail["loc"][2].toLowerCase() === this.typeDefinition.type)
             .map(detail => {
-              return { field: detail.loc[1], message: detail.msg };
+              return { field: detail["loc"][3], message: detail.msg };
             });
         })
         .finally();

@@ -31,6 +31,9 @@
       <template v-slot:item.relevant_tags="{ item }">
         <v-chip v-for="name in item.relevant_tags" :text="name" class="mr-1" size="small"></v-chip>
       </template>
+      <template v-slot:item.supported_os="{ item }">
+        <v-chip v-for="name in item.supported_os" :text="name" class="mr-1" size="small"></v-chip>
+      </template>
       <template v-slot:item.dfiq_tags="{ item }">
         <v-chip v-for="name in item.dfiq_tags" :text="name" class="mr-1" size="small"></v-chip>
       </template>
@@ -142,11 +145,20 @@ export default {
       }
       return resultObj;
     },
-    loadOjects({ page, itemsPerPage, sortBy }: { page: number; itemsPerPage: number; sortBy: string }) {
+    loadOjects({
+      page,
+      itemsPerPage,
+      sortBy
+    }: {
+      page: number;
+      itemsPerPage: number;
+      sortBy: Array<{ key: string; order: string }>;
+    }) {
       let params = {
         page: page - 1,
-        count: itemsPerPage,
-        query: this.extractParamsFromSearchQuery(this.searchQuery, "name")
+        count: itemsPerPage === -1 ? 0 : itemsPerPage,
+        query: this.extractParamsFromSearchQuery(this.searchQuery, "name"),
+        sorting: sortBy.map(sort => [sort.key, sort.order === "desc"])
       };
       if (this.searchSubtype != "") {
         params["type"] = this.searchSubtype;
