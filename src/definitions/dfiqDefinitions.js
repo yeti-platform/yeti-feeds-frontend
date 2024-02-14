@@ -5,6 +5,7 @@ export const DFIQ_TYPES = [
     fields: [
       { field: "dfiq_id", type: "text", label: "DFIQ ID", displayList: true, editable: true, width: "120px" },
       { field: "name", type: "text", label: "Name", displayList: true, editable: true },
+      { field: "internal", type: "bool", label: "Internal", displayList: false, editable: false },
       { field: "dfiq_version", type: "text", label: "DFIQ Version", displayList: false, editable: true },
       { field: "dfiq_tags", type: "list", label: "DFIQ tags", displayList: true, editable: true },
       { field: "contributors", type: "list", label: "Contributors", displayList: false, editable: true },
@@ -20,6 +21,7 @@ export const DFIQ_TYPES = [
     fields: [
       { field: "dfiq_id", type: "text", label: "DFIQ ID", displayList: true, editable: true, width: "120px" },
       { field: "name", type: "text", label: "Name", displayList: true, editable: true },
+      { field: "internal", type: "bool", label: "Internal", displayList: false, editable: false },
       { field: "dfiq_version", type: "text", label: "DFIQ Version", displayList: false, editable: true },
       { field: "dfiq_tags", type: "list", label: "DFIQ tags", displayList: true, editable: true },
       { field: "parent_ids", type: "list", label: "Parent IDs", displayList: true, editable: true },
@@ -36,6 +38,7 @@ export const DFIQ_TYPES = [
     fields: [
       { field: "dfiq_id", type: "text", label: "DFIQ ID", displayList: true, editable: true, width: "120px" },
       { field: "name", type: "text", label: "Name", displayList: true, editable: true },
+      { field: "internal", type: "bool", label: "Internal", displayList: false, editable: false },
       { field: "dfiq_version", type: "text", label: "DFIQ Version", displayList: false, editable: true },
       { field: "dfiq_tags", type: "list", label: "DFIQ tags", displayList: true, editable: true },
       { field: "parent_ids", type: "list", label: "Parent IDs", displayList: true, editable: true },
@@ -52,6 +55,7 @@ export const DFIQ_TYPES = [
     fields: [
       { field: "dfiq_id", type: "text", label: "DFIQ ID", displayList: true, editable: true, width: "120px" },
       { field: "name", type: "text", label: "Name", displayList: true, editable: true },
+      { field: "internal", type: "bool", label: "Internal", displayList: false, editable: false },
       { field: "dfiq_version", type: "text", label: "DFIQ Version", displayList: false, editable: true },
       { field: "dfiq_tags", type: "list", label: "DFIQ tags", displayList: true, editable: true },
       { field: "contributors", type: "list", label: "Contributors", displayList: false, editable: true },
