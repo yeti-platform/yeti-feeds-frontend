@@ -24,6 +24,7 @@ export const INDICATOR_TYPES = [
       },
       { field: "description", type: "longtext", label: "Description", displayList: false, editable: true }
     ],
+    filterAliases: ["aliases"],
     icon: "mdi-script-text-outline"
   },
   {
@@ -46,6 +47,7 @@ export const INDICATOR_TYPES = [
       },
       { field: "description", type: "longtext", label: "Description", displayList: false, editable: true }
     ],
+    filterAliases: ["relevant_tags"],
     icon: "mdi-regex"
   },
   {
@@ -76,6 +78,7 @@ export const INDICATOR_TYPES = [
       },
       { field: "description", type: "longtext", label: "Description", displayList: false, editable: true }
     ],
+    filterAliases: ["target_systems"],
     icon: "mdi-database-search"
   },
   {
@@ -97,6 +100,7 @@ export const INDICATOR_TYPES = [
       },
       { field: "description", type: "longtext", label: "Description", displayList: false, editable: true }
     ],
+    filterAliases: [],
     icon: "mdi-code-braces"
   },
   {
@@ -118,6 +122,7 @@ export const INDICATOR_TYPES = [
       },
       { field: "description", type: "longtext", label: "Description", displayList: false, editable: true }
     ],
+    filterAliases: [],
     icon: "mdi-xml"
   }
 ];

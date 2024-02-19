@@ -69,7 +69,6 @@
 
 <script lang="ts" setup>
 import axios from "axios";
-import { ENTITY_TYPES } from "@/definitions/entityDefinitions.js";
 
 import moment from "moment";
 </script>
@@ -97,6 +96,10 @@ export default {
         { title: "Tags", key: "tags" },
         { title: "Created on", key: "created", width: "200px" }
       ]
+    },
+    filterAliases: {
+      type: Array,
+      default: () => []
     },
     checkable: {
       type: Boolean,
@@ -158,6 +161,7 @@ export default {
         page: page - 1,
         count: itemsPerPage === -1 ? 0 : itemsPerPage,
         query: this.extractParamsFromSearchQuery(this.searchQuery, "name"),
+        filter_aliases: this.filterAliases,
         sorting: sortBy.map(sort => [sort.key, sort.order === "desc"])
       };
       if (this.searchSubtype != "") {
