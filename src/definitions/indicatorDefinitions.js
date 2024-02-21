@@ -47,7 +47,7 @@ export const INDICATOR_TYPES = [
       },
       { field: "description", type: "longtext", label: "Description", displayList: false, editable: true }
     ],
-    filterAliases: ["relevant_tags"],
+    filterAliases: [],
     icon: "mdi-regex"
   },
   {
