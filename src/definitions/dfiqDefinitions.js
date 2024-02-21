@@ -13,6 +13,7 @@ export const DFIQ_TYPES = [
       { field: "modified", type: "date", label: "Modified on", displayList: false, editable: false },
       { field: "created", type: "date", label: "Created on", displayList: true, editable: false, width: "200px" }
     ],
+    filterAliases: ["dfiq_tags", "dfiq_id"],
     icon: "mdi-script"
   },
   {
@@ -30,6 +31,7 @@ export const DFIQ_TYPES = [
       { field: "modified", type: "date", label: "Modified on", displayList: false, editable: false },
       { field: "created", type: "date", label: "Created on", displayList: true, editable: false, width: "200px" }
     ],
+    filterAliases: ["dfiq_tags", "dfiq_id", "parent_ids"],
     icon: "mdi-magnify-scan"
   },
   {
@@ -47,6 +49,7 @@ export const DFIQ_TYPES = [
       { field: "modified", type: "date", label: "Modified on", displayList: false, editable: false },
       { field: "created", type: "date", label: "Created on", displayList: true, editable: false, width: "200px" }
     ],
+    filterAliases: ["dfiq_tags", "dfiq_id", "parent_ids"],
     icon: "mdi-help"
   },
   {
@@ -62,6 +65,7 @@ export const DFIQ_TYPES = [
       { field: "modified", type: "date", label: "Modified on", displayList: false, editable: false },
       { field: "created", type: "date", label: "Created on", displayList: true, editable: false, width: "200px" }
     ],
+    filterAliases: ["dfiq_tags", "dfiq_id"],
     icon: "mdi-tools"
   }
 ];

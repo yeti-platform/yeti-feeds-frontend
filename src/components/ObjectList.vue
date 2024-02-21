@@ -51,6 +51,9 @@
       <template v-slot:item.target_systems="{ item }">
         <v-chip v-for="value in item.target_systems" :text="value" class="mr-1" size="small"></v-chip>
       </template>
+      <template v-slot:item.parent_ids="{ item }">
+        <v-chip v-for="value in item.parent_ids" :text="value" class="mr-1" size="small"></v-chip>
+      </template>
       <template v-slot:item.created="{ item }">
         {{ moment(item.created).format("YYYY-MM-DD HH:mm:ss") }}
       </template>
