@@ -84,7 +84,7 @@
             </tbody>
           </v-table>
         </v-card>
-        <v-card class="ma-2" variant="flat" v-if="object?.root_type !== 'indicator'">
+        <v-card class="ma-2" variant="flat">
           <v-card-title>Tags</v-card-title>
           <v-combobox
             v-model="objectTags"
