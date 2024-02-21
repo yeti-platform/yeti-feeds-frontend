@@ -28,6 +28,7 @@
         label="Search entities"
         density="compact"
         class="mt-2"
+        hint="e.g. created>2024-01-01, family=miner, tags=malware"
       />
     </v-list-item>
     <v-list-item>

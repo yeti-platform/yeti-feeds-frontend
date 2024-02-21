@@ -28,6 +28,7 @@
         label="Search indicators"
         density="compact"
         class="mt-2"
+        hint="e.g. created>2024-01-01, supported_os=windows"
       />
     </v-list-item>
     <v-list-item>
