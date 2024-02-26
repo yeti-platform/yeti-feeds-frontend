@@ -13,6 +13,7 @@
           :search-subtype="typeDef.type"
           :search-query="searchQueryDebounced"
           :headers="getFieldForType(typeDef.type)"
+          :filter-aliases="getAliasesForType(typeDef.type)"
           @totalUpdated="countIndicators(typeDef.type, $event)"
         />
       </v-window-item>
@@ -27,6 +28,7 @@
         label="Search indicators"
         density="compact"
         class="mt-2"
+        hint="e.g. created>2024-01-01, supported_os=windows"
       />
     </v-list-item>
     <v-list-item>
@@ -107,6 +109,12 @@ export default {
           key: field.field,
           width: field.width
         };
+      });
+    },
+    getAliasesForType(typeName) {
+      let typeDef = this.indicatorTypes.find(type => type.type === typeName);
+      return typeDef.filterAliases.map(alias => {
+        return [alias, typeDef.fields.find(field => field.field === alias).type];
       });
     },
     toggleNewObjectFullscreen(fullscreen: boolean) {

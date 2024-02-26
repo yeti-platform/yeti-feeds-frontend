@@ -9,6 +9,7 @@ export const INDICATOR_TYPES = [
       { field: "created", type: "date", label: "Created", displayList: true, editable: false, width: "170px" },
       { field: "name", type: "text", label: "Name", displayList: true, editable: true },
       { field: "pattern", type: "code", label: "Pattern", displayList: false, editable: true },
+      { field: "tags", type: "list", label: "Tags", displayList: true, editable: false },
       { field: "relevant_tags", type: "list", label: "Relevant tags", displayList: true, editable: true },
       { field: "aliases", type: "list", label: "Aliases", displayList: false, editable: true },
       { field: "supported_os", type: "list", label: "Supported OS", displayList: true, editable: true, width: "140px" },
@@ -24,6 +25,7 @@ export const INDICATOR_TYPES = [
       },
       { field: "description", type: "longtext", label: "Description", displayList: false, editable: true }
     ],
+    filterAliases: ["aliases"],
     icon: "mdi-script-text-outline"
   },
   {
@@ -33,6 +35,7 @@ export const INDICATOR_TYPES = [
       { field: "created", type: "date", label: "Created", displayList: true, editable: false, width: "170px" },
       { field: "name", type: "text", label: "Name", displayList: true, editable: true },
       { field: "pattern", type: "code", label: "Pattern", displayList: false, editable: true },
+      { field: "tags", type: "list", label: "Tags", displayList: true, editable: false },
       { field: "relevant_tags", type: "list", label: "Relevant tags", displayList: true, editable: true },
       { field: "location", type: "text", label: "Location", displayList: false, editable: true },
       {
@@ -46,6 +49,7 @@ export const INDICATOR_TYPES = [
       },
       { field: "description", type: "longtext", label: "Description", displayList: false, editable: true }
     ],
+    filterAliases: [],
     icon: "mdi-regex"
   },
   {
@@ -55,6 +59,7 @@ export const INDICATOR_TYPES = [
       { field: "created", type: "date", label: "Created", displayList: true, editable: false, width: "200px" },
       { field: "name", type: "text", label: "Name", displayList: true, editable: true },
       { field: "pattern", type: "code", label: "Query text", displayList: false, editable: true },
+      { field: "tags", type: "list", label: "Tags", displayList: true, editable: false },
       { field: "relevant_tags", type: "list", label: "Relevant tags", displayList: true, editable: true },
       {
         field: "query_type",
@@ -76,6 +81,7 @@ export const INDICATOR_TYPES = [
       },
       { field: "description", type: "longtext", label: "Description", displayList: false, editable: true }
     ],
+    filterAliases: ["target_systems"],
     icon: "mdi-database-search"
   },
   {
@@ -85,6 +91,7 @@ export const INDICATOR_TYPES = [
       { field: "created", type: "date", label: "Created", displayList: true, editable: false, width: "200px" },
       { field: "name", type: "text", label: "Name", displayList: true, editable: true },
       { field: "pattern", type: "code", label: "Rule text", displayList: false, editable: true },
+      { field: "tags", type: "list", label: "Tags", displayList: true, editable: false },
       { field: "relevant_tags", type: "list", label: "Relevant tags", displayList: true, editable: true },
       { field: "location", type: "text", label: "Location", displayList: false, editable: true },
       {
@@ -97,6 +104,7 @@ export const INDICATOR_TYPES = [
       },
       { field: "description", type: "longtext", label: "Description", displayList: false, editable: true }
     ],
+    filterAliases: [],
     icon: "mdi-code-braces"
   },
   {
@@ -106,6 +114,7 @@ export const INDICATOR_TYPES = [
       { field: "created", type: "date", label: "Created", displayList: true, editable: false, width: "200px" },
       { field: "name", type: "text", label: "Name", displayList: true, editable: true },
       { field: "pattern", type: "code", label: "Rule text", displayList: false, editable: true },
+      { field: "tags", type: "list", label: "Tags", displayList: true, editable: false },
       { field: "relevant_tags", type: "list", label: "Relevant tags", displayList: true, editable: true },
       { field: "location", type: "text", label: "Location", displayList: false, editable: true },
       {
@@ -118,6 +127,7 @@ export const INDICATOR_TYPES = [
       },
       { field: "description", type: "longtext", label: "Description", displayList: false, editable: true }
     ],
+    filterAliases: [],
     icon: "mdi-xml"
   }
 ];

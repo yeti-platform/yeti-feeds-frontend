@@ -6,9 +6,10 @@ export const ENTITY_TYPES = [
       { field: "created", type: "date", label: "Created on", displayList: true, editable: false, width: "200px" },
       { field: "name", type: "text", label: "Name", displayList: true, editable: true },
       { field: "reference", type: "text", label: "Reference", displayList: true, editable: true },
-      { field: "tags", type: "list", label: "Relevant tags", displayList: true, editable: false },
+      { field: "tags", type: "list", label: "Tags", displayList: true, editable: false },
       { field: "description", type: "longtext", label: "Description", displayList: false, editable: true }
     ],
+    filterAliases: ["reference"],
     icon: "mdi-fire"
   },
   {
@@ -17,11 +18,12 @@ export const ENTITY_TYPES = [
     fields: [
       { field: "created", type: "date", label: "Created", displayList: true, editable: false, width: "200px" },
       { field: "name", type: "text", label: "Name", displayList: true, editable: true },
-      { field: "tags", type: "list", label: "Relevant tags", displayList: true, editable: false },
+      { field: "tags", type: "list", label: "Tags", displayList: true, editable: false },
       { field: "family", type: "text", label: "Family", displayList: true, editable: true },
       { field: "aliases", type: "list", label: "Aliases", displayList: true, editable: true },
       { field: "description", type: "longtext", label: "Description", displayList: false, editable: true }
     ],
+    filterAliases: ["family", "aliases"],
     icon: "mdi-spider"
   },
   {
@@ -30,11 +32,12 @@ export const ENTITY_TYPES = [
     fields: [
       { field: "created", type: "date", label: "Created", displayList: true, editable: false, width: "200px" },
       { field: "name", type: "text", label: "Name", displayList: true, editable: true },
-      { field: "tags", type: "list", label: "Relevant tags", displayList: true, editable: false },
+      { field: "tags", type: "list", label: "Tags", displayList: true, editable: false },
       { field: "aliases", type: "list", label: "Aliases", displayList: true, editable: true },
       { field: "kill_chain_phases", type: "list", label: "Kill chain phases", displayList: true, editable: true },
       { field: "description", type: "longtext", label: "Description", displayList: false, editable: true }
     ],
+    filterAliases: ["aliases"],
     icon: "mdi-tools"
   },
   {
@@ -43,10 +46,11 @@ export const ENTITY_TYPES = [
     fields: [
       { field: "created", type: "date", label: "Created", displayList: true, editable: false, width: "200px" },
       { field: "name", type: "text", label: "Name", displayList: true, editable: true },
-      { field: "tags", type: "list", label: "Relevant tags", displayList: true, editable: false },
+      { field: "tags", type: "list", label: "Tags", displayList: true, editable: false },
       { field: "kill_chain_phases", type: "list", label: "Kill chain phases", displayList: true, editable: true },
       { field: "description", type: "longtext", label: "Description", displayList: false, editable: true }
     ],
+    filterAliases: [],
     icon: "mdi-flash"
   },
   {
@@ -55,13 +59,14 @@ export const ENTITY_TYPES = [
     fields: [
       { field: "created", type: "date", label: "Created", displayList: true, editable: false, width: "200px" },
       { field: "name", type: "text", label: "Name", displayList: true, editable: true },
-      { field: "tags", type: "list", label: "Relevant tags", displayList: true, editable: false },
+      { field: "tags", type: "list", label: "Tags", displayList: true, editable: false },
       { field: "aliases", type: "list", label: "Aliases", displayList: true, editable: true },
       { field: "description", type: "longtext", label: "Description", displayList: false, editable: true },
       { field: "threat_actor_types", type: "list", label: "Threat actor types", displayList: true, editable: true },
       { field: "first_seen", type: "date", label: "First seen", displayList: true, editable: true, width: "200px" },
       { field: "last_seen", type: "date", label: "Last seen", displayList: true, editable: true, width: "200px" }
     ],
+    filterAliases: ["aliases"],
     icon: "mdi-incognito"
   },
   {
@@ -70,10 +75,11 @@ export const ENTITY_TYPES = [
     fields: [
       { field: "created", type: "date", label: "Created", displayList: true, editable: false, width: "200px" },
       { field: "name", type: "text", label: "Name", displayList: true, editable: true },
-      { field: "tags", type: "list", label: "Relevant tags", displayList: true, editable: false },
+      { field: "tags", type: "list", label: "Tags", displayList: true, editable: false },
       { field: "aliases", type: "list", label: "Aliases", displayList: true },
       { field: "description", type: "longtext", label: "Description", displayList: false, editable: true }
     ],
+    filterAliases: ["aliases"],
     icon: "mdi-account-tie"
   },
   {
@@ -82,10 +88,11 @@ export const ENTITY_TYPES = [
     fields: [
       { field: "created", type: "date", label: "Created", displayList: true, editable: false, width: "200px" },
       { field: "name", type: "text", label: "Name", displayList: true, editable: true },
-      { field: "tags", type: "list", label: "Relevant tags", displayList: true, editable: false },
+      { field: "tags", type: "list", label: "Tags", displayList: true, editable: false },
       { field: "aliases", type: "list", label: "Aliases", displayList: true },
       { field: "description", type: "longtext", label: "Description", displayList: false, editable: true }
     ],
+    filterAliases: ["aliases"],
     icon: "mdi-bullhorn"
   },
   {
@@ -94,10 +101,11 @@ export const ENTITY_TYPES = [
     fields: [
       { field: "created", type: "date", label: "Created", displayList: true, editable: false, width: "200px" },
       { field: "name", type: "text", label: "Name", displayList: true, editable: true },
-      { field: "tags", type: "list", label: "Relevant tags", displayList: true, editable: false },
+      { field: "tags", type: "list", label: "Tags", displayList: true, editable: false },
       { field: "aliases", type: "list", label: "Aliases", displayList: true },
       { field: "description", type: "longtext", label: "Description", displayList: false, editable: true }
     ],
+    filterAliases: ["aliases"],
     icon: "mdi-information-outline"
   },
   {
@@ -106,9 +114,10 @@ export const ENTITY_TYPES = [
     fields: [
       { field: "created", type: "date", label: "Created", displayList: true, editable: false, width: "200px" },
       { field: "name", type: "text", label: "Name", displayList: true, editable: true },
-      { field: "tags", type: "list", label: "Relevant tags", displayList: true, editable: false },
+      { field: "tags", type: "list", label: "Tags", displayList: true, editable: false },
       { field: "description", type: "longtext", label: "Description", displayList: false, editable: true }
     ],
+    filterAliases: [],
     icon: "mdi-office-building"
   },
   {
@@ -118,9 +127,10 @@ export const ENTITY_TYPES = [
       { field: "created", type: "date", label: "Created", displayList: true, editable: false, width: "200px" },
       { field: "name", type: "text", label: "Name", displayList: true, editable: true },
       { field: "title", type: "text", label: "Title", displayList: true, editable: true },
-      { field: "tags", type: "list", label: "Relevant tags", displayList: true, editable: false },
+      { field: "tags", type: "list", label: "Tags", displayList: true, editable: false },
       { field: "description", type: "longtext", label: "Description", displayList: false, editable: true }
     ],
+    filterAliases: ["title"],
     icon: "mdi-shield-alert"
   },
   {
@@ -129,9 +139,10 @@ export const ENTITY_TYPES = [
     fields: [
       { field: "created", type: "date", label: "Created", displayList: true, editable: false, width: "200px" },
       { field: "name", type: "text", label: "Name", displayList: true, editable: true },
-      { field: "tags", type: "list", label: "Relevant tags", displayList: true, editable: false },
+      { field: "tags", type: "list", label: "Tags", displayList: true, editable: false },
       { field: "description", type: "longtext", label: "Description", displayList: false, editable: true }
     ],
+    filterAliases: [],
     icon: "mdi-medical-bag"
   }
 ];
