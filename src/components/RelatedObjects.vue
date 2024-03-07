@@ -72,8 +72,8 @@
         </td>
         <td class="controls" v-if="hops === 1">
           <v-btn
-            icon="mdi-link-off"
-            @click="unlink(item.edges[0].id)"
+            icon="mdi-swap-horizontal"
+            @click="swapLink(item.edges[0].id)"
             density="compact"
             variant="tonal"
             color="primary"
@@ -95,6 +95,15 @@
               />
             </template>
           </v-dialog>
+          <v-btn
+            icon="mdi-link-off"
+            @click="unlink(item.edges[0].id)"
+            density="compact"
+            variant="tonal"
+            color="error"
+            class="me-2"
+          >
+          </v-btn>
         </td>
       </tr>
     </template>
@@ -185,7 +194,22 @@ export default {
         })
         .finally(() => (this.loading = false));
     },
+    swapLink(edgeId) {
+      axios
+        .post(`/api/v2/graph/${edgeId}/swap`)
+        .then(response => {
+          this.$eventBus.emit("displayMessage", { message: "Link direction swapped succesfully!", status: "success" });
+          this.fetchNeighbors({ page: this.page, itemsPerPage: this.perPage });
+        })
+        .catch(error => {
+          this.error = error;
+          console.log(error);
+        });
+    },
     unlink(id) {
+      if (!confirm("Are you sure you want to delete this link?")) {
+        return;
+      }
       axios
         .delete(`/api/v2/graph/${id}`)
         .then(() => {
@@ -258,7 +282,7 @@ export default {
 }
 
 td.controls {
-  width: 110px;
+  width: 140px;
 }
 
 td.link {
