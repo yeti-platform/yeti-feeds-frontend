@@ -11,6 +11,7 @@
     </v-card-text>
 
     <v-card-actions>
+      <v-btn append-icon="mdi-swap-horizontal" text="Swap link direction" color="primary" @click="swapLink"></v-btn>
       <v-spacer></v-spacer>
       <v-btn text="Cancel" color="cancel" @click="isActive.value = false"></v-btn>
       <v-btn text="Save" color="primary" @click="saveLink" variant="tonal"></v-btn>
@@ -63,6 +64,19 @@ export default {
           console.log(error);
         })
         .finally();
+    },
+    swapLink() {
+      axios
+        .post(`/api/v2/graph/${this.edge.id}/swap`)
+        .then(response => {
+          this.edge["source"] = response.data["source"];
+          this.edge["target"] = response.data["target"];
+          this.$eventBus.emit("displayMessage", { message: "Link direction swapped succesfully!", status: "success" });
+        })
+        .catch(error => {
+          this.error = error;
+          console.log(error);
+        });
     }
   },
   computed: {

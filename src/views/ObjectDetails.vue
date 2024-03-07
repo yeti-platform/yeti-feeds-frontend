@@ -59,13 +59,24 @@
 
             <v-dialog :width="editWidth">
               <template v-slot:activator="{ props }">
-                <v-btn variant="tonal" color="primary" v-bind="props" size="small" append-icon="mdi-link"
-                  >new link
+                <v-btn class="me-2" variant="tonal" color="primary" v-bind="props" size="small" append-icon="mdi-link"
+                  >link object
                 </v-btn>
               </template>
 
               <template v-slot:default="{ isActive }">
                 <link-object :object="object" :is-active="isActive" />
+              </template>
+            </v-dialog>
+            <v-dialog :width="editWidth">
+              <template v-slot:activator="{ props }">
+                <v-btn variant="tonal" color="primary" v-bind="props" size="small" append-icon="mdi-link"
+                  >link observables
+                </v-btn>
+              </template>
+
+              <template v-slot:default="{ isActive }">
+                <link-observables :linkTarget="object" :is-active="isActive" />
               </template>
             </v-dialog>
           </v-card-title>
@@ -84,7 +95,7 @@
             </tbody>
           </v-table>
         </v-card>
-        <v-card class="ma-2" variant="flat" v-if="object?.root_type !== 'indicator'">
+        <v-card class="ma-2" variant="flat">
           <v-card-title>Tags</v-card-title>
           <v-combobox
             v-model="objectTags"
@@ -202,6 +213,7 @@ import RelatedObjects from "@/components/RelatedObjects.vue";
 import EditObject from "@/components/EditObject.vue";
 import EditDFIQObject from "@/components/EditDFIQObject.vue";
 import LinkObject from "@/components/LinkObject.vue";
+import LinkObservables from "@/components/LinkObservables.vue";
 import YetiMarkdown from "@/components/YetiMarkdown.vue";
 import YetiDFIQApproachTemplate from "@/components/YetiDFIQApproachTemplate.vue";
 
