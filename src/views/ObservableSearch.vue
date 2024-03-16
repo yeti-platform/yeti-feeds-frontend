@@ -126,10 +126,10 @@ export default {
       items: [],
       observableTypes: OBSERVABLE_TYPES,
       headers: [
-        { title: "Value", key: "value" },
-        { title: "Tags", key: "tags", width: "300px" },
-        { title: "Context", key: "context", width: "300px" },
-        { title: "Created on", key: "created", width: "200px" }
+        { title: "Created on", key: "created", width: "200px", sortable: true },
+        { title: "Value", key: "value", sortable: true },
+        { title: "Tags", key: "tags", width: "300px", sortable: false },
+        { title: "Context", key: "context", width: "300px", sortable: false }
       ],
       page: 1,
       perPage: 25,
@@ -180,11 +180,20 @@ export default {
       }
       return resultObj;
     },
-    loadOjects({ page, itemsPerPage, sortBy }: { page: number; itemsPerPage: number; sortBy: string }) {
+    loadOjects({
+      page,
+      itemsPerPage,
+      sortBy
+    }: {
+      page: number;
+      itemsPerPage: number;
+      sortBy: Array<{ key: string; order: string }>;
+    }) {
       let params = {
         page: page - 1,
         count: itemsPerPage,
-        query: this.extractParamsFromSearchQuery(this.searchQuery, "value")
+        query: this.extractParamsFromSearchQuery(this.searchQuery, "value"),
+        sorting: sortBy.map(sort => [sort.key, sort.order === "desc"])
       };
       axios.post("/api/v2/observables/search", params).then(response => {
         this.items = response.data.observables;
@@ -208,7 +217,7 @@ export default {
       axios
         .post(`/api/v2/observables/tag`, params)
         .then(() => {
-          this.loadOjects({ page: this.page, itemsPerPage: this.perPage, sortBy: "" });
+          this.loadOjects({ page: this.page, itemsPerPage: this.perPage, sortBy: [] });
           this.bulkTags = [];
         })
         .catch(error => {
