@@ -69,3 +69,84 @@ export const DFIQ_TYPES = [
     icon: "mdi-tools"
   }
 ];
+
+const SCENARIO_TEMPATE = `
+display_name: Scenario template
+type: scenario
+description: >
+  Multi-line description
+id: S1999
+dfiq_version: 1.0.0
+tags:
+  - tag1
+  - tag2
+`;
+
+const FACET_TEMPATE = `
+display_name: Facet template
+type: facet
+description: >
+  Multiline description
+id: F1999
+dfiq_version: 1.0.0
+tags:
+parent_ids:
+  - S1999
+`;
+
+const QUESTION_TEMPATE = `
+display_name: Question template
+type: question
+description:
+id: Q1999
+dfiq_version: 1.0.0
+tags:
+  - tag1
+parent_ids:
+  - F1999
+  - F1666
+`;
+
+const APPROACH_TEMPATE = `
+display_name: Approach template
+type: approach
+id: Q1999.1
+dfiq_version: 1.0.0
+tags:
+  - tag1
+description:
+  summary: Summary of the approach description
+  details: Approaches' descriptions are complex objects
+  references:
+    - "[ref1](https://google.com)"
+    - "[ref2](https://google.com)"
+view:
+  data:
+    - type: ForensicArtifact
+      value: BrowserHistory
+    - type: description
+      value: Description of the forensic artifact
+  notes:
+    covered:
+      - This covers browsing that happens on a host
+    not_covered:
+      - This does not cover how to make pizza
+  processors:
+    - name: Plaso
+      options:
+        - type: parsers
+          value: webhist
+      analysis:
+        - name: OpenSearch
+          steps:
+            - description: &filter-desc Filter the results to just file downloads
+              type: opensearch-query
+              value: data_type:("chrome:history:file_downloaded" OR "safari:downloads:entry")
+`;
+
+export const DFIQ_TEMPLATES = {
+  scenario: SCENARIO_TEMPATE.trim(),
+  facet: FACET_TEMPATE.trim(),
+  question: QUESTION_TEMPATE.trim(),
+  approach: APPROACH_TEMPATE.trim()
+};
