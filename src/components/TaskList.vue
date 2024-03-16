@@ -1,5 +1,5 @@
 <template>
-  <v-sheet class="ma-5" width="100%">
+  <v-sheet width="100%">
     <div class="d-flex">
       <v-text-field
         class="ma-4"

@@ -11,6 +11,7 @@ import ObjectDetails from "@/views/ObjectDetails.vue";
 import EntitySearch from "@/views/EntitySearch.vue";
 import IndicatorSearch from "@/views/IndicatorSearch.vue";
 import DFIQSearch from "@/views/DFIQSearch.vue";
+import FeedList from "@/views/FeedList.vue";
 import AnalyticsList from "@/views/AnalyticsList.vue";
 import ExportList from "@/views/ExportList.vue";
 import ExportTemplates from "@/views/ExportTemplates.vue";
@@ -117,11 +118,8 @@ const routes = [
       {
         path: "",
         name: "Feeds",
-        component: TaskList,
-        props: {
-          taskType: "feed",
-          displayColumns: ["name", "frequency", "last_run", "description", "status", "toggle", "refresh"]
-        }
+        component: FeedList,
+        props: true
       }
     ]
   },
