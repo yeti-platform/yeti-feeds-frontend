@@ -28,7 +28,14 @@
       <v-btn text="Toggle full screen" color="primary" @click="toggleFullScreen"></v-btn>
       <v-spacer></v-spacer>
       <v-btn text="Cancel" color="cancel" @click="$emit('close')"></v-btn>
-      <v-btn text="Save" @click="saveObject" variant="tonal"></v-btn>
+
+      <v-btn
+        :disabled="yamlValidationError !== 'valid'"
+        text="Save"
+        color="primary"
+        @click="saveObject"
+        variant="tonal"
+      ></v-btn>
     </v-card-actions>
     <v-alert v-if="errors.length > 0" type="error">
       Error saving {{ typeDefinition.name }}:
