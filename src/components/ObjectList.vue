@@ -122,7 +122,7 @@ export default {
       page: 1,
       perPage: 20,
       total: 0,
-      sortBy: [{ key: "name", order: "desc" }]
+      sortBy: [{ key: "name", order: "asc" }]
     };
   },
   methods: {
@@ -173,7 +173,7 @@ export default {
         count: itemsPerPage === -1 ? 0 : itemsPerPage,
         query: this.extractParamsFromSearchQuery(this.searchQuery, "name"),
         filter_aliases: this.filterAliases,
-        sorting: sortBy.map(sort => [sort.key, sort.order === "desc"])
+        sorting: sortBy.map(sort => [sort.key, sort.order === "asc"])
       };
       if (this.searchSubtype != "") {
         params["type"] = this.searchSubtype;

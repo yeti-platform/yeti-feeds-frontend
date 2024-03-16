@@ -145,7 +145,7 @@ export default {
       fullScreenEdit: false,
       editWidth: "50%",
       newDialogActive: false,
-      sortBy: [{ key: "created", order: "asc" }]
+      sortBy: [{ key: "created", order: "desc" }]
     };
   },
   methods: {
@@ -195,7 +195,7 @@ export default {
         page: page - 1,
         count: itemsPerPage,
         query: this.extractParamsFromSearchQuery(this.searchQuery, "value"),
-        sorting: sortBy.map(sort => [sort.key, sort.order === "desc"])
+        sorting: sortBy.map(sort => [sort.key, sort.order === "asc"])
       };
       axios.post("/api/v2/observables/search", params).then(response => {
         this.items = response.data.observables;
