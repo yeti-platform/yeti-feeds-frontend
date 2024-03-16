@@ -17,6 +17,7 @@
         { value: 50, title: '50' },
         { value: 100, title: '100' }
       ]"
+      :sort-by="sortBy"
       v-model="selectedObservables"
       hover
       class="fixed-table"
@@ -143,7 +144,8 @@ export default {
       selectedExportTemplate: null,
       fullScreenEdit: false,
       editWidth: "50%",
-      newDialogActive: false
+      newDialogActive: false,
+      sortBy: [{ key: "created", order: "asc" }]
     };
   },
   methods: {

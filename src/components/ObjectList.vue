@@ -18,6 +18,7 @@
       :item-value="item => item.id"
       hover
       class="fixed-table"
+      :sort-by="sortBy"
     >
       <template v-slot:item.name="{ item }">
         <span class="short-links">
@@ -120,7 +121,8 @@ export default {
       items: [],
       page: 1,
       perPage: 20,
-      total: 0
+      total: 0,
+      sortBy: [{ key: "name", order: "desc" }]
     };
   },
   methods: {
