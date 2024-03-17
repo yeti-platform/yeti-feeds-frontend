@@ -1,11 +1,21 @@
 <template>
-  <v-sheet class="ma-5" width="100%">
+  <v-sheet width="100%">
+    <div class="d-flex">
+      <v-text-field
+        class="ma-4"
+        hide-details
+        density="compact"
+        placeholder="Search tasks"
+        v-model="taskDisplayFilter"
+      ></v-text-field>
+      <v-checkbox-btn label="Hide disabled" v-model="taskHideDisabled"></v-checkbox-btn>
+    </div>
     <v-data-table
-      :items="tasks"
+      :items="filteredTasks"
       :headers="displayedHeaders"
       :items-per-page="100"
       density="compact"
-      :sort-by="[{ key: 'name', order: 'asc' }]"
+      :sort-by="sortBy"
       :show-select="selectableTasks"
       select-strategy="single"
       class="auto-layout"
@@ -115,17 +125,19 @@ export default {
       timer: null,
       selected: null,
       defaultHeaders: [
-        { key: "name", title: "Name" },
+        { key: "name", title: "Name", sortable: true },
         { key: "acts_on", title: "Acts On" },
-        { key: "frequency", title: "Runs every" },
-        { key: "last_run", title: "Last Run", width: "180px" },
+        { key: "frequency", title: "Runs every", sortable: true },
+        { key: "last_run", title: "Last Run", width: "180px", sortable: true },
         { key: "description", title: "Description" },
-        { key: "status", title: "Status", width: "120px" },
+        { key: "status", title: "Status", width: "120px", sortable: true },
         { key: "toggle", title: "Toggle", width: "80px" },
         { key: "refresh", title: "", width: "80px" }
       ],
       sortBy: [{ key: "name", order: "asc" }],
-      selectedTask: null
+      selectedTask: null,
+      taskDisplayFilter: "",
+      taskHideDisabled: false
     };
   },
   mounted() {
@@ -224,6 +236,17 @@ export default {
   computed: {
     displayedHeaders() {
       return this.defaultHeaders.filter(header => this.displayColumns.includes(header.key));
+    },
+    filteredTasks() {
+      return this.tasks.filter(task => {
+        if (this.taskHideDisabled && !task.enabled) {
+          return false;
+        }
+        if (this.taskDisplayFilter) {
+          return task.name.toLowerCase().includes(this.taskDisplayFilter.toLowerCase());
+        }
+        return true;
+      });
     }
   }
 };

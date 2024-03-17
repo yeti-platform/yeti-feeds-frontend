@@ -84,7 +84,7 @@ export default {
         this.items = [];
         return;
       }
-      const params = { query: { name: searchQuery }, count: 0 };
+      const params = { query: { name: searchQuery }, count: 20 };
       const entities = (await axios.post("/api/v2/entities/search", params)).data.entities;
       const indicators = (await axios.post("/api/v2/indicators/search", params)).data.indicators;
       this.items = entities.concat(indicators).map(item => {
