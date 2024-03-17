@@ -83,15 +83,16 @@ export default {
           this.$router.push({ path: `/${this.typeToSavedObjectPath[this.newObject.root_type]}/${response.data.id}` });
         })
         .catch(error => {
-          if (!Array.isArray(error.response.data.detail)) {
+          if (error.response.status === 422) {
+            this.errors = error.response.data.detail
+              .filter(detail => detail.loc[2] === this.typeDefinition.modelName)
+              .map(detail => {
+                return { field: detail.loc[3], message: detail.msg };
+              });
+          } else {
             this.errors = [{ field: "details", message: error.response.data.detail }];
             return;
           }
-          this.errors = error.response.data.detail
-            .filter(detail => detail.loc[1] !== "type")
-            .map(detail => {
-              return { field: detail.loc[1], message: detail.msg };
-            });
         })
         .finally();
     },

@@ -4,6 +4,7 @@ export const QUERY_TYPES = ["opensearch", "osquery", "sql", "splunk", "censys", 
 export const INDICATOR_TYPES = [
   {
     name: "Forensic artifact",
+    modelName: "ForensicArtifact",
     type: "forensicartifact",
     fields: [
       {
@@ -38,6 +39,7 @@ export const INDICATOR_TYPES = [
   },
   {
     name: "Regular expression",
+    modelName: "Regex",
     type: "regex",
     fields: [
       {
@@ -70,6 +72,7 @@ export const INDICATOR_TYPES = [
   },
   {
     name: "Query",
+    modelName: "Query",
     type: "query",
     fields: [
       {
@@ -110,6 +113,7 @@ export const INDICATOR_TYPES = [
   },
   {
     name: "Yara",
+    modelName: "Yara",
     type: "yara",
     fields: [
       {
@@ -141,6 +145,7 @@ export const INDICATOR_TYPES = [
   },
   {
     name: "Sigma",
+    modelName: "Sigma",
     type: "sigma",
     fields: [
       {

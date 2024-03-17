@@ -1,6 +1,7 @@
 export const ENTITY_TYPES = [
   {
     name: "Investigation",
+    modelName: "Investigation",
     type: "investigation",
     fields: [
       {
@@ -22,6 +23,7 @@ export const ENTITY_TYPES = [
   },
   {
     name: "Malware",
+    modelName: "Malware",
     type: "malware",
     fields: [
       {
@@ -44,6 +46,7 @@ export const ENTITY_TYPES = [
   },
   {
     name: "Tool",
+    modelName: "Tool",
     type: "tool",
     fields: [
       {
@@ -66,6 +69,7 @@ export const ENTITY_TYPES = [
   },
   {
     name: "Attack pattern",
+    modelName: "AttackPattern",
     type: "attack-pattern",
     fields: [
       {
@@ -87,6 +91,7 @@ export const ENTITY_TYPES = [
   },
   {
     name: "Threat actor",
+    modelName: "ThreatActor",
     type: "threat-actor",
     fields: [
       {
@@ -111,6 +116,7 @@ export const ENTITY_TYPES = [
   },
   {
     name: "Intrusion set",
+    modelName: "IntrusionSet",
     type: "intrusion-set",
     fields: [
       {
@@ -132,6 +138,7 @@ export const ENTITY_TYPES = [
   },
   {
     name: "Campaign",
+    modelName: "Campaign",
     type: "campaign",
     fields: [
       {
@@ -153,6 +160,7 @@ export const ENTITY_TYPES = [
   },
   {
     name: "Identity",
+    modelName: "Identity",
     type: "identity",
     fields: [
       {
@@ -174,6 +182,7 @@ export const ENTITY_TYPES = [
   },
   {
     name: "Company",
+    modelName: "Company",
     type: "company",
     fields: [
       {
@@ -194,6 +203,7 @@ export const ENTITY_TYPES = [
   },
   {
     name: "Vulnerability",
+    modelName: "Vulnerability",
     type: "vulnerability",
     fields: [
       {
@@ -215,6 +225,7 @@ export const ENTITY_TYPES = [
   },
   {
     name: "Course of action",
+    modelName: "CourseOfAction",
     type: "course-of-action",
     fields: [
       {
