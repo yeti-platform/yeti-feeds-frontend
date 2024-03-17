@@ -1,7 +1,6 @@
 export const DFIQ_TYPES = [
   {
     name: "Scenario",
-    modelName: "DFIQScenario",
     type: "scenario",
     fields: [
       {
@@ -42,7 +41,6 @@ export const DFIQ_TYPES = [
   },
   {
     name: "Facet",
-    modelName: "DFIQFacet",
     type: "facet",
     fields: [
       {
@@ -84,7 +82,6 @@ export const DFIQ_TYPES = [
   },
   {
     name: "Question",
-    modelName: "DFIQQuestion",
     type: "question",
     fields: [
       {
@@ -126,7 +123,6 @@ export const DFIQ_TYPES = [
   },
   {
     name: "Approach",
-    modelName: "DFIQApproach",
     type: "approach",
     fields: [
       {
