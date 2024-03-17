@@ -83,9 +83,7 @@ export default {
           this.$router.push({ path: `/${this.typeToSavedObjectPath[this.newObject.root_type]}/${response.data.id}` });
         })
         .catch(error => {
-          console.log(error);
-          console.log(error.response.data.detail);
-          if (error.response.data.detail) {
+          if (!Array.isArray(error.response.data.detail)) {
             this.errors = [{ field: "details", message: error.response.data.detail }];
             return;
           }
