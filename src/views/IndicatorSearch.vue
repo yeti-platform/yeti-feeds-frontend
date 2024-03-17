@@ -107,7 +107,8 @@ export default {
         return {
           title: field.label,
           key: field.field,
-          width: field.width
+          width: field.width,
+          sortable: field.sortable || false
         };
       });
     },

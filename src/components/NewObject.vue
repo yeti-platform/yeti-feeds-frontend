@@ -75,7 +75,7 @@ export default {
       });
 
       axios
-        .post(`/api/v2/${this.typeToEndpointMapping[this.newObject.root_type]}/`, {
+        .post(`/api/v2/${this.typeToEndpointMapping[this.newObject.root_type]}`, {
           [this.newObject.root_type]: request
         })
         .then(response => {
@@ -84,6 +84,11 @@ export default {
         })
         .catch(error => {
           console.log(error);
+          console.log(error.response.data.detail);
+          if (error.response.data.detail) {
+            this.errors = [{ field: "details", message: error.response.data.detail }];
+            return;
+          }
           this.errors = error.response.data.detail
             .filter(detail => detail.loc[1] !== "type")
             .map(detail => {
@@ -100,27 +105,22 @@ export default {
   computed: {
     typeDefinition() {
       return (
-        ENTITY_TYPES.find(t => t.type === this.objectType) || INDICATOR_TYPES.find(t => t.type === this.objectType) || OBSERVABLE_TYPES.find(t => t.type === this.objectType)
-        );
+        ENTITY_TYPES.find(t => t.type === this.objectType) ||
+        INDICATOR_TYPES.find(t => t.type === this.objectType) ||
+        OBSERVABLE_TYPES.find(t => t.type === this.objectType)
+      );
     },
     editableFields() {
       return this.typeDefinition.fields.filter(field => field.editable);
     },
     objectRootType() {
-      if ( ENTITY_TYPES.find(t => t.type === this.objectType) )
-      {
+      if (ENTITY_TYPES.find(t => t.type === this.objectType)) {
         return "entity";
-      }
-      else if ( INDICATOR_TYPES.find(t => t.type === this.objectType) )
-      {
+      } else if (INDICATOR_TYPES.find(t => t.type === this.objectType)) {
         return "indicator";
-      }
-      else if ( OBSERVABLE_TYPES.find(t => t.type === this.objectType) )
-      {
+      } else if (OBSERVABLE_TYPES.find(t => t.type === this.objectType)) {
         return "observable";
-      }
-      else
-      {
+      } else {
         return "unknown";
       }
     }
