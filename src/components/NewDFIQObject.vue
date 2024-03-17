@@ -109,11 +109,9 @@ export default {
         })
         .catch(error => {
           if (error.response.status === 422) {
-            this.errors = error.response.data.detail
-              .filter(detail => detail.loc[2] === this.typeDefinition.modelName)
-              .map(detail => {
-                return { field: detail.loc[3], message: detail.msg };
-              });
+            this.errors = error.response.data.detail.map(detail => {
+              return { field: detail.loc[3], message: detail.msg };
+            });
           } else {
             this.errors = [{ field: "details", message: error.response.data.detail }];
             return;
