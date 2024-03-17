@@ -5,7 +5,7 @@
         <div class="text-h4 mb-4">Search & add observables</div>
         <v-textarea v-model="textSearch" auto-grow></v-textarea>
         <div class="d-flex pl-0">
-          <v-btn @click="searchObservables" class="me-3">Launch search</v-btn>
+          <v-btn @click="matchObservables" class="me-3">Launch search</v-btn>
 
           <v-checkbox-btn v-model="addAndTag" label="Tag and add missing observables"></v-checkbox-btn>
           <v-select
@@ -29,6 +29,7 @@
             :delimiters="[',', ' ', ';']"
           ></v-combobox>
         </div>
+        <v-progress-linear v-show="loading" class="mt-3" color="primary" indeterminate></v-progress-linear>
       </v-col>
     </v-row>
     <v-row v-if="searchResults">
@@ -274,11 +275,13 @@ export default {
       addTagsUnknown: [],
       addTypeUnknown: "guess",
       selectedUnknown: [],
-      selectedKnown: []
+      selectedKnown: [],
+      loading: false
     };
   },
   methods: {
-    searchObservables() {
+    matchObservables() {
+      this.loading = true;
       this.selectedKnown = [];
       this.selectedUnknown = [];
       var params = {
@@ -294,6 +297,7 @@ export default {
       axios
         .post("/api/v2/graph/match", params)
         .then(response => {
+          this.loading = false;
           this.searchResults = response.data;
         })
         .catch(error => {
@@ -317,7 +321,7 @@ export default {
           });
           this.selectedKnown = [];
           this.addTagsKnown = [];
-          this.searchObservables();
+          this.matchObservables();
         })
         .catch(error => {
           this.$eventBus.emit("displayMessage", {
@@ -368,7 +372,7 @@ export default {
           this.selectedUnknown = [];
           this.addTypeUnknown = "guess";
           this.addTagsUnknown = [];
-          this.searchObservables();
+          this.matchObservables();
         })
         .catch(error => {
           this.$eventBus.emit("displayMessage", {
