@@ -6,14 +6,22 @@ export const INDICATOR_TYPES = [
     name: "Forensic artifact",
     type: "forensicartifact",
     fields: [
-      { field: "created", type: "date", label: "Created", displayList: true, editable: false, width: "170px" },
-      { field: "name", type: "text", label: "Name", displayList: true, editable: true },
+      {
+        field: "created",
+        type: "date",
+        label: "Created",
+        displayList: true,
+        editable: false,
+        width: "170px",
+        sortable: true
+      },
+      { field: "name", type: "text", label: "Name", displayList: true, editable: true, sortable: true },
       { field: "pattern", type: "code", label: "Pattern", displayList: false, editable: true },
       { field: "tags", type: "list", label: "Tags", displayList: true, editable: false },
       { field: "relevant_tags", type: "list", label: "Relevant tags", displayList: true, editable: true },
       { field: "aliases", type: "list", label: "Aliases", displayList: false, editable: true },
       { field: "supported_os", type: "list", label: "Supported OS", displayList: true, editable: true, width: "140px" },
-      { field: "location", type: "text", label: "Location", displayList: false, editable: true },
+      { field: "location", type: "text", label: "Location", displayList: false, editable: true, sortable: true },
       {
         field: "diamond",
         type: "option",
@@ -32,12 +40,20 @@ export const INDICATOR_TYPES = [
     name: "Regular expression",
     type: "regex",
     fields: [
-      { field: "created", type: "date", label: "Created", displayList: true, editable: false, width: "170px" },
-      { field: "name", type: "text", label: "Name", displayList: true, editable: true },
+      {
+        field: "created",
+        type: "date",
+        label: "Created",
+        displayList: true,
+        editable: false,
+        width: "170px",
+        sortable: true
+      },
+      { field: "name", type: "text", label: "Name", displayList: true, editable: true, sortable: true },
       { field: "pattern", type: "code", label: "Pattern", displayList: false, editable: true },
       { field: "tags", type: "list", label: "Tags", displayList: true, editable: false },
       { field: "relevant_tags", type: "list", label: "Relevant tags", displayList: true, editable: true },
-      { field: "location", type: "text", label: "Location", displayList: false, editable: true },
+      { field: "location", type: "text", label: "Location", displayList: false, editable: true, sortable: true },
       {
         field: "diamond",
         type: "option",
@@ -56,8 +72,16 @@ export const INDICATOR_TYPES = [
     name: "Query",
     type: "query",
     fields: [
-      { field: "created", type: "date", label: "Created", displayList: true, editable: false, width: "200px" },
-      { field: "name", type: "text", label: "Name", displayList: true, editable: true },
+      {
+        field: "created",
+        type: "date",
+        label: "Created",
+        displayList: true,
+        editable: false,
+        width: "200px",
+        sortable: true
+      },
+      { field: "name", type: "text", label: "Name", displayList: true, editable: true, sortable: true },
       { field: "pattern", type: "code", label: "Query text", displayList: false, editable: true },
       { field: "tags", type: "list", label: "Tags", displayList: true, editable: false },
       { field: "relevant_tags", type: "list", label: "Relevant tags", displayList: true, editable: true },
@@ -70,7 +94,7 @@ export const INDICATOR_TYPES = [
         editable: true
       },
       { field: "target_systems", type: "list", label: "Target systems", displayList: true, editable: true },
-      { field: "location", type: "text", label: "Location", displayList: false, editable: true },
+      { field: "location", type: "text", label: "Location", displayList: false, editable: true, sortable: true },
       {
         field: "diamond",
         type: "option",
@@ -88,12 +112,20 @@ export const INDICATOR_TYPES = [
     name: "Yara",
     type: "yara",
     fields: [
-      { field: "created", type: "date", label: "Created", displayList: true, editable: false, width: "200px" },
-      { field: "name", type: "text", label: "Name", displayList: true, editable: true },
+      {
+        field: "created",
+        type: "date",
+        label: "Created",
+        displayList: true,
+        editable: false,
+        width: "200px",
+        sortable: true
+      },
+      { field: "name", type: "text", label: "Name", displayList: true, editable: true, sortable: true },
       { field: "pattern", type: "code", label: "Rule text", displayList: false, editable: true },
       { field: "tags", type: "list", label: "Tags", displayList: true, editable: false },
       { field: "relevant_tags", type: "list", label: "Relevant tags", displayList: true, editable: true },
-      { field: "location", type: "text", label: "Location", displayList: false, editable: true },
+      { field: "location", type: "text", label: "Location", displayList: false, editable: true, sortable: true },
       {
         field: "diamond",
         type: "option",
@@ -111,12 +143,20 @@ export const INDICATOR_TYPES = [
     name: "Sigma",
     type: "sigma",
     fields: [
-      { field: "created", type: "date", label: "Created", displayList: true, editable: false, width: "200px" },
-      { field: "name", type: "text", label: "Name", displayList: true, editable: true },
+      {
+        field: "created",
+        type: "date",
+        label: "Created",
+        displayList: true,
+        editable: false,
+        width: "200px",
+        sortable: true
+      },
+      { field: "name", type: "text", label: "Name", displayList: true, editable: true, sortable: true },
       { field: "pattern", type: "code", label: "Rule text", displayList: false, editable: true },
       { field: "tags", type: "list", label: "Tags", displayList: true, editable: false },
       { field: "relevant_tags", type: "list", label: "Relevant tags", displayList: true, editable: true },
-      { field: "location", type: "text", label: "Location", displayList: false, editable: true },
+      { field: "location", type: "text", label: "Location", displayList: false, editable: true, sortable: true },
       {
         field: "diamond",
         type: "option",

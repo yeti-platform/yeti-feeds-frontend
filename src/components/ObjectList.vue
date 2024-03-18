@@ -4,6 +4,12 @@
       v-model:page="page"
       :itemsLength="total"
       :items-per-page="perPage"
+      :items-per-page-options="[
+        { value: 10, title: '10' },
+        { value: 25, title: '25' },
+        { value: 50, title: '50' },
+        { value: 100, title: '100' }
+      ]"
       :headers="headers"
       density="compact"
       :items="items"
@@ -12,6 +18,7 @@
       :item-value="item => item.id"
       hover
       class="fixed-table"
+      :sort-by="sortBy"
     >
       <template v-slot:item.name="{ item }">
         <span class="short-links">
@@ -114,7 +121,8 @@ export default {
       items: [],
       page: 1,
       perPage: 20,
-      total: 0
+      total: 0,
+      sortBy: [{ key: "name", order: "asc" }]
     };
   },
   methods: {
@@ -165,7 +173,7 @@ export default {
         count: itemsPerPage === -1 ? 0 : itemsPerPage,
         query: this.extractParamsFromSearchQuery(this.searchQuery, "name"),
         filter_aliases: this.filterAliases,
-        sorting: sortBy.map(sort => [sort.key, sort.order === "desc"])
+        sorting: sortBy.map(sort => [sort.key, sort.order === "asc"])
       };
       if (this.searchSubtype != "") {
         params["type"] = this.searchSubtype;

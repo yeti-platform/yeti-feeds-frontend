@@ -114,12 +114,14 @@ export default {
           this.isActive.value = false;
         })
         .catch(error => {
-          console.log(error);
-          this.errors = error.response.data.detail
-            .filter(detail => detail.loc[1] !== "type")
-            .map(detail => {
-              return { field: detail.loc[1], message: detail.msg };
+          if (error.response.status === 422) {
+            this.errors = error.response.data.detail.map(detail => {
+              return { field: detail.loc[3], message: detail.msg };
             });
+          } else {
+            this.errors = [{ field: "details", message: error.response.data.detail }];
+            return;
+          }
         })
         .finally();
     },
