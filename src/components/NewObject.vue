@@ -48,9 +48,9 @@ export default {
       errors: [],
       fullScreen: false,
       typeToEndpointMapping: {
-        entity: "entities",
+        entity: "entities/",
         observable: "observables/extended",
-        indicator: "indicators"
+        indicator: "indicators/"
       },
       typeToSavedObjectPath: {
         entity: "entities",
