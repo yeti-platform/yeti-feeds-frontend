@@ -87,7 +87,7 @@ export const INDICATOR_TYPES = [
       { field: "relevant_tags", type: "list", label: "Relevant tags", displayList: true, editable: true },
       {
         field: "query_type",
-        type: "option",
+        type: "option-custom",
         choices: QUERY_TYPES,
         label: "Query type",
         displayList: true,
