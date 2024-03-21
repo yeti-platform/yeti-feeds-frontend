@@ -38,11 +38,6 @@
         <template v-slot:item.name="{ item }">
           <v-btn variant="plain" density="compact" @click="editTemplate(item)">{{ item.name }}</v-btn>
         </template>
-
-        <template v-slot:item.actions="{ item }">
-          <v-icon size="small" class="me-2" @click="editTemplate(item)"> mdi-pencil </v-icon>
-          <v-icon size="small" @click="deleteTemplate(item)"> mdi-delete </v-icon>
-        </template>
       </v-data-table>
       <v-btn-group rounded="1" density="compact">
         <v-btn color="primary" @click="newTemplate">New template</v-btn>
