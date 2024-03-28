@@ -41,6 +41,7 @@
           <v-list>
             <v-list-item :to="{ path: '/profile' }" prepend-icon="mdi-cog"> Account settings </v-list-item>
             <v-list-item @click="toggleTheme" prepend-icon="mdi-brightness-4"> Toggle dark mode </v-list-item>
+            <v-list-item @click="logout" prepend-icon="mdi-logout"> Logout </v-list-item>
           </v-list>
         </v-menu>
       </v-btn>
@@ -65,6 +66,15 @@ export default {
   computed: {
     user() {
       return useUserStore().user;
+    }
+  },
+  methods: {
+    logout() {
+      useUserStore()
+        .userLocalLogout()
+        .then(() => {
+          this.$router.push({ name: "Login" });
+        });
     }
   }
 };
