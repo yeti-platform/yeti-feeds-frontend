@@ -64,6 +64,21 @@ export const useUserStore = defineStore("user", {
             reject(err);
           });
       });
+    },
+    async userLocalLogout() {
+      return new Promise((resolve, reject) => {
+        axios
+          .post("/api/v2/auth/logout")
+          .then(response => {
+            console.log("User logout success");
+            this.user = null;
+            resolve(response);
+          })
+          .catch(err => {
+            console.log("User logout fail");
+            reject(err);
+          });
+      });
     }
   }
 });
