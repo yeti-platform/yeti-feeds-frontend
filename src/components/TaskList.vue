@@ -73,6 +73,16 @@
           <td v-if="displayColumn('refresh')">
             <v-btn @click="refresh(item)" icon="mdi-refresh" size="x-small" variant="tonal" :disabled="!item.enabled">
             </v-btn>
+            <v-btn
+              v-if="downloadableTasks"
+              class="ml-2"
+              @click="$emit('taskDownload', item)"
+              icon="mdi-download"
+              size="x-small"
+              variant="tonal"
+              :disabled="!item.enabled"
+            >
+            </v-btn>
           </td>
         </tr>
       </template>
@@ -117,6 +127,10 @@ export default {
     selectableTasks: {
       type: Boolean,
       default: false
+    },
+    downloadableTasks: {
+      type: Boolean,
+      default: false
     }
   },
   data() {
@@ -132,7 +146,7 @@ export default {
         { key: "description", title: "Description" },
         { key: "status", title: "Status", width: "120px", sortable: true },
         { key: "toggle", title: "Toggle", width: "80px" },
-        { key: "refresh", title: "", width: "80px" }
+        { key: "refresh", title: "", width: "110px" }
       ],
       sortBy: [{ key: "name", order: "asc" }],
       selectedTask: null,
