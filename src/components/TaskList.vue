@@ -48,10 +48,10 @@
           </td>
 
           <td v-if="displayColumn('frequency')">
-            {{ moment.duration(item.frequency).humanize().replace("an ", "1 ").replace("a ", "1 ") }}
+            {{ moment.duration(item.frequency).humanize() }}
           </td>
           <td v-if="displayColumn('last_run')">
-            {{ item.last_run }}
+            {{ moment(item.last_run).format("YYYY-MM-DD HH:mm:ss") }}
           </td>
           <td v-if="displayColumn('description')">{{ item.description }}</td>
 
@@ -128,7 +128,7 @@ export default {
         { key: "name", title: "Name", sortable: true },
         { key: "acts_on", title: "Acts On" },
         { key: "frequency", title: "Runs every", sortable: true },
-        { key: "last_run", title: "Last Run", width: "180px", sortable: true },
+        { key: "last_run", title: "Last run", width: "180px", sortable: true },
         { key: "description", title: "Description" },
         { key: "status", title: "Status", width: "120px", sortable: true },
         { key: "toggle", title: "Toggle", width: "80px" },
