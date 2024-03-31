@@ -69,7 +69,7 @@ export default {
       templates: [],
       defaultTemplate: {
         name: "",
-        template: ""
+        template: `value,tags\n{% for obj in data %}{{obj.value}},{{";".join(obj.tags.keys())}}\n{% endfor %}`
       },
       selectedTemplate: null,
       headers: [
