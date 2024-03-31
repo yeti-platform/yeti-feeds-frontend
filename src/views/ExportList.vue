@@ -106,7 +106,7 @@ export default {
   created() {
     this.timerListTemplates = setInterval(this.listTemplates, 2000);
   },
-  beforeDestroy() {
+  unmounted() {
     clearInterval(this.timerListTemplates);
   },
   methods: {

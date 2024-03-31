@@ -161,7 +161,7 @@ export default {
     this.timer = setInterval(this.listTasks, 5000);
     this.$eventBus.on("taskUpdated", this.listTasks);
   },
-  beforeDestroy() {
+  unmounted() {
     clearInterval(this.timer);
   },
   methods: {
