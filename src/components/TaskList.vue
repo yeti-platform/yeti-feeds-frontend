@@ -48,10 +48,10 @@
           </td>
 
           <td v-if="displayColumn('frequency')">
-            {{ moment.duration(item.frequency).humanize().replace("an ", "1 ").replace("a ", "1 ") }}
+            {{ moment.duration(item.frequency).humanize() }}
           </td>
           <td v-if="displayColumn('last_run')">
-            {{ item.last_run }}
+            {{ moment(item.last_run).format("YYYY-MM-DD HH:mm:ss") }}
           </td>
           <td v-if="displayColumn('description')">{{ item.description }}</td>
 
@@ -72,6 +72,16 @@
 
           <td v-if="displayColumn('refresh')">
             <v-btn @click="refresh(item)" icon="mdi-refresh" size="x-small" variant="tonal" :disabled="!item.enabled">
+            </v-btn>
+            <v-btn
+              v-if="downloadableTasks"
+              class="ml-2"
+              @click="$emit('taskDownload', item)"
+              icon="mdi-download"
+              size="x-small"
+              variant="tonal"
+              :disabled="!item.enabled"
+            >
             </v-btn>
           </td>
         </tr>
@@ -117,6 +127,10 @@ export default {
     selectableTasks: {
       type: Boolean,
       default: false
+    },
+    downloadableTasks: {
+      type: Boolean,
+      default: false
     }
   },
   data() {
@@ -128,11 +142,11 @@ export default {
         { key: "name", title: "Name", sortable: true },
         { key: "acts_on", title: "Acts On" },
         { key: "frequency", title: "Runs every", sortable: true },
-        { key: "last_run", title: "Last Run", width: "180px", sortable: true },
+        { key: "last_run", title: "Last run", width: "180px", sortable: true },
         { key: "description", title: "Description" },
         { key: "status", title: "Status", width: "120px", sortable: true },
         { key: "toggle", title: "Toggle", width: "80px" },
-        { key: "refresh", title: "", width: "80px" }
+        { key: "refresh", title: "", width: "110px" }
       ],
       sortBy: [{ key: "name", order: "asc" }],
       selectedTask: null,
@@ -147,7 +161,7 @@ export default {
     this.timer = setInterval(this.listTasks, 5000);
     this.$eventBus.on("taskUpdated", this.listTasks);
   },
-  beforeDestroy() {
+  unmounted() {
     clearInterval(this.timer);
   },
   methods: {

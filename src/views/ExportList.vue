@@ -1,5 +1,12 @@
 <template>
-  <task-list selectable-tasks task-type="export" ref="exportList" @taskSelected="task => (this.selectedExport = task)">
+  <task-list
+    selectable-tasks
+    downloadable-tasks
+    task-type="export"
+    ref="exportList"
+    @taskSelected="task => selectExport(task)"
+    @taskDownload="task => downloadExport(task)"
+  >
   </task-list>
 
   <v-navigation-drawer permament location="right" width="400" ref="drawer">
@@ -57,6 +64,17 @@
         required
         ref="exportTemplate"
       ></v-autocomplete>
+      <div class="d-flex">
+        <v-text-field
+          class="w-50"
+          density="compact"
+          label="Run every"
+          v-model="selectedExport.human_frequency"
+        ></v-text-field>
+        <!-- select hours, days, minutes, etc -->
+        <v-select density="compact" v-model="frequencyUnit" :items="['hours', 'days', 'minutes', 'seconds']"></v-select>
+      </div>
+
       <v-btn-group rounded="1" density="compact">
         <v-btn color="primary" density="compact" v-if="selectedExport.id" @click="updateExport">Save changes</v-btn>
         <v-btn color="error" density="compact" v-if="selectedExport.id" @click="confirmDeleteExport">Delete</v-btn>
@@ -81,6 +99,7 @@
 import { OBSERVABLE_TYPES } from "@/definitions/observableDefinitions.js";
 import axios from "axios";
 import TaskList from "@/components/TaskList.vue";
+import moment from "moment";
 </script>
 
 <script lang="ts">
@@ -97,16 +116,17 @@ export default {
       exports: [],
       exportTemplates: [],
       selectedExport: {},
-      timerListTemplates: null
+      timerListTemplates: null,
+      frequencyUnit: "hours"
     };
   },
   mounted() {
     this.listTemplates();
   },
   created() {
-    this.timerListTemplates = setInterval(this.listTemplates, 2000);
+    this.timerListTemplates = setInterval(this.listTemplates, 5000);
   },
-  beforeDestroy() {
+  unmounted() {
     clearInterval(this.timerListTemplates);
   },
   methods: {
@@ -119,6 +139,11 @@ export default {
         })
         .finally(() => {});
     },
+    selectExport(task) {
+      this.selectedExport = task;
+      this.selectedExport.human_frequency = moment.duration(task.frequency).asHours();
+      this.frequencyUnit = "hours";
+    },
     updateExport() {
       let exportTask = {
         id: this.selectedExport.id,
@@ -128,7 +153,8 @@ export default {
         ignore_tags: this.selectedExport.ignore_tags,
         exclude_tags: this.selectedExport.exclude_tags,
         acts_on: this.selectedExport.acts_on,
-        template_name: this.selectedExport.template_name
+        template_name: this.selectedExport.template_name,
+        frequency: moment.duration(this.selectedExport.human_frequency, this.frequencyUnit)
       };
 
       axios
@@ -152,7 +178,8 @@ export default {
         template_name: this.selectedExport.template_name,
         exclude_tags: this.selectedExport.exclude_tags,
         ignore_tags: this.selectedExport.ignore_tags,
-        include_tags: this.selectedExport.include_tags
+        include_tags: this.selectedExport.include_tags,
+        frequency: moment.duration(this.selectedExport.human_frequency, this.frequencyUnit)
       };
       axios
         .post(`/api/v2/tasks/export/new`, { export: exportTask })
@@ -192,9 +219,9 @@ export default {
         .then(response => {
           var fileURL = window.URL.createObjectURL(new Blob([response.data]));
           var fileLink = document.createElement("a");
-          var fileName = response.headers["content-disposition"].split("filename=")[1];
+          let fileName = `${singleExport.name}_${singleExport.last_run}.txt`;
           fileLink.href = fileURL;
-          fileLink.setAttribute("download", fileName);
+          fileLink.download = fileName;
           document.body.appendChild(fileLink);
           fileLink.click();
         })
