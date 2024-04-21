@@ -124,23 +124,24 @@
               v-for="entityType in displayedEntityTypes"
               v-bind:key="entityType.type"
               @click="autoTab = false"
+              :href="'#' + entityType.type"
             >
               <v-icon size="x-large" start>{{ entityType.icon }}</v-icon>
               {{ entityType.name }} {{ relatedObjectTabCount[entityType.type] }}
             </v-tab>
-            <v-tab value="related-indicators"
+            <v-tab value="related-indicators" href="#indicators"
               ><v-icon size="x-large" start>mdi-flash</v-icon>Related indicators
               <v-chip class="ml-3" density="comfortable"> {{ relatedObjectTabCount["indicators"] }}</v-chip></v-tab
             >
-            <v-tab value="related-observables"
+            <v-tab value="related-observables" href="#observables"
               ><v-icon size="x-large" start>mdi-text-search</v-icon>Related observables
               <v-chip class="ml-3" density="comfortable">{{ relatedObjectTabCount["observables"] }}</v-chip></v-tab
             >
-            <v-tab value="related-dfiq"
+            <v-tab value="related-dfiq" href="#dfiq"
               ><v-icon size="x-large" start>mdi-chat-question</v-icon>Related DFIQ
               <v-chip class="ml-3" density="comfortable">{{ relatedObjectTabCount["dfiq"] }}</v-chip></v-tab
             >
-            <v-tab value="related-tagged"
+            <v-tab value="related-tagged" href="#tagged"
               ><v-icon size="x-large" start>mdi-tag</v-icon>Tag relationships
               <v-chip class="ml-3" density="comfortable">{{ relatedObjectTabCount["tagged"] }}</v-chip></v-tab
             >
@@ -154,7 +155,7 @@
               eager
               class="my-4"
             >
-              <related-objects
+              <direct-neighbors
                 :id="id"
                 :source-type="typeToEndpointMapping[objectType]"
                 :target-types="[entityType.type]"
@@ -163,7 +164,7 @@
             </v-window-item>
 
             <v-window-item value="related-indicators" eager class="my-4">
-              <related-objects
+              <direct-neighbors
                 :id="id"
                 :source-type="typeToEndpointMapping[objectType]"
                 :target-types="objectTypes['indicator'].map(def => def.type)"
@@ -172,7 +173,7 @@
             </v-window-item>
 
             <v-window-item value="related-observables" eager class="my-4">
-              <related-objects
+              <direct-neighbors
                 :id="id"
                 :source-type="typeToEndpointMapping[objectType]"
                 :target-types="objectTypes['observable'].map(def => def.type)"
@@ -181,7 +182,7 @@
             </v-window-item>
 
             <v-window-item value="related-dfiq" eager class="my-4">
-              <related-objects
+              <direct-neighbors
                 :id="id"
                 :source-type="typeToEndpointMapping[objectType]"
                 :target-types="objectTypes['dfiq'].map(def => def.type)"
@@ -210,6 +211,7 @@
 import axios from "axios";
 
 import RelatedObjects from "@/components/RelatedObjects.vue";
+import DirectNeighbors from "@/components/DirectNeighbors.vue";
 import EditObject from "@/components/EditObject.vue";
 import EditDFIQObject from "@/components/EditDFIQObject.vue";
 import LinkObject from "@/components/LinkObject.vue";
@@ -239,6 +241,7 @@ export default {
   },
   components: {
     RelatedObjects,
+    DirectNeighbors,
     EditObject,
     EditDFIQObject,
     LinkObject,
@@ -303,6 +306,7 @@ export default {
     countObjects(key: string, value: number) {
       this.relatedObjectTabCount[key] = value;
       if (!this.$route.hash && this.autoTab) {
+        console.log("navigating!");
         this.navigateToFirstPopulatedTab();
       }
     },
@@ -331,14 +335,24 @@ export default {
     },
     displayedEntityTypes() {
       return this.objectTypes["entity"].filter(type => this.relatedObjectTabCount[type.type] > 0);
+    },
+    activeHash() {
+      return this.$route.hash;
     }
   },
   mounted() {
     this.getObjectDetails();
+    if (this.activeHash) {
+      this.autoTab = false;
+      this.activeTab = "related-" + this.activeHash.replace("#", "");
+    }
   },
   watch: {
     id() {
       this.getObjectDetails();
+    },
+    activeHash() {
+      this.activeTab = "related-" + this.activeHash.replace("#", "");
     }
   }
 };
