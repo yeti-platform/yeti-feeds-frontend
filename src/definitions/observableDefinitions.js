@@ -6,7 +6,8 @@ export const OBSERVABLE_TYPES = [
       { field: "value", type: "text", label: "Value", displayList: true, editable: true },
       { field: "tags", type: "list", label: "tags", displayList: true, editable: false },
       { field: "created", type: "datetime", label: "Created", displayList: true, editable: false }
-    ]
+    ],
+    icon: "mdi-magnify"
   },
   {
     name: "IPv6",
@@ -16,7 +17,7 @@ export const OBSERVABLE_TYPES = [
       { field: "tags", type: "list", label: "tags", displayList: true, editable: false },
       { field: "created", type: "datetime", label: "Created", displayList: true, editable: false }
     ],
-    icon: "globe"
+    icon: "mdi-ip-network"
   },
   {
     name: "IPv4",
@@ -26,7 +27,7 @@ export const OBSERVABLE_TYPES = [
       { field: "tags", type: "list", label: "tags", displayList: true, editable: false },
       { field: "created", type: "datetime", label: "Created", displayList: true, editable: false }
     ],
-    icon: "globe"
+    icon: "mdi-ip-network"
   },
   {
     name: "Hostname",
@@ -36,7 +37,7 @@ export const OBSERVABLE_TYPES = [
       { field: "tags", type: "list", label: "tags", displayList: true, editable: false },
       { field: "created", type: "datetime", label: "Created", displayList: true, editable: false }
     ],
-    icon: "globe"
+    icon: "mdi-domain"
   },
   {
     name: "Url",
@@ -46,7 +47,7 @@ export const OBSERVABLE_TYPES = [
       { field: "tags", type: "list", label: "tags", displayList: true, editable: false },
       { field: "created", type: "datetime", label: "Created", displayList: true, editable: false }
     ],
-    icon: "globe"
+    icon: "mdi-web"
   },
   {
     name: "File",
@@ -56,7 +57,7 @@ export const OBSERVABLE_TYPES = [
       { field: "tags", type: "list", label: "tags", displayList: true, editable: false },
       { field: "created", type: "datetime", label: "Created", displayList: true, editable: false }
     ],
-    icon: "file"
+    icon: "mdi-file"
   },
   {
     name: "SHA256",
@@ -66,7 +67,7 @@ export const OBSERVABLE_TYPES = [
       { field: "tags", type: "list", label: "tags", displayList: true, editable: false },
       { field: "created", type: "datetime", label: "Created", displayList: true, editable: false }
     ],
-    icon: "lock"
+    icon: "mdi-pound"
   },
   {
     name: "MD5",
@@ -76,7 +77,7 @@ export const OBSERVABLE_TYPES = [
       { field: "tags", type: "list", label: "tags", displayList: true, editable: false },
       { field: "created", type: "datetime", label: "Created", displayList: true, editable: false }
     ],
-    icon: "lock"
+    icon: "mdi-pound"
   },
   {
     name: "SHA1",
@@ -86,7 +87,7 @@ export const OBSERVABLE_TYPES = [
       { field: "tags", type: "list", label: "tags", displayList: true, editable: false },
       { field: "created", type: "datetime", label: "Created", displayList: true, editable: false }
     ],
-    icon: "lock"
+    icon: "mdi-pound"
   },
   {
     name: "ASN",
@@ -107,7 +108,8 @@ export const OBSERVABLE_TYPES = [
       { field: "address", type: "text", label: "Address", displayList: false, editable: true },
       { field: "tags", type: "list", label: "tags", displayList: true, editable: false },
       { field: "created", type: "datetime", label: "Created", displayList: true, editable: false }
-    ]
+    ],
+    icon: "mdi-wallet-bifold"
   },
   {
     name: "Certificate",
@@ -116,7 +118,8 @@ export const OBSERVABLE_TYPES = [
       { field: "value", type: "text", label: "Value", displayList: true, editable: true },
       { field: "tags", type: "list", label: "tags", displayList: true, editable: false },
       { field: "created", type: "datetime", label: "Created", displayList: true, editable: false }
-    ]
+    ],
+    icon: "mdi-certificate"
   },
   {
     name: "CIDR",
@@ -125,7 +128,8 @@ export const OBSERVABLE_TYPES = [
       { field: "value", type: "text", label: "Value", displayList: true, editable: true },
       { field: "tags", type: "list", label: "tags", displayList: true, editable: false },
       { field: "created", type: "datetime", label: "Created", displayList: true, editable: false }
-    ]
+    ],
+    icon: "mdi-ip-network"
   },
   {
     name: "Mac Address",
@@ -134,7 +138,8 @@ export const OBSERVABLE_TYPES = [
       { field: "value", type: "text", label: "Value", displayList: true, editable: true },
       { field: "tags", type: "list", label: "tags", displayList: true, editable: false },
       { field: "created", type: "datetime", label: "Created", displayList: true, editable: false }
-    ]
+    ],
+    icon: "mdi-eye-outline"
   },
   {
     name: "Command Line",
@@ -152,7 +157,8 @@ export const OBSERVABLE_TYPES = [
       { field: "value", type: "text", label: "Value", displayList: true, editable: true },
       { field: "tags", type: "list", label: "tags", displayList: true, editable: false },
       { field: "created", type: "datetime", label: "Created", displayList: true, editable: false }
-    ]
+    ],
+    icon: "mdi-key"
   },
   {
     name: "Imphash",
@@ -161,7 +167,8 @@ export const OBSERVABLE_TYPES = [
       { field: "value", type: "text", label: "Value", displayList: true, editable: true },
       { field: "tags", type: "list", label: "tags", displayList: true, editable: false },
       { field: "created", type: "datetime", label: "Created", displayList: true, editable: false }
-    ]
+    ],
+    icon: "mdi-hash"
   },
   {
     name: "TLSH",
@@ -170,7 +177,8 @@ export const OBSERVABLE_TYPES = [
       { field: "value", type: "text", label: "Value", displayList: true, editable: true },
       { field: "tags", type: "list", label: "tags", displayList: true, editable: false },
       { field: "created", type: "datetime", label: "Created", displayList: true, editable: false }
-    ]
+    ],
+    icon: "mdi-hash"
   },
   {
     name: "SSDEEP",
@@ -179,7 +187,8 @@ export const OBSERVABLE_TYPES = [
       { field: "value", type: "text", label: "Value", displayList: true, editable: true },
       { field: "tags", type: "list", label: "tags", displayList: true, editable: false },
       { field: "created", type: "datetime", label: "Created", displayList: true, editable: false }
-    ]
+    ],
+    icon: "mdi-hash"
   },
   {
     name: "Email",
@@ -188,7 +197,8 @@ export const OBSERVABLE_TYPES = [
       { field: "value", type: "text", label: "Value", displayList: true, editable: true },
       { field: "tags", type: "list", label: "tags", displayList: true, editable: false },
       { field: "created", type: "datetime", label: "Created", displayList: true, editable: false }
-    ]
+    ],
+    icon: "mdi-at"
   },
   {
     name: "Filesystem path",
@@ -197,7 +207,8 @@ export const OBSERVABLE_TYPES = [
       { field: "value", type: "text", label: "Value", displayList: true, editable: true },
       { field: "tags", type: "list", label: "tags", displayList: true, editable: false },
       { field: "created", type: "datetime", label: "Created", displayList: true, editable: false }
-    ]
+    ],
+    icon: "mdi-slash-forward"
   },
   {
     name: "Docker Image",
@@ -206,7 +217,8 @@ export const OBSERVABLE_TYPES = [
       { field: "value", type: "text", label: "Value", displayList: true, editable: true },
       { field: "tags", type: "list", label: "tags", displayList: true, editable: false },
       { field: "created", type: "datetime", label: "Created", displayList: true, editable: false }
-    ]
+    ],
+    icon: "mdi-docker"
   },
   {
     name: "User-Agent",
@@ -215,7 +227,8 @@ export const OBSERVABLE_TYPES = [
       { field: "value", type: "text", label: "Value", displayList: true, editable: true },
       { field: "tags", type: "list", label: "tags", displayList: true, editable: false },
       { field: "created", type: "datetime", label: "Created", displayList: true, editable: false }
-    ]
+    ],
+    icon: "mdi-account-circle"
   },
   {
     name: "User Account",
@@ -250,7 +263,8 @@ export const OBSERVABLE_TYPES = [
       },
       { field: "account_first_login", type: "datetime", label: "First login", displayList: false, editable: true },
       { field: "account_last_login", type: "datetime", label: "Last login", displayList: false, editable: true }
-    ]
+    ],
+    icon: "mdi-account"
   },
   {
     name: "IBAN",
@@ -260,7 +274,7 @@ export const OBSERVABLE_TYPES = [
       { field: "tags", type: "list", label: "tags", displayList: true, editable: false },
       { field: "created", type: "datetime", label: "Created", displayList: true, editable: false }
     ],
-    icon: "mdi:bank-transfer"
+    icon: "mdi-bank"
   },
   {
     name: "BIC",
@@ -270,6 +284,6 @@ export const OBSERVABLE_TYPES = [
       { field: "tags", type: "list", label: "tags", displayList: true, editable: false },
       { field: "created", type: "datetime", label: "Created", displayList: true, editable: false }
     ],
-    icon: "mdi:bank"
+    icon: "mdi-bank"
   }
 ];
