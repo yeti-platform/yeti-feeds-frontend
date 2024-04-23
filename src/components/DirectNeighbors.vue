@@ -12,100 +12,89 @@
     :sort-by="sortBy"
     hover
   >
-    <template v-slot:item="{ item }">
-      <tr>
-        <td>
-          <v-icon v-if="item.target === extendedId">mdi-arrow-left</v-icon>
-          <v-icon v-else-if="item.source === extendedId">mdi-arrow-right</v-icon>
-        </td>
-        <td>
-          <v-chip density="compact" class="ml-2">{{ item.relevant_node.type }}</v-chip>
-        </td>
-        <td v-if="item.relevant_node.root_type === 'observable'">
-          <router-link :to="{ name: 'ObservableDetails', params: { id: item.relevant_node.id } }">
-            {{ item.relevant_node.value }}
-          </router-link>
-        </td>
-        <td v-if="item.relevant_node.root_type === 'entity'">
-          <v-icon :icon="getIconForType(item.relevant_node.type)" start size="small"></v-icon>
-          <router-link :to="{ name: 'EntityDetails', params: { id: item.relevant_node.id } }">
-            {{ item.relevant_node.name }}
-          </router-link>
-        </td>
-        <td v-if="item.relevant_node.root_type === 'indicator'">
-          <v-icon :icon="getIconForType(item.relevant_node.type)" start size="small"></v-icon>
-          <router-link :to="{ name: 'IndicatorDetails', params: { id: item.relevant_node.id } }">
-            {{ item.relevant_node.name }}
-          </router-link>
-        </td>
-        <td v-if="item.relevant_node.root_type === 'dfiq'">
-          <v-icon :icon="getIconForType(item.relevant_node.type)" start size="small"></v-icon>
-          <router-link :to="{ name: 'DFIQDetails', params: { id: item.relevant_node.id } }">
-            {{ item.relevant_node.name }}
-          </router-link>
-        </td>
-        <td>
-          <v-chip density="compact" class="mr-2">{{ item.type }} </v-chip>{{ item.description }}
-        </td>
-        <!-- <td>
-          <v-btn size="small" variant="text" append-icon="mdi-information">
-            <template v-slot:append>
-              <v-icon class="on-surface" v-if="node.description"></v-icon>
-            </template>
-            {{ node.type }}
-            <v-menu activator="parent" v-if="node.description">
-              <v-sheet class="px-5 py-2" color="background" width="auto" elevation="10" style="font-size: 0.8rem">
-                <yeti-markdown :text="node.description" />
-              </v-sheet>
-            </v-menu>
-          </v-btn>
-        </td> -->
-        <td class="controls" v-if="hops === 1">
-          <v-btn
-            icon="mdi-swap-horizontal"
-            @click="swapLink(item.id)"
-            density="compact"
-            variant="tonal"
-            color="primary"
-            class="me-2"
-          >
-          </v-btn>
-          <v-dialog width="700">
-            <template v-slot:activator="{ props }">
-              <v-btn icon="mdi-pencil" density="compact" variant="tonal" color="primary" class="me-2" v-bind="props">
-              </v-btn>
-            </template>
+    <!-- <tr> -->
+    <template v-slot:item.direction="{ item }">
+      <v-icon v-if="item.target === extendedId">mdi-arrow-left</v-icon>
+      <v-icon v-else-if="item.source === extendedId">mdi-arrow-right</v-icon>
+    </template>
 
-            <template v-slot:default="{ isActive }">
-              <edit-link
-                :vertices="vertices"
-                :edge="node"
-                :is-active="isActive"
-                @success="linkUpdateSuccess(node, $event)"
-              />
-            </template>
-          </v-dialog>
-          <v-btn
-            icon="mdi-link-off"
-            @click="unlink(item.id)"
-            density="compact"
-            variant="tonal"
-            color="error"
-            class="me-2"
-          >
+    <template v-slot:item.created="{ item }">
+      {{ moment(item.created).format("YYYY-MM-DD HH:mm:ss") }}
+    </template>
+
+    <template v-slot:item.relevant_node.type="{ item }">
+      <v-chip density="compact" class="ml-2">
+        <v-icon :icon="getIconForType(item.relevant_node.type)" start size="small"></v-icon>
+        {{ item.relevant_node.type }}</v-chip
+      >
+    </template>
+
+    <template v-slot:item.relevant_node.value="{ item }">
+      <span v-if="item.relevant_node.root_type === 'observable'">
+        <router-link :to="{ name: 'ObservableDetails', params: { id: item.relevant_node.id } }">
+          {{ item.relevant_node.value }}
+        </router-link>
+      </span>
+      <span v-if="item.relevant_node.root_type === 'entity'">
+        <router-link :to="{ name: 'EntityDetails', params: { id: item.relevant_node.id } }">
+          {{ item.relevant_node.name }}
+        </router-link>
+      </span>
+      <span v-if="item.relevant_node.root_type === 'indicator'">
+        <router-link :to="{ name: 'IndicatorDetails', params: { id: item.relevant_node.id } }">
+          {{ item.relevant_node.name }}
+        </router-link>
+      </span>
+      <span v-if="item.relevant_node.root_type === 'dfiq'">
+        <router-link :to="{ name: 'DFIQDetails', params: { id: item.relevant_node.id } }">
+          {{ item.relevant_node.name }}
+        </router-link>
+      </span>
+    </template>
+
+    <template v-slot:item.description="{ item }">
+      <v-chip density="compact" class="mr-2">{{ item.type }} </v-chip>{{ item.description }}
+    </template>
+
+    <template v-slot:item.controls="{ item }">
+      <v-btn
+        icon="mdi-swap-horizontal"
+        @click="swapLink(item.id)"
+        density="compact"
+        variant="tonal"
+        color="primary"
+        class="me-2"
+      >
+      </v-btn>
+      <v-dialog width="700">
+        <template v-slot:activator="{ props }">
+          <v-btn icon="mdi-pencil" density="compact" variant="tonal" color="primary" class="me-2" v-bind="props">
           </v-btn>
-        </td>
-      </tr>
+        </template>
+
+        <template v-slot:default="{ isActive }">
+          <edit-link
+            :vertices="vertices"
+            :edge="item"
+            :is-active="isActive"
+            @success="linkUpdateSuccess(item, $event)"
+          />
+        </template>
+      </v-dialog>
+      <v-btn icon="mdi-link-off" @click="unlink(item.id)" density="compact" variant="tonal" color="error" class="me-2">
+      </v-btn>
     </template>
   </v-data-table-server>
 </template>
 
 <script lang="ts" setup>
 import axios from "axios";
+import moment from "moment";
 
 import { ENTITY_TYPES } from "@/definitions/entityDefinitions.js";
 import { INDICATOR_TYPES } from "@/definitions/indicatorDefinitions.js";
 import { DFIQ_TYPES } from "@/definitions/dfiqDefinitions.js";
+import { OBSERVABLE_TYPES } from "@/definitions/observableDefinitions.js";
 import EditLink from "@/components/EditLink.vue";
 import YetiMarkdown from "@/components/YetiMarkdown.vue";
 </script>
@@ -145,16 +134,17 @@ export default {
       perPage: 25,
       total: 0,
       loading: false,
-      objectTypes: ENTITY_TYPES.concat(INDICATOR_TYPES).concat(DFIQ_TYPES),
+      objectTypes: ENTITY_TYPES.concat(INDICATOR_TYPES).concat(DFIQ_TYPES).concat(OBSERVABLE_TYPES),
       showEditLink: false,
       headers: [
         { title: "", key: "direction", width: "10px" },
-        { title: "Type", key: "relevant_node.type", width: "10px" },
-        { title: "Value", key: "relevant_node.value" },
-        { title: "Description", key: "description" },
-        { title: "", key: "controls" }
+        { title: "Linked on", key: "created", width: "170px", sortable: true },
+        { title: "Type", key: "relevant_node.type", width: "10px", sortable: false },
+        { title: "Value", key: "relevant_node.value", sortable: false },
+        { title: "Description", key: "description", sortable: false },
+        { title: "", key: "controls", sortable: false }
       ],
-      sortBy: [{ key: "name", order: "asc" }]
+      sortBy: [{ key: "created", order: "asc" }]
     };
   },
   methods: {
@@ -185,7 +175,8 @@ export default {
         direction: "any",
         include_original: true,
         count: itemsPerPage === -1 ? 0 : itemsPerPage,
-        page: page - 1
+        page: page - 1,
+        sorting: sortBy.map(sort => [sort.key, sort.order === "asc"])
       };
 
       axios
@@ -199,7 +190,6 @@ export default {
             processedPath.relevant_node = this.vertices[relevantNode];
             return processedPath;
           });
-          console.log(this.processedPaths);
           this.total = response.data.total;
           this.$emit("totalUpdated", this.total);
         })
@@ -209,7 +199,6 @@ export default {
         .finally(() => (this.loading = false));
     },
     getVerticeFromNode(link) {
-      console.log(link);
       return link.source === this.extendedId ? this.vertices[link.target] : this.vertices[link.source];
     },
     swapLink(edgeId) {
@@ -217,8 +206,7 @@ export default {
         .post(`/api/v2/graph/${edgeId}/swap`)
         .then(response => {
           this.$eventBus.emit("displayMessage", { message: "Link direction swapped succesfully!", status: "success" });
-          console.log({ page: this.page, itemsPerPage: this.perPage });
-          this.fetchNeighbors({ page: this.page, itemsPerPage: this.perPage });
+          this.fetchNeighbors({ page: this.page, itemsPerPage: this.perPage, sortBy: this.sortBy });
         })
         .catch(error => {
           this.error = error;
@@ -232,14 +220,14 @@ export default {
       axios
         .delete(`/api/v2/graph/${id}`)
         .then(() => {
-          this.fetchNeighbors({ page: this.page, itemsPerPage: this.perPage });
+          this.fetchNeighbors({ page: this.page, itemsPerPage: this.perPage, sortBy: this.sortBy });
         })
         .catch(error => {
           console.log(error);
         });
     },
     getIconForType(type) {
-      return this.objectTypes.find(objectType => objectType.type === type).icon;
+      return this.objectTypes.find(objectType => objectType.type === type)?.icon;
     }
   },
   computed: {
@@ -251,7 +239,7 @@ export default {
     id: function () {
       this.page = 1;
       this.perPage = 20;
-      this.fetchNeighbors({ page: this.page, itemsPerPage: this.perPage });
+      this.fetchNeighbors({ page: this.page, itemsPerPage: this.perPage, sortBy: this.sortBy });
     }
   }
 };
