@@ -1,90 +1,112 @@
 <template>
   <!-- Empty headers array to not mess up with CSS borders -->
-  <v-data-table-server
-    density="compact"
-    :items="processedPaths"
-    :itemsLength="total"
-    :items-per-page="perPage"
-    v-model:page="page"
-    :headers="headers"
-    @update:options="fetchNeighbors"
-    @update:items-per-page="perPage = $event"
-    :sort-by="sortBy"
-    hover
-  >
-    <!-- <tr> -->
-    <template v-slot:item.direction="{ item }">
-      <v-icon v-if="item.target === extendedId">mdi-arrow-left</v-icon>
-      <v-icon v-else-if="item.source === extendedId">mdi-arrow-right</v-icon>
-    </template>
+  <div>
+    <v-form>
+      <v-row>
+        <v-col>
+          <v-text-field
+            label="Filter neighbors (type, value, or description)"
+            density="compact"
+            @update:model-value="searchFilterDebounced"
+            clearable
+          ></v-text-field>
+        </v-col>
+      </v-row>
+    </v-form>
+    <v-data-table-server
+      density="compact"
+      :items="processedPaths"
+      :itemsLength="total"
+      :items-per-page="perPage"
+      v-model:page="page"
+      :headers="headers"
+      @update:options="fetchNeighbors"
+      @update:items-per-page="perPage = $event"
+      :sort-by="sortBy"
+      :search="searchFilter"
+      hover
+    >
+      <!-- <tr> -->
+      <template v-slot:item.direction="{ item }">
+        <v-icon v-if="item.target === extendedId">mdi-arrow-left</v-icon>
+        <v-icon v-else-if="item.source === extendedId">mdi-arrow-right</v-icon>
+      </template>
 
-    <template v-slot:item.created="{ item }">
-      {{ moment(item.created).format("YYYY-MM-DD HH:mm:ss") }}
-    </template>
+      <template v-slot:item.created="{ item }">
+        {{ moment(item.created).format("YYYY-MM-DD HH:mm:ss") }}
+      </template>
 
-    <template v-slot:item.relevant_node.type="{ item }">
-      <v-chip density="compact" class="ml-2">
-        <v-icon :icon="getIconForType(item.relevant_node.type)" start size="small"></v-icon>
-        {{ item.relevant_node.type }}</v-chip
-      >
-    </template>
+      <template v-slot:item.relevant_node.type="{ item }">
+        <v-chip density="compact" class="ml-2">
+          <v-icon :icon="getIconForType(item.relevant_node.type)" start size="small"></v-icon>
+          {{ item.relevant_node.type }}</v-chip
+        >
+      </template>
 
-    <template v-slot:item.relevant_node.value="{ item }">
-      <span v-if="item.relevant_node.root_type === 'observable'">
-        <router-link :to="{ name: 'ObservableDetails', params: { id: item.relevant_node.id } }">
-          {{ item.relevant_node.value }}
-        </router-link>
-      </span>
-      <span v-if="item.relevant_node.root_type === 'entity'">
-        <router-link :to="{ name: 'EntityDetails', params: { id: item.relevant_node.id } }">
-          {{ item.relevant_node.name }}
-        </router-link>
-      </span>
-      <span v-if="item.relevant_node.root_type === 'indicator'">
-        <router-link :to="{ name: 'IndicatorDetails', params: { id: item.relevant_node.id } }">
-          {{ item.relevant_node.name }}
-        </router-link>
-      </span>
-      <span v-if="item.relevant_node.root_type === 'dfiq'">
-        <router-link :to="{ name: 'DFIQDetails', params: { id: item.relevant_node.id } }">
-          {{ item.relevant_node.name }}
-        </router-link>
-      </span>
-    </template>
+      <template v-slot:item.relevant_node.value="{ item }">
+        <span v-if="item.relevant_node.root_type === 'observable'">
+          <router-link :to="{ name: 'ObservableDetails', params: { id: item.relevant_node.id } }">
+            {{ item.relevant_node.value }}
+          </router-link>
+        </span>
+        <span v-if="item.relevant_node.root_type === 'entity'">
+          <router-link :to="{ name: 'EntityDetails', params: { id: item.relevant_node.id } }">
+            {{ item.relevant_node.name }}
+          </router-link>
+        </span>
+        <span v-if="item.relevant_node.root_type === 'indicator'">
+          <router-link :to="{ name: 'IndicatorDetails', params: { id: item.relevant_node.id } }">
+            {{ item.relevant_node.name }}
+          </router-link>
+        </span>
+        <span v-if="item.relevant_node.root_type === 'dfiq'">
+          <router-link :to="{ name: 'DFIQDetails', params: { id: item.relevant_node.id } }">
+            {{ item.relevant_node.name }}
+          </router-link>
+        </span>
+      </template>
 
-    <template v-slot:item.description="{ item }">
-      <v-chip density="compact" class="mr-2">{{ item.type }} </v-chip>{{ item.description }}
-    </template>
+      <template v-slot:item.description="{ item }">
+        <v-chip density="compact" class="mr-2">{{ item.type }} </v-chip>{{ item.description }}
+      </template>
 
-    <template v-slot:item.controls="{ item }">
-      <v-btn
-        icon="mdi-swap-horizontal"
-        @click="swapLink(item.id)"
-        density="compact"
-        variant="tonal"
-        color="primary"
-        class="me-2"
-      >
-      </v-btn>
-      <v-dialog width="700">
-        <template v-slot:activator="{ props }">
-          <v-btn icon="mdi-pencil" density="compact" variant="tonal" color="primary" class="me-2" v-bind="props">
-          </v-btn>
-        </template>
+      <template v-slot:item.controls="{ item }">
+        <v-btn
+          icon="mdi-swap-horizontal"
+          @click="swapLink(item.id)"
+          density="compact"
+          variant="tonal"
+          color="primary"
+          class="me-2"
+        >
+        </v-btn>
+        <v-dialog width="700">
+          <template v-slot:activator="{ props }">
+            <v-btn icon="mdi-pencil" density="compact" variant="tonal" color="primary" class="me-2" v-bind="props">
+            </v-btn>
+          </template>
 
-        <template v-slot:default="{ isActive }">
-          <edit-link
-            :vertices="vertices"
-            :edge="item"
-            :is-active="isActive"
-            @success="linkUpdateSuccess(item, $event)"
-          />
-        </template>
-      </v-dialog>
-      <v-btn icon="mdi-link-off" @click="unlink(item.id)" density="compact" variant="tonal" color="error" class="me-2">
-      </v-btn>
-    </template>
-  </v-data-table-server>
+          <template v-slot:default="{ isActive }">
+            <edit-link
+              :vertices="vertices"
+              :edge="item"
+              :is-active="isActive"
+              @success="linkUpdateSuccess(item, $event)"
+            />
+          </template>
+        </v-dialog>
+        <v-btn
+          icon="mdi-link-off"
+          @click="unlink(item.id)"
+          density="compact"
+          variant="tonal"
+          color="error"
+          class="me-2"
+        >
+        </v-btn>
+      </template>
+    </v-data-table-server>
+  </div>
 </template>
 
 <script lang="ts" setup>
@@ -97,6 +119,8 @@ import { DFIQ_TYPES } from "@/definitions/dfiqDefinitions.js";
 import { OBSERVABLE_TYPES } from "@/definitions/observableDefinitions.js";
 import EditLink from "@/components/EditLink.vue";
 import YetiMarkdown from "@/components/YetiMarkdown.vue";
+
+import _ from "lodash";
 </script>
 
 <script lang="ts">
@@ -130,6 +154,7 @@ export default {
       paths: [],
       processedPaths: [],
       vertices: {},
+      searchFilter: "",
       page: 1,
       perPage: 25,
       total: 0,
@@ -167,6 +192,28 @@ export default {
       sortBy: Array<{ key: string; order: string }>;
     }) {
       this.loading = true;
+      let filters = [
+        {
+          key: "type",
+          value: this.searchFilter || "",
+          operator: "=~"
+        },
+        {
+          key: "description",
+          value: this.searchFilter || "",
+          operator: "=~"
+        },
+        {
+          key: "value",
+          value: this.searchFilter || "",
+          operator: "=~"
+        },
+        {
+          key: "name",
+          value: this.searchFilter || "",
+          operator: "=~"
+        }
+      ];
       let graphSearchRequest = {
         source: `${this.sourceType}/${this.id}`,
         target_types: this.targetTypes,
@@ -174,6 +221,7 @@ export default {
         hops: this.hops,
         direction: "any",
         include_original: true,
+        filter: filters,
         count: itemsPerPage === -1 ? 0 : itemsPerPage,
         page: page - 1,
         sorting: sortBy.map(sort => [sort.key, sort.order === "asc"])
@@ -228,7 +276,10 @@ export default {
     },
     getIconForType(type) {
       return this.objectTypes.find(objectType => objectType.type === type)?.icon;
-    }
+    },
+    searchFilterDebounced: _.debounce(function (searchFilter) {
+      this.searchFilter = searchFilter;
+    }, 200)
   },
   computed: {
     extendedId() {
