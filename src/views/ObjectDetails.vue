@@ -306,7 +306,6 @@ export default {
     countObjects(key: string, value: number) {
       this.relatedObjectTabCount[key] = value;
       if (!this.$route.hash && this.autoTab) {
-        console.log("navigating!");
         this.navigateToFirstPopulatedTab();
       }
     },
