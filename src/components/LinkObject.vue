@@ -4,23 +4,37 @@
       >New link for <span class="text-primary">{{ object.name }}</span>
     </v-card-title>
     <v-card-text>
-      <v-checkbox hide-details color="primary" :label="`Filter on suggested types (${getSuggestedTypes.length})`" v-model=filterRecommended density="compact" :disabled="getSuggestedTypes.length === 0"></v-checkbox>
-      <entity-selector @selected-object="targetSelected" :type-filter="filterRecommended ? getSuggestedTypes : []"  />
+      <v-checkbox
+        hide-details
+        color="primary"
+        :label="`Filter on suggested types (${getSuggestedTypes.length})`"
+        v-model="filterRecommended"
+        density="compact"
+        :disabled="getSuggestedTypes.length === 0"
+      ></v-checkbox>
+      <entity-selector @selected-object="targetSelected" :type-filter="filterRecommended ? getSuggestedTypes : []" />
 
-      <v-divider class="mt-4 mb-6"/>
-      <v-combobox @update:modelValue="checkLinkdDirection" :label="getLinkTypeLabel" v-model="linkType" :items="getLinkTypeSuggestions"></v-combobox>
+      <v-divider class="mt-4 mb-6" />
+      <v-combobox
+        @update:modelValue="checkLinkDirection"
+        :label="getLinkTypeLabel"
+        v-model="linkType"
+        :items="getLinkTypeSuggestions"
+      ></v-combobox>
 
       <v-textarea label="Link description (supports markdown)" v-model="linkDescription"></v-textarea>
-      <v-btn variant="outlined" @click="linkDirectionOutgoing = !linkDirectionOutgoing">Switch direction</v-btn>
+      <v-btn variant="outlined" @click="linkDirectionOutgoing = !linkDirectionOutgoing">Swap direction</v-btn>
       <br />
       <br />
-      <div  class="d-flex justify-center">
+      <div class="d-flex justify-center">
         <table>
           <tr>
-            <td><v-chip :text="object.name" :prepend-icon="getIconForType(object.type)" /></td>
-            <td> {{ linkDirectionOutgoing ? "→" : "←"}}</td>
-            <td> <code>{{ linkType || "?" }}</code></td>
-            <td> {{ linkDirectionOutgoing ? "→" : "←"}}</td>
+            <td><v-chip :text="object.name || object.value" :prepend-icon="getIconForType(object.type)" /></td>
+            <td>{{ linkDirectionOutgoing ? "→" : "←" }}</td>
+            <td>
+              <code>{{ linkType || "?" }}</code>
+            </td>
+            <td>{{ linkDirectionOutgoing ? "→" : "←" }}</td>
             <td>
               <v-chip v-if="linkTarget" :text="linkTarget.name" :prepend-icon="getIconForType(linkTarget.type)" />
               <span v-else>Select target</span>
@@ -49,7 +63,6 @@
 
 <script lang="ts" setup>
 import axios from "axios";
-
 
 import { ENTITY_TYPES } from "@/definitions/entityDefinitions.js";
 import { INDICATOR_TYPES } from "@/definitions/indicatorDefinitions.js";
@@ -131,9 +144,9 @@ export default {
     },
     targetSelected(target) {
       this.linkTarget = target;
-      this.linkType = ''
+      this.linkType = "";
     },
-    checkLinkdDirection(linkType) {
+    checkLinkDirection(linkType) {
       if (this.getOutgoingLinkTypeSuggestions.includes(linkType)) {
         this.linkDirectionOutgoing = true;
       } else if (this.getIncomingLinkTypeSuggestions.includes(linkType)) {
@@ -143,24 +156,46 @@ export default {
       }
     },
     getIconForType(type) {
-      return (ENTITY_TYPES.find(t => t.type === type) || INDICATOR_TYPES.find(t => t.type === type) || OBSERVABLE_TYPES.find(t => t.type === type)).icon;
+      return (
+        ENTITY_TYPES.find(t => t.type === type) ||
+        INDICATOR_TYPES.find(t => t.type === type) ||
+        OBSERVABLE_TYPES.find(t => t.type === type)
+      ).icon;
     }
   },
   computed: {
     getSuggestedTypes() {
-      let outgoingTypes = [...new Set(LINK_SUGGESTIONS[this.object.type].flatMap(entry => entry.targets))];
-      let incomingTypes = [...new Set(Object.keys(LINK_SUGGESTIONS).filter(key => LINK_SUGGESTIONS[key].some(entry => entry.targets.includes(this.object.type))))];
+      let outgoingTypes = [
+        ...new Set(
+          (LINK_SUGGESTIONS[this.object.type] || LINK_SUGGESTIONS[this.object.root_type]).flatMap(
+            entry => entry.targets
+          )
+        )
+      ];
+      let incomingTypes = [
+        ...new Set(
+          Object.keys(LINK_SUGGESTIONS).filter(key =>
+            LINK_SUGGESTIONS[key].some(
+              entry => entry.targets.includes(this.object.type) || entry.targets.includes(this.object.root_type)
+            )
+          )
+        )
+      ];
       return [...new Set(outgoingTypes.concat(incomingTypes))];
-
     },
     getOutgoingLinkTypeSuggestions() {
-      return  (LINK_SUGGESTIONS[this.object.type] || LINK_SUGGESTIONS[this.object.root_type])
-        .filter(suggestion => suggestion.targets.includes(this.linkTarget.type))
+      return (LINK_SUGGESTIONS[this.object.type] || LINK_SUGGESTIONS[this.object.root_type])
+        .filter(
+          suggestion =>
+            suggestion.targets.includes(this.linkTarget.type) || suggestion.targets.includes(this.linkTarget.type)
+        )
         .map(suggestion => suggestion.verb);
     },
     getIncomingLinkTypeSuggestions() {
-      return (LINK_SUGGESTIONS[this.linkTarget.type] ||  LINK_SUGGESTIONS[this.linkTarget.root_type])
-        .filter(suggestion => suggestion.targets.includes(this.object.type))
+      return (LINK_SUGGESTIONS[this.linkTarget.type] || LINK_SUGGESTIONS[this.linkTarget.root_type])
+        .filter(
+          suggestion => suggestion.targets.includes(this.object.type) || suggestion.targets.includes(this.object.type)
+        )
         .map(suggestion => suggestion.verb);
     },
     getLinkTypeSuggestions() {
@@ -170,10 +205,10 @@ export default {
       return [...new Set(this.getOutgoingLinkTypeSuggestions.concat(this.getIncomingLinkTypeSuggestions))];
     },
     getLinkTypeLabel() {
-      if (this.getLinkTypeSuggestions === [] || this.linkTarget === null) {
-        return "Link type"
+      if (this.getLinkTypeSuggestions.length === 0 || this.linkTarget === null) {
+        return "Link type";
       } else {
-        return  `Link type (suggestions for ${this.object.type} → ${this.linkTarget.type} links)`
+        return `Link type (suggestions for ${this.object.type} → ${this.linkTarget.type} links)`;
       }
     }
   }
