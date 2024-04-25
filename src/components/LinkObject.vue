@@ -4,9 +4,30 @@
       >New link for <span class="text-primary">{{ object.name }}</span>
     </v-card-title>
     <v-card-text>
-      <entity-selector @selected-object="selection => (linkTarget = selection)" />
-      <v-text-field label="Link type" v-model="linkType"></v-text-field>
+      <v-checkbox hide-details color="primary" :label="`Filter on suggested types (${getSuggestedTypes.length})`" v-model=filterRecommended density="compact" :disabled="getSuggestedTypes.length === 0"></v-checkbox>
+      <entity-selector @selected-object="targetSelected" :type-filter="filterRecommended ? getSuggestedTypes : []"  />
+
+      <v-divider class="mt-4 mb-6"/>
+      <v-combobox @update:modelValue="checkLinkdDirection" :label="getLinkTypeLabel" v-model="linkType" :items="getLinkTypeSuggestions"></v-combobox>
+
       <v-textarea label="Link description (supports markdown)" v-model="linkDescription"></v-textarea>
+      <v-btn variant="outlined" @click="linkDirectionOutgoing = !linkDirectionOutgoing">Switch direction</v-btn>
+      <br />
+      <br />
+      <div  class="d-flex justify-center">
+        <table>
+          <tr>
+            <td><v-chip :text="object.name" :prepend-icon="getIconForType(object.type)" /></td>
+            <td> {{ linkDirectionOutgoing ? "→" : "←"}}</td>
+            <td> <code>{{ linkType || "?" }}</code></td>
+            <td> {{ linkDirectionOutgoing ? "→" : "←"}}</td>
+            <td>
+              <v-chip v-if="linkTarget" :text="linkTarget.name" :prepend-icon="getIconForType(linkTarget.type)" />
+              <span v-else>Select target</span>
+            </td>
+          </tr>
+        </table>
+      </div>
     </v-card-text>
 
     <v-card-actions>
@@ -29,8 +50,12 @@
 <script lang="ts" setup>
 import axios from "axios";
 
+
 import { ENTITY_TYPES } from "@/definitions/entityDefinitions.js";
 import { INDICATOR_TYPES } from "@/definitions/indicatorDefinitions.js";
+import { OBSERVABLE_TYPES } from "@/definitions/observableDefinitions.js";
+
+import { LINK_SUGGESTIONS } from "@/definitions/linkSuggestions.js";
 import EntitySelector from "@/components/EntitySelector.vue";
 
 import _ from "lodash";
@@ -58,15 +83,20 @@ export default {
       linkTarget: null,
       linkType: "",
       linkDescription: "",
-      autocompleteLoading: false
+      autocompleteLoading: false,
+      filterRecommended: true,
+      linkDirectionOutgoing: true
     };
   },
   methods: {
     createLink() {
+      let source = this.linkDirectionOutgoing ? this.object : this.linkTarget;
+      let target = this.linkDirectionOutgoing ? this.linkTarget : this.object;
+
       axios
         .post("/api/v2/graph/add", {
-          source: `${this.object.root_type}/${this.object.id}`,
-          target: `${this.linkTarget.root_type}/${this.linkTarget.id}`,
+          source: `${source.root_type}/${source.id}`,
+          target: `${target.root_type}/${target.id}`,
           link_type: this.linkType,
           description: this.linkDescription
         })
@@ -78,16 +108,16 @@ export default {
           });
           const linkData = {
             source: {
-              id: this.object.id,
-              root_type: this.object.root_type,
-              type: this.object.type,
-              name: this.object.name
+              id: source.id,
+              root_type: source.root_type,
+              type: source.type,
+              name: source.name
             },
             target: {
-              id: this.linkTarget.id,
-              root_type: this.linkTarget.root_type,
-              type: this.linkTarget.type,
-              name: this.linkTarget.name
+              id: target.id,
+              root_type: target.root_type,
+              type: target.type,
+              name: target.name
             },
             link_type: this.linkType,
             description: this.linkDescription,
@@ -98,6 +128,53 @@ export default {
         .catch(error => {
           this.errors = error.response.data.errors;
         });
+    },
+    targetSelected(target) {
+      this.linkTarget = target;
+      this.linkType = ''
+    },
+    checkLinkdDirection(linkType) {
+      if (this.getOutgoingLinkTypeSuggestions.includes(linkType)) {
+        this.linkDirectionOutgoing = true;
+      } else if (this.getIncomingLinkTypeSuggestions.includes(linkType)) {
+        this.linkDirectionOutgoing = false;
+      } else {
+        this.linkDirectionOutgoing = true;
+      }
+    },
+    getIconForType(type) {
+      return (ENTITY_TYPES.find(t => t.type === type) || INDICATOR_TYPES.find(t => t.type === type) || OBSERVABLE_TYPES.find(t => t.type === type)).icon;
+    }
+  },
+  computed: {
+    getSuggestedTypes() {
+      let outgoingTypes = [...new Set(LINK_SUGGESTIONS[this.object.type].flatMap(entry => entry.targets))];
+      let incomingTypes = [...new Set(Object.keys(LINK_SUGGESTIONS).filter(key => LINK_SUGGESTIONS[key].some(entry => entry.targets.includes(this.object.type))))];
+      return [...new Set(outgoingTypes.concat(incomingTypes))];
+
+    },
+    getOutgoingLinkTypeSuggestions() {
+      return  (LINK_SUGGESTIONS[this.object.type] || LINK_SUGGESTIONS[this.object.root_type])
+        .filter(suggestion => suggestion.targets.includes(this.linkTarget.type))
+        .map(suggestion => suggestion.verb);
+    },
+    getIncomingLinkTypeSuggestions() {
+      return (LINK_SUGGESTIONS[this.linkTarget.type] ||  LINK_SUGGESTIONS[this.linkTarget.root_type])
+        .filter(suggestion => suggestion.targets.includes(this.object.type))
+        .map(suggestion => suggestion.verb);
+    },
+    getLinkTypeSuggestions() {
+      if (!this.object || !this.linkTarget) {
+        return [];
+      }
+      return [...new Set(this.getOutgoingLinkTypeSuggestions.concat(this.getIncomingLinkTypeSuggestions))];
+    },
+    getLinkTypeLabel() {
+      if (this.getLinkTypeSuggestions === [] || this.linkTarget === null) {
+        return "Link type"
+      } else {
+        return  `Link type (suggestions for ${this.object.type} → ${this.linkTarget.type} links)`
+      }
     }
   }
 };
