@@ -17,7 +17,7 @@ export const OBSERVABLE_TYPES = [
       { field: "tags", type: "list", label: "tags", displayList: true, editable: false },
       { field: "created", type: "datetime", label: "Created", displayList: true, editable: false }
     ],
-    icon: "mdi-ip-network"
+    icon: "mdi-earth"
   },
   {
     name: "IPv4",
@@ -27,7 +27,7 @@ export const OBSERVABLE_TYPES = [
       { field: "tags", type: "list", label: "tags", displayList: true, editable: false },
       { field: "created", type: "datetime", label: "Created", displayList: true, editable: false }
     ],
-    icon: "mdi-ip-network"
+    icon: "mdi-earth"
   },
   {
     name: "Hostname",
@@ -57,7 +57,7 @@ export const OBSERVABLE_TYPES = [
       { field: "tags", type: "list", label: "tags", displayList: true, editable: false },
       { field: "created", type: "datetime", label: "Created", displayList: true, editable: false }
     ],
-    icon: "mdi-file"
+    icon: "mdi-file-outline"
   },
   {
     name: "SHA256",
@@ -129,7 +129,7 @@ export const OBSERVABLE_TYPES = [
       { field: "tags", type: "list", label: "tags", displayList: true, editable: false },
       { field: "created", type: "datetime", label: "Created", displayList: true, editable: false }
     ],
-    icon: "mdi-ip-network"
+    icon: "mdi-earth-plus"
   },
   {
     name: "Mac Address",
@@ -208,7 +208,7 @@ export const OBSERVABLE_TYPES = [
       { field: "tags", type: "list", label: "tags", displayList: true, editable: false },
       { field: "created", type: "datetime", label: "Created", displayList: true, editable: false }
     ],
-    icon: "mdi-slash-forward"
+    icon: "mdi-folder-multiple-outline"
   },
   {
     name: "Docker Image",
