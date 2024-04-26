@@ -77,6 +77,18 @@
         </span>
       </template>
 
+      <template v-slot:item.relevant_node.tags="{ item }">
+        <v-chip
+          v-for="tag in Object.keys(item.relevant_node.tags)"
+          :key="tag"
+          class="mr-2"
+          :color="item.relevant_node.tags[tag].fresh ? 'primary' : 'grey'"
+          density="compact"
+        >
+          {{ tag }}
+        </v-chip>
+      </template>
+
       <template v-slot:item.description="{ item }">
         <span v-if="inlineDescription">
           <v-chip density="compact" class="mr-2" color="success">{{ item.type }} </v-chip>
@@ -179,9 +191,10 @@ export default {
       paths: [],
       processedPaths: [],
       vertices: {},
+      inlineDescription: true,
       searchFilter: "",
       page: 1,
-      perPage: 25,
+      perPage: 50,
       total: 0,
       loading: false,
       objectTypes: ENTITY_TYPES.concat(INDICATOR_TYPES).concat(DFIQ_TYPES).concat(OBSERVABLE_TYPES),
@@ -191,6 +204,7 @@ export default {
         { title: "Linked on", key: "created", width: "170px", sortable: true },
         { title: "Type", key: "relevant_node.type", width: "10px", sortable: false },
         { title: "Value", key: "relevant_node.value", sortable: false },
+        { title: "Tags", key: "relevant_node.tags", sortable: false },
         { title: "Description", key: "description", sortable: false },
         { title: "", key: "controls", sortable: false }
       ],
