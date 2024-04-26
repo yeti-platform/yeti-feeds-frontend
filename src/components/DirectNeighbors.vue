@@ -5,11 +5,22 @@
       <v-row>
         <v-col>
           <v-text-field
-            label="Filter neighbors (type, value, or description)"
+            label="Filter regex (type, value, or description)"
             density="compact"
             @update:model-value="searchFilterDebounced"
             clearable
+            hide-details
           ></v-text-field>
+        </v-col>
+        <v-col>
+          <!-- add a checkbox for inline display of description -->
+          <v-checkbox
+            label="Dispay inline description"
+            density="compact"
+            hide-details
+            color="primary"
+            v-model="inlineDescription"
+          ></v-checkbox>
         </v-col>
       </v-row>
     </v-form>
@@ -67,7 +78,21 @@
       </template>
 
       <template v-slot:item.description="{ item }">
-        <v-chip density="compact" class="mr-2">{{ item.type }} </v-chip>{{ item.description }}
+        <span v-if="inlineDescription">
+          <v-chip density="compact" class="mr-2" color="success">{{ item.type }} </v-chip>
+          <span>{{ item.description }}</span>
+        </span>
+        <v-btn v-else size="small" variant="tonal" append-icon="mdi-information">
+          <template v-slot:append>
+            <v-icon v-if="item.description"></v-icon>
+          </template>
+          {{ item.type }}
+          <v-menu activator="parent" v-if="item.description">
+            <v-sheet class="px-5 py-2" color="background" width="auto" elevation="10" style="font-size: 0.8rem">
+              <yeti-markdown :text="item.description" />
+            </v-sheet>
+          </v-menu>
+        </v-btn>
       </template>
 
       <template v-slot:item.controls="{ item }">
