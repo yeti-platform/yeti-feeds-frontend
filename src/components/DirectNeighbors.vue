@@ -14,13 +14,22 @@
         </v-col>
         <v-col>
           <!-- add a checkbox for inline display of description -->
-          <v-checkbox
+          <v-checkbox-btn
             label="Dispay inline description"
             density="compact"
             hide-details
             color="primary"
+            class="float-left mr-4 mt-1"
             v-model="inlineDescription"
-          ></v-checkbox>
+          ></v-checkbox-btn>
+          <v-checkbox-btn
+            label="Inline markdown"
+            density="compact"
+            hide-details
+            color="primary"
+            class="float-left mt-1"
+            v-model="inlineMarkdown"
+          ></v-checkbox-btn>
         </v-col>
       </v-row>
     </v-form>
@@ -92,7 +101,7 @@
       <template v-slot:item.description="{ item }">
         <span v-if="inlineDescription">
           <v-chip density="compact" class="mr-2" color="success">{{ item.type }} </v-chip>
-          <span>{{ item.description }}</span>
+          <span><yeti-markdown :text="item.description" :inline="inlineMarkdown" /></span>
         </span>
         <v-btn v-else size="small" variant="tonal" append-icon="mdi-information">
           <template v-slot:append>
@@ -192,6 +201,7 @@ export default {
       processedPaths: [],
       vertices: {},
       inlineDescription: true,
+      inlineMarkdown: true,
       searchFilter: "",
       page: 1,
       perPage: 50,

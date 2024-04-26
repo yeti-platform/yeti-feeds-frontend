@@ -1,5 +1,5 @@
 <template>
-  <div v-html="renderedMarkdown" class="yeti-markdown"></div>
+  <div :class="['yeti-markdown', { 'yeti-markdown-inline': inline }]" v-html="renderedMarkdown"></div>
 </template>
 
 <script lang="ts" setup>
@@ -13,6 +13,10 @@ export default {
     text: {
       type: String,
       required: true
+    },
+    inline: {
+      type: Boolean,
+      default: false
     }
   },
   computed: {
@@ -25,6 +29,10 @@ export default {
 </script>
 
 <style>
+div.yeti-markdown-inline,
+.yeti-markdown-inline * {
+  display: inline;
+}
 .yeti-markdown h1,
 .yeti-markdown h2,
 .yeti-markdown h3 {
@@ -43,9 +51,7 @@ export default {
 }
 
 .yeti-markdown pre {
-  font-family:
-    Roboto Mono,
-    monospace;
+  font-family: Roboto Mono, monospace;
   border: 1px solid #e0e0e0;
   margin: 0.5rem 0 0.5rem 0;
   padding: 0.5rem;
