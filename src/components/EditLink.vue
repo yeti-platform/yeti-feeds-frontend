@@ -85,6 +85,7 @@ export default {
         .then(response => {
           this.$eventBus.emit("displayMessage", { message: "Link updated succesfully!", status: "success" });
           this.isActive.value = false;
+          this.$emit("success", response.data);
         })
         .catch(error => {
           this.error = error;
@@ -100,6 +101,7 @@ export default {
           this.edge["target"] = response.data["target"];
           this.localEdge = { ...this.edge };
           this.$eventBus.emit("displayMessage", { message: "Link direction swapped succesfully!", status: "success" });
+          this.$emit("success", response.data);
         })
         .catch(error => {
           this.error = error;
