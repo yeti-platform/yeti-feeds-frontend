@@ -10,6 +10,8 @@
     @update:model-value="emitSelectedObject"
     :hide-details="inline"
     :density="inline ? 'compact' : 'default'"
+    :persistent-hint="getHintForTypes.length > 0"
+    :hint="getHintForTypes"
   >
     <template v-slot:no-data>
       <v-list-item>
@@ -69,6 +71,10 @@ export default {
     inline: {
       type: Boolean,
       default: false
+    },
+    typeFilter: {
+      type: Array,
+      default: () => []
     }
   },
   data() {
@@ -87,7 +93,7 @@ export default {
       const params = { query: { name: searchQuery }, count: 20 };
       const entities = (await axios.post("/api/v2/entities/search", params)).data.entities;
       const indicators = (await axios.post("/api/v2/indicators/search", params)).data.indicators;
-      this.items = entities.concat(indicators).map(item => {
+      let items = entities.concat(indicators).map(item => {
         return {
           id: item.id,
           root_type: item.root_type,
@@ -95,6 +101,10 @@ export default {
           type: item.type
         };
       });
+      if (this.typeFilter.length > 0) {
+        items = items.filter(item => this.typeFilter.includes(item.type) || this.typeFilter.includes(item.root_type));
+      }
+      this.items = items;
     },
     updateItemsDebounced: _.debounce(function (searchQuery) {
       this.loadObjects(searchQuery);
@@ -104,6 +114,16 @@ export default {
     },
     getIconForType(type) {
       return (ENTITY_TYPES.find(t => t.type === type) || INDICATOR_TYPES.find(t => t.type === type)).icon;
+    },
+
+  },
+  computed: {
+    getHintForTypes() {
+      if (this.typeFilter.length > 0) {
+      return 'Filtering for ' + this.typeFilter.join(", ");
+      } else {
+        return 'Filtering for all object types';
+      }
     }
   }
 };
