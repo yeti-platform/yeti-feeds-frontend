@@ -56,7 +56,16 @@
           <td v-if="displayColumn('description')">{{ item.description }}</td>
 
           <td v-if="displayColumn('status')">
-            <v-chip label> {{ getHumanStatus(item) }}</v-chip>
+            <v-chip v-if="!item.enabled"> Disabled </v-chip>
+            <v-menu v-else-if="item.status === 'failed'">
+              <template v-slot:activator="{ props }">
+                <v-chip v-bind="props" append-icon="mdi-information"> Failed </v-chip>
+              </template>
+              <v-sheet class="px-5 py-2" color="background" width="auto" elevation="10" style="font-size: 0.8rem">
+                {{ item.status_message }}
+              </v-sheet>
+            </v-menu>
+            <v-chip v-else label> {{ getHumanStatus(item) }}</v-chip>
           </td>
           <td v-if="displayColumn('toggle')">
             <v-switch
@@ -234,9 +243,6 @@ export default {
       }
       if (task.status === "running") {
         return "Running";
-      }
-      if (task.status === "failed") {
-        return `Failed: ${task.status_message}`;
       }
       return "N/A";
     },
