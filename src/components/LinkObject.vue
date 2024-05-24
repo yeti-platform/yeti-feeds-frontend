@@ -67,6 +67,7 @@ import axios from "axios";
 import { ENTITY_TYPES } from "@/definitions/entityDefinitions.js";
 import { INDICATOR_TYPES } from "@/definitions/indicatorDefinitions.js";
 import { OBSERVABLE_TYPES } from "@/definitions/observableDefinitions.js";
+import { DFIQ_TYPES } from "@/definitions/dfiqDefinitions.js";
 
 import { LINK_SUGGESTIONS } from "@/definitions/linkSuggestions.js";
 import EntitySelector from "@/components/EntitySelector.vue";
@@ -159,7 +160,8 @@ export default {
       return (
         ENTITY_TYPES.find(t => t.type === type) ||
         INDICATOR_TYPES.find(t => t.type === type) ||
-        OBSERVABLE_TYPES.find(t => t.type === type)
+        OBSERVABLE_TYPES.find(t => t.type === type) ||
+        DFIQ_TYPES.find(t => t.type === type)
       ).icon;
     }
   },
@@ -187,14 +189,15 @@ export default {
       return (LINK_SUGGESTIONS[this.object.type] || LINK_SUGGESTIONS[this.object.root_type])
         .filter(
           suggestion =>
-            suggestion.targets.includes(this.linkTarget.type) || suggestion.targets.includes(this.linkTarget.type)
+            suggestion.targets.includes(this.linkTarget.type) || suggestion.targets.includes(this.linkTarget.root_type)
         )
         .map(suggestion => suggestion.verb);
     },
     getIncomingLinkTypeSuggestions() {
       return (LINK_SUGGESTIONS[this.linkTarget.type] || LINK_SUGGESTIONS[this.linkTarget.root_type])
         .filter(
-          suggestion => suggestion.targets.includes(this.object.type) || suggestion.targets.includes(this.object.type)
+          suggestion =>
+            suggestion.targets.includes(this.object.type) || suggestion.targets.includes(this.object.root_type)
         )
         .map(suggestion => suggestion.verb);
     },

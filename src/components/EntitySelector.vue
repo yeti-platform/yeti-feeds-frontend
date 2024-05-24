@@ -53,6 +53,7 @@ import axios from "axios";
 
 import { ENTITY_TYPES } from "@/definitions/entityDefinitions.js";
 import { INDICATOR_TYPES } from "@/definitions/indicatorDefinitions.js";
+import { DFIQ_TYPES } from "@/definitions/dfiqDefinitions.js";
 
 import _ from "lodash";
 </script>
@@ -93,14 +94,18 @@ export default {
       const params = { query: { name: searchQuery }, count: 20 };
       const entities = (await axios.post("/api/v2/entities/search", params)).data.entities;
       const indicators = (await axios.post("/api/v2/indicators/search", params)).data.indicators;
-      let items = entities.concat(indicators).map(item => {
-        return {
-          id: item.id,
-          root_type: item.root_type,
-          name: item.name,
-          type: item.type
-        };
-      });
+      const dfiq = (await axios.post("/api/v2/dfiq/search", params)).data.dfiq;
+      let items = entities
+        .concat(indicators)
+        .concat(dfiq)
+        .map(item => {
+          return {
+            id: item.id,
+            root_type: item.root_type,
+            name: item.name,
+            type: item.type
+          };
+        });
       if (this.typeFilter.length > 0) {
         items = items.filter(item => this.typeFilter.includes(item.type) || this.typeFilter.includes(item.root_type));
       }
@@ -113,16 +118,19 @@ export default {
       this.$emit("selected-object", this.selectedEntity);
     },
     getIconForType(type) {
-      return (ENTITY_TYPES.find(t => t.type === type) || INDICATOR_TYPES.find(t => t.type === type)).icon;
-    },
-
+      return (
+        ENTITY_TYPES.find(t => t.type === type) ||
+        INDICATOR_TYPES.find(t => t.type === type) ||
+        DFIQ_TYPES.find(t => t.type === type)
+      ).icon;
+    }
   },
   computed: {
     getHintForTypes() {
       if (this.typeFilter.length > 0) {
-      return 'Filtering for ' + this.typeFilter.join(", ");
+        return "Filtering for " + this.typeFilter.join(", ");
       } else {
-        return 'Filtering for all object types';
+        return "Filtering for all object types";
       }
     }
   }
