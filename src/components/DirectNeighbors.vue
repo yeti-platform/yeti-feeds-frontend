@@ -88,6 +88,7 @@
 
       <template v-slot:item.relevant_node.tags="{ item }">
         <v-chip
+          v-if="item.relevant_node.tags"
           v-for="tag in Object.keys(item.relevant_node.tags)"
           :key="tag"
           class="mr-2"
