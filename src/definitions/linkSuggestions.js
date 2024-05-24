@@ -100,5 +100,10 @@ export const LINK_SUGGESTIONS = {
     },
     { verb: "uses", targets: ["infrastructure"] }
   ],
-  vulnerability: []
+  vulnerability: [],
+  // DFIQ
+  scenario: [{ verb: "Uses DFIQ facet", targets: ["facet"] }],
+  facet: [{ verb: "Uses DFIQ question", targets: ["question"] }],
+  question: [{ verb: "Uses DFIQ approach", targets: ["approach"] }],
+  approach: [{ verb: "Uses indicator", targets: ["indicator"] }]
 };
