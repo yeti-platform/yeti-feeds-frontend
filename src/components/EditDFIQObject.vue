@@ -3,6 +3,15 @@
     <v-card-title>{{ localObject.name }}</v-card-title>
     <v-card-subtitle>Editing DFIQ {{ localObject.type }}</v-card-subtitle>
     <v-card-text>
+      <v-checkbox-btn
+        v-if="localObject.type === 'approach'"
+        label="Automatically create new indicators from Approach"
+        density="compact"
+        hide-details
+        color="primary"
+        class="mb-5"
+        v-model="updateApproachIndicators"
+      ></v-checkbox-btn>
       <v-textarea class="yeti-code" label="DFIQ Yaml" auto-grow v-model="localObject.dfiq_yaml"></v-textarea>
       <div v-if="yamlValidationError === 'valid'">
         <v-alert type="success">YAML is valid!</v-alert>
@@ -75,7 +84,8 @@ export default {
         dfiq: "dfiq"
       },
       validatingYaml: false,
-      yamlValidationError: ""
+      yamlValidationError: "",
+      updateApproachIndicators: true
     };
   },
   mounted() {},
@@ -100,8 +110,13 @@ export default {
     saveObject() {
       let patchRequest = {
         dfiq_type: this.localObject.type,
-        dfiq_yaml: this.localObject.dfiq_yaml
+        dfiq_yaml: this.localObject.dfiq_yaml,
+        update_indicators: false
       };
+
+      if (this.localObject.type === "approach") {
+        patchRequest.update_indicators = this.updateApproachIndicators;
+      }
 
       axios
         .patch(`/api/v2/dfiq/${this.localObject.id}`, patchRequest)
