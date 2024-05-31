@@ -1,6 +1,9 @@
 <template>
   <v-card>
     <v-card-title>New {{ typeDefinition.name }}</v-card-title>
+    <v-card-subtitle v-if="parent !== null"
+      >Parent ID {{ parent.dfiq_id }} pre-populated from {{ parent.type }} "{{ parent.name }}""</v-card-subtitle
+    >
     <v-card-text>
       <v-textarea
         class="yeti-code"
@@ -64,6 +67,14 @@ export default {
     objectType: {
       type: String,
       default: () => ""
+    },
+    parent: {
+      type: Object,
+      default: null
+    },
+    isActive: {
+      type: Object,
+      default: () => {}
     }
   },
   data() {
@@ -105,9 +116,14 @@ export default {
         })
         .then(response => {
           this.$eventBus.emit("displayMessage", { message: `New ${this.objectType} created`, status: "success" });
-          this.$router.push({ path: `/dfiq/${response.data.id}` });
+          this.$emit("success", response.data);
+          this.isActive.value = false;
+          if (this.parent === null) {
+            this.$router.push({ path: `/dfiq/${response.data.id}` });
+          }
         })
         .catch(error => {
+          console.log(error);
           if (error.response.status === 422) {
             this.errors = error.response.data.detail.map(detail => {
               return { field: detail.loc[3], message: detail.msg };
@@ -124,7 +140,12 @@ export default {
       this.$emit("toggle-fullscreen", this.fullScreen);
     },
     getTemplateForType(type) {
-      return DFIQ_TEMPLATES[type];
+      let template = DFIQ_TEMPLATES[type];
+      // replace all instances of placeholder IDs (e.g. S1999) with "<parentId>"
+      if (this.parent !== null) {
+        template = template.replace(/[SFQ]1999/g, this.parent.dfiq_id);
+      }
+      return template;
     }
   },
   computed: {
