@@ -119,6 +119,7 @@
       <v-container fluid>
         <v-sheet>
           <v-tabs v-model="activeTab" color="primary">
+            <v-tab value="related-dfiq-tree" href="#dfiq-tree">DFIQ tree</v-tab>
             <v-tab
               :value="'related-' + entityType.type"
               v-for="entityType in displayedEntityTypes"
@@ -148,6 +149,11 @@
           </v-tabs>
 
           <v-window v-model="activeTab">
+            <v-window-item value="related-dfiq-tree" eager class="my-4">
+              <v-sheet>
+                <DFIQ-tree :dfiq-object-id="id" top-level :dfiq-object="object" />
+              </v-sheet>
+            </v-window-item>
             <v-window-item
               v-for="entityType in objectTypes['entity']"
               v-bind:key="entityType.type"
@@ -211,6 +217,7 @@
 import axios from "axios";
 
 import RelatedObjects from "@/components/RelatedObjects.vue";
+import DFIQTree from "@/components/DFIQTree.vue";
 import DirectNeighbors from "@/components/DirectNeighbors.vue";
 import EditObject from "@/components/EditObject.vue";
 import EditDFIQObject from "@/components/EditDFIQObject.vue";
@@ -246,7 +253,8 @@ export default {
     EditDFIQObject,
     LinkObject,
     YetiMarkdown,
-    YetiDFIQApproachTemplate
+    YetiDFIQApproachTemplate,
+    DFIQTree
   },
   data() {
     return {
