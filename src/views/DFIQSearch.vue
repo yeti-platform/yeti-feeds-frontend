@@ -45,6 +45,7 @@
                   :object-type="typeDef.type"
                   @close="isActive.value = false"
                   @toggle-fullscreen="toggleNewObjectFullscreen"
+                  :is-active="isActive"
                 />
               </template>
             </v-dialog>
