@@ -31,6 +31,7 @@
     <v-card-actions>
       <v-btn text="Toggle full screen" color="primary" @click="toggleFullScreen"></v-btn>
       <v-spacer></v-spacer>
+      <v-btn text="Delete object" color="cancel" variant="tonal" @click="dialogDelete = true"></v-btn>
       <v-btn text="Cancel" color="cancel" @click="isActive.value = false"></v-btn>
       <v-btn
         :disabled="yamlValidationError !== 'valid'"
@@ -49,6 +50,17 @@
         </li>
       </ul>
     </v-alert>
+    <v-dialog v-model="dialogDelete" max-width="420px">
+      <v-card>
+        <v-card-title class="text-h6">Are you sure you want to delete this item?</v-card-title>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="light" variant="text" @click="dialogDelete = false">Cancel</v-btn>
+          <v-btn color="error" variant="flat" @click="deleteObject">Delete</v-btn>
+          <v-spacer></v-spacer>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-card>
 </template>
 
@@ -85,7 +97,8 @@ export default {
       },
       validatingYaml: false,
       yamlValidationError: "",
-      updateApproachIndicators: true
+      updateApproachIndicators: true,
+      dialogDelete: false
     };
   },
   mounted() {},
@@ -137,6 +150,24 @@ export default {
             this.errors = [{ field: "details", message: error.response.data.detail }];
             return;
           }
+        })
+        .finally();
+    },
+    deleteObject() {
+      axios
+        .delete(`/api/v2/dfiq/${this.object.id}`)
+        .then(response => {
+          this.$eventBus.emit("displayMessage", {
+            message: `DFIQ ${this.object.id} succesfully deleted`,
+            status: "success"
+          });
+          this.$emit("deleteSuccess", response.data);
+          this.isActive.value = false;
+          this.$router.replace({ path: "/dfiq" });
+        })
+        .catch(error => {
+          this.errors = [{ field: "details", message: error.response.data.detail }];
+          return;
         })
         .finally();
     },
