@@ -1,8 +1,10 @@
 <template>
   <v-card>
     <v-card-title>{{ localObject.name }}</v-card-title>
-    <v-card-subtitle>Editing DFIQ {{ localObject.type }}</v-card-subtitle>
-
+    <v-card-subtitle>{{ newType !== "" ? "Creating" : "Editing" }} DFIQ {{ localObject.type }}</v-card-subtitle>
+    <v-card-subtitle v-if="parent !== null"
+      >Parent ID {{ parent.dfiq_id }} pre-populated from {{ parent.type }} "{{ parent.name }}""</v-card-subtitle
+    >
     <v-card-text>
       <v-tabs v-model="activeTab" color="primary">
         <v-tab value="user-form">Form</v-tab>
@@ -10,13 +12,22 @@
       </v-tabs>
       <v-window v-model="activeTab">
         <v-window-item value="user-form" class="mt-4">
+          <v-text-field label="ID" v-model="parsedYaml.id" :disabled="newType === ''" density="compact"></v-text-field>
           <v-text-field label="Display name" v-model="parsedYaml.display_name" density="compact"></v-text-field>
+          <v-text-field
+            label="DFIQ Version"
+            v-model="parsedYaml.dfiq_version"
+            disabled
+            density="compact"
+          ></v-text-field>
+          <v-combobox label="Tags" v-model="parsedYaml.tags" chips multiple density="compact"></v-combobox>
           <v-textarea
             v-if="localObject.type !== 'approach'"
             label="Description"
             v-model="parsedYaml.description"
             density="compact"
           ></v-textarea>
+
           <v-expansion-panels v-else-if="parsedYaml.description">
             <v-expansion-panel title="Summary & references">
               <v-expansion-panel-text>
@@ -308,15 +319,7 @@
               </v-expansion-panel-text>
             </v-expansion-panel>
           </v-expansion-panels>
-          <v-text-field label="ID" v-model="parsedYaml.id" readonly disabled density="compact"></v-text-field>
-          <v-text-field
-            label="DFIQ Version"
-            v-model="parsedYaml.dfiq_version"
-            readonly
-            disabled
-            density="compact"
-          ></v-text-field>
-          <v-combobox label="Tags" v-model="parsedYaml.tags" chips multiple density="compact"></v-combobox>
+
           <!-- <pre v-if="parsedYaml">{{ renderedYaml }}</pre> -->
         </v-window-item>
         <v-window-item value="yaml">
@@ -341,7 +344,13 @@
     <v-card-actions>
       <v-btn text="Toggle full screen" color="primary" @click="toggleFullScreen"></v-btn>
       <v-spacer></v-spacer>
-      <v-btn text="Delete object" color="cancel" variant="tonal" @click="dialogDelete = true"></v-btn>
+      <v-btn
+        v-if="newType === ''"
+        text="Delete object"
+        color="cancel"
+        variant="tonal"
+        @click="dialogDelete = true"
+      ></v-btn>
       <v-btn text="Cancel" color="cancel" @click="isActive.value = false"></v-btn>
       <v-btn
         :disabled="yamlValidationError !== 'valid'"
@@ -379,6 +388,7 @@ import axios from "axios";
 
 import ObjectFields from "@/components/ObjectFields.vue";
 import { DFIQ_APPROACH_VIEW_TYPES, DFIQ_APPROACH_VIEW_PROCESSOR_STEP_TYPES } from "@/definitions/dfiqDefinitions.js";
+import { DFIQ_TYPES, DFIQ_TEMPLATES } from "@/definitions/dfiqDefinitions.js";
 
 import _ from "lodash";
 import { parse, stringify } from "yaml";
@@ -395,6 +405,18 @@ export default {
     isActive: {
       type: Object,
       default: () => {}
+    },
+    newType: {
+      type: String,
+      default: ""
+    },
+    parent: {
+      type: Object,
+      default: null
+    },
+    redirect: {
+      type: Boolean,
+      default: true
     }
   },
   data() {
@@ -416,10 +438,22 @@ export default {
       parsedYaml: {},
       dfiqYaml: "",
       valueTypes: DFIQ_APPROACH_VIEW_TYPES,
+      stepTypes: DFIQ_APPROACH_VIEW_PROCESSOR_STEP_TYPES,
       stepTypes: DFIQ_APPROACH_VIEW_PROCESSOR_STEP_TYPES
     };
   },
   mounted() {
+    if (this.newType !== "") {
+      let template = DFIQ_TEMPLATES[this.newType];
+      if (this.parent !== null) {
+        template = template.replace(/[SFQ]1999/g, this.parent.dfiq_id);
+      }
+      this.localObject.type = this.newType;
+      this.localObject.dfiq_yaml = template;
+      this.dfiqYaml = template;
+    } else {
+      this.dfiqYaml = this.localObject.dfiq_yaml;
+    }
     this.dfiqYaml = this.localObject.dfiq_yaml;
   },
   methods: {
@@ -429,7 +463,7 @@ export default {
         .post(`/api/v2/dfiq/validate`, {
           dfiq_type: this.localObject.type,
           dfiq_yaml: this.localObject.dfiq_yaml,
-          check_id: false
+          check_id: this.newType !== ""
         })
         .then(response => {
           if (!response.data.valid) {
@@ -441,7 +475,43 @@ export default {
           this.validatingYaml = false;
         });
     },
+    createObject() {
+      axios
+        .post(`/api/v2/dfiq/from_yaml`, {
+          dfiq_type: this.localObject.type,
+          dfiq_yaml: this.localObject.dfiq_yaml
+        })
+        .then(response => {
+          this.$eventBus.emit("displayMessage", {
+            message: "DFIQ object succesfully created",
+            status: "success"
+          });
+          this.$emit("success", response.data);
+          this.isActive.value = false;
+          // parent is set in dfiqtree view
+          if (this.redirect) {
+            this.$router.push({ path: `/dfiq/${response.data.id}` });
+          }
+        })
+        .catch(error => {
+          console.log(error);
+          if (error.response.status === 422) {
+            this.errors = error.response.data.detail.map(detail => {
+              return { field: detail.loc[3], message: detail.msg };
+            });
+          } else {
+            this.errors = [{ field: "details", message: error.response.data.detail }];
+            return;
+          }
+        })
+        .finally();
+    },
     saveObject() {
+      if (this.newType !== "") {
+        this.createObject();
+        return;
+      }
+
       let patchRequest = {
         dfiq_type: this.localObject.type,
         dfiq_yaml: this.localObject.dfiq_yaml,
@@ -484,7 +554,9 @@ export default {
           });
           this.$emit("deleteSuccess", response.data);
           this.isActive.value = false;
-          this.$router.replace({ path: "/dfiq" });
+          if (this.redirect) {
+            this.$router.replace({ path: "/dfiq" });
+          }
         })
         .catch(error => {
           this.errors = [{ field: "details", message: error.response.data.detail }];

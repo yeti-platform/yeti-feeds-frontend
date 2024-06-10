@@ -87,6 +87,7 @@
                   v-if="dfiqTree.object?.root_type === 'dfiq'"
                   :object="dfiqTree.object"
                   :is-active="isActive"
+                  :redirect="false"
                   @success="obj => emitDFIQUpdate(obj)"
                   @deleteSuccess="obj => emitDFIQUpdate(obj)"
                   @toggle-fullscreen="toggleFullscreen"
@@ -105,9 +106,10 @@
                 >
               </template>
               <template v-slot:default="{ isActive }">
-                <new-DFIQ-object
-                  :object-type="DFIQHierarchy[dfiqTree.object.type]"
+                <edit-DFIQ-object
+                  :new-type="DFIQHierarchy[dfiqTree.object.type]"
                   :is-active="isActive"
+                  :redirect="false"
                   :parent="dfiqTree.object"
                   @toggle-fullscreen="toggleFullscreen"
                   @close="isActive.value = false"
@@ -156,7 +158,7 @@ import axios from "axios";
 import { DFIQ_TYPES } from "@/definitions/dfiqDefinitions.js";
 import { INDICATOR_TYPES } from "@/definitions/indicatorDefinitions.js";
 
-import EditDFIQObject from "@/components/EditDFIQObject.vue";
+import EditDFIQObject from "@/components/DFIQ/EditDFIQObject.vue";
 import NewDFIQObject from "@/components/NewDFIQObject.vue";
 
 export default {
@@ -196,7 +198,7 @@ export default {
       dfiqGraph: {},
       expanded: true,
       indicatorTypesControl: ["pandas", "opensearch-query", "splunk-query", "GUI"],
-      editWidth: "50%",
+      editWidth: "75%",
       fullScreenEdit: false,
       DFIQHierarchy: {
         scenario: "facet",

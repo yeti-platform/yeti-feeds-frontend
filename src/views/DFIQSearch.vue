@@ -41,11 +41,11 @@
                 <v-list-item v-bind="props" :prepend-icon="typeDef.icon"> {{ typeDef.name }} </v-list-item>
               </template>
               <template v-slot:default="{ isActive }">
-                <new-DFIQ-object
-                  :object-type="typeDef.type"
+                <edit-DFIQ-object
+                  :new-type="typeDef.type"
+                  :is-active="isActive"
                   @close="isActive.value = false"
                   @toggle-fullscreen="toggleNewObjectFullscreen"
-                  :is-active="isActive"
                 />
               </template>
             </v-dialog>
@@ -58,6 +58,8 @@
 
 <script lang="ts" setup>
 import { DFIQ_TYPES } from "@/definitions/dfiqDefinitions.js";
+
+import EditDFIQObject from "@/components/DFIQ/EditDFIQObject.vue";
 import ObjectList from "@/components/ObjectList.vue";
 import NewDFIQObject from "@/components/NewDFIQObject.vue";
 
