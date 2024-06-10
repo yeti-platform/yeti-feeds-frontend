@@ -213,7 +213,7 @@ description:
     - "[ref2](https://google.com)"
 view:
   data:
-    - type: ForensicArtifact
+    - type: artifact
       value: BrowserHistory
     - type: description
       value: Description of the forensic artifact
