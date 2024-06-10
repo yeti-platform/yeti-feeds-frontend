@@ -14,6 +14,18 @@
         <v-window-item value="user-form" class="mt-4">
           <v-text-field label="ID" v-model="parsedYaml.id" :disabled="newType === ''" density="compact"></v-text-field>
           <v-text-field label="Display name" v-model="parsedYaml.display_name" density="compact"></v-text-field>
+          <v-autocomplete
+            v-if="['question', 'facet'].includes(localObject.type)"
+            label="Parents"
+            v-model="parsedYaml.parent_ids"
+            :items="possibleParents"
+            item-text="name"
+            multiple
+            item-value="dfiq_id"
+            item-title="name"
+            density="compact"
+            dense
+          ></v-autocomplete>
           <v-text-field
             label="DFIQ Version"
             v-model="parsedYaml.dfiq_version"
@@ -439,7 +451,12 @@ export default {
       dfiqYaml: "",
       valueTypes: DFIQ_APPROACH_VIEW_TYPES,
       stepTypes: DFIQ_APPROACH_VIEW_PROCESSOR_STEP_TYPES,
-      stepTypes: DFIQ_APPROACH_VIEW_PROCESSOR_STEP_TYPES
+      possibleParents: [],
+      DFIQParentHierarchy: {
+        facet: "scenario",
+        question: "facet",
+        approach: "question"
+      }
     };
   },
   mounted() {
@@ -454,9 +471,21 @@ export default {
     } else {
       this.dfiqYaml = this.localObject.dfiq_yaml;
     }
-    this.dfiqYaml = this.localObject.dfiq_yaml;
+    this.loadPossibleParents();
   },
   methods: {
+    updateItemsDebounced: _.debounce(function (searchQuery) {
+      this.loadPossibleParents(searchQuery);
+    }, 200),
+    loadPossibleParents(searchQuery) {
+      axios
+        .post("/api/v2/dfiq/search", {
+          query: { name: searchQuery, type: this.DFIQParentHierarchy[this.localObject.type] }
+        })
+        .then(response => {
+          this.possibleParents = response.data.dfiq;
+        });
+    },
     validateDFIQYaml() {
       this.validatingYaml = "primary";
       axios
