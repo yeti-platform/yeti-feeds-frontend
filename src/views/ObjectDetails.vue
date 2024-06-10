@@ -119,7 +119,9 @@
       <v-container fluid>
         <v-sheet>
           <v-tabs v-model="activeTab" color="primary">
-            <v-tab value="related-dfiq-tree" href="#dfiq-tree">DFIQ tree</v-tab>
+            <v-tab value="related-dfiq-tree" href="#dfiq-tree"
+              ><v-icon size="x-large" start>mdi-file-tree</v-icon>DFIQ tree</v-tab
+            >
             <v-tab
               :value="'related-' + entityType.type"
               v-for="entityType in displayedEntityTypes"
@@ -220,7 +222,7 @@ import RelatedObjects from "@/components/RelatedObjects.vue";
 import DFIQTree from "@/components/DFIQTree.vue";
 import DirectNeighbors from "@/components/DirectNeighbors.vue";
 import EditObject from "@/components/EditObject.vue";
-import EditDFIQObject from "@/components/EditDFIQObject.vue";
+import EditDFIQObject from "@/components/DFIQ/EditDFIQObject.vue";
 import LinkObject from "@/components/LinkObject.vue";
 import LinkObservables from "@/components/LinkObservables.vue";
 import YetiMarkdown from "@/components/YetiMarkdown.vue";
@@ -318,6 +320,10 @@ export default {
       }
     },
     navigateToFirstPopulatedTab() {
+      if (this.object?.root_type === "dfiq") {
+        this.activeTab = "related-dfiq-tree";
+        return;
+      }
       let tabKeys = this.objectTypes.entity.map(entityType => entityType.type);
       tabKeys = tabKeys.concat(["indicators", "observables", "tagged", "dfiq"]);
 
