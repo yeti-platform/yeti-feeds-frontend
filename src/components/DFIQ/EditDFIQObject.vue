@@ -25,7 +25,13 @@
             item-title="name"
             density="compact"
             dense
-          ></v-autocomplete>
+            chips
+            :custom-filter="parentSearchFilter"
+          >
+            <template v-slot:item="{ props, item }">
+              <v-list-item v-bind="props" title="">{{ `${item.raw.dfiq_id} - ${item.raw.name}` }}</v-list-item>
+            </template>
+          </v-autocomplete>
           <v-text-field
             label="DFIQ Version"
             v-model="parsedYaml.dfiq_version"
@@ -474,9 +480,11 @@ export default {
     this.loadPossibleParents();
   },
   methods: {
-    updateItemsDebounced: _.debounce(function (searchQuery) {
-      this.loadPossibleParents(searchQuery);
-    }, 200),
+    parentSearchFilter(itemTitle, queryText, item) {
+      const inId = item.raw.dfiq_id.toLowerCase().includes(queryText.toLowerCase());
+      const inTitle = itemTitle.toLowerCase().includes(queryText.toLowerCase());
+      return inId || inTitle;
+    },
     loadPossibleParents(searchQuery) {
       axios
         .post("/api/v2/dfiq/search", {
