@@ -119,7 +119,7 @@
       <v-container fluid>
         <v-sheet>
           <v-tabs v-model="activeTab" color="primary">
-            <v-tab value="related-dfiq-tree" href="#dfiq-tree"
+            <v-tab value="related-dfiq-tree" href="#dfiq-tree" v-if="object?.root_type === 'dfiq'"
               ><v-icon size="x-large" start>mdi-file-tree</v-icon>DFIQ tree</v-tab
             >
             <v-tab
@@ -151,7 +151,7 @@
           </v-tabs>
 
           <v-window v-model="activeTab">
-            <v-window-item value="related-dfiq-tree" eager class="my-4">
+            <v-window-item value="related-dfiq-tree" eager class="my-4" v-if="object?.root_type === 'dfiq'">
               <v-sheet>
                 <DFIQ-tree :dfiq-object-id="id" top-level :dfiq-object="object" />
               </v-sheet>
@@ -290,6 +290,7 @@ export default {
           let tagNames: string[] = [];
           this.object = response.data;
           this.objectTags = this.object.tags ? Object.keys(this.object.tags) : [];
+          this.navigateToFirstPopulatedTab();
         })
         .catch(error => {
           console.log(error);
