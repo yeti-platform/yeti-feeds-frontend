@@ -359,6 +359,9 @@ export default {
     },
     displayIndicatorTypes() {
       this.indicatorTypesControl = this.displayIndicatorTypes;
+    },
+    dfiqObjectId() {
+      this.getDFIQData();
     }
   }
 };
