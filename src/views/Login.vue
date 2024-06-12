@@ -69,6 +69,9 @@ export default {
         .userLocalLogin(form)
         .then(() => {
           console.log("Successfully logged in!");
+          if (this.$route.query?.next !== undefined) {
+            this.$router.replace(this.$route.query.next);
+          }
         })
         .catch(error => {
           this.$eventBus.emit("displayMessage", { message: error.response.data.detail, status: "error" });
