@@ -220,7 +220,7 @@ router.beforeEach((to, _from, next) => {
       .then(() => {
         if (userStore.user === null) {
           console.log("Pinia: user null, redirecting to login");
-          next({ name: "Login" });
+          next({ name: "Login", query: { next: to.fullPath } });
         } else {
           console.log("Pinia: got user, continuing");
           next();
@@ -229,7 +229,7 @@ router.beforeEach((to, _from, next) => {
       .catch(error => {
         console.log(error);
         console.log("Pinia: Not authed; redirecting to Login");
-        next({ name: "Login" });
+        next({ name: "Login", query: { next: to.fullPath } });
       });
   } else {
     next();

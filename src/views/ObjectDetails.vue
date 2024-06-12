@@ -57,7 +57,7 @@
               </template>
             </v-dialog>
 
-            <v-dialog :width="editWidth">
+            <v-dialog :width="editWidth" v-if="object?.root_type !== 'dfiq'">
               <template v-slot:activator="{ props }">
                 <v-btn class="me-2" variant="tonal" color="primary" v-bind="props" size="small" append-icon="mdi-link"
                   >link object
@@ -68,7 +68,7 @@
                 <link-object :object="object" :is-active="isActive" />
               </template>
             </v-dialog>
-            <v-dialog :width="editWidth">
+            <v-dialog :width="editWidth" v-if="object?.root_type !== 'dfiq'">
               <template v-slot:activator="{ props }">
                 <v-btn variant="tonal" color="primary" v-bind="props" size="small" append-icon="mdi-link"
                   >link observables
@@ -119,6 +119,9 @@
       <v-container fluid>
         <v-sheet>
           <v-tabs v-model="activeTab" color="primary">
+            <v-tab value="related-dfiq-tree" href="#dfiq-tree" v-if="object?.root_type === 'dfiq'"
+              ><v-icon size="x-large" start>mdi-file-tree</v-icon>DFIQ tree</v-tab
+            >
             <v-tab
               :value="'related-' + entityType.type"
               v-for="entityType in displayedEntityTypes"
@@ -148,6 +151,11 @@
           </v-tabs>
 
           <v-window v-model="activeTab">
+            <v-window-item value="related-dfiq-tree" eager class="my-4" v-if="object?.root_type === 'dfiq'">
+              <v-sheet>
+                <DFIQ-tree :dfiq-object-id="id" top-level :dfiq-object="object" />
+              </v-sheet>
+            </v-window-item>
             <v-window-item
               v-for="entityType in objectTypes['entity']"
               v-bind:key="entityType.type"
@@ -211,9 +219,10 @@
 import axios from "axios";
 
 import RelatedObjects from "@/components/RelatedObjects.vue";
+import DFIQTree from "@/components/DFIQTree.vue";
 import DirectNeighbors from "@/components/DirectNeighbors.vue";
 import EditObject from "@/components/EditObject.vue";
-import EditDFIQObject from "@/components/EditDFIQObject.vue";
+import EditDFIQObject from "@/components/DFIQ/EditDFIQObject.vue";
 import LinkObject from "@/components/LinkObject.vue";
 import LinkObservables from "@/components/LinkObservables.vue";
 import YetiMarkdown from "@/components/YetiMarkdown.vue";
@@ -246,7 +255,8 @@ export default {
     EditDFIQObject,
     LinkObject,
     YetiMarkdown,
-    YetiDFIQApproachTemplate
+    YetiDFIQApproachTemplate,
+    DFIQTree
   },
   data() {
     return {
@@ -280,6 +290,7 @@ export default {
           let tagNames: string[] = [];
           this.object = response.data;
           this.objectTags = this.object.tags ? Object.keys(this.object.tags) : [];
+          this.navigateToFirstPopulatedTab();
         })
         .catch(error => {
           console.log(error);
@@ -310,6 +321,10 @@ export default {
       }
     },
     navigateToFirstPopulatedTab() {
+      if (this.object?.root_type === "dfiq") {
+        this.activeTab = "related-dfiq-tree";
+        return;
+      }
       let tabKeys = this.objectTypes.entity.map(entityType => entityType.type);
       tabKeys = tabKeys.concat(["indicators", "observables", "tagged", "dfiq"]);
 

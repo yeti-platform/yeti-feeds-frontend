@@ -41,8 +41,9 @@
                 <v-list-item v-bind="props" :prepend-icon="typeDef.icon"> {{ typeDef.name }} </v-list-item>
               </template>
               <template v-slot:default="{ isActive }">
-                <new-DFIQ-object
-                  :object-type="typeDef.type"
+                <edit-DFIQ-object
+                  :new-type="typeDef.type"
+                  :is-active="isActive"
                   @close="isActive.value = false"
                   @toggle-fullscreen="toggleNewObjectFullscreen"
                 />
@@ -57,8 +58,9 @@
 
 <script lang="ts" setup>
 import { DFIQ_TYPES } from "@/definitions/dfiqDefinitions.js";
+
+import EditDFIQObject from "@/components/DFIQ/EditDFIQObject.vue";
 import ObjectList from "@/components/ObjectList.vue";
-import NewDFIQObject from "@/components/NewDFIQObject.vue";
 
 import _ from "lodash";
 </script>
@@ -67,8 +69,7 @@ import _ from "lodash";
 export default {
   name: "DFIQSearch",
   components: {
-    ObjectList,
-    NewDFIQObject
+    ObjectList
   },
   data() {
     return {
@@ -82,7 +83,7 @@ export default {
       activeTab: "",
       autoTab: true,
       fullScreenEdit: false,
-      editWidth: "50%",
+      editWidth: "75%",
       newDialogActive: false
     };
   },

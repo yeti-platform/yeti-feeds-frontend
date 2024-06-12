@@ -167,7 +167,7 @@ display_name: Scenario template
 type: scenario
 description: >
   Multi-line description
-id: S1999
+id: S0999
 dfiq_version: 1.0.0
 tags:
   - tag1
@@ -179,7 +179,7 @@ display_name: Facet template
 type: facet
 description: >
   Multiline description
-id: F1999
+id: F0999
 dfiq_version: 1.0.0
 tags:
 parent_ids:
@@ -190,19 +190,18 @@ const QUESTION_TEMPATE = `
 display_name: Question template
 type: question
 description:
-id: Q1999
+id: Q0999
 dfiq_version: 1.0.0
 tags:
   - tag1
 parent_ids:
   - F1999
-  - F1666
 `;
 
 const APPROACH_TEMPATE = `
 display_name: Approach template
 type: approach
-id: Q1999.1
+id: Q1999.01
 dfiq_version: 1.0.0
 tags:
   - tag1
@@ -214,7 +213,7 @@ description:
     - "[ref2](https://google.com)"
 view:
   data:
-    - type: ForensicArtifact
+    - type: artifact
       value: BrowserHistory
     - type: description
       value: Description of the forensic artifact
@@ -242,3 +241,6 @@ export const DFIQ_TEMPLATES = {
   question: QUESTION_TEMPATE.trim(),
   approach: APPROACH_TEMPATE.trim()
 };
+
+export const DFIQ_APPROACH_VIEW_TYPES = ["artifact", "description"];
+export const DFIQ_APPROACH_VIEW_PROCESSOR_STEP_TYPES = ["opensearch-query", "pandas", "manual"];
