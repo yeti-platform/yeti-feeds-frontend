@@ -223,8 +223,7 @@ router.beforeEach((to, _from, next) => {
           next({ name: "Login", query: { next: to.fullPath } });
         } else {
           console.log("Pinia: got user, continuing");
-          console.log(to);
-          next({ path: to.query.next || "/" });
+          next();
         }
       })
       .catch(error => {
