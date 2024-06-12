@@ -340,7 +340,7 @@
 
           <!-- <pre v-if="parsedYaml">{{ renderedYaml }}</pre> -->
         </v-window-item>
-        <v-window-item value="yaml">
+        <v-window-item value="yaml" class="mt-4">
           <v-textarea class="yeti-code" label="DFIQ Yaml" auto-grow v-model="localObject.dfiq_yaml"></v-textarea>
         </v-window-item>
         <div v-if="yamlValidationError === 'valid'">
