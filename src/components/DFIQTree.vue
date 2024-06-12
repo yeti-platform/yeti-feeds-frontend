@@ -5,19 +5,18 @@
         <v-btn
           v-if="dfiqGraph.paths?.length > 0"
           @click="expandedControl = !expandedControl"
-          class="mr-2"
-          :prepend-icon="expandedControl ? 'mdi-chevron-right' : 'mdi-chevron-down'"
+          class="me-2"
           variant="outlined"
-          v-show="dfiqGraph.paths?.length > 0"
-          width="160"
-          >{{ expandedControl ? "Collapse all" : "Expand all" }}</v-btn
+        >
+          <v-icon size="x-large">{{ expandedControl ? "mdi-chevron-down" : "mdi-chevron-right" }}</v-icon>
+          {{ expandedControl ? "Collapse all" : "Expand all" }}</v-btn
         >
         <v-combobox
           v-model="indicatorTypesControl"
-          :items="displayIndicatorTypes"
+          :items="availableIndicatorTypes"
           density="compact"
           variant="outlined"
-          label="Include query types"
+          label="Include indicator types"
           chips
           multiple
           hide-details
@@ -33,19 +32,25 @@
       <!-- Main entry display -->
       <li class="mt-2">
         <span @click="expanded = !expanded">
-          <v-icon color="grey-darken-2" v-if="dfiqTree.children?.length > 0" class="me-1">{{
-            expanded ? "mdi-chevron-down" : "mdi-chevron-right"
-          }}</v-icon>
+          <v-icon
+            color="grey-darken-2"
+            v-if="dfiqTree.children?.length > 0 && dfiqTree.object?.root_type === 'dfiq'"
+            class="me-1"
+            >{{ expanded ? "mdi-chevron-down" : "mdi-chevron-right" }}</v-icon
+          >
           <v-divider v-else vertical class="mr-7"></v-divider>
           <v-icon color="grey-darken-2" size="x-small" class="me-2">{{ getDFIQIcon(dfiqTree) }}</v-icon>
 
-          <code v-if="dfiqTree.object?.type === 'forensicartifact'">{{ dfiqTree.title }}</code>
-          <span v-else
-            >{{ sanitizeTitle(dfiqTree) }}
+          <span v-if="dfiqTree.object?.type === 'forensicartifact'">
+            <code class="me-2">{{ dfiqTree.title }}</code>
+            <v-chip density="compact" size="small">forensicartifact</v-chip>
+          </span>
+          <span v-else>
+            <span class="me-2">{{ sanitizeTitle(dfiqTree) }}</span>
             <v-chip density="compact" size="small" v-if="dfiqTree.object.type === 'query'">{{
               dfiqTree.object.query_type
-            }}</v-chip></span
-          >
+            }}</v-chip>
+          </span>
 
           <!-- if approach, display data -->
           <span v-if="dfiqTree.object?.type === 'approach' && !expanded" class="ml-1">
@@ -124,6 +129,7 @@
       <!-- Recursive DFIQ children -->
       <li class="ml-2 border-s" v-show="dfiqTree.children && expanded" v-for="child in dfiqTree.children">
         <DFIQ-tree
+          v-if="dfiqTree.object?.root_type === 'dfiq'"
           :treeRoot="child"
           :expanded-control="expandedControl"
           :display-indicator-types="indicatorTypesControl"
@@ -142,7 +148,7 @@
           color="grey"
           icon="mdi-content-copy"
           density="compact"
-          class="mr-2 clipboard-copy"
+          class="me-2 clipboard-copy"
           title="Copy to clipboard"
           ripple
         />
@@ -189,7 +195,7 @@ export default {
     displayIndicatorTypes: {
       type: Array,
       default: () => {
-        return ["pandas", "opensearch-query", "splunk-query", "GUI"];
+        return [];
       }
     }
   },
@@ -197,7 +203,7 @@ export default {
     return {
       dfiqGraph: {},
       expanded: true,
-      indicatorTypesControl: ["pandas", "opensearch-query", "splunk-query", "GUI"],
+      indicatorTypesControl: [],
       editWidth: "75%",
       fullScreenEdit: false,
       DFIQHierarchy: {
@@ -246,10 +252,16 @@ export default {
       });
     },
     shouldDisplay(treeItem) {
+      if (this.displayIndicatorTypes.length === 0) {
+        return true;
+      }
       if (!treeItem.object) {
         return false;
       }
       if (treeItem.object.type === "query" && !this.displayIndicatorTypes.includes(treeItem.object.query_type)) {
+        return false;
+      }
+      if (treeItem.object.type === "forensicartifact" && !this.displayIndicatorTypes.includes("forensicartifact")) {
         return false;
       }
       // don't display if children are only queries with no displayIndicatorTypes
@@ -342,6 +354,15 @@ export default {
       });
 
       return root;
+    },
+    availableIndicatorTypes() {
+      if (this.dfiqGraph === null) {
+        return [];
+      }
+      const queryTypes = Object.values(this.dfiqGraph.vertices || {})
+        .filter(vertex => vertex.root_type === "indicator")
+        .map(vertex => vertex.query_type || vertex.type);
+      return [...new Set(queryTypes)];
     }
   },
   mounted() {
