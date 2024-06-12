@@ -165,12 +165,10 @@ import { DFIQ_TYPES } from "@/definitions/dfiqDefinitions.js";
 import { INDICATOR_TYPES } from "@/definitions/indicatorDefinitions.js";
 
 import EditDFIQObject from "@/components/DFIQ/EditDFIQObject.vue";
-import NewDFIQObject from "@/components/NewDFIQObject.vue";
 
 export default {
   components: {
-    EditDFIQObject,
-    NewDFIQObject
+    EditDFIQObject
   },
   props: {
     dfiqObject: {

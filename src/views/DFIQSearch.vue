@@ -61,7 +61,6 @@ import { DFIQ_TYPES } from "@/definitions/dfiqDefinitions.js";
 
 import EditDFIQObject from "@/components/DFIQ/EditDFIQObject.vue";
 import ObjectList from "@/components/ObjectList.vue";
-import NewDFIQObject from "@/components/NewDFIQObject.vue";
 
 import _ from "lodash";
 </script>
@@ -70,8 +69,7 @@ import _ from "lodash";
 export default {
   name: "DFIQSearch",
   components: {
-    ObjectList,
-    NewDFIQObject
+    ObjectList
   },
   data() {
     return {
