@@ -46,7 +46,7 @@
             density="compact"
           ></v-textarea>
 
-          <v-expansion-panels v-else-if="parsedYaml.description">
+          <v-expansion-panels v-else-if="parsedYaml.description" class="mb-4 pa-1">
             <v-expansion-panel title="Summary & references">
               <v-expansion-panel-text>
                 <v-text-field label="Summary" v-model="parsedYaml.description.summary" density="compact"></v-text-field>

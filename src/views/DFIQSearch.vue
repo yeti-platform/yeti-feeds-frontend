@@ -83,7 +83,7 @@ export default {
       activeTab: "",
       autoTab: true,
       fullScreenEdit: false,
-      editWidth: "50%",
+      editWidth: "75%",
       newDialogActive: false
     };
   },

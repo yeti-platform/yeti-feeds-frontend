@@ -57,7 +57,7 @@
               </template>
             </v-dialog>
 
-            <v-dialog :width="editWidth">
+            <v-dialog :width="editWidth" v-if="object?.root_type !== 'dfiq'">
               <template v-slot:activator="{ props }">
                 <v-btn class="me-2" variant="tonal" color="primary" v-bind="props" size="small" append-icon="mdi-link"
                   >link object
@@ -68,7 +68,7 @@
                 <link-object :object="object" :is-active="isActive" />
               </template>
             </v-dialog>
-            <v-dialog :width="editWidth">
+            <v-dialog :width="editWidth" v-if="object?.root_type !== 'dfiq'">
               <template v-slot:activator="{ props }">
                 <v-btn variant="tonal" color="primary" v-bind="props" size="small" append-icon="mdi-link"
                   >link observables
