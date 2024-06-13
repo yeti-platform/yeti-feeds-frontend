@@ -28,16 +28,16 @@
             <pre>{{ object.pattern }}</pre>
           </v-card-text></v-card
         >
-        
+
         <v-card v-for="(context, index) in object?.context" class="ma-2" variant="flat">
-                <v-card-title>{{ context.source }}</v-card-title>
-                <v-table>
-                  <tbody>
-                    <tr v-for="key in Object.keys(context).filter(k => k !== 'source')" v-bind:key="key">
-                     <yeti-markdown :text="context[key]" />
-                    </tr>
-                  </tbody>
-                </v-table>
+          <v-card-title>{{ context.source }}</v-card-title>
+          <v-table>
+            <tbody>
+              <tr v-for="key in Object.keys(context).filter(k => k !== 'source')" v-bind:key="key">
+                <yeti-markdown :text="context[key]" />
+              </tr>
+            </tbody>
+          </v-table>
         </v-card>
       </v-col>
       <v-col cols="4">
