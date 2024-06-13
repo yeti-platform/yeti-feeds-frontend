@@ -148,7 +148,8 @@ export const OBSERVABLE_TYPES = [
       { field: "value", type: "text", label: "Value", displayList: true, editable: true },
       { field: "tags", type: "list", label: "tags", displayList: true, editable: false },
       { field: "created", type: "datetime", label: "Created", displayList: true, editable: false }
-    ]
+    ],
+    icon: "mdi-console"
   },
   {
     name: "Registry Key",
