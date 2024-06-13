@@ -17,7 +17,6 @@
       :search="searchQuery"
       :item-value="item => item.id"
       hover
-      class="fixed-table"
       :sort-by="sortBy"
     >
       <template v-slot:item.name="{ item }">
