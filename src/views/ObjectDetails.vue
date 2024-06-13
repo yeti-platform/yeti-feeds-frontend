@@ -21,12 +21,24 @@
             <yeti-markdown v-else :text="object.description || 'No description provided'" />
           </v-card-text>
         </v-card>
+
         <v-card v-if="object?.pattern" class="ma-2" variant="flat">
           <v-card-title>Pattern</v-card-title>
           <v-card-text class="yeti-pattern-code">
             <pre>{{ object.pattern }}</pre>
           </v-card-text></v-card
         >
+        
+        <v-card v-for="(context, index) in object?.context" class="ma-2" variant="flat">
+                <v-card-title>{{ context.source }}</v-card-title>
+                <v-table>
+                  <tbody>
+                    <tr v-for="key in Object.keys(context).filter(k => k !== 'source')" v-bind:key="key">
+                     <yeti-markdown :text="context[key]" />
+                    </tr>
+                  </tbody>
+                </v-table>
+        </v-card>
       </v-col>
       <v-col cols="4">
         <v-card class="ma-2" variant="flat">
