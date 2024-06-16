@@ -1,12 +1,12 @@
 <template>
   <v-container fluid>
     <v-row align="start" no-gutters>
-      <v-col>
+      <v-col cols="8">
         <v-card class="ma-2 break-title" variant="flat">
           <template v-slot:title>
             <div class="d-flex">
-              <v-chip class="mr-3" color="primary" :text="observable?.type" label></v-chip>
-              <code class="me-auto">{{ observable?.value }}</code>
+              <v-chip class="mr-3 flex-shrink-0" color="primary" :text="observable?.type" label></v-chip>
+              <code class="observable-value">{{ observable?.value }}</code>
               <v-dialog :width="editWidth" :fullscreen="fullScreenEdit">
                 <template v-slot:activator="{ props }">
                   <v-btn class="me-2" variant="tonal" color="primary" v-bind="props" append-icon="mdi-pencil"
@@ -26,6 +26,31 @@
             </div>
           </template>
         </v-card>
+        <v-sheet class="ma-2">
+          <v-expansion-panels>
+            <v-expansion-panel>
+              <v-expansion-panel-title v-slot="{ expanded }">
+                <div>
+                  Display full value
+                  <v-btn
+                    variant="text"
+                    color="grey"
+                    prepend-icon="mdi-content-copy"
+                    density="compact"
+                    title="Copy to clipboard"
+                    class="ml-2"
+                    ripple
+                    @click="copyText(observable?.value)"
+                    >Copy to clipboard</v-btn
+                  >
+                </div>
+              </v-expansion-panel-title>
+              <v-expansion-panel-text>
+                <code class="observable-value-long">{{ observable?.value }}</code>
+              </v-expansion-panel-text>
+            </v-expansion-panel>
+          </v-expansion-panels>
+        </v-sheet>
         <v-sheet class="ma-2">
           <v-table density="compact">
             <tbody>
@@ -201,6 +226,13 @@ export default {
     };
   },
   methods: {
+    copyText(text) {
+      navigator.clipboard.writeText(text);
+      this.$eventBus.emit("displayMessage", {
+        status: "info",
+        message: "Observable value copied to clipboard!"
+      });
+    },
     getObservableDetails() {
       axios
         .get(`/api/v2/observables/${this.id}`)
@@ -265,5 +297,16 @@ export default {
 
 .break-title .v-card-title {
   white-space: normal;
+}
+
+.observable-value {
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+  /* display: block; */
+}
+
+.observable-value-long {
+  overflow-wrap: break-word;
 }
 </style>
