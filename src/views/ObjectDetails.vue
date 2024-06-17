@@ -34,7 +34,8 @@
           <v-table>
             <tbody>
               <tr v-for="key in Object.keys(context).filter(k => k !== 'source')" v-bind:key="key">
-                <yeti-markdown :text="context[key]" />
+                <th>{{ key }}</th>
+                <td><yeti-markdown :text="context[key]" /></td>
               </tr>
             </tbody>
           </v-table>
