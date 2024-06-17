@@ -15,7 +15,15 @@ export const INDICATOR_TYPES = [
         width: "170px",
         sortable: true
       },
-      { field: "name", type: "text", label: "Name", displayList: true, editable: true, sortable: true },
+      {
+        field: "name",
+        type: "text",
+        label: "Name",
+        displayList: true,
+        editable: true,
+        sortable: true,
+        maxWidth: "500px"
+      },
       { field: "pattern", type: "code", label: "Pattern", displayList: false, editable: true },
       { field: "tags", type: "list", label: "Tags", displayList: true, editable: false },
       { field: "relevant_tags", type: "list", label: "Relevant tags", displayList: true, editable: true },
@@ -49,7 +57,15 @@ export const INDICATOR_TYPES = [
         width: "170px",
         sortable: true
       },
-      { field: "name", type: "text", label: "Name", displayList: true, editable: true, sortable: true },
+      {
+        field: "name",
+        type: "text",
+        label: "Name",
+        displayList: true,
+        editable: true,
+        sortable: true,
+        maxWidth: "500px"
+      },
       { field: "pattern", type: "code", label: "Pattern", displayList: false, editable: true },
       { field: "tags", type: "list", label: "Tags", displayList: true, editable: false },
       { field: "relevant_tags", type: "list", label: "Relevant tags", displayList: true, editable: true },
@@ -81,7 +97,15 @@ export const INDICATOR_TYPES = [
         width: "200px",
         sortable: true
       },
-      { field: "name", type: "text", label: "Name", displayList: true, editable: true, sortable: true },
+      {
+        field: "name",
+        type: "text",
+        label: "Name",
+        displayList: true,
+        editable: true,
+        sortable: true,
+        maxWidth: "500px"
+      },
       { field: "pattern", type: "code", label: "Query text", displayList: false, editable: true },
       { field: "tags", type: "list", label: "Tags", displayList: true, editable: false },
       { field: "relevant_tags", type: "list", label: "Relevant tags", displayList: true, editable: true },
@@ -121,7 +145,15 @@ export const INDICATOR_TYPES = [
         width: "200px",
         sortable: true
       },
-      { field: "name", type: "text", label: "Name", displayList: true, editable: true, sortable: true },
+      {
+        field: "name",
+        type: "text",
+        label: "Name",
+        displayList: true,
+        editable: true,
+        sortable: true,
+        maxWidth: "500px"
+      },
       { field: "pattern", type: "code", label: "Rule text", displayList: false, editable: true },
       { field: "tags", type: "list", label: "Tags", displayList: true, editable: false },
       { field: "relevant_tags", type: "list", label: "Relevant tags", displayList: true, editable: true },
@@ -152,7 +184,15 @@ export const INDICATOR_TYPES = [
         width: "200px",
         sortable: true
       },
-      { field: "name", type: "text", label: "Name", displayList: true, editable: true, sortable: true },
+      {
+        field: "name",
+        type: "text",
+        label: "Name",
+        displayList: true,
+        editable: true,
+        sortable: true,
+        maxWidth: "500px"
+      },
       { field: "pattern", type: "code", label: "Rule text", displayList: false, editable: true },
       { field: "tags", type: "list", label: "Tags", displayList: true, editable: false },
       { field: "relevant_tags", type: "list", label: "Relevant tags", displayList: true, editable: true },
