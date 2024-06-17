@@ -12,7 +12,16 @@ export const DFIQ_TYPES = [
         width: "120px",
         sortable: true
       },
-      { field: "name", type: "text", label: "Name", displayList: true, editable: true, sortable: true },
+
+      {
+        field: "name",
+        type: "text",
+        label: "Name",
+        displayList: true,
+        editable: true,
+        sortable: true,
+        maxWidth: "500px"
+      },
       { field: "internal", type: "bool", label: "Internal", displayList: false, editable: false, sortable: true },
       {
         field: "dfiq_version",
@@ -52,7 +61,15 @@ export const DFIQ_TYPES = [
         width: "120px",
         sortable: true
       },
-      { field: "name", type: "text", label: "Name", displayList: true, editable: true, sortable: true },
+      {
+        field: "name",
+        type: "text",
+        label: "Name",
+        displayList: true,
+        editable: true,
+        sortable: true,
+        maxWidth: "500px"
+      },
       { field: "internal", type: "bool", label: "Internal", displayList: false, editable: false, sortable: true },
       {
         field: "dfiq_version",
@@ -90,10 +107,18 @@ export const DFIQ_TYPES = [
         label: "DFIQ ID",
         displayList: true,
         editable: true,
-        width: "120px",
+        width: "110px",
         sortable: true
       },
-      { field: "name", type: "text", label: "Name", displayList: true, editable: true, sortable: true },
+      {
+        field: "name",
+        type: "text",
+        label: "Name",
+        displayList: true,
+        editable: true,
+        sortable: true,
+        maxWidth: "500px"
+      },
       { field: "internal", type: "bool", label: "Internal", displayList: false, editable: false, sortable: true },
       {
         field: "dfiq_version",
@@ -134,7 +159,15 @@ export const DFIQ_TYPES = [
         width: "120px",
         sortable: true
       },
-      { field: "name", type: "text", label: "Name", displayList: true, editable: true, sortable: true },
+      {
+        field: "name",
+        type: "text",
+        label: "Name",
+        displayList: true,
+        editable: true,
+        sortable: true,
+        maxWidth: "500px"
+      },
       { field: "internal", type: "bool", label: "Internal", displayList: false, editable: false, sortable: true },
       {
         field: "dfiq_version",

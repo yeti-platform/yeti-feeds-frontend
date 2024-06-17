@@ -12,7 +12,15 @@ export const ENTITY_TYPES = [
         sortable: true,
         width: "200px"
       },
-      { field: "name", type: "text", label: "Name", displayList: true, editable: true, sortable: true },
+      {
+        field: "name",
+        type: "text",
+        label: "Name",
+        displayList: true,
+        editable: true,
+        sortable: true,
+        maxWidth: "500px"
+      },
       { field: "reference", type: "text", label: "Reference", displayList: true, editable: true },
       { field: "tags", type: "list", label: "Tags", displayList: true, editable: false },
       { field: "description", type: "longtext", label: "Description", displayList: false, editable: true }
@@ -33,7 +41,15 @@ export const ENTITY_TYPES = [
         sortable: true,
         width: "200px"
       },
-      { field: "name", type: "text", label: "Name", displayList: true, editable: true, sortable: true },
+      {
+        field: "name",
+        type: "text",
+        label: "Name",
+        displayList: true,
+        editable: true,
+        sortable: true,
+        maxWidth: "500px"
+      },
       { field: "tags", type: "list", label: "Tags", displayList: true, editable: false },
       { field: "family", type: "text", label: "Family", displayList: true, editable: true },
       { field: "aliases", type: "list", label: "Aliases", displayList: true, editable: true },
@@ -55,7 +71,15 @@ export const ENTITY_TYPES = [
         sortable: true,
         width: "200px"
       },
-      { field: "name", type: "text", label: "Name", displayList: true, editable: true, sortable: true },
+      {
+        field: "name",
+        type: "text",
+        label: "Name",
+        displayList: true,
+        editable: true,
+        sortable: true,
+        maxWidth: "500px"
+      },
       { field: "tags", type: "list", label: "Tags", displayList: true, editable: false },
       { field: "aliases", type: "list", label: "Aliases", displayList: true, editable: true },
       { field: "kill_chain_phases", type: "list", label: "Kill chain phases", displayList: true, editable: true },
@@ -77,7 +101,15 @@ export const ENTITY_TYPES = [
         sortable: true,
         width: "200px"
       },
-      { field: "name", type: "text", label: "Name", displayList: true, editable: true, sortable: true },
+      {
+        field: "name",
+        type: "text",
+        label: "Name",
+        displayList: true,
+        editable: true,
+        sortable: true,
+        maxWidth: "500px"
+      },
       { field: "tags", type: "list", label: "Tags", displayList: true, editable: false },
       { field: "kill_chain_phases", type: "list", label: "Kill chain phases", displayList: true, editable: true },
       { field: "description", type: "longtext", label: "Description", displayList: false, editable: true }
@@ -98,7 +130,15 @@ export const ENTITY_TYPES = [
         sortable: true,
         width: "200px"
       },
-      { field: "name", type: "text", label: "Name", displayList: true, editable: true, sortable: true },
+      {
+        field: "name",
+        type: "text",
+        label: "Name",
+        displayList: true,
+        editable: true,
+        sortable: true,
+        maxWidth: "500px"
+      },
       { field: "tags", type: "list", label: "Tags", displayList: true, editable: false },
       { field: "aliases", type: "list", label: "Aliases", displayList: true, editable: true },
       { field: "description", type: "longtext", label: "Description", displayList: false, editable: true },
@@ -122,7 +162,15 @@ export const ENTITY_TYPES = [
         sortable: true,
         width: "200px"
       },
-      { field: "name", type: "text", label: "Name", displayList: true, editable: true, sortable: true },
+      {
+        field: "name",
+        type: "text",
+        label: "Name",
+        displayList: true,
+        editable: true,
+        sortable: true,
+        maxWidth: "500px"
+      },
       { field: "tags", type: "list", label: "Tags", displayList: true, editable: false },
       { field: "aliases", type: "list", label: "Aliases", displayList: true },
       { field: "description", type: "longtext", label: "Description", displayList: false, editable: true }
@@ -143,7 +191,15 @@ export const ENTITY_TYPES = [
         sortable: true,
         width: "200px"
       },
-      { field: "name", type: "text", label: "Name", displayList: true, editable: true, sortable: true },
+      {
+        field: "name",
+        type: "text",
+        label: "Name",
+        displayList: true,
+        editable: true,
+        sortable: true,
+        maxWidth: "500px"
+      },
       { field: "tags", type: "list", label: "Tags", displayList: true, editable: false },
       { field: "aliases", type: "list", label: "Aliases", displayList: true },
       { field: "description", type: "longtext", label: "Description", displayList: false, editable: true }
@@ -164,7 +220,15 @@ export const ENTITY_TYPES = [
         sortable: true,
         width: "200px"
       },
-      { field: "name", type: "text", label: "Name", displayList: true, editable: true, sortable: true },
+      {
+        field: "name",
+        type: "text",
+        label: "Name",
+        displayList: true,
+        editable: true,
+        sortable: true,
+        maxWidth: "500px"
+      },
       { field: "tags", type: "list", label: "Tags", displayList: true, editable: false },
       { field: "aliases", type: "list", label: "Aliases", displayList: true },
       { field: "description", type: "longtext", label: "Description", displayList: false, editable: true }
@@ -185,7 +249,15 @@ export const ENTITY_TYPES = [
         sortable: true,
         width: "200px"
       },
-      { field: "name", type: "text", label: "Name", displayList: true, editable: true, sortable: true },
+      {
+        field: "name",
+        type: "text",
+        label: "Name",
+        displayList: true,
+        editable: true,
+        sortable: true,
+        maxWidth: "500px"
+      },
       { field: "tags", type: "list", label: "Tags", displayList: true, editable: false },
       { field: "description", type: "longtext", label: "Description", displayList: false, editable: true }
     ],
@@ -205,7 +277,15 @@ export const ENTITY_TYPES = [
         sortable: true,
         width: "200px"
       },
-      { field: "name", type: "text", label: "Name", displayList: true, editable: true, sortable: true },
+      {
+        field: "name",
+        type: "text",
+        label: "Name",
+        displayList: true,
+        editable: true,
+        sortable: true,
+        maxWidth: "500px"
+      },
       { field: "title", type: "text", label: "Title", displayList: true, editable: true, sortable: true },
       { field: "tags", type: "list", label: "Tags", displayList: true, editable: false },
       { field: "description", type: "longtext", label: "Description", displayList: false, editable: true }
@@ -226,7 +306,15 @@ export const ENTITY_TYPES = [
         sortable: true,
         width: "200px"
       },
-      { field: "name", type: "text", label: "Name", displayList: true, editable: true, sortable: true },
+      {
+        field: "name",
+        type: "text",
+        label: "Name",
+        displayList: true,
+        editable: true,
+        sortable: true,
+        maxWidth: "500px"
+      },
       { field: "tags", type: "list", label: "Tags", displayList: true, editable: false },
       { field: "description", type: "longtext", label: "Description", displayList: false, editable: true }
     ],

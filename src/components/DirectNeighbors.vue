@@ -66,22 +66,22 @@
       <template v-slot:item.relevant_node.value="{ item }">
         <span v-if="item.relevant_node.root_type === 'observable'">
           <router-link :to="{ name: 'ObservableDetails', params: { id: item.relevant_node.id } }">
-            {{ item.relevant_node.value }}
+            <span class="short-links">{{ item.relevant_node.value }}</span>
           </router-link>
         </span>
         <span v-if="item.relevant_node.root_type === 'entity'">
           <router-link :to="{ name: 'EntityDetails', params: { id: item.relevant_node.id } }">
-            {{ item.relevant_node.name }}
+            <span class="short-links">{{ item.relevant_node.name }}</span>
           </router-link>
         </span>
         <span v-if="item.relevant_node.root_type === 'indicator'">
           <router-link :to="{ name: 'IndicatorDetails', params: { id: item.relevant_node.id } }">
-            {{ item.relevant_node.name }}
+            <span class="short-links">{{ item.relevant_node.name }}</span>
           </router-link>
         </span>
         <span v-if="item.relevant_node.root_type === 'dfiq'">
           <router-link :to="{ name: 'DFIQDetails', params: { id: item.relevant_node.id } }">
-            {{ item.relevant_node.name }}
+            <span class="short-links">{{ item.relevant_node.name }}</span>
           </router-link>
         </span>
       </template>
@@ -214,7 +214,7 @@ export default {
         { title: "", key: "direction", width: "10px" },
         { title: "Linked on", key: "created", width: "170px", sortable: true },
         { title: "Type", key: "relevant_node.type", width: "10px", sortable: false },
-        { title: "Value", key: "relevant_node.value", sortable: false },
+        { title: "Value", key: "relevant_node.value", maxWidth: "700px", sortable: false },
         { title: "Tags", key: "relevant_node.tags", sortable: false },
         { title: "Description", key: "description", sortable: false },
         { title: "", key: "controls", sortable: false }
@@ -346,4 +346,11 @@ export default {
 };
 </script>
 
-<style></style>
+<style>
+.short-links {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  display: block;
+}
+</style>

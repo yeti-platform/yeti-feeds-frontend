@@ -5,26 +5,65 @@
     </v-card-title>
     <v-card-text>
       <v-textarea label="Add one observable per line" v-model="observables" hide-details></v-textarea>
-      <div class="d-flex pl-0 mt-3">
-        <v-select
-          class="me-3"
-          v-model="addType"
-          :items="observableTypes"
-          density="compact"
-          placeholder="Force type"
-          variant="outlined"
-          hide-details
-        ></v-select>
-        <v-combobox
-          density="compact"
-          chips
-          multiple
-          v-model="optionalTags"
-          hide-details
-          placeholder="Optional tags"
-          :delimiters="[',', ' ', ';']"
-        ></v-combobox>
-      </div>
+      <div class="text-subtitle-2 mt-2">Observable data</div>
+
+      <v-row no-gutters class="mt-2">
+        <v-col cols="4">
+          <v-select
+            class="me-3"
+            v-model="addType"
+            :items="observableTypes"
+            density="compact"
+            placeholder="Force type"
+            variant="outlined"
+            hide-details
+          ></v-select>
+        </v-col>
+        <v-col>
+          <v-combobox
+            density="compact"
+            chips
+            multiple
+            v-model="optionalTags"
+            hide-details
+            placeholder="Optional tags"
+            :delimiters="[',', ' ', ';']"
+          ></v-combobox>
+        </v-col>
+      </v-row>
+
+      <div class="text-subtitle-2 mt-2">Link metadata</div>
+
+      <v-row no-gutters class="mt-2">
+        <v-col cols="4">
+          <v-text-field
+            class="me-3"
+            v-model="linkType"
+            density="compact"
+            placeholder="Link type"
+            variant="outlined"
+            hide-details
+          ></v-text-field>
+        </v-col>
+        <v-col>
+          <v-text-field
+            density="compact"
+            v-model="linkDescription"
+            hide-details
+            placeholder="Link description"
+          ></v-text-field>
+        </v-col>
+      </v-row>
+      <v-row no-gutters class="mt-5">
+        <v-col>
+          <v-btn size="small" text @click="linkDirectionOutgoing = !linkDirectionOutgoing"> Swap direction </v-btn>
+        </v-col>
+        <v-col
+          >Observables {{ linkDirectionOutgoing ? "→" : "←" }}
+          <v-chip v-if="linkTarget" :text="linkTarget.name" :prepend-icon="getIconForType(linkTarget.type)"
+        /></v-col>
+      </v-row>
+
       <v-divider v-if="addedObservables.length > 0" class="my-5"></v-divider>
       <div v-if="addedObservables.length > 0">
         <p class="mt-3 mb-1 text-h6">Succesfully linked:</p>
@@ -68,6 +107,9 @@ import axios from "axios";
 
 import EntitySelector from "@/components/EntitySelector.vue";
 import { OBSERVABLE_TYPES } from "@/definitions/observableDefinitions.js";
+import { ENTITY_TYPES } from "@/definitions/entityDefinitions.js";
+import { INDICATOR_TYPES } from "@/definitions/indicatorDefinitions.js";
+import { DFIQ_TYPES } from "@/definitions/dfiqDefinitions.js";
 
 import _ from "lodash";
 </script>
@@ -99,7 +141,10 @@ export default {
         { title: "Value", key: "value" },
         { title: "Detected type", key: "type" },
         { title: "Tags", key: "tags" }
-      ]
+      ],
+      linkType: "manual",
+      linkDescription: "Linked manually from the Web UI",
+      linkDirectionOutgoing: true
     };
   },
   methods: {
@@ -144,12 +189,27 @@ export default {
     },
     linkKnownObservable(observable, linkTarget) {
       let params = {
-        source: `${observable.root_type}/${observable.id}`,
-        target: `${linkTarget.root_type}/${linkTarget.id}`,
-        link_type: "manual link",
-        description: "Linked manually from the Web UI"
+        link_type: this.linkType,
+        description: this.linkDescription
       };
+
+      if (this.linkDirectionOutgoing) {
+        params.source = `${observable.root_type}/${observable.id}`;
+        params.target = `${linkTarget.root_type}/${linkTarget.id}`;
+      } else {
+        params.source = `${linkTarget.root_type}/${linkTarget.id}`;
+        params.target = `${observable.root_type}/${observable.id}`;
+      }
+
       axios.post("/api/v2/graph/add", params);
+    },
+    getIconForType(type) {
+      return (
+        ENTITY_TYPES.find(t => t.type === type) ||
+        INDICATOR_TYPES.find(t => t.type === type) ||
+        OBSERVABLE_TYPES.find(t => t.type === type) ||
+        DFIQ_TYPES.find(t => t.type === type)
+      ).icon;
     }
   },
   computed: {

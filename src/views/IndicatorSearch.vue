@@ -113,6 +113,7 @@ export default {
           title: field.label,
           key: field.field,
           width: field.width,
+          maxWidth: field.maxWidth,
           sortable: field.sortable || false
         };
       });
