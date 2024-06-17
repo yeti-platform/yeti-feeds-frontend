@@ -9,7 +9,7 @@
               <code class="observable-value">{{ observable?.value }}</code>
               <v-dialog :width="editWidth" :fullscreen="fullScreenEdit">
                 <template v-slot:activator="{ props }">
-                  <v-btn class="me-2" variant="tonal" color="primary" v-bind="props" append-icon="mdi-pencil"
+                  <v-btn class="ml-2" variant="tonal" color="primary" v-bind="props" append-icon="mdi-pencil"
                     >Edit
                   </v-btn>
                 </template>
@@ -150,7 +150,7 @@
               <div v-if="observable?.context.length == 0"><em>No context for observable</em></div>
             </v-window-item>
             <v-window-item value="related-observables" eager>
-              <related-objects
+              <direct-neighbors
                 :id="id"
                 source-type="observables"
                 :target-types="observableTypes.map(def => def.type)"
@@ -160,7 +160,7 @@
 
             <v-window-item value="related-entities" eager>
               <v-card title="Direct links">
-                <related-objects
+                <direct-neighbors
                   :id="id"
                   source-type="observables"
                   :target-types="entityTypes.map(def => def.type)"
@@ -188,10 +188,10 @@
 <script lang="ts" setup>
 import axios from "axios";
 
-// import tasklist component
 import TaskList from "@/components/TaskList.vue";
 import RelatedObjects from "@/components/RelatedObjects.vue";
 import EditObject from "@/components/EditObject.vue";
+import DirectNeighbors from "@/components/DirectNeighbors.vue";
 
 import { ENTITY_TYPES } from "@/definitions/entityDefinitions.js";
 import { OBSERVABLE_TYPES } from "@/definitions/observableDefinitions.js";
