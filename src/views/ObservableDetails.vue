@@ -26,6 +26,7 @@
             </div>
           </template>
         </v-card>
+
         <v-sheet class="ma-2">
           <v-expansion-panels>
             <v-expansion-panel>
@@ -77,6 +78,34 @@
         </v-sheet>
       </v-col>
       <v-col cols="4">
+        <v-card class="ma-2" variant="flat">
+          <v-card-title class="d-flex"
+            ><span class="me-auto"> Info</span>
+
+            <v-dialog :width="editWidth" v-if="object?.root_type !== 'dfiq'">
+              <template v-slot:activator="{ props }">
+                <v-btn class="me-2" variant="tonal" color="primary" v-bind="props" size="small" append-icon="mdi-link"
+                  >link object
+                </v-btn>
+              </template>
+
+              <template v-slot:default="{ isActive }">
+                <link-object :object="object" :is-active="isActive" />
+              </template>
+            </v-dialog>
+            <v-dialog :width="editWidth" v-if="object?.root_type !== 'dfiq'">
+              <template v-slot:activator="{ props }">
+                <v-btn variant="tonal" color="primary" v-bind="props" size="small" append-icon="mdi-link"
+                  >link observables
+                </v-btn>
+              </template>
+
+              <template v-slot:default="{ isActive }">
+                <link-observables :linkTarget="object" :is-active="isActive" />
+              </template>
+            </v-dialog>
+          </v-card-title>
+        </v-card>
         <v-card class="ma-2" variant="flat">
           <v-card-title>Tags</v-card-title>
 
@@ -192,9 +221,13 @@ import TaskList from "@/components/TaskList.vue";
 import RelatedObjects from "@/components/RelatedObjects.vue";
 import EditObject from "@/components/EditObject.vue";
 import DirectNeighbors from "@/components/DirectNeighbors.vue";
+import LinkObject from "@/components/LinkObject.vue";
+import LinkObservables from "@/components/LinkObservables.vue";
+
 
 import { ENTITY_TYPES } from "@/definitions/entityDefinitions.js";
 import { OBSERVABLE_TYPES } from "@/definitions/observableDefinitions.js";
+
 import moment from "moment";
 </script>
 
@@ -207,6 +240,7 @@ export default {
     }
   },
   components: {
+    LinkObject,
     TaskList,
     RelatedObjects,
     EditObject
