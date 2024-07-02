@@ -1,6 +1,6 @@
 FROM node:buster
 
-RUN apt update && apt install \
+RUN apt-get update && apt-get install -y \
     python3 \
     git
 
