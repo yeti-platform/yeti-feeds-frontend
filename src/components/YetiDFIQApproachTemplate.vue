@@ -2,7 +2,7 @@
   <v-sheet>
     <div class="text-h6">{{ description.summary }}</div>
     <div class="yeti-markdown" v-html="markdownifyText(description.details)"></div>
-    <div class="mt-5">
+    <div class="mt-5" v-if="description.references.length > 0">
       <div class="font-weight-bold mb-2">References:</div>
       <ul class="ml-5">
         <li class="mb-2" v-for="ref in description.references"><span v-html="markdownifyText(ref)"></span></li>
@@ -13,11 +13,13 @@
         </li>
       </ul>
     </div>
+    <div v-else class="mt-5"><em>No references</em></div>
   </v-sheet>
 
-  <v-divider class="my-7"></v-divider>
+  <v-divider class="my-7" v-if="view.notes.covered.length + view.notes.not_covered.length > 0"></v-divider>
+  <div class="mt-5" v-else><em>No coverage data</em></div>
 
-  <v-card class="dfiq-covered ma-4">
+  <v-card class="dfiq-covered ma-4" v-if="view.notes.covered.length > 0">
     <v-card-title>Covered</v-card-title>
     <v-card-text>
       <ul>
@@ -26,7 +28,7 @@
     </v-card-text>
   </v-card>
 
-  <v-card class="dfiq-not-covered ma-4">
+  <v-card class="dfiq-not-covered ma-4" v-if="view.notes.not_covered.length > 0">
     <v-card-title>Not covered</v-card-title>
     <v-card-text>
       <ul>
