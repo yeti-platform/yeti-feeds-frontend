@@ -12,7 +12,30 @@
       </v-tabs>
       <v-window v-model="activeTab">
         <v-window-item value="user-form" class="mt-4">
-          <v-text-field label="ID" v-model="parsedYaml.id" :disabled="newType === ''" density="compact"></v-text-field>
+          <v-text-field label="UUID" v-model="parsedYaml.uuid" disabled density="compact"></v-text-field>
+          <v-autocomplete
+            v-if="localObject.type === 'approach'"
+            label="Parent question"
+            v-model="parsedYaml.parent_id"
+            :items="possibleParents"
+            item-text="name"
+            item-value="uuid"
+            item-title="name"
+            density="compact"
+            dense
+            chips
+            :custom-filter="parentSearchFilter"
+          >
+            <template v-slot:item="{ props, item }">
+              <v-list-item v-bind="props" title="">{{ item.raw.name }}</v-list-item>
+            </template>
+          </v-autocomplete>
+
+          <v-text-field
+            label="DFIQ ID (e.g. S0001, F0001, Q0001, Q0001.10)"
+            v-model="parsedYaml.id"
+            density="compact"
+          ></v-text-field>
           <v-text-field label="Display name" v-model="parsedYaml.display_name" density="compact"></v-text-field>
           <v-autocomplete
             v-if="['question', 'facet'].includes(localObject.type)"
@@ -21,7 +44,7 @@
             :items="possibleParents"
             item-text="name"
             multiple
-            item-value="dfiq_id"
+            item-value="uuid"
             item-title="name"
             density="compact"
             dense
@@ -29,7 +52,7 @@
             :custom-filter="parentSearchFilter"
           >
             <template v-slot:item="{ props, item }">
-              <v-list-item v-bind="props" title="">{{ `${item.raw.dfiq_id} - ${item.raw.name}` }}</v-list-item>
+              <v-list-item v-bind="props" title="">{{ item.raw.name }}</v-list-item>
             </template>
           </v-autocomplete>
           <v-text-field
@@ -469,8 +492,10 @@ export default {
     if (this.newType !== "") {
       let template = DFIQ_TEMPLATES[this.newType];
       if (this.parent !== null) {
-        template = template.replace(/[SFQ]1999/g, this.parent.dfiq_id);
+        template = template.replace("PARENT_UUID_PLACEHOLDER", this.parent.uuid);
       }
+      // replace UUID_PLACEHOLDER with a new UUID
+      template = template.replace("UUID_PLACEHOLDER", crypto.randomUUID());
       this.localObject.type = this.newType;
       this.localObject.dfiq_yaml = template;
       this.dfiqYaml = template;
