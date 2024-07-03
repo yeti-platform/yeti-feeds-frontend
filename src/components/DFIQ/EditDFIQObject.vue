@@ -513,11 +513,18 @@ export default {
         });
     },
     createObject() {
+      let createRequest = {
+        dfiq_type: this.localObject.type,
+        dfiq_yaml: this.localObject.dfiq_yaml,
+        update_indicators: false
+      };
+
+      if (this.localObject.type === "approach") {
+        createRequest.update_indicators = this.updateApproachIndicators;
+      }
+
       axios
-        .post(`/api/v2/dfiq/from_yaml`, {
-          dfiq_type: this.localObject.type,
-          dfiq_yaml: this.localObject.dfiq_yaml
-        })
+        .post(`/api/v2/dfiq/from_yaml`, createRequest)
         .then(response => {
           this.$eventBus.emit("displayMessage", {
             message: "DFIQ object succesfully created",
