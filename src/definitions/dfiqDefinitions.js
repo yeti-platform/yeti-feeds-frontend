@@ -4,6 +4,15 @@ export const DFIQ_TYPES = [
     type: "scenario",
     fields: [
       {
+        field: "uuid",
+        type: "text",
+        label: "DFIQ UUID",
+        displayList: false,
+        editable: false,
+        width: "120px",
+        sortable: true
+      },
+      {
         field: "dfiq_id",
         type: "text",
         label: "DFIQ ID",
@@ -12,7 +21,6 @@ export const DFIQ_TYPES = [
         width: "120px",
         sortable: true
       },
-
       {
         field: "name",
         type: "text",
@@ -200,8 +208,9 @@ display_name: Scenario template
 type: scenario
 description: >
   Multi-line description
-id: S0999
-dfiq_version: 1.0.0
+uuid: UUID_PLACEHOLDER
+id:
+dfiq_version: 1.1.0
 tags:
   - tag1
   - tag2
@@ -212,34 +221,37 @@ display_name: Facet template
 type: facet
 description: >
   Multiline description
-id: F0999
-dfiq_version: 1.0.0
+uuid: UUID_PLACEHOLDER
+id:
+dfiq_version: 1.1.0
 tags:
 parent_ids:
-  - S1999
+  - PARENT_UUID_PLACEHOLDER
 `;
 
 const QUESTION_TEMPATE = `
 display_name: Question template
 type: question
 description:
-id: Q0999
-dfiq_version: 1.0.0
+uuid: UUID_PLACEHOLDER
+id:
+dfiq_version: 1.1.0
 tags:
   - tag1
 parent_ids:
-  - F1999
+  - PARENT_UUID_PLACEHOLDER
 `;
 
 const APPROACH_TEMPATE = `
 display_name: Approach template
 type: approach
-id: Q1999.01
-dfiq_version: 1.0.0
+uuid: UUID_PLACEHOLDER
+parent_id: PARENT_UUID_PLACEHOLDER
+id:
+dfiq_version: 1.1.0
 tags:
   - tag1
 description:
-  summary: Summary of the approach description
   details: Approaches' descriptions are complex objects
   references:
     - "[ref1](https://google.com)"
