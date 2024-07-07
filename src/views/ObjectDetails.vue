@@ -99,7 +99,7 @@
                   </v-dialog>
                 </v-list-item>
                 <v-list-item density="compact">
-                  <v-dialog :width="editWidth" v-if="object?.root_type !== 'dfiq'">
+                  <v-dialog :width="editWidth">
                     <template v-slot:activator="{ props }">
                       <v-btn variant="text" color="primary" v-bind="props" size="small">observables </v-btn>
                     </template>
