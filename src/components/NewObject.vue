@@ -30,7 +30,6 @@ import { ENTITY_TYPES } from "@/definitions/entityDefinitions.js";
 import { INDICATOR_TYPES } from "@/definitions/indicatorDefinitions.js";
 import { OBSERVABLE_TYPES } from "@/definitions/observableDefinitions.js";
 import ObjectFields from "@/components/ObjectFields.vue";
-import { objectTypeAnnotation } from "@babel/types";
 </script>
 
 <script lang="ts">
@@ -40,6 +39,10 @@ export default {
     objectType: {
       type: String,
       default: () => ""
+    },
+    redirect: {
+      type: Boolean,
+      default: true
     }
   },
   data() {
@@ -80,7 +83,12 @@ export default {
         })
         .then(response => {
           this.$eventBus.emit("displayMessage", { message: `New ${this.objectType} created`, status: "success" });
-          this.$router.push({ path: `/${this.typeToSavedObjectPath[this.newObject.root_type]}/${response.data.id}` });
+          if (this.redirect) {
+            this.$router.push({ path: `/${this.typeToSavedObjectPath[this.newObject.root_type]}/${response.data.id}` });
+          } else {
+            this.$emit("close");
+          }
+          this.$emit("success", response.data);
         })
         .catch(error => {
           if (error.response.status === 422) {
