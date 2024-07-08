@@ -1,4 +1,5 @@
 export const LINK_SUGGESTIONS = {
+  observable: [],
   "attack-pattern": [
     { verb: "delivers", targets: ["malware"] },
     { verb: "targets", targets: ["identity", "location", "vulnerability"] },
