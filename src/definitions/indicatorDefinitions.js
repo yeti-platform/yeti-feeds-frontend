@@ -172,6 +172,45 @@ export const INDICATOR_TYPES = [
     icon: "mdi-code-braces"
   },
   {
+    name: "Suricata",
+    type: "suricata",
+    fields: [
+      {
+        field: "created",
+        type: "date",
+        label: "Created",
+        displayList: true,
+        editable: false,
+        width: "200px",
+        sortable: true
+      },
+      {
+        field: "name",
+        type: "text",
+        label: "Name",
+        displayList: true,
+        editable: true,
+        sortable: true,
+        maxWidth: "500px"
+      },
+      { field: "pattern", type: "code", label: "Rule text", displayList: false, editable: true },
+      { field: "tags", type: "list", label: "Tags", displayList: true, editable: false },
+      { field: "relevant_tags", type: "list", label: "Relevant tags", displayList: true, editable: true },
+      { field: "location", type: "text", label: "Location", displayList: false, editable: true, sortable: true },
+      {
+        field: "diamond",
+        type: "option",
+        choices: DIAMOND_MODEL,
+        label: "Diamond model",
+        displayList: true,
+        editable: true
+      },
+      { field: "description", type: "longtext", label: "Description", displayList: false, editable: true }
+    ],
+    filterAliases: [],
+    icon: "mdi-code-braces"
+  },
+  {
     name: "Sigma",
     type: "sigma",
     fields: [
