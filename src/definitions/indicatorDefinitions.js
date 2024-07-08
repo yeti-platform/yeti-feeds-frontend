@@ -193,7 +193,7 @@ export const INDICATOR_TYPES = [
         sortable: true,
         maxWidth: "500px"
       },
-      { field: "pattern", type: "code", label: "Rule text", displayList: false, editable: true },
+      { field: "pattern", type: "longtext", label: "Rule text", displayList: false, editable: true },
       { field: "tags", type: "list", label: "Tags", displayList: true, editable: false },
       { field: "relevant_tags", type: "list", label: "Relevant tags", displayList: true, editable: true },
       { field: "location", type: "text", label: "Location", displayList: false, editable: true, sortable: true },
