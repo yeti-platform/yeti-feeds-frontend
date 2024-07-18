@@ -127,7 +127,7 @@
             </tbody>
           </v-table>
         </v-card>
-        <v-card class="ma-2" variant="flat">
+        <v-card v-if="object?.root_type !== 'dfiq'" class="ma-2" variant="flat">
           <v-card-title>Tags</v-card-title>
           <v-combobox
             v-model="objectTags"
