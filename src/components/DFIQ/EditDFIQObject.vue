@@ -488,7 +488,8 @@ export default {
     loadPossibleParents(searchQuery) {
       axios
         .post("/api/v2/dfiq/search", {
-          query: { name: searchQuery, type: this.DFIQParentHierarchy[this.localObject.type] }
+          query: { name: searchQuery, type: this.DFIQParentHierarchy[this.localObject.type] },
+          count: 0
         })
         .then(response => {
           this.possibleParents = response.data.dfiq;
