@@ -214,7 +214,8 @@ export default {
     },
     targetSelected(target) {
       this.linkTarget = target;
-      this.linkType = "";
+      this.linkType = this.getLinkTypeSuggestions.length ? this.getLinkTypeSuggestions[0] : "";
+      this.checkLinkDirection(this.linkType);
     },
     checkLinkDirection(linkType) {
       if (this.getOutgoingLinkTypeSuggestions.includes(linkType)) {
