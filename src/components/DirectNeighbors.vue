@@ -262,6 +262,11 @@ export default {
           key: "name",
           value: this.searchFilter || "",
           operator: "=~"
+        },
+        {
+          key: "aliases",
+          value: this.searchFilter || "",
+          operator: "in"
         }
       ];
       let graphSearchRequest = {
