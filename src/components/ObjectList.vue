@@ -127,7 +127,7 @@ export default {
   methods: {
     extractParamsFromSearchQuery(searchQuery, defaultKey) {
       const pattern =
-        /(?<key>\w+)=(?<keyed_terms>[^\s,]+(?:,[^\s,]+)*)|(?<isolated_term>[^"\s]+)|"(?<quoted_term>[^"]+)"/g;
+        /(?<key>\w+[<>~]?)=(?<keyed_terms>[^\s,]+(?:,[^\s,]+)*)|(?<isolated_term>[^"\s]+)|"(?<quoted_term>[^"]+)"/g;
 
       let resultObj: Record<string, string | string[]> = {};
       let match;
