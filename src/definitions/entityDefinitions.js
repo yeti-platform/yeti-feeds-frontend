@@ -111,10 +111,11 @@ export const ENTITY_TYPES = [
         maxWidth: "500px"
       },
       { field: "tags", type: "list", label: "Tags", displayList: true, editable: false },
+      { field: "aliases", type: "list", label: "Aliases", displayList: true, editable: true },
       { field: "kill_chain_phases", type: "list", label: "Kill chain phases", displayList: true, editable: true },
       { field: "description", type: "longtext", label: "Description", displayList: false, editable: true }
     ],
-    filterAliases: [],
+    filterAliases: ["aliases"],
     icon: "mdi-flash"
   },
   {

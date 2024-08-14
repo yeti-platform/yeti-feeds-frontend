@@ -70,28 +70,47 @@
               </template>
             </v-dialog>
 
-            <v-dialog :width="editWidth" v-if="object?.root_type !== 'dfiq'">
+            <v-menu
+              v-model="newLinkMenu"
+              persistent
+              no-click-animation
+              @click:outside="newLinkMenu = false"
+              v-if="object?.root_type !== 'dfiq'"
+            >
               <template v-slot:activator="{ props }">
-                <v-btn class="me-2" variant="tonal" color="primary" v-bind="props" size="small" append-icon="mdi-link"
-                  >link object
+                <v-btn class="me-2" variant="tonal" color="primary" size="small" v-bind="props" append-icon="mdi-link">
+                  new link...
                 </v-btn>
               </template>
+              <v-list>
+                <v-list-item density="compact">
+                  <v-dialog :width="editWidth">
+                    <template v-slot:activator="{ props }">
+                      <v-btn class="me-2" variant="text" color="primary" v-bind="props" size="small"
+                        >entities / indicators
+                      </v-btn>
+                    </template>
 
-              <template v-slot:default="{ isActive }">
-                <link-object :object="object" :is-active="isActive" />
-              </template>
-            </v-dialog>
-            <v-dialog :width="editWidth" v-if="object?.root_type !== 'dfiq'">
-              <template v-slot:activator="{ props }">
-                <v-btn variant="tonal" color="primary" v-bind="props" size="small" append-icon="mdi-link"
-                  >link observables
-                </v-btn>
-              </template>
+                    <template v-slot:default="{ isActive }">
+                      <v-sheet>
+                        <link-object :object="object" :is-active="isActive" />
+                      </v-sheet>
+                    </template>
+                  </v-dialog>
+                </v-list-item>
+                <v-list-item density="compact">
+                  <v-dialog :width="editWidth">
+                    <template v-slot:activator="{ props }">
+                      <v-btn variant="text" color="primary" v-bind="props" size="small">observables </v-btn>
+                    </template>
 
-              <template v-slot:default="{ isActive }">
-                <link-observables :linkTarget="object" :is-active="isActive" />
-              </template>
-            </v-dialog>
+                    <template v-slot:default="{ isActive }">
+                      <link-observables :linkTarget="object" :is-active="isActive" />
+                    </template>
+                  </v-dialog>
+                </v-list-item>
+              </v-list>
+            </v-menu>
           </v-card-title>
           <v-table density="compact">
             <tbody>
@@ -108,7 +127,7 @@
             </tbody>
           </v-table>
         </v-card>
-        <v-card class="ma-2" variant="flat">
+        <v-card v-if="object?.root_type !== 'dfiq'" class="ma-2" variant="flat">
           <v-card-title>Tags</v-card-title>
           <v-combobox
             v-model="objectTags"
@@ -292,7 +311,8 @@ export default {
       relatedObjectTabCount: {},
       hideFieldsInfoBox: ["name", "description", "tags", "pattern"],
       fullScreenEdit: false,
-      editWidth: "50%"
+      editWidth: "50%",
+      newLinkMenu: false
     };
   },
   methods: {

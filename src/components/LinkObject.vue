@@ -4,6 +4,63 @@
       >New link for <span class="text-primary">{{ object.name }}</span>
     </v-card-title>
     <v-card-text>
+      <v-menu v-model="newEntityMenu">
+        <template v-slot:activator="{ props }">
+          <v-btn prepend-icon="mdi-plus" v-bind="props" size="small" variant="outlined" class="me-2">
+            New Entity
+          </v-btn>
+        </template>
+        <v-list>
+          <v-dialog
+            v-for="typeDef in entityTypes"
+            :width="editWidth"
+            :fullscreen="fullScreenEdit"
+            v-bind:key="typeDef.type"
+          >
+            <template v-slot:activator="{ props }">
+              <v-list-item v-bind="props" :prepend-icon="typeDef.icon"> {{ typeDef.name }} </v-list-item>
+            </template>
+            <template v-slot:default="{ isActive }">
+              <new-object
+                :object-type="typeDef.type"
+                @close="isActive.value = false"
+                @toggle-fullscreen="toggleNewObjectFullscreen"
+                @success="assignLinkTarget"
+                :redirect="false"
+              />
+            </template>
+          </v-dialog>
+        </v-list>
+      </v-menu>
+
+      <v-menu v-model="newIndicatorMenu">
+        <template v-slot:activator="{ props }">
+          <v-btn prepend-icon="mdi-plus" v-bind="props" size="small" variant="outlined" class="me-2">
+            New Indicator
+          </v-btn>
+        </template>
+        <v-list>
+          <v-dialog
+            v-for="typeDef in indicatorTypes"
+            :width="editWidth"
+            :fullscreen="fullScreenEdit"
+            v-bind:key="typeDef.type"
+          >
+            <template v-slot:activator="{ props }">
+              <v-list-item v-bind="props" :prepend-icon="typeDef.icon"> {{ typeDef.name }} </v-list-item>
+            </template>
+            <template v-slot:default="{ isActive }">
+              <new-object
+                :object-type="typeDef.type"
+                @close="isActive.value = false"
+                @toggle-fullscreen="toggleNewObjectFullscreen"
+                @success="assignLinkTarget"
+                :redirect="false"
+              />
+            </template>
+          </v-dialog>
+        </v-list>
+      </v-menu>
       <v-checkbox
         hide-details
         color="primary"
@@ -12,7 +69,11 @@
         density="compact"
         :disabled="getSuggestedTypes.length === 0"
       ></v-checkbox>
-      <entity-selector @selected-object="targetSelected" :type-filter="filterRecommended ? getSuggestedTypes : []" />
+      <entity-selector
+        :object="linkTarget"
+        @selected-object="targetSelected"
+        :type-filter="filterRecommended ? getSuggestedTypes : []"
+      />
 
       <v-divider class="mt-4 mb-6" />
       <v-combobox
@@ -71,6 +132,7 @@ import { DFIQ_TYPES } from "@/definitions/dfiqDefinitions.js";
 
 import { LINK_SUGGESTIONS } from "@/definitions/linkSuggestions.js";
 import EntitySelector from "@/components/EntitySelector.vue";
+import NewObject from "@/components/NewObject.vue";
 
 import _ from "lodash";
 </script>
@@ -88,7 +150,8 @@ export default {
     }
   },
   components: {
-    EntitySelector
+    EntitySelector,
+    NewObject
   },
   data() {
     return {
@@ -99,7 +162,13 @@ export default {
       linkDescription: "",
       autocompleteLoading: false,
       filterRecommended: true,
-      linkDirectionOutgoing: true
+      linkDirectionOutgoing: true,
+      entityTypes: ENTITY_TYPES,
+      indicatorTypes: INDICATOR_TYPES,
+      fullScreenEdit: false,
+      editWidth: "50%",
+      newEntityMenu: false,
+      newIndicatorMenu: false
     };
   },
   methods: {
@@ -145,7 +214,8 @@ export default {
     },
     targetSelected(target) {
       this.linkTarget = target;
-      this.linkType = "";
+      this.linkType = this.getLinkTypeSuggestions.length ? this.getLinkTypeSuggestions[0] : "";
+      this.checkLinkDirection(this.linkType);
     },
     checkLinkDirection(linkType) {
       if (this.getOutgoingLinkTypeSuggestions.includes(linkType)) {
@@ -163,6 +233,15 @@ export default {
         OBSERVABLE_TYPES.find(t => t.type === type) ||
         DFIQ_TYPES.find(t => t.type === type)
       ).icon;
+    },
+    toggleNewObjectFullscreen(fullscreen: boolean) {
+      this.fullScreenEdit = !this.fullScreenEdit;
+      this.editWidth = fullscreen ? "100%" : "50%";
+    },
+    assignLinkTarget(target) {
+      this.linkTarget = target;
+      this.newEntityMenu = false;
+      this.newIndicatorMenu = false;
     }
   },
   computed: {

@@ -5,7 +5,7 @@
       <v-row>
         <v-col>
           <v-text-field
-            label="Filter regex (type, value, or description)"
+            label="Filter regex (name, type, value, description, aliases)"
             density="compact"
             @update:model-value="searchFilterDebounced"
             clearable
@@ -262,6 +262,11 @@ export default {
           key: "name",
           value: this.searchFilter || "",
           operator: "=~"
+        },
+        {
+          key: "aliases",
+          value: this.searchFilter || "",
+          operator: "in"
         }
       ];
       let graphSearchRequest = {

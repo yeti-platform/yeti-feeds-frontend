@@ -15,7 +15,7 @@
           </v-card-text>
           <v-card-text v-if="authModule === 'oidc'">
             <v-btn
-              @click="userStore.OIDCBrowserRedirect"
+              @click="OIDCBrowserRedirect"
               block
               rounded="xs"
               size="large"
@@ -49,6 +49,10 @@ export default {
     };
   },
   methods: {
+    OIDCBrowserRedirect() {
+      localStorage.setItem("next", this.$route.query.next);
+      this.userStore.OIDCBrowserRedirect();
+    },
     OIDCAsyncRefresh() {
       this.userStore
         .OIDCAsyncRefresh()

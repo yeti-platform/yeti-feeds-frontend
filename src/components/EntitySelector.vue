@@ -133,6 +133,14 @@ export default {
         return "Filtering for all object types";
       }
     }
+  },
+  watch: {
+    object: {
+      handler: function (val) {
+        this.selectedEntity = val;
+      },
+      deep: true
+    }
   }
 };
 </script>

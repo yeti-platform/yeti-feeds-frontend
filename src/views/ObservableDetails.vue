@@ -7,22 +7,6 @@
             <div class="d-flex">
               <v-chip class="mr-3 flex-shrink-0" color="primary" :text="observable?.type" label></v-chip>
               <code class="observable-value">{{ observable?.value }}</code>
-              <v-dialog :width="editWidth" :fullscreen="fullScreenEdit">
-                <template v-slot:activator="{ props }">
-                  <v-btn class="ml-2" variant="tonal" color="primary" v-bind="props" append-icon="mdi-pencil"
-                    >Edit
-                  </v-btn>
-                </template>
-
-                <template v-slot:default="{ isActive }">
-                  <edit-object
-                    :object="observable"
-                    :is-active="isActive"
-                    @success="obs => (observable = obs)"
-                    @toggle-fullscreen="toggleFullscreen"
-                  />
-                </template>
-              </v-dialog>
             </div>
           </template>
         </v-card>
@@ -77,6 +61,60 @@
         </v-sheet>
       </v-col>
       <v-col cols="4">
+        <v-sheet class="ma-2 d-flex justify-end bg-background" variant="flat">
+          <v-dialog :width="editWidth" :fullscreen="fullScreenEdit">
+            <template v-slot:activator="{ props }">
+              <v-btn class="me-2" variant="tonal" color="primary" size="small" v-bind="props" append-icon="mdi-pencil"
+                >Edit
+              </v-btn>
+            </template>
+
+            <template v-slot:default="{ isActive }">
+              <edit-object
+                :object="observable"
+                :is-active="isActive"
+                @success="obs => (observable = obs)"
+                @toggle-fullscreen="toggleFullscreen"
+              />
+            </template>
+          </v-dialog>
+
+          <v-menu v-model="newLinkMenu" persistent no-click-animation @click:outside="newLinkMenu = false">
+            <template v-slot:activator="{ props }">
+              <v-btn class="me-2" variant="tonal" color="primary" size="small" v-bind="props" append-icon="mdi-link">
+                new link...
+              </v-btn>
+            </template>
+            <v-list>
+              <v-list-item density="compact">
+                <v-dialog :width="editWidth">
+                  <template v-slot:activator="{ props }">
+                    <v-btn class="me-2" variant="text" color="primary" v-bind="props" size="small"
+                      >entities / indicators
+                    </v-btn>
+                  </template>
+
+                  <template v-slot:default="{ isActive }">
+                    <v-sheet>
+                      <link-object :object="observable" :is-active="isActive" />
+                    </v-sheet>
+                  </template>
+                </v-dialog>
+              </v-list-item>
+              <v-list-item density="compact">
+                <v-dialog :width="editWidth">
+                  <template v-slot:activator="{ props }">
+                    <v-btn variant="text" color="primary" v-bind="props" size="small">observables </v-btn>
+                  </template>
+
+                  <template v-slot:default="{ isActive }">
+                    <link-observables :linkTarget="observable" :is-active="isActive" />
+                  </template>
+                </v-dialog>
+              </v-list-item>
+            </v-list>
+          </v-menu>
+        </v-sheet>
         <v-card class="ma-2" variant="flat">
           <v-card-title>Tags</v-card-title>
 
@@ -193,6 +231,9 @@ import RelatedObjects from "@/components/RelatedObjects.vue";
 import EditObject from "@/components/EditObject.vue";
 import DirectNeighbors from "@/components/DirectNeighbors.vue";
 
+import LinkObject from "@/components/LinkObject.vue";
+import LinkObservables from "@/components/LinkObservables.vue";
+
 import { ENTITY_TYPES } from "@/definitions/entityDefinitions.js";
 import { OBSERVABLE_TYPES } from "@/definitions/observableDefinitions.js";
 import moment from "moment";
@@ -209,7 +250,9 @@ export default {
   components: {
     TaskList,
     RelatedObjects,
-    EditObject
+    EditObject,
+    LinkObject,
+    LinkObservables
   },
   data() {
     return {
@@ -222,7 +265,8 @@ export default {
       totalTaggedRelationships: 0,
       totalRelatedEntities: 0,
       editWidth: 600,
-      fullScreenEdit: false
+      fullScreenEdit: false,
+      newLinkMenu: false
     };
   },
   methods: {

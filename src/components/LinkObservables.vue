@@ -1,7 +1,7 @@
 <template>
   <v-card>
     <v-card-title
-      >Link observables to <span class="text-primary">{{ linkTarget.name }}</span>
+      >Link observables to <span class="text-primary">{{ linkTarget.name || linkTarget.value }}</span>
     </v-card-title>
     <v-card-text>
       <v-textarea label="Add one observable per line" v-model="observables" hide-details></v-textarea>
@@ -60,7 +60,10 @@
         </v-col>
         <v-col
           >Observables {{ linkDirectionOutgoing ? "→" : "←" }}
-          <v-chip v-if="linkTarget" :text="linkTarget.name" :prepend-icon="getIconForType(linkTarget.type)"
+          <v-chip
+            v-if="linkTarget"
+            :text="linkTarget.name || linkTarget.value"
+            :prepend-icon="getIconForType(linkTarget.type)"
         /></v-col>
       </v-row>
 

@@ -29,7 +29,15 @@ const routes = [
   },
   {
     path: "/",
-    redirect: { name: "ObservableMatch" },
+    redirect: to => {
+      if (localStorage.getItem("next") !== null) {
+        let redirect_uri = localStorage.getItem("next");
+        localStorage.removeItem("next");
+        return { path: redirect_uri };
+      } else {
+        return { name: "ObservableMatch" };
+      }
+    },
     name: "Home"
   },
   {

@@ -5,11 +5,11 @@
         <div class="text-h4 mb-4">Search & add observables</div>
         <v-textarea v-model="textSearch" auto-grow></v-textarea>
         <div class="d-flex pl-0">
-          <v-btn @click="matchObservables" class="me-3">Launch search</v-btn>
-
-          <v-checkbox-btn v-model="addAndTag" label="Tag and add missing observables"></v-checkbox-btn>
+          <v-btn @click="matchObservables" class="me-3" :disabled="observableList.length < 1">Launch search</v-btn>
+          <v-checkbox-btn v-model="regexMatch" label="Regex search (expensive!)"></v-checkbox-btn>
+          <v-checkbox-btn v-model="addAndTag" label="Tag and add missing observables" class="me-3"></v-checkbox-btn>
           <v-select
-            v-if="addAndTag"
+            :disabled="!addAndTag"
             class="me-3"
             v-model="addTypeSearch"
             :items="observableTypes"
@@ -19,7 +19,7 @@
             hide-details
           ></v-select>
           <v-combobox
-            v-if="addAndTag"
+            :disabled="!addAndTag"
             density="compact"
             chips
             multiple
@@ -266,6 +266,7 @@ export default {
       // search field
       textSearch: "",
       searchResults: null,
+      regexMatch: false,
       addAndTag: false,
       addTypeSearch: "guess",
       addTagsSearch: [],
@@ -284,15 +285,19 @@ export default {
       this.loading = true;
       this.selectedKnown = [];
       this.selectedUnknown = [];
+
+      if (this.observableList.length === 0) {
+        this.loading = false;
+        return;
+      }
+
       var params = {
         // split newlines, trim whitespace, remove empty lines
-        observables: this.textSearch
-          .split("\n")
-          .filter(line => line.length > 0)
-          .map(line => line.trim()),
+        observables: this.observableList,
         add_unknown: this.addAndTag,
         add_tags: this.addTagsSearch,
-        add_type: this.addTypeSearch
+        add_type: this.addTypeSearch,
+        regex_match: this.regexMatch
       };
       axios
         .post("/api/v2/graph/match", params)
@@ -414,6 +419,24 @@ export default {
         title: "Guess type"
       };
       return [guess, ...OBSERVABLE_TYPES.map(t => ({ value: t.type, title: t.name }))];
+    },
+    observableList() {
+      return this.textSearch
+        .split("\n")
+        .map(line => line.trim())
+        .filter(line => line.length > 0);
+    }
+  },
+  watch: {
+    regexMatch() {
+      if (this.addAndTag && this.regexMatch) {
+        this.addAndTag = false;
+      }
+    },
+    addAndTag() {
+      if (this.addAndTag && this.regexMatch) {
+        this.regexMatch = false;
+      }
     }
   }
 };
