@@ -111,15 +111,16 @@
               :width="editWidth"
               :fullscreen="fullScreenEdit"
               v-if="Object.keys(DFIQHierarchy).includes(dfiqTree.object?.type)"
+              v-for="dfiqType in DFIQHierarchy[dfiqTree.object.type]"
             >
               <template v-slot:activator="{ props }">
-                <v-btn size="small" density="compact" variant="outlined" v-bind="props"
-                  >add {{ DFIQHierarchy[dfiqTree.object.type] }}</v-btn
+                <v-btn class="me-2" size="small" density="compact" variant="outlined" v-bind="props"
+                  >new {{ dfiqType }}</v-btn
                 >
               </template>
               <template v-slot:default="{ isActive }">
                 <edit-DFIQ-object
-                  :new-type="DFIQHierarchy[dfiqTree.object.type]"
+                  :new-type="dfiqType"
                   :is-active="isActive"
                   :redirect="false"
                   :parent="dfiqTree.object"
@@ -214,9 +215,9 @@ export default {
       editWidth: "75%",
       fullScreenEdit: false,
       DFIQHierarchy: {
-        scenario: "facet",
-        facet: "question",
-        question: "approach"
+        scenario: ["facet", "question"],
+        facet: ["question"],
+        question: ["approach"]
       }
     };
   },
