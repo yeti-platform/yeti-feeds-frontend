@@ -212,8 +212,6 @@ uuid: UUID_PLACEHOLDER
 id:
 dfiq_version: 1.1.0
 tags:
-  - tag1
-  - tag2
 `;
 
 const FACET_TEMPATE = `
@@ -237,43 +235,31 @@ uuid: UUID_PLACEHOLDER
 id:
 dfiq_version: 1.1.0
 tags:
-  - tag1
 parent_ids:
   - PARENT_UUID_PLACEHOLDER
 `;
 
 const APPROACH_TEMPATE = `
-display_name: Approach template
+display_name: Approach name
 type: approach
 uuid: UUID_PLACEHOLDER
 parent_id: PARENT_UUID_PLACEHOLDER
 id:
 dfiq_version: 1.1.0
 tags:
-  - tag1
 description:
-  details: Approaches' descriptions are complex objects
-  references:
-    - "[ref1](https://google.com)"
-    - "[ref2](https://google.com)"
+  details: Brief approach description
+  references: []
 view:
-  data:
-    - type: artifact
-      value: BrowserHistory
-    - type: description
-      value: Description of the forensic artifact
+  data: []
   notes:
-    covered:
-      - This covers browsing that happens on a host
-    not_covered:
-      - This does not cover how to make pizza
+    covered: []
+    not_covered: []
   processors:
-    - name: Plaso
-      options:
-        - type: parsers
-          value: webhist
+    - name: Processor name (e.g. Plaso)
+      options: []
       analysis:
-        - name: OpenSearch
+        - name: Analysis method name (e.g. OpenSearch)
           steps:
             - description: &filter-desc Filter the results to just file downloads
               type: opensearch-query
