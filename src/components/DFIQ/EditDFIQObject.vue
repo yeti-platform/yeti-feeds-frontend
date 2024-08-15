@@ -61,7 +61,14 @@
             disabled
             density="compact"
           ></v-text-field>
-          <v-combobox label="Tags" v-model="parsedYaml.tags" chips multiple density="compact"></v-combobox>
+          <v-combobox
+            label="Tags"
+            v-model="parsedYaml.tags"
+            chips
+            multiple
+            density="compact"
+            :delimiters="[',', ' ', ';']"
+          ></v-combobox>
           <v-textarea
             v-if="localObject.type !== 'approach'"
             label="Description"
@@ -70,9 +77,8 @@
           ></v-textarea>
 
           <v-expansion-panels v-else-if="parsedYaml.description" class="mb-4 pa-1">
-            <v-expansion-panel title="Summary & references">
+            <v-expansion-panel title="Details & references">
               <v-expansion-panel-text>
-                <v-text-field label="Summary" v-model="parsedYaml.description.summary" density="compact"></v-text-field>
                 <v-textarea label="Details" v-model="parsedYaml.description.details" density="compact"></v-textarea>
                 <v-divider class="my-4"></v-divider>
                 <v-btn
@@ -482,9 +488,9 @@ export default {
       stepTypes: DFIQ_APPROACH_VIEW_PROCESSOR_STEP_TYPES,
       possibleParents: [],
       DFIQParentHierarchy: {
-        facet: "scenario",
-        question: "facet",
-        approach: "question"
+        facet: ["scenario"],
+        question: ["facet", "scenario"],
+        approach: ["question"]
       }
     };
   },
@@ -513,11 +519,13 @@ export default {
     loadPossibleParents(searchQuery) {
       axios
         .post("/api/v2/dfiq/search", {
-          query: { name: searchQuery, type: this.DFIQParentHierarchy[this.localObject.type] },
+          query: { name: searchQuery },
           count: 0
         })
         .then(response => {
-          this.possibleParents = response.data.dfiq;
+          this.possibleParents = response.data.dfiq.filter(dfiq => {
+            return this.DFIQParentHierarchy[this.localObject.type].includes(dfiq.type);
+          });
         });
     },
     validateDFIQYaml() {
