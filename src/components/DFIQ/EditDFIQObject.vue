@@ -12,7 +12,16 @@
       </v-tabs>
       <v-window v-model="activeTab">
         <v-window-item value="user-form" class="mt-4">
-          <v-text-field label="UUID" v-model="parsedYaml.uuid" disabled density="compact"></v-text-field>
+          <v-text-field
+            label="UUID"
+            v-model="parsedYaml.uuid"
+            density="compact"
+            readonly
+            :disabled="!!parsedYaml.uuid"
+            append-inner-icon="mdi-refresh"
+            @click:appendInner="newUUID"
+          ></v-text-field>
+
           <v-autocomplete
             v-if="localObject.type === 'approach'"
             label="Parent question"
@@ -669,6 +678,9 @@ export default {
         }
         this.parsedYaml.description.references.push("");
       }
+    },
+    newUUID() {
+      this.parsedYaml.uuid = crypto.randomUUID();
     }
   },
   computed: {
