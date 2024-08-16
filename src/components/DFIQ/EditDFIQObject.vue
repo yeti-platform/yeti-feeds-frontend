@@ -509,6 +509,7 @@ export default {
       this.dfiqYaml = this.localObject.dfiq_yaml;
     }
     this.loadPossibleParents();
+    this.fetchDFIQConfig();
   },
   methods: {
     parentSearchFilter(itemTitle, queryText, item) {
@@ -516,10 +517,20 @@ export default {
       const inTitle = itemTitle.toLowerCase().includes(queryText.toLowerCase());
       return inId || inTitle;
     },
-    loadPossibleParents(searchQuery) {
+    fetchDFIQConfig() {
+      axios.get("/api/v2/dfiq/config").then(response => {
+        this.valueTypes = response.data.approach_data_sources;
+        this.stepTypes = response.data.approach_analysis_step_types;
+      });
+    },
+    loadPossibleParents() {
+      // Scenarios don't have parents
+      if (this.localObject.type === "scenario") {
+        return;
+      }
       axios
         .post("/api/v2/dfiq/search", {
-          query: { name: searchQuery },
+          query: { name: "" },
           count: 0
         })
         .then(response => {
