@@ -61,6 +61,15 @@ export const DFIQ_TYPES = [
     type: "facet",
     fields: [
       {
+        field: "uuid",
+        type: "text",
+        label: "DFIQ UUID",
+        displayList: false,
+        editable: false,
+        width: "120px",
+        sortable: true
+      },
+      {
         field: "dfiq_id",
         type: "text",
         label: "DFIQ ID",
@@ -110,6 +119,15 @@ export const DFIQ_TYPES = [
     type: "question",
     fields: [
       {
+        field: "uuid",
+        type: "text",
+        label: "DFIQ UUID",
+        displayList: false,
+        editable: false,
+        width: "120px",
+        sortable: true
+      },
+      {
         field: "dfiq_id",
         type: "text",
         label: "DFIQ ID",
@@ -158,6 +176,15 @@ export const DFIQ_TYPES = [
     name: "Approach",
     type: "approach",
     fields: [
+      {
+        field: "uuid",
+        type: "text",
+        label: "DFIQ UUID",
+        displayList: false,
+        editable: false,
+        width: "120px",
+        sortable: true
+      },
       {
         field: "dfiq_id",
         type: "text",
