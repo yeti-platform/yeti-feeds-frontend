@@ -12,14 +12,31 @@
             </div>
           </template>
           <v-card-text class="yeti-description" v-if="object">
-            <yeti-DFIQ-approach-template
-              v-if="object.root_type === 'dfiq' && object.type === 'approach'"
-              :description="object.description"
-              :view="object.view"
-              :dfiq-type="object.type"
-            />
-            <yeti-markdown v-else :text="object.description || 'No description provided'" />
+            <yeti-markdown :text="object.description || 'No description provided'" />
           </v-card-text>
+        </v-card>
+
+        <v-card class="ma-2" v-if="object?.root_type === 'dfiq' && object?.type === 'question'">
+          <v-card-title>Approaches</v-card-title>
+          <v-expansion-panels>
+            <v-expansion-panel v-for="approach in object.approaches">
+              <v-expansion-panel-title>
+                {{ approach.name }}
+                <v-icon class="ml-2" v-if="approach.tags.map(tag => tag.toLowerCase()).includes('windows')"
+                  >mdi-microsoft-windows-classic</v-icon
+                >
+                <v-icon class="ml-2" v-if="approach.tags.map(tag => tag.toLowerCase()).includes('macos')"
+                  >mdi-apple
+                </v-icon>
+                <v-icon class="ml-2" v-if="approach.tags.map(tag => tag.toLowerCase()).includes('linux')"
+                  >mdi-penguin
+                </v-icon>
+              </v-expansion-panel-title>
+              <v-expansion-panel-text>
+                <yeti-DFIQ-approach-template :approach="approach" />
+              </v-expansion-panel-text>
+            </v-expansion-panel>
+          </v-expansion-panels>
         </v-card>
 
         <v-card v-if="object?.pattern" class="ma-2" variant="flat">

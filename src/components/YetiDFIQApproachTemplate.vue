@@ -1,14 +1,16 @@
 <template>
   <v-sheet>
-    <div class="text-h6">{{ description.summary }}</div>
-    <div class="yeti-markdown" v-html="markdownifyText(description.details)"></div>
-    <div class="mt-5" v-if="description.references.length > 0">
+    <v-chip v-for="tag in approach.tags" class="ml-2" density="comfortable" variant="tonal" color="primary" rounded>{{
+      tag
+    }}</v-chip>
+    <div class="yeti-markdown" v-html="markdownifyText(approach.description)"></div>
+    <div class="mt-5" v-if="approach.references.length > 0">
       <div class="font-weight-bold mb-2">References:</div>
       <ul class="ml-5">
-        <li class="mb-2" v-for="ref in description.references"><span v-html="markdownifyText(ref)"></span></li>
+        <li class="mb-2" v-for="ref in approach.references"><span v-html="markdownifyText(ref)"></span></li>
       </ul>
-      <ul class="ml-5" v-if="description.references_internal?.length > 0">
-        <li class="mb-2" v-for="ref in description.references_internal">
+      <ul class="ml-5" v-if="approach.references_internal?.length > 0">
+        <li class="mb-2" v-for="ref in approach.references_internal">
           <span v-html="markdownifyText(ref)"></span>
         </li>
       </ul>
@@ -16,83 +18,48 @@
     <div v-else class="mt-5"><em>No references</em></div>
   </v-sheet>
 
-  <v-divider class="my-7" v-if="view.notes.covered.length + view.notes.not_covered.length > 0"></v-divider>
+  <v-divider class="my-7" v-if="approach.notes.covered.length + approach.notes.not_covered.length > 0"></v-divider>
   <div class="mt-5" v-else><em>No coverage data</em></div>
 
-  <v-card class="dfiq-covered ma-4" v-if="view.notes.covered.length > 0">
+  <v-sheet>
+    <ol>
+      <li v-for="step in approach.steps" class="ml-2 mb-4">
+        <!-- {{ step }} -->
+        <div>
+          {{ step.name }}
+          <v-chip class="ml-2" density="compact" variant="tonal" color="primary" rounded>{{ step.type }}</v-chip>
+          <v-chip class="ml-2" density="compact" variant="tonal" color="primary" rounded>{{ step.stage }}</v-chip>
+        </div>
+        <div class="ma-2">
+          <code>{{ step.value }}</code>
+        </div>
+        <!-- <div>
+            <v-chip class="ml-3" density="comfortable" variant="tonal" color="primary" rounded>{{ step.type }}</v-chip>
+          </div>
+          <div class="dfiq-step-value my-4 mx-2 pa-3 rounded">
+            <code>{{ step.value }}</code>
+          </div> -->
+      </li>
+    </ol>
+  </v-sheet>
+
+  <v-divider class="my-7" v-if="approach.notes.covered.length + approach.notes.not_covered.length > 0"></v-divider>
+
+  <v-card class="dfiq-covered ma-4" v-if="approach.notes.covered.length > 0">
     <v-card-title>Covered</v-card-title>
     <v-card-text>
       <ul>
-        <li class="mb-2 ml-5" v-for="ref in view.notes.covered"><span v-html="markdownifyText(ref)"></span></li>
+        <li class="mb-2 ml-5" v-for="ref in approach.notes.covered"><span v-html="markdownifyText(ref)"></span></li>
       </ul>
     </v-card-text>
   </v-card>
 
-  <v-card class="dfiq-not-covered ma-4" v-if="view.notes.not_covered.length > 0">
+  <v-card class="dfiq-not-covered ma-4" v-if="approach.notes.not_covered.length > 0">
     <v-card-title>Not covered</v-card-title>
     <v-card-text>
       <ul>
-        <li class="mb-2 ml-5" v-for="ref in view.notes.not_covered"><span v-html="markdownifyText(ref)"></span></li>
+        <li class="mb-2 ml-5" v-for="ref in approach.notes.not_covered"><span v-html="markdownifyText(ref)"></span></li>
       </ul>
-    </v-card-text>
-  </v-card>
-
-  <v-divider class="my-7"></v-divider>
-
-  <v-sheet>
-    <div class="text-h6">Data</div>
-    <v-table class="mt-3">
-      <tbody>
-        <tr v-for="ref in view.data">
-          <td>
-            <v-chip class="mr-2" density="comfortable" variant="tonal" color="primary" rounded>{{ ref.type }}</v-chip>
-          </td>
-          <td>{{ ref.value }}</td>
-        </tr>
-      </tbody>
-    </v-table>
-  </v-sheet>
-
-  <v-divider class="my-7"></v-divider>
-
-  <v-card>
-    <v-tabs v-model="dfiqTab">
-      <v-tab v-for="proc in view.processors" :value="proc.name">{{ proc.name }}</v-tab>
-    </v-tabs>
-
-    <v-card-text>
-      <v-window v-model="dfiqTab">
-        <v-window-item v-for="proc in view.processors" :value="proc.name">
-          <div class="text pb-4">
-            Recommended CLI options:
-            <code class="dfiq-option bg-red-lighten-5 pa-1 ms-2" v-for="option in proc.options"
-              >--{{ option.type }} {{ option.value }}</code
-            >
-          </div>
-          <div class="text-h6 mb-2">Analysis options</div>
-          <v-expansion-panels multiple>
-            <v-expansion-panel v-for="opt in proc.analysis" :title="opt.name">
-              <v-expansion-panel-text>
-                <ol class="dfiq-step-list">
-                  <li v-for="step in opt.steps" class="ml-2">
-                    <div class="dfiq-step-description d-flex align-center">
-                      <div>{{ step.description }}</div>
-                      <div>
-                        <v-chip class="ml-3" density="comfortable" variant="tonal" color="primary" rounded>{{
-                          step.type
-                        }}</v-chip>
-                      </div>
-                    </div>
-                    <div class="dfiq-step-value my-4 mx-2 pa-3 rounded">
-                      <code>{{ step.value }}</code>
-                    </div>
-                  </li>
-                </ol>
-              </v-expansion-panel-text>
-            </v-expansion-panel>
-          </v-expansion-panels>
-        </v-window-item>
-      </v-window>
     </v-card-text>
   </v-card>
 </template>
@@ -105,16 +72,8 @@ import { marked } from "marked";
 <script lang="ts">
 export default {
   props: {
-    description: {
+    approach: {
       type: Object,
-      required: true
-    },
-    view: {
-      type: Object,
-      required: true
-    },
-    dfiqType: {
-      type: String,
       required: true
     }
   },
@@ -199,11 +158,13 @@ export default {
 
 .dfiq-covered {
   border: 2px solid rgb(var(--v-theme-success));
-  background: rgba(0, 160, 66, 0.1);
+  background: rgba(0, 160, 66, 0.05);
+  opacity: 0.8;
 }
 
 .dfiq-not-covered {
   border: 2px solid rgb(var(--v-theme-error));
-  background: rgba(155, 0, 0, 0.1);
+  background: rgba(155, 0, 0, 0.05);
+  opacity: 0.8;
 }
 </style>
