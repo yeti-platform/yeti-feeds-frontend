@@ -30,7 +30,6 @@ export const DFIQ_TYPES = [
         sortable: true,
         maxWidth: "500px"
       },
-      { field: "internal", type: "bool", label: "Internal", displayList: false, editable: false, sortable: true },
       {
         field: "dfiq_version",
         type: "text",
@@ -87,7 +86,6 @@ export const DFIQ_TYPES = [
         sortable: true,
         maxWidth: "500px"
       },
-      { field: "internal", type: "bool", label: "Internal", displayList: false, editable: false, sortable: true },
       {
         field: "dfiq_version",
         type: "text",
@@ -145,7 +143,6 @@ export const DFIQ_TYPES = [
         sortable: true,
         maxWidth: "500px"
       },
-      { field: "internal", type: "bool", label: "Internal", displayList: false, editable: false, sortable: true },
       {
         field: "dfiq_version",
         type: "text",
@@ -171,62 +168,6 @@ export const DFIQ_TYPES = [
     ],
     filterAliases: ["dfiq_tags", "dfiq_id", "parent_ids"],
     icon: "mdi-help"
-  },
-  {
-    name: "Approach",
-    type: "approach",
-    fields: [
-      {
-        field: "uuid",
-        type: "text",
-        label: "DFIQ UUID",
-        displayList: false,
-        editable: false,
-        width: "120px",
-        sortable: true
-      },
-      {
-        field: "dfiq_id",
-        type: "text",
-        label: "DFIQ ID",
-        displayList: true,
-        editable: true,
-        width: "120px",
-        sortable: true
-      },
-      {
-        field: "name",
-        type: "text",
-        label: "Name",
-        displayList: true,
-        editable: true,
-        sortable: true,
-        maxWidth: "500px"
-      },
-      { field: "internal", type: "bool", label: "Internal", displayList: false, editable: false, sortable: true },
-      {
-        field: "dfiq_version",
-        type: "text",
-        label: "DFIQ Version",
-        displayList: false,
-        editable: true,
-        sortable: true
-      },
-      { field: "dfiq_tags", type: "list", label: "DFIQ tags", displayList: true, editable: true },
-      { field: "contributors", type: "list", label: "Contributors", displayList: false, editable: true },
-      { field: "modified", type: "date", label: "Modified on", displayList: false, editable: false },
-      {
-        field: "created",
-        type: "date",
-        label: "Created on",
-        displayList: true,
-        editable: false,
-        width: "200px",
-        sortable: true
-      }
-    ],
-    filterAliases: ["dfiq_tags", "dfiq_id"],
-    icon: "mdi-tools"
   }
 ];
 
