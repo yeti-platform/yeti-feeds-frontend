@@ -65,8 +65,12 @@
         </v-window-item>
 
         <v-window-item value="approaches" class="mt-4">
-          <v-expansion-panels>
-            <v-expansion-panel :title="approach.name" v-for="approach in parsedYaml.approaches">
+          <v-expansion-panels v-model="expandedPanel">
+            <v-expansion-panel
+              :title="approach.name"
+              v-for="(approach, index) in parsedYaml.approaches"
+              v-bind:key="`approach-${index}`"
+            >
               <v-expansion-panel-text>
                 <div class="text-h6 mb-4">Main info</div>
                 <v-text-field
@@ -268,12 +272,7 @@
               </v-expansion-panel-text>
             </v-expansion-panel>
           </v-expansion-panels>
-          <v-btn
-            prepend-icon="mdi-plus"
-            @click="parsedYaml.approaches.push(newApproach())"
-            density="compact"
-            variant="outlined"
-            class="my-4"
+          <v-btn prepend-icon="mdi-plus" @click="newApproach" density="compact" variant="outlined" class="my-4"
             >Add approach</v-btn
           >
         </v-window-item>
@@ -395,6 +394,7 @@ export default {
       stageTypes: [],
       stepTypes: [],
       possibleParents: [],
+      expandedPanel: -1,
       DFIQParentHierarchy: {
         facet: ["scenario"],
         question: ["facet", "scenario"]
@@ -420,14 +420,18 @@ export default {
   },
   methods: {
     newApproach() {
-      return {
+      if (!this.parsedYaml.approaches) {
+        this.parsedYaml.approaches = [];
+      }
+      this.parsedYaml.approaches.push({
         name: "New approach",
         description: "",
         tags: [],
         references: [],
         notes: { covered: [], not_covered: [] },
         steps: []
-      };
+      });
+      this.expandedPanel = this.parsedYaml.approaches.length - 1;
     },
     newApproachStep() {
       return {
