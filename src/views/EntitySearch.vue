@@ -86,7 +86,7 @@ export default {
       activeTab: "",
       autoTab: true,
       fullScreenEdit: false,
-      editWidth: "50%",
+      editWidth: "75%",
       newDialogActive: false
     };
   },
@@ -125,7 +125,7 @@ export default {
     },
     toggleNewObjectFullscreen(fullscreen: boolean) {
       this.fullScreenEdit = !this.fullScreenEdit;
-      this.editWidth = fullscreen ? "100%" : "50%";
+      this.editWidth = fullscreen ? "100%" : "75%";
     }
   },
   computed: {

@@ -328,7 +328,7 @@ export default {
       relatedObjectTabCount: {},
       hideFieldsInfoBox: ["name", "description", "tags", "pattern"],
       fullScreenEdit: false,
-      editWidth: "50%",
+      editWidth: "75%",
       newLinkMenu: false
     };
   },
@@ -387,7 +387,7 @@ export default {
     },
     toggleFullscreen(fullscreen: boolean) {
       this.fullScreenEdit = !this.fullScreenEdit;
-      this.editWidth = fullscreen ? "100%" : "50%";
+      this.editWidth = fullscreen ? "100%" : "75%";
     }
   },
   computed: {
