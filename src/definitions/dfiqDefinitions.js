@@ -240,6 +240,3 @@ export const DFIQ_TEMPLATES = {
   question: QUESTION_TEMPATE.trim(),
   approach: APPROACH_TEMPATE.trim()
 };
-
-export const DFIQ_APPROACH_VIEW_TYPES = ["artifact", "description"];
-export const DFIQ_APPROACH_VIEW_PROCESSOR_STEP_TYPES = ["opensearch-query", "pandas", "manual"];
