@@ -8,6 +8,7 @@
     <v-card-text>
       <v-tabs v-model="activeTab" color="primary">
         <v-tab value="user-form">Form</v-tab>
+        <v-tab v-if="parsedYaml.type === 'question'" value="approaches">Approaches</v-tab>
         <v-tab value="yaml">YAML</v-tab>
       </v-tabs>
       <v-window v-model="activeTab">
@@ -21,24 +22,6 @@
             append-inner-icon="mdi-refresh"
             @click:appendInner="newUUID"
           ></v-text-field>
-
-          <v-autocomplete
-            v-if="localObject.type === 'approach'"
-            label="Parent question"
-            v-model="parsedYaml.parent_id"
-            :items="possibleParents"
-            item-text="name"
-            item-value="uuid"
-            item-title="name"
-            density="compact"
-            dense
-            chips
-            :custom-filter="parentSearchFilter"
-          >
-            <template v-slot:item="{ props, item }">
-              <v-list-item v-bind="props" title="">{{ item.raw.name }}</v-list-item>
-            </template>
-          </v-autocomplete>
 
           <v-text-field
             label="DFIQ ID (e.g. S0001, F0001, Q0001, Q0001.10)"
@@ -78,306 +61,223 @@
             density="compact"
             :delimiters="[',', ' ', ';']"
           ></v-combobox>
-          <v-textarea
-            v-if="localObject.type !== 'approach'"
-            label="Description"
-            v-model="parsedYaml.description"
-            density="compact"
-          ></v-textarea>
+          <v-textarea label="Description" v-model="parsedYaml.description" density="compact"></v-textarea>
+        </v-window-item>
 
-          <v-expansion-panels v-else-if="parsedYaml.description" class="mb-4 pa-1">
-            <v-expansion-panel title="Details & references">
+        <v-window-item value="approaches" class="mt-4">
+          <v-expansion-panels>
+            <v-expansion-panel :title="approach.name" v-for="approach in parsedYaml.approaches">
               <v-expansion-panel-text>
-                <v-textarea label="Details" v-model="parsedYaml.description.details" density="compact"></v-textarea>
-                <v-divider class="my-4"></v-divider>
-                <v-btn
-                  @click="newReference(true)"
-                  prepend-icon="mdi-plus"
+                <div class="text-h6 mb-4">Main info</div>
+                <v-text-field
+                  class="mb-4"
+                  label="Approach name"
+                  v-model="approach.name"
                   density="compact"
-                  variant="outlined"
-                  class="mr-2"
-                >
-                  internal ref.</v-btn
-                >
-                <v-btn @click="newReference(false)" prepend-icon="mdi-plus" density="compact" variant="outlined">
-                  external ref.</v-btn
-                >
-                <div class="mt-4">
-                  <v-text-field
-                    v-for="(ref, index) in parsedYaml.description.references"
-                    v-model="parsedYaml.description.references[index]"
-                    label="Reference"
+                  hide-details
+                ></v-text-field>
+                <v-textarea
+                  class="mb-4"
+                  label="Description"
+                  v-model="approach.description"
+                  density="compact"
+                  hide-details
+                ></v-textarea>
+                <v-combobox
+                  label="Tags"
+                  v-model="approach.tags"
+                  chips
+                  multiple
+                  hint="Use tag 'internal' to mark internal approaches"
+                  density="compact"
+                  :delimiters="[',', ' ', ';']"
+                ></v-combobox>
+
+                <v-divider class="my-6"></v-divider>
+
+                <div>
+                  <span class="text-h6 mr-4">
+                    References
+                    <span class="text-medium-emphasis font-weight-light">({{ approach.references.length }})</span>
+                  </span>
+                  <v-btn
+                    class="my-2"
+                    @click="approach.references.push('')"
+                    prepend-icon="mdi-plus"
                     density="compact"
-                    :append-icon="'mdi-close-circle-outline'"
-                    @click:append="parsedYaml.description.references.splice(index, 1)"
-                  ></v-text-field>
-                  <v-text-field
-                    v-for="(ref, index) in parsedYaml.description.references_internal"
-                    v-model="parsedYaml.description.references_internal[index]"
-                    label="Internal reference"
-                    density="compact"
-                    :append-icon="'mdi-close-circle-outline'"
-                    @click:append="parsedYaml.description.references_internal.splice(index, 1)"
-                  ></v-text-field>
+                    variant="outlined"
+                  >
+                    add reference</v-btn
+                  >
                 </div>
-              </v-expansion-panel-text>
-            </v-expansion-panel>
+                <v-text-field
+                  class="mb-2"
+                  v-for="(ref, index) in approach.references"
+                  v-model="approach.references[index]"
+                  label="Reference"
+                  density="compact"
+                  hide-details
+                  :append-icon="'mdi-close-circle-outline'"
+                  @click:append="approach.references.splice(index, 1)"
+                ></v-text-field>
 
-            <v-expansion-panel title="View data">
-              <v-expansion-panel-text>
-                <v-row dense>
-                  <v-col>Type</v-col>
-                  <v-col>Value</v-col>
-                  <v-col cols="1">
-                    <v-btn variant="text" @click="parsedYaml.view.data.push({ type: '', value: '' })">
-                      <v-icon>mdi-plus-circle-outline</v-icon>
-                    </v-btn>
-                  </v-col>
-                </v-row>
-                <v-row dense v-for="(ref, index) in parsedYaml.view.data">
-                  <v-col>
-                    <v-combobox
-                      v-model="parsedYaml.view.data[index].type"
-                      density="compact"
-                      hide-details
-                      :items="valueTypes"
-                    ></v-combobox>
-                  </v-col>
-                  <v-col>
-                    <v-text-field
-                      v-model="parsedYaml.view.data[index].value"
-                      density="compact"
-                      hide-details
-                    ></v-text-field>
-                  </v-col>
-                  <v-col cols="1">
-                    <v-btn variant="text" @click="parsedYaml.view.data.splice(index, 1)">
-                      <v-icon>mdi-close-circle-outline</v-icon>
-                    </v-btn>
-                  </v-col>
-                </v-row>
+                <v-divider class="my-6"></v-divider>
 
-                <v-divider class="my-4"></v-divider>
-                <div class="text-subtitle-1 font-weight-medium">View notes</div>
-                <div class="mb-2 mt-2">
+                <strong class="text-h6"
+                  >Coverage notes
+                  <span class="text-medium-emphasis font-weight-light"
+                    >({{ approach.notes.covered.length }} / {{ approach.notes.not_covered.length }})</span
+                  ></strong
+                >
+                <div class="my-2">
                   <v-icon color="green" class="mr-2">mdi-check-circle-outline</v-icon>Covered
                   <v-btn
-                    @click="parsedYaml.view.notes.covered.push('')"
+                    @click="approach.notes.covered.push('')"
                     prepend-icon="mdi-plus"
                     density="compact"
                     variant="outlined"
-                    class="ml-2"
-                    >Add</v-btn
+                    class="mx-2"
+                  >
+                    add</v-btn
                   >
                 </div>
                 <v-textarea
-                  v-for="(ref, index) in parsedYaml.view.notes.covered"
+                  v-for="(ref, index) in approach.notes.covered"
+                  v-model="approach.notes.covered[index]"
                   rows="1"
                   class="mb-2"
                   density="compact"
                   auto-grow
                   hide-details
-                  v-model="parsedYaml.view.notes.covered[index]"
                   :append-icon="'mdi-close-circle-outline'"
-                  @click:append="parsedYaml.view.notes.covered.splice(index, 1)"
+                  @click:append="approach.notes.covered.splice(index, 1)"
                 ></v-textarea>
-                <v-divider class="my-4"></v-divider>
-                <div class="mb-2 mt-2">
+                <v-divider class="my-3"></v-divider>
+
+                <div class="my-2">
                   <v-icon color="red" class="mr-2">mdi-cancel</v-icon>Not covered
+
                   <v-btn
-                    @click="parsedYaml.view.notes.not_covered.push('')"
+                    @click="approach.notes.not_covered.push('')"
                     prepend-icon="mdi-plus"
                     density="compact"
                     variant="outlined"
-                    class="ml-2"
-                    >Add</v-btn
+                    class="mx-2"
+                  >
+                    add</v-btn
                   >
                 </div>
                 <v-textarea
+                  v-for="(ref, index) in approach.notes.not_covered"
+                  v-model="approach.notes.not_covered[index]"
                   rows="1"
                   class="mb-2"
+                  density="compact"
                   auto-grow
-                  density="compact"
                   hide-details
-                  v-for="(ref, index) in parsedYaml.view.notes.not_covered"
-                  v-model="parsedYaml.view.notes.not_covered[index]"
                   :append-icon="'mdi-close-circle-outline'"
-                  @click:append="parsedYaml.view.notes.not_covered.splice(index, 1)"
+                  @click:append="approach.notes.not_covered.splice(index, 1)"
                 ></v-textarea>
-              </v-expansion-panel-text>
-            </v-expansion-panel>
 
-            <v-expansion-panel title="View processors">
-              <v-expansion-panel-text>
-                <v-btn
-                  @click="
-                    parsedYaml.view.processors.push({
-                      name: '',
-                      options: [{ type: '', value: '' }],
-                      analysis: [{ name: '', steps: [{ type: '', description: '', value: '' }] }]
-                    })
-                  "
-                  prepend-icon="mdi-plus"
-                  density="compact"
-                  variant="outlined"
-                  >Add processor</v-btn
-                >
+                <v-divider class="my-8"></v-divider>
 
-                <span v-for="(processor, index) in parsedYaml.view.processors">
-                  <div class="text-subtitle-1 font-weight-bold mt-4 mb-4">
-                    Processor #{{ index + 1 }}
-                    <v-btn
-                      variant="text"
-                      density="compact"
-                      @click="parsedYaml.view.processors.splice(index, 1)"
-                      class="ml-2"
-                      size="x-small"
-                    >
-                      remove
-                    </v-btn>
-                  </div>
-                  <v-text-field
-                    label="Processor name"
-                    v-model="processor.name"
+                <div class="mb-4">
+                  <span class="text-h6 mr-4"
+                    >Steps
+                    <span class="text-medium-emphasis font-weight-light">({{ approach.steps.length }})</span>
+                  </span>
+                  <v-btn
+                    @click="approach.steps.push(newApproachStep())"
+                    prepend-icon="mdi-plus"
                     density="compact"
-                    hide-details
-                  ></v-text-field>
-                  <v-divider class="my-4"></v-divider>
-                  <div class="mb-4">
-                    <span class="text-subtitle-1 font-italic">Processor options</span>
-                    <v-btn
-                      @click="parsedYaml.view.processors[index].options.push({ type: '', value: '' })"
-                      prepend-icon="mdi-plus"
-                      density="compact"
-                      variant="outlined"
-                      class="ml-4"
-                      >Add option</v-btn
+                    variant="outlined"
+                  >
+                    Add step</v-btn
+                  >
+                </div>
+                <div v-for="(step, index) in approach.steps" class="my-2 ml-4">
+                  <v-row dense align="center">
+                    <v-col cols="1"
+                      ><span class="font-weight-bold">Step {{ index + 1 }}</span></v-col
                     >
-                  </div>
-
-                  <v-row dense v-for="(option, optionIndex) in processor.options" class="ml-2">
                     <v-col>
                       <v-text-field
-                        v-model="parsedYaml.view.processors[index].options[optionIndex].type"
+                        v-model="approach.steps[index].name"
+                        label="Step name"
                         density="compact"
                         hide-details
-                        placeholder="Option"
-                      ></v-text-field>
-                    </v-col>
-                    <v-col>
-                      <v-text-field
-                        v-model="parsedYaml.view.processors[index].options[optionIndex].value"
-                        density="compact"
-                        hide-details
-                        placeholder="Value"
-                      ></v-text-field>
-                    </v-col>
-                    <v-col cols="1">
-                      <v-btn variant="text" @click="parsedYaml.view.processors[index].options.splice(optionIndex, 1)">
-                        <v-icon>mdi-close-circle-outline</v-icon>
-                      </v-btn>
+                        :append-icon="'mdi-close-circle-outline'"
+                        @click:append="approach.steps.splice(index, 1)"
+                      >
+                      </v-text-field>
                     </v-col>
                   </v-row>
-
-                  <v-divider class="my-4"></v-divider>
-                  <div class="mb-4">
-                    <span class="text-subtitle-1 font-italic">Analysis methods</span>
-                    <v-btn
-                      @click="
-                        parsedYaml.view.processors[index].analysis.push({
-                          name: '',
-                          steps: []
-                        })
-                      "
-                      prepend-icon="mdi-plus"
-                      density="compact"
-                      variant="outlined"
-                      class="ml-4"
-                      >Add analysis method</v-btn
-                    >
-                  </div>
-
-                  <div v-for="(analysis, analysisIndex) in processor.analysis" class="pl-4 border-s-sm mb-10">
-                    <v-text-field
-                      label="Analysis method name"
-                      v-model="parsedYaml.view.processors[index].analysis[analysisIndex].name"
-                      density="compact"
-                      hide-details
-                      :append-icon="'mdi-close-circle-outline'"
-                      @click:append="parsedYaml.view.processors[index].analysis.splice(analysisIndex, 1)"
-                      max-width="300px"
-                    ></v-text-field>
-                    <v-divider class="my-4"></v-divider>
-                    <div class="mb-6">
-                      <span class="text-subtitle-1 font-italic">Steps</span>
-                      <v-btn
-                        @click="
-                          parsedYaml.view.processors[index].analysis[analysisIndex].steps.push({
-                            type: '',
-                            description: '',
-                            value: ''
-                          })
-                        "
-                        prepend-icon="mdi-plus"
+                  <v-row dense>
+                    <v-col>
+                      <v-combobox
+                        v-model="approach.steps[index].type"
+                        label="Type"
                         density="compact"
-                        variant="outlined"
-                        class="ml-4"
-                        >Add step</v-btn
-                      >
-                    </div>
+                        hide-details
+                        :items="stepTypes"
+                      ></v-combobox>
+                    </v-col>
+                    <v-col>
+                      <v-combobox
+                        v-model="approach.steps[index].stage"
+                        label="Stage"
+                        density="compact"
+                        hide-details
+                        :items="stageTypes"
+                      ></v-combobox>
+                    </v-col>
+                  </v-row>
+                  <v-row dense>
+                    <v-col>
+                      <v-text-field
+                        v-model="approach.steps[index].value"
+                        class="yeti-code"
+                        label="Value"
+                        density="compact"
+                        hide-details
+                      ></v-text-field>
+                    </v-col>
+                  </v-row>
+                  <v-row dense>
+                    <v-col>
+                      <v-text-field
+                        v-model="approach.steps[index].description"
+                        label="Description"
+                        density="compact"
+                        hide-details
+                      ></v-text-field>
+                    </v-col>
+                  </v-row>
+                  <v-divider class="my-8"></v-divider>
+                </div>
 
-                    <div v-for="(step, stepIndex) in analysis.steps" class="mb-4 ml-4">
-                      <div class="font-weight-bold mt-4 mb-2">
-                        Step #{{ stepIndex + 1 }}
-                        <v-btn
-                          variant="text"
-                          @click="parsedYaml.view.processors[index].analysis[analysisIndex].steps.splice(stepIndex, 1)"
-                          size="x-small"
-                        >
-                          remove
-                        </v-btn>
-                      </div>
-                      <v-row dense>
-                        <v-col cols="4">
-                          <v-combobox
-                            v-model="parsedYaml.view.processors[index].analysis[analysisIndex].steps[stepIndex].type"
-                            density="compact"
-                            hide-details
-                            placeholder="Type, e.g. opensearch-query"
-                            :items="stepTypes"
-                          ></v-combobox>
-                        </v-col>
-                        <v-col>
-                          <v-text-field
-                            v-model="
-                              parsedYaml.view.processors[index].analysis[analysisIndex].steps[stepIndex].description
-                            "
-                            density="compact"
-                            hide-details
-                            placeholder="Description"
-                          ></v-text-field>
-                        </v-col>
-                      </v-row>
-                      <v-row dense>
-                        <v-col>
-                          <v-text-field
-                            v-model="parsedYaml.view.processors[index].analysis[analysisIndex].steps[stepIndex].value"
-                            density="compact"
-                            hide-details
-                            placeholder='Query, e.g. data_type:"fs:stat" AND filename:"*crontab*"'
-                          ></v-text-field>
-                        </v-col>
-                      </v-row>
-                    </div>
-                    <!-- </div> -->
-                  </div>
-                </span>
+                <v-btn
+                  @click="parsedYaml.approaches.splice(parsedYaml.approaches.indexOf(approach), 1)"
+                  prepend-icon="mdi-delete"
+                  density="compact"
+                  variant="outlined"
+                  color="cancel"
+                  class="mr-2"
+                  >Remove approach</v-btn
+                >
               </v-expansion-panel-text>
             </v-expansion-panel>
           </v-expansion-panels>
-
-          <!-- <pre v-if="parsedYaml">{{ renderedYaml }}</pre> -->
+          <v-btn
+            prepend-icon="mdi-plus"
+            @click="parsedYaml.approaches.push(newApproach())"
+            density="compact"
+            variant="outlined"
+            class="my-4"
+            >Add approach</v-btn
+          >
         </v-window-item>
+
         <v-window-item value="yaml" class="mt-4">
           <v-textarea class="yeti-code" label="DFIQ Yaml" auto-grow v-model="localObject.dfiq_yaml"></v-textarea>
         </v-window-item>
@@ -443,7 +343,6 @@
 import axios from "axios";
 
 import ObjectFields from "@/components/ObjectFields.vue";
-import { DFIQ_APPROACH_VIEW_TYPES, DFIQ_APPROACH_VIEW_PROCESSOR_STEP_TYPES } from "@/definitions/dfiqDefinitions.js";
 import { DFIQ_TYPES, DFIQ_TEMPLATES } from "@/definitions/dfiqDefinitions.js";
 
 import _ from "lodash";
@@ -493,13 +392,12 @@ export default {
       activeTab: "user-form",
       parsedYaml: {},
       dfiqYaml: "",
-      valueTypes: DFIQ_APPROACH_VIEW_TYPES,
-      stepTypes: DFIQ_APPROACH_VIEW_PROCESSOR_STEP_TYPES,
+      stageTypes: [],
+      stepTypes: [],
       possibleParents: [],
       DFIQParentHierarchy: {
         facet: ["scenario"],
-        question: ["facet", "scenario"],
-        approach: ["question"]
+        question: ["facet", "scenario"]
       }
     };
   },
@@ -521,6 +419,25 @@ export default {
     this.fetchDFIQConfig();
   },
   methods: {
+    newApproach() {
+      return {
+        name: "New approach",
+        description: "",
+        tags: [],
+        references: [],
+        notes: { covered: [], not_covered: [] },
+        steps: []
+      };
+    },
+    newApproachStep() {
+      return {
+        name: "",
+        description: "",
+        type: "",
+        stage: "",
+        value: ""
+      };
+    },
     parentSearchFilter(itemTitle, queryText, item) {
       const inId = item.raw.dfiq_id.toLowerCase().includes(queryText.toLowerCase());
       const inTitle = itemTitle.toLowerCase().includes(queryText.toLowerCase());
@@ -528,8 +445,8 @@ export default {
     },
     fetchDFIQConfig() {
       axios.get("/api/v2/dfiq/config").then(response => {
-        this.valueTypes = response.data.approach_data_sources;
-        this.stepTypes = response.data.approach_analysis_step_types;
+        this.stageTypes = response.data.stage_types;
+        this.stepTypes = response.data.step_types;
       });
     },
     loadPossibleParents() {
@@ -573,7 +490,7 @@ export default {
         update_indicators: false
       };
 
-      if (this.localObject.type === "approach") {
+      if (this.localObject.type === "question") {
         createRequest.update_indicators = this.updateApproachIndicators;
       }
 
@@ -616,7 +533,7 @@ export default {
         update_indicators: false
       };
 
-      if (this.localObject.type === "approach") {
+      if (this.localObject.type === "question") {
         patchRequest.update_indicators = this.updateApproachIndicators;
       }
 
@@ -666,19 +583,6 @@ export default {
       this.fullScreen = !this.fullScreen;
       this.$emit("toggle-fullscreen", this.fullScreen);
     },
-    newReference(internal: boolean) {
-      if (internal) {
-        if (!this.parsedYaml.description.references_internal) {
-          this.parsedYaml.description.references_internal = [];
-        }
-        this.parsedYaml.description.references_internal.push("");
-      } else {
-        if (!this.parsedYaml.description.references) {
-          this.parsedYaml.description.references = [];
-        }
-        this.parsedYaml.description.references.push("");
-      }
-    },
     newUUID() {
       this.parsedYaml.uuid = crypto.randomUUID();
     }
@@ -703,7 +607,8 @@ export default {
 </script>
 
 <style>
-.yeti-code textarea {
+.yeti-code textarea,
+.yeti-code input {
   font-family: monospace;
 }
 </style>
