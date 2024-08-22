@@ -172,7 +172,7 @@ export const DFIQ_TYPES = [
 ];
 
 const SCENARIO_TEMPATE = `
-display_name: Scenario template
+name: Scenario template
 type: scenario
 description: >
   Multi-line description
@@ -183,7 +183,7 @@ tags:
 `;
 
 const FACET_TEMPATE = `
-display_name: Facet template
+name: Facet template
 type: facet
 description: >
   Multiline description
@@ -196,7 +196,7 @@ parent_ids:
 `;
 
 const QUESTION_TEMPATE = `
-display_name: Question template
+name: Question template
 type: question
 description:
 uuid: UUID_PLACEHOLDER
@@ -206,37 +206,8 @@ tags:
 parent_ids:
   - PARENT_UUID_PLACEHOLDER
 `;
-
-const APPROACH_TEMPATE = `
-display_name: Approach name
-type: approach
-uuid: UUID_PLACEHOLDER
-parent_id: PARENT_UUID_PLACEHOLDER
-id:
-dfiq_version: 1.1.0
-tags:
-description:
-  details: Brief approach description
-  references: []
-view:
-  data: []
-  notes:
-    covered: []
-    not_covered: []
-  processors:
-    - name: Processor name (e.g. Plaso)
-      options: []
-      analysis:
-        - name: Analysis method name (e.g. OpenSearch)
-          steps:
-            - description: &filter-desc Filter the results to just file downloads
-              type: opensearch-query
-              value: data_type:("chrome:history:file_downloaded" OR "safari:downloads:entry")
-`;
-
 export const DFIQ_TEMPLATES = {
   scenario: SCENARIO_TEMPATE.trim(),
   facet: FACET_TEMPATE.trim(),
-  question: QUESTION_TEMPATE.trim(),
-  approach: APPROACH_TEMPATE.trim()
+  question: QUESTION_TEMPATE.trim()
 };

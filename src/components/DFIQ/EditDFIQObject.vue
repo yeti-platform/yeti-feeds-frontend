@@ -28,7 +28,7 @@
             v-model="parsedYaml.id"
             density="compact"
           ></v-text-field>
-          <v-text-field label="Display name" v-model="parsedYaml.display_name" density="compact"></v-text-field>
+          <v-text-field label="Display name" v-model="parsedYaml.name" density="compact"></v-text-field>
           <v-autocomplete
             v-if="['question', 'facet'].includes(localObject.type)"
             label="Parents"
