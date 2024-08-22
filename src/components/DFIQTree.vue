@@ -39,6 +39,7 @@
             >{{ expanded ? "mdi-chevron-down" : "mdi-chevron-right" }}</v-icon
           >
           <v-divider v-else vertical class="mr-7"></v-divider>
+
           <v-icon color="grey-darken-2" size="x-small" class="me-2">{{ getDFIQIcon(dfiqTree) }}</v-icon>
 
           <span v-if="dfiqTree.object?.type === 'forensicartifact'">
@@ -49,13 +50,6 @@
             <span class="me-2">{{ sanitizeTitle(dfiqTree) }}</span>
             <v-chip density="compact" size="small" v-if="dfiqTree.object.type === 'query'">{{
               dfiqTree.object.query_type
-            }}</v-chip>
-          </span>
-
-          <!-- if approach, display data -->
-          <span v-if="dfiqTree.object?.type === 'approach' && !expanded" class="ml-1">
-            <v-chip size="small" density="compact" class="me-1" v-for="data in parseApproachData(dfiqTree.object)">{{
-              data
             }}</v-chip>
           </span>
 
@@ -111,15 +105,16 @@
               :width="editWidth"
               :fullscreen="fullScreenEdit"
               v-if="Object.keys(DFIQHierarchy).includes(dfiqTree.object?.type)"
+              v-for="dfiqType in DFIQHierarchy[dfiqTree.object.type]"
             >
               <template v-slot:activator="{ props }">
-                <v-btn size="small" density="compact" variant="outlined" v-bind="props"
-                  >add {{ DFIQHierarchy[dfiqTree.object.type] }}</v-btn
+                <v-btn class="me-2" size="small" density="compact" variant="outlined" v-bind="props"
+                  >new {{ dfiqType }}</v-btn
                 >
               </template>
               <template v-slot:default="{ isActive }">
                 <edit-DFIQ-object
-                  :new-type="DFIQHierarchy[dfiqTree.object.type]"
+                  :new-type="dfiqType"
                   :is-active="isActive"
                   :redirect="false"
                   :parent="dfiqTree.object"
@@ -136,30 +131,51 @@
       <!-- Recursive DFIQ children -->
       <li class="ml-2 border-s" v-show="dfiqTree.children && expanded" v-for="child in dfiqTree.children">
         <DFIQ-tree
-          v-if="dfiqTree.object?.root_type === 'dfiq'"
+          v-if="dfiqTree.object?.root_type === 'dfiq' && dfiqTree.object?.type !== 'question'"
           :treeRoot="child"
           :expanded-control="expandedControl"
           :display-indicator-types="indicatorTypesControl"
         />
       </li>
+      <!-- Stop recursion if we're doing a question -->
+      <li v-show="expanded" class="ml-2" v-if="dfiqTree.object?.type === 'question'">
+        <ul class="ml-2 dfiq-tree">
+          <li class="my-2" v-for="approach in dfiqTree.object.approaches">
+            <span @click="approach.expanded = !approach.expanded">
+              <v-icon color="grey-darken-2" class="me-1">{{
+                approach.expanded ? "mdi-chevron-down" : "mdi-chevron-right"
+              }}</v-icon>
+              <v-icon color="grey-darken-2" size="x-small" class="me-2">mdi-monitor </v-icon>{{ approach.name }}</span
+            >
+            <ul class="ml-4 dfiq-tree" v-show="approach.expanded">
+              <li class="mt-2" v-for="step in approach.steps.filter(step => step.type.match(/artifact|query/gi))">
+                <v-icon color="grey-darken-2" size="x-small" class="me-2">{{ getDFIQStepIcon(step) }}</v-icon>
+                <span v-if="step.type === 'ForensicArtifact'">
+                  <code class="me-2">{{ step.value }}</code>
+                  <v-chip density="compact" size="small">{{ step.type }}</v-chip>
+                </span>
+                <span v-else-if="step.type.match(/query/gi)">
+                  <span class="me-2">{{ step.name }}</span>
+                  <v-chip density="compact" size="small">{{ step.type }}</v-chip>
+                  <div class="indicator-preview" @click="copyText(step.value)">
+                    <v-btn
+                      variant="text"
+                      size="small"
+                      color="grey"
+                      icon="mdi-content-copy"
+                      density="compact"
+                      class="me-2 clipboard-copy"
+                      title="Copy to clipboard"
+                      ripple
+                    /><code>{{ step.value }}</code>
+                  </div>
+                </span>
 
-      <!-- Query preview if indicators -->
-      <li
-        @click="copyText(dfiqTree.object?.pattern)"
-        v-if="dfiqTree.object?.type === 'query'"
-        class="ml-7 indicator-preview"
-      >
-        <v-btn
-          variant="text"
-          size="small"
-          color="grey"
-          icon="mdi-content-copy"
-          density="compact"
-          class="me-2 clipboard-copy"
-          title="Copy to clipboard"
-          ripple
-        />
-        <code>{{ dfiqTree.object?.pattern }}</code>
+                <span v-else>??{{ step.type }} {{ step.value }}</span>
+              </li>
+            </ul>
+          </li>
+        </ul>
       </li>
     </ul>
   </div>
@@ -214,9 +230,8 @@ export default {
       editWidth: "75%",
       fullScreenEdit: false,
       DFIQHierarchy: {
-        scenario: "facet",
-        facet: "question",
-        question: "approach"
+        scenario: ["facet", "question"],
+        facet: ["question"]
       }
     };
   },
@@ -244,6 +259,14 @@ export default {
         DFIQ_TYPES.find(type => type.type === treeItem.object.type) ||
         INDICATOR_TYPES.find(type => type.type === treeItem.object.type)
       ).icon;
+    },
+    getDFIQStepIcon(step) {
+      if (step.type.match(/forensicartifact/gi)) {
+        return "mdi-script-text-outline";
+      }
+      if (step.type.match(/query/gi)) {
+        return "mdi-database-search";
+      }
     },
     getDetailsLink(treeItem) {
       return {
@@ -286,19 +309,6 @@ export default {
       }
       return true;
     },
-    parseApproachData(dfiqObject) {
-      let data = dfiqObject.view.data
-        .filter(data => data.type !== "description")
-        .map(data => {
-          return `${data.type}:${data.value}`;
-        });
-      let processorTypes = [
-        ...new Set(
-          dfiqObject.view.processors.flatMap(processor => processor.analysis.flatMap(a => a.steps).map(s => s.type))
-        )
-      ];
-      return data.concat(processorTypes);
-    },
     sanitizeTitle(dfiqItem) {
       if (dfiqItem.object.type !== "query") {
         return dfiqItem.title;
@@ -307,7 +317,7 @@ export default {
     },
     toggleFullscreen(fullscreen: boolean) {
       this.fullScreenEdit = !this.fullScreenEdit;
-      this.editWidth = fullscreen ? "100%" : "50%";
+      this.editWidth = fullscreen ? "100%" : "75%";
     },
     DFIQUpdated(obj) {
       if (this.topLevel) {

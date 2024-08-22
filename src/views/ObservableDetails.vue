@@ -311,7 +311,7 @@ export default {
     },
     toggleFullscreen(fullscreen: boolean) {
       this.fullScreenEdit = !this.fullScreenEdit;
-      this.editWidth = fullscreen ? "100%" : "50%";
+      this.editWidth = fullscreen ? "100%" : "75%";
     }
   },
   computed: {

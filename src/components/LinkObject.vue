@@ -166,7 +166,7 @@ export default {
       entityTypes: ENTITY_TYPES,
       indicatorTypes: INDICATOR_TYPES,
       fullScreenEdit: false,
-      editWidth: "50%",
+      editWidth: "75%",
       newEntityMenu: false,
       newIndicatorMenu: false
     };
@@ -236,7 +236,7 @@ export default {
     },
     toggleNewObjectFullscreen(fullscreen: boolean) {
       this.fullScreenEdit = !this.fullScreenEdit;
-      this.editWidth = fullscreen ? "100%" : "50%";
+      this.editWidth = fullscreen ? "100%" : "75%";
     },
     assignLinkTarget(target) {
       this.linkTarget = target;
