@@ -406,6 +406,8 @@ export default {
       let template = DFIQ_TEMPLATES[this.newType];
       if (this.parent !== null) {
         template = template.replace("PARENT_UUID_PLACEHOLDER", this.parent.uuid);
+      } else {
+        template = template.replace("\n  - PARENT_UUID_PLACEHOLDER", " []");
       }
       // replace UUID_PLACEHOLDER with a new UUID
       template = template.replace("UUID_PLACEHOLDER", crypto.randomUUID());
