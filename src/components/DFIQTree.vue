@@ -34,7 +34,10 @@
         <span @click="expanded = !expanded">
           <v-icon
             color="grey-darken-2"
-            v-if="dfiqTree.children?.length > 0 && dfiqTree.object?.root_type === 'dfiq'"
+            v-if="
+              (dfiqTree.object?.type === 'question' && dfiqTree.object?.approaches.length > 0) ||
+              (dfiqTree.children?.length > 0 && dfiqTree.object?.root_type === 'dfiq')
+            "
             class="me-1"
             >{{ expanded ? "mdi-chevron-down" : "mdi-chevron-right" }}</v-icon
           >
@@ -140,15 +143,46 @@
       <!-- Stop recursion if we're doing a question -->
       <li v-show="expanded" class="ml-2" v-if="dfiqTree.object?.type === 'question'">
         <ul class="ml-2 dfiq-tree">
-          <li class="my-2" v-for="approach in dfiqTree.object.approaches">
+          <li class="my-2" v-for="(approach, index) in dfiqTree.object.approaches">
             <span @click="approach.expanded = !approach.expanded">
               <v-icon color="grey-darken-2" class="me-1">{{
                 approach.expanded ? "mdi-chevron-down" : "mdi-chevron-right"
               }}</v-icon>
-              <v-icon color="grey-darken-2" size="x-small" class="me-2">mdi-monitor </v-icon>{{ approach.name }}</span
-            >
+              <v-icon color="grey-darken-2" size="x-small" class="me-2">mdi-monitor </v-icon>{{ approach.name }}
+              <span class="item-controls">
+                <v-dialog :width="editWidth" :fullscreen="fullScreenEdit">
+                  <template v-slot:activator="{ props }">
+                    <v-btn
+                      variant="text"
+                      size="small"
+                      icon="mdi-edit"
+                      density="compact"
+                      v-bind="props"
+                      target="_blank"
+                      class="ml-2"
+                    >
+                      <v-icon>mdi-pencil</v-icon>
+                    </v-btn>
+                  </template>
+
+                  <template v-slot:default="{ isActive }">
+                    <edit-DFIQ-object
+                      v-if="dfiqTree.object?.root_type === 'dfiq'"
+                      :object="dfiqTree.object"
+                      :is-active="isActive"
+                      :redirect="false"
+                      @success="obj => emitDFIQUpdate(obj)"
+                      @deleteSuccess="obj => emitDFIQUpdate(obj)"
+                      @toggle-fullscreen="toggleFullscreen"
+                      :approach="index + 1"
+                    />
+                  </template>
+                </v-dialog>
+              </span>
+            </span>
             <ul class="ml-4 dfiq-tree" v-show="approach.expanded">
-              <li class="mt-2" v-for="step in approach.steps.filter(step => step.type.match(/artifact|query/gi))">
+              <!-- <li class="mt-2 ml-6" v-for="step in approach.steps.filter(step => step.type.match(/artifact|query/gi))"> -->
+              <li class="mt-2 ml-6" v-for="step in approach.steps">
                 <v-icon color="grey-darken-2" size="x-small" class="me-2">{{ getDFIQStepIcon(step) }}</v-icon>
                 <span v-if="step.type === 'ForensicArtifact'">
                   <code class="me-2">{{ step.value }}</code>

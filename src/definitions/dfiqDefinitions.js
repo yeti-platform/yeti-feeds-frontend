@@ -1,3 +1,5 @@
+import { placeholder } from "@babel/types";
+
 export const DFIQ_TYPES = [
   {
     name: "Scenario",
@@ -171,11 +173,48 @@ export const DFIQ_TYPES = [
   }
 ];
 
+export const FORM_METADATA = {
+  scenario: {
+    placeholders: {
+      name: "Name of the scenario, e.g. Host compromise assessment",
+      description: "Description of the scenario. What kind of investigation is it supposed to address?"
+    },
+    rules: {
+      name: [value => !!value || "Required"]
+    }
+  },
+  facet: {
+    placeholders: {
+      name: "Name of the facet, e.g. Does the host have malware on its filesystem?",
+      description:
+        "Facets are used to group questions. Describe what facet of the scenario the questions are supposed to address."
+    }
+  },
+  question: {
+    placeholders: {
+      name: "Name of the question, e.g. Are there any indicators of known malware on the filesystem?",
+      description:
+        "Give more details about what the question is trying to answer and what information it will provide.",
+      approach: {
+        name: "Name of the approach, e.g. Filesystem analysis",
+        description:
+          "Detailed description of the approach, e.g. Hash all files in the filesystem and compare them against known badness."
+      },
+      approachStep: {
+        name: "Name of the step, e.g. Hash all files",
+        type: "Type of step, e.g. command. Auto-populated with all already existing types.",
+        stage: "Stage of the step, e.g. collection. Auto-populated with all already existing stages.",
+        value: "The command to execute, the query to run, etc., e.g. find . -type f -exec md5sum {} \\;",
+        description: "Describe the steps in more detail if needed."
+      }
+    }
+  }
+};
+
 const SCENARIO_TEMPATE = `
-name: Scenario template
+name: ""
 type: scenario
-description: >
-  Multi-line description
+description: ""
 uuid: UUID_PLACEHOLDER
 id:
 dfiq_version: 1.1.0
@@ -183,10 +222,9 @@ tags:
 `;
 
 const FACET_TEMPATE = `
-name: Facet template
+name: ""
 type: facet
-description: >
-  Multiline description
+description: ""
 uuid: UUID_PLACEHOLDER
 id:
 dfiq_version: 1.1.0
@@ -196,7 +234,7 @@ parent_ids:
 `;
 
 const QUESTION_TEMPATE = `
-name: Question template
+name: ""
 type: question
 description:
 uuid: UUID_PLACEHOLDER
