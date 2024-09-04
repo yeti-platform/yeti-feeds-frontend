@@ -7,28 +7,26 @@
     >
     <v-card-text>
       <v-tabs v-model="activeTab" color="primary">
-        <v-tab value="user-form">Form</v-tab>
+        <v-tab value="user-form">{{ localObject.type }}</v-tab>
         <v-tab v-if="parsedYaml.type === 'question'" value="approaches">Approaches</v-tab>
         <v-tab value="yaml">YAML</v-tab>
       </v-tabs>
       <v-window v-model="activeTab">
         <v-window-item value="user-form" class="mt-4">
           <v-text-field
-            label="UUID"
-            v-model="parsedYaml.uuid"
+            label="Name"
+            :placeholder="placeholders['name']"
+            persistent-placeholder
+            v-model="parsedYaml.name"
             density="compact"
-            readonly
-            :disabled="!!parsedYaml.uuid"
-            append-inner-icon="mdi-refresh"
-            @click:appendInner="newUUID"
           ></v-text-field>
-
           <v-text-field
-            label="DFIQ ID (e.g. S0001, F0001, Q0001, Q0001.10)"
+            label="DFIQ ID"
+            placeholder="e.g. S0001, F0001, Q0001"
+            persistent-placeholder
             v-model="parsedYaml.id"
             density="compact"
           ></v-text-field>
-          <v-text-field label="Display name" v-model="parsedYaml.name" density="compact"></v-text-field>
           <v-autocomplete
             v-if="['question', 'facet'].includes(localObject.type)"
             label="Parents"
@@ -42,17 +40,13 @@
             dense
             chips
             :custom-filter="parentSearchFilter"
+            :placeholder="`Add parents to this ${localObject.type}`"
+            persistent-placeholder
           >
             <template v-slot:item="{ props, item }">
               <v-list-item v-bind="props" title="">{{ item.raw.name }}</v-list-item>
             </template>
           </v-autocomplete>
-          <v-text-field
-            label="DFIQ Version"
-            v-model="parsedYaml.dfiq_version"
-            disabled
-            density="compact"
-          ></v-text-field>
           <v-combobox
             label="Tags"
             v-model="parsedYaml.tags"
@@ -61,13 +55,22 @@
             density="compact"
             :delimiters="[',', ' ', ';']"
           ></v-combobox>
-          <v-textarea label="Description" v-model="parsedYaml.description" density="compact"></v-textarea>
+          <v-textarea
+            label="Description (optional)"
+            :placeholder="placeholders['description']"
+            persistent-placeholder
+            v-model="parsedYaml.description"
+            density="compact"
+          ></v-textarea>
         </v-window-item>
 
         <v-window-item value="approaches" class="mt-4">
+          <p class="mb-4 ml-4">
+            Approaches describe specific ways to answer the question, providing a specific list of steps to follow.
+          </p>
           <v-expansion-panels v-model="expandedPanel">
             <v-expansion-panel
-              :title="approach.name"
+              :title="approach.name || 'Untitled approach ' + index"
               v-for="(approach, index) in parsedYaml.approaches"
               v-bind:key="`approach-${index}`"
             >
@@ -76,6 +79,8 @@
                 <v-text-field
                   class="mb-4"
                   label="Approach name"
+                  :placeholder="placeholders['approach']['name']"
+                  persistent-placeholder
                   v-model="approach.name"
                   density="compact"
                   hide-details
@@ -83,6 +88,8 @@
                 <v-textarea
                   class="mb-4"
                   label="Description"
+                  :placeholder="placeholders['approach']['description']"
+                  persistent-placeholder
                   v-model="approach.description"
                   density="compact"
                   hide-details
@@ -104,6 +111,7 @@
                     References
                     <span class="text-medium-emphasis font-weight-light">({{ approach.references.length }})</span>
                   </span>
+
                   <v-btn
                     class="my-2"
                     @click="approach.references.push('')"
@@ -113,6 +121,14 @@
                   >
                     add reference</v-btn
                   >
+                  <v-tooltip>
+                    <template v-slot:activator="{ props }">
+                      <v-icon v-bind="props" class="ml-2 text-disabled float-right" size="small"
+                        >mdi-information-outline</v-icon
+                      >
+                    </template>
+                    <span>Use this field to add references to external sources (documentation, blogposts, etc.)</span>
+                  </v-tooltip>
                 </div>
                 <v-text-field
                   class="mb-2"
@@ -133,7 +149,18 @@
                     >({{ approach.notes.covered.length }} / {{ approach.notes.not_covered.length }})</span
                   ></strong
                 >
-                <div class="my-2">
+                <v-tooltip>
+                  <template v-slot:activator="{ props }">
+                    <v-icon v-bind="props" class="ml-2 text-disabled float-right" size="small"
+                      >mdi-information-outline</v-icon
+                    >
+                  </template>
+                  <span
+                    >Reduce ambiguity by describing what the approach covers and doesn't, e.g. data retention time,
+                    standard installation paths, default logging enabled.</span
+                  >
+                </v-tooltip>
+                <div class="my-6">
                   <v-icon color="green" class="mr-2">mdi-check-circle-outline</v-icon>Covered
                   <v-btn
                     @click="approach.notes.covered.push('')"
@@ -185,7 +212,7 @@
 
                 <v-divider class="my-8"></v-divider>
 
-                <div class="mb-4">
+                <div class="mb-6">
                   <span class="text-h6 mr-4"
                     >Steps
                     <span class="text-medium-emphasis font-weight-light">({{ approach.steps.length }})</span>
@@ -198,9 +225,24 @@
                   >
                     Add step</v-btn
                   >
+                  <v-tooltip>
+                    <template v-slot:activator="{ props }">
+                      <v-icon v-bind="props" class="ml-2 text-disabled float-right" size="small"
+                        >mdi-information-outline</v-icon
+                      >
+                    </template>
+                    <span
+                      >Describe the series of steps to go through the approach, e.g.
+                      <ol class="ml-4">
+                        <li>Hash all files in the filesystem;</li>
+                        <li>Check hashes in threat intelligence platform using this query;</li>
+                        <li>Report findings in ticket.</li>
+                      </ol>
+                    </span>
+                  </v-tooltip>
                 </div>
                 <div v-for="(step, index) in approach.steps" class="my-2 ml-4">
-                  <v-row dense align="center">
+                  <v-row align="center">
                     <v-col cols="1"
                       ><span class="font-weight-bold">Step {{ index + 1 }}</span></v-col
                     >
@@ -208,6 +250,8 @@
                       <v-text-field
                         v-model="approach.steps[index].name"
                         label="Step name"
+                        :placeholder="placeholders.approachStep.name"
+                        persistent-placeholder
                         density="compact"
                         hide-details
                         :append-icon="'mdi-close-circle-outline'"
@@ -216,13 +260,14 @@
                       </v-text-field>
                     </v-col>
                   </v-row>
-                  <v-row dense>
+                  <v-row>
                     <v-col>
                       <v-combobox
                         v-model="approach.steps[index].type"
                         label="Type"
+                        :hint="placeholders.approachStep.type"
+                        persistent-hint
                         density="compact"
-                        hide-details
                         :items="stepTypes"
                       ></v-combobox>
                     </v-col>
@@ -230,31 +275,38 @@
                       <v-combobox
                         v-model="approach.steps[index].stage"
                         label="Stage"
+                        :hint="placeholders.approachStep.stage"
+                        persistent-hint
                         density="compact"
-                        hide-details
                         :items="stageTypes"
                       ></v-combobox>
                     </v-col>
                   </v-row>
-                  <v-row dense>
+                  <v-row>
                     <v-col>
-                      <v-text-field
+                      <v-textarea
                         v-model="approach.steps[index].value"
                         class="yeti-code"
                         label="Value"
+                        :placeholder="placeholders.approachStep.value"
+                        persistent-placeholder
                         density="compact"
                         hide-details
-                      ></v-text-field>
+                        rows="1"
+                      ></v-textarea>
                     </v-col>
                   </v-row>
-                  <v-row dense>
+                  <v-row>
                     <v-col>
-                      <v-text-field
+                      <v-textarea
                         v-model="approach.steps[index].description"
-                        label="Description"
+                        label="Description (optional)"
+                        :placeholder="placeholders.approachStep.description"
+                        persistent-placeholder
                         density="compact"
                         hide-details
-                      ></v-text-field>
+                        rows="1"
+                      ></v-textarea>
                     </v-col>
                   </v-row>
                   <v-divider class="my-8"></v-divider>
@@ -280,17 +332,29 @@
         <v-window-item value="yaml" class="mt-4">
           <v-textarea class="yeti-code" label="DFIQ Yaml" auto-grow v-model="localObject.dfiq_yaml"></v-textarea>
         </v-window-item>
-        <div v-if="yamlValidationError === 'valid'">
-          <v-alert type="success">YAML is valid!</v-alert>
+        <div v-if="yamlValidationError.valid && activeTab == 'yaml'">
+          <v-alert type="success">DFIQ {{ localObject.type }} YAML is valid</v-alert>
         </div>
-        <div v-else-if="yamlValidationError.length > 0 && localObject.dfiq_yaml.length > 0">
-          <v-alert type="error"
-            ><strong>Invalid YAML</strong> {{ yamlValidationError }}
-            <br />
-            Please revise the
-            <a :href="'https://dfiq.org/contributing/specification/#' + localObject.type" target="_blank">
-              DFIQ spec for {{ localObject.type }}
-            </a>
+        <div v-if="!yamlValidationError.valid">
+          <v-alert type="error">
+            <strong>Invalid DFIQ {{ localObject.type }}</strong>
+
+            <span v-if="yamlValidationError.error_type === 'message' && localObject.dfiq_yaml.length > 0">{{
+              yamlValidationError
+            }}</span>
+            <span v-else-if="yamlValidationError.error_type === 'pydantic'">
+              <ul>
+                <li v-for="error in yamlValidationError.error">
+                  <code>{{ error.field }}</code
+                  >: {{ error.error }}
+                </li>
+              </ul>
+              <br />
+              Please revise the
+              <a :href="'https://dfiq.org/contributing/specification/#' + localObject.type" target="_blank">
+                DFIQ spec for {{ localObject.type }}
+              </a>
+            </span>
           </v-alert>
         </div>
       </v-window>
@@ -308,7 +372,7 @@
       ></v-btn>
       <v-btn text="Cancel" color="cancel" @click="isActive.value = false"></v-btn>
       <v-btn
-        :disabled="yamlValidationError !== 'valid'"
+        :disabled="!yamlValidationError.valid"
         text="Save"
         color="primary"
         @click="saveObject"
@@ -342,7 +406,7 @@
 import axios from "axios";
 
 import ObjectFields from "@/components/ObjectFields.vue";
-import { DFIQ_TYPES, DFIQ_TEMPLATES } from "@/definitions/dfiqDefinitions.js";
+import { DFIQ_TYPES, DFIQ_TEMPLATES, FORM_METADATA } from "@/definitions/dfiqDefinitions.js";
 
 import _ from "lodash";
 import { parse, stringify } from "yaml";
@@ -371,6 +435,10 @@ export default {
     redirect: {
       type: Boolean,
       default: true
+    },
+    approach: {
+      type: Number,
+      default: -1
     }
   },
   data() {
@@ -385,7 +453,7 @@ export default {
         dfiq: "dfiq"
       },
       validatingYaml: false,
-      yamlValidationError: "",
+      yamlValidationError: { valid: true },
       updateApproachIndicators: true,
       dialogDelete: false,
       activeTab: "user-form",
@@ -419,6 +487,10 @@ export default {
     }
     this.loadPossibleParents();
     this.fetchDFIQConfig();
+    if (this.approach != -1) {
+      this.activeTab = "approaches";
+      this.expandedPanel = this.approach - 1;
+    }
   },
   methods: {
     newApproach() {
@@ -426,7 +498,7 @@ export default {
         this.parsedYaml.approaches = [];
       }
       this.parsedYaml.approaches.push({
-        name: "New approach",
+        name: "",
         description: "",
         tags: [],
         references: [],
@@ -481,9 +553,9 @@ export default {
         })
         .then(response => {
           if (!response.data.valid) {
-            this.yamlValidationError = response.data.error;
+            this.yamlValidationError = response.data;
           } else {
-            this.yamlValidationError = "valid";
+            this.yamlValidationError = { valid: true };
             this.dfiqYaml = this.localObject.dfiq_yaml;
           }
           this.validatingYaml = false;
@@ -596,6 +668,18 @@ export default {
   computed: {
     renderedYaml() {
       return stringify(this.parsedYaml);
+    },
+    placeholders() {
+      if (this.localObject.type === undefined) {
+        return {};
+      }
+      return FORM_METADATA[this.localObject.type].placeholders;
+    },
+    rules() {
+      if (this.localObject.type === undefined) {
+        return [];
+      }
+      return FORM_METADATA[this.localObject.type].rules;
     }
   },
   watch: {
