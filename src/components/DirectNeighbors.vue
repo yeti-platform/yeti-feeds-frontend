@@ -56,6 +56,10 @@
         {{ moment(item.created).format("YYYY-MM-DD HH:mm:ss") }}
       </template>
 
+      <template v-slot:item.modified="{ item }">
+        {{ moment(item.created).format("YYYY-MM-DD HH:mm:ss") }}
+      </template>
+
       <template v-slot:item.relevant_node.type="{ item }">
         <v-chip density="compact" class="ml-2">
           <v-icon :icon="getIconForType(item.relevant_node.type)" start size="small"></v-icon>
@@ -212,11 +216,13 @@ export default {
       showEditLink: false,
       headers: [
         { title: "", key: "direction", width: "10px" },
-        { title: "Linked on", key: "created", width: "170px", sortable: true },
+        { title: "First linked", key: "created", width: "170px", sortable: true },
+        { title: "Last linked", key: "modified", width: "170px", sortable: true },
         { title: "Type", key: "relevant_node.type", width: "10px", sortable: false },
         { title: "Value", key: "relevant_node.value", maxWidth: "700px", sortable: false },
         { title: "Tags", key: "relevant_node.tags", sortable: false },
         { title: "Description", key: "description", sortable: false },
+        { title: "Count", key: "count", sortable: false },
         { title: "", key: "controls", sortable: false }
       ],
       sortBy: [{ key: "created", order: "asc" }]
