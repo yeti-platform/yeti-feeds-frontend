@@ -222,10 +222,10 @@ export default {
         { title: "Value", key: "relevant_node.value", maxWidth: "700px", sortable: false },
         { title: "Tags", key: "relevant_node.tags", sortable: false },
         { title: "Description", key: "description", sortable: false },
-        { title: "Count", key: "count", sortable: false },
+        { title: "Count", key: "count", sortable: true },
         { title: "", key: "controls", sortable: false }
       ],
-      sortBy: [{ key: "created", order: "asc" }]
+      sortBy: [{ key: "modified", order: "desc" }]
     };
   },
   methods: {
