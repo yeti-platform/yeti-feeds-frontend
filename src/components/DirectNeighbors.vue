@@ -225,7 +225,7 @@ export default {
         { title: "Count", key: "count", sortable: true },
         { title: "", key: "controls", sortable: false }
       ],
-      sortBy: [{ key: "created", order: "asc" }]
+      sortBy: [{ key: "modified", order: "asc" }]
     };
   },
   methods: {
