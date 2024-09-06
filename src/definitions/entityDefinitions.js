@@ -192,6 +192,8 @@ export const ENTITY_TYPES = [
         sortable: true,
         width: "200px"
       },
+      { field: "first_seen", type: "date", label: "First seen", displayList: true, editable: true, sortable: true, width: "200px" },
+      { field: "last_seen", type: "date", label: "Last seen", displayList: true, editable: true, sortable: true, width: "200px" },
       {
         field: "name",
         type: "text",
@@ -201,9 +203,10 @@ export const ENTITY_TYPES = [
         sortable: true,
         maxWidth: "500px"
       },
+
       { field: "tags", type: "list", label: "Tags", displayList: true, editable: false },
       { field: "aliases", type: "list", label: "Aliases", displayList: true },
-      { field: "description", type: "longtext", label: "Description", displayList: false, editable: true }
+      { field: "description", type: "longtext", label: "Description", displayList: false, editable: true },
     ],
     filterAliases: ["aliases"],
     icon: "mdi-bullhorn"
