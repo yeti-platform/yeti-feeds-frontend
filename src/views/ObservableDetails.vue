@@ -169,6 +169,10 @@
               ><v-icon size="x-large" start>mdi-brain</v-icon>Related entities
               <v-chip class="ml-3" density="comfortable">{{ totalRelatedEntities + totalTaggedRelationships }}</v-chip>
             </v-tab>
+            <v-tab value="related-indicators"
+              ><v-icon size="x-large" start>mdi-magnify</v-icon>Related indicators
+              <v-chip class="ml-3" density="comfortable">{{ totalRelatedIndicators }}</v-chip>
+            </v-tab>
           </v-tabs>
 
           <v-window v-model="activeTab" class="pa-5">
@@ -216,6 +220,14 @@
                 ></related-objects>
               </v-card>
             </v-window-item>
+            <v-window-item value="related-indicators" eager>
+              <direct-neighbors
+                :id="id"
+                source-type="observables"
+                :target-types="indicatorTypes.map(def => def.type)"
+                @totalUpdated="value => (totalRelatedIndicators = value)"
+              />
+            </v-window-item>
           </v-window>
         </v-sheet>
       </v-container>
@@ -235,6 +247,7 @@ import LinkObject from "@/components/LinkObject.vue";
 import LinkObservables from "@/components/LinkObservables.vue";
 
 import { ENTITY_TYPES } from "@/definitions/entityDefinitions.js";
+import { INDICATOR_TYPES } from "@/definitions/indicatorDefinitions.js";
 import { OBSERVABLE_TYPES } from "@/definitions/observableDefinitions.js";
 import moment from "moment";
 </script>
@@ -261,9 +274,11 @@ export default {
       activeTab: 0,
       observableTypes: OBSERVABLE_TYPES,
       entityTypes: ENTITY_TYPES,
+      indicatorTypes: INDICATOR_TYPES,
       totalRelatedObservables: 0,
       totalTaggedRelationships: 0,
       totalRelatedEntities: 0,
+      totalRelatedIndicators: 0,
       editWidth: 600,
       fullScreenEdit: false,
       newLinkMenu: false
