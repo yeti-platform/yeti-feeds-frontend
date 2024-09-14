@@ -18,6 +18,8 @@
       :item-value="item => item.id"
       hover
       :sort-by="sortBy"
+      :loading="loading"
+      loading-text="Loading data..."
     >
       <template v-slot:item.name="{ item }">
         <span class="short-links">
@@ -121,7 +123,8 @@ export default {
       page: 1,
       perPage: 20,
       total: 0,
-      sortBy: [{ key: "name", order: "asc" }]
+      sortBy: [{ key: "name", order: "asc" }],
+      loading: true
     };
   },
   methods: {
@@ -167,6 +170,7 @@ export default {
       itemsPerPage: number;
       sortBy: Array<{ key: string; order: string }>;
     }) {
+      this.loading = true;
       let params = {
         page: page - 1,
         count: itemsPerPage === -1 ? 0 : itemsPerPage,
@@ -177,13 +181,18 @@ export default {
       if (this.searchSubtype != "") {
         params["type"] = this.searchSubtype;
       }
-      axios.post(`/api/v2/${this.searchType}/search`, params).then(response => {
-        this.items = response.data[this.searchType];
-        if (response.data.total != this.total) {
-          this.total = response.data.total;
-          this.$emit("totalUpdated", this.total);
-        }
-      });
+      axios
+        .post(`/api/v2/${this.searchType}/search`, params)
+        .then(response => {
+          this.items = response.data[this.searchType];
+          if (response.data.total != this.total) {
+            this.total = response.data.total;
+            this.$emit("totalUpdated", this.total);
+          }
+        })
+        .finally(() => {
+          this.loading = false;
+        });
     }
   }
 };

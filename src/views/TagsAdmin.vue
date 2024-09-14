@@ -9,6 +9,8 @@
       density="compact"
       :search="tagFilterDebounced"
       @update:options="searchTags"
+      :loading="loading"
+      loading-text="Loading tags..."
     >
       <template v-slot:item.name="{ item }">
         <v-chip color="primary" @click="selectTag(item)" density="compact">{{ item.name }}</v-chip>
@@ -141,6 +143,7 @@ export default {
   },
   methods: {
     searchTags({ page, itemsPerPage, sortBy }) {
+      this.loading = true;
       axios
         .post(`/api/v2/tags/search`, { name: this.tagFilter, page: page - 1, count: itemsPerPage })
         .then(response => {
@@ -150,7 +153,9 @@ export default {
         .catch(error => {
           return console.log(error);
         })
-        .finally(() => {});
+        .finally(() => {
+          this.loading = false;
+        });
     },
     selectTag(selectedTag) {
       this.selectedTag = selectedTag;
