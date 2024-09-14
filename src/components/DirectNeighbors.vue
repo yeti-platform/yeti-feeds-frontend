@@ -45,6 +45,8 @@
       :sort-by="sortBy"
       :search="searchFilter"
       hover
+      :loading="loading"
+      loading-text="Loading data..."
     >
       <!-- <tr> -->
       <template v-slot:item.direction="{ item }">
