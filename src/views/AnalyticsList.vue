@@ -16,7 +16,6 @@
       title="Inline"
       subtitle="Analytics that trigger when an observable is added to the Yeti database."
     >
-      <task-list task-type="inline"> </task-list>
     </v-card>
   </div>
 </template>
