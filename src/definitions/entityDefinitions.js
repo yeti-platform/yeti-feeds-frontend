@@ -23,7 +23,14 @@ export const ENTITY_TYPES = [
       },
       { field: "reference", type: "text", label: "Reference", displayList: true, editable: true },
       { field: "tags", type: "list", label: "Tags", displayList: true, editable: false },
-      { field: "related_observables_count", type: "text", label: "Related observables", displayList: true, editable: false, sortable: true },
+      {
+        field: "related_observables_count",
+        type: "text",
+        label: "Related observables",
+        displayList: true,
+        editable: false,
+        sortable: true
+      },
       { field: "description", type: "longtext", label: "Description", displayList: false, editable: true }
     ],
     filterAliases: ["reference"],
@@ -52,7 +59,14 @@ export const ENTITY_TYPES = [
         maxWidth: "500px"
       },
       { field: "tags", type: "list", label: "Tags", displayList: true, editable: false },
-      { field: "related_observables_count", type: "text", label: "Related observables", displayList: true, editable: false, sortable: true },
+      {
+        field: "related_observables_count",
+        type: "text",
+        label: "Related observables",
+        displayList: true,
+        editable: false,
+        sortable: true
+      },
       { field: "family", type: "text", label: "Family", displayList: true, editable: true },
       { field: "aliases", type: "list", label: "Aliases", displayList: true, editable: true },
       { field: "description", type: "longtext", label: "Description", displayList: false, editable: true }
@@ -83,7 +97,14 @@ export const ENTITY_TYPES = [
         maxWidth: "500px"
       },
       { field: "tags", type: "list", label: "Tags", displayList: true, editable: false },
-      { field: "related_observables_count", type: "text", label: "Related observables", displayList: true, editable: false, sortable: true },
+      {
+        field: "related_observables_count",
+        type: "text",
+        label: "Related observables",
+        displayList: true,
+        editable: false,
+        sortable: true
+      },
       { field: "aliases", type: "list", label: "Aliases", displayList: true, editable: true },
       { field: "kill_chain_phases", type: "list", label: "Kill chain phases", displayList: true, editable: true },
       { field: "description", type: "longtext", label: "Description", displayList: false, editable: true }
@@ -114,7 +135,14 @@ export const ENTITY_TYPES = [
         maxWidth: "500px"
       },
       { field: "tags", type: "list", label: "Tags", displayList: true, editable: false },
-      { field: "related_observables_count", type: "text", label: "Related observables", displayList: true, editable: false, sortable: true },
+      {
+        field: "related_observables_count",
+        type: "text",
+        label: "Related observables",
+        displayList: true,
+        editable: false,
+        sortable: true
+      },
       { field: "aliases", type: "list", label: "Aliases", displayList: true, editable: true },
       { field: "kill_chain_phases", type: "list", label: "Kill chain phases", displayList: true, editable: true },
       { field: "description", type: "longtext", label: "Description", displayList: false, editable: true }
@@ -145,7 +173,14 @@ export const ENTITY_TYPES = [
         maxWidth: "500px"
       },
       { field: "tags", type: "list", label: "Tags", displayList: true, editable: false },
-      { field: "related_observables_count", type: "text", label: "Related observables", displayList: true, editable: false, sortable: true },
+      {
+        field: "related_observables_count",
+        type: "text",
+        label: "Related observables",
+        displayList: true,
+        editable: false,
+        sortable: true
+      },
       { field: "aliases", type: "list", label: "Aliases", displayList: true, editable: true },
       { field: "description", type: "longtext", label: "Description", displayList: false, editable: true },
       { field: "threat_actor_types", type: "list", label: "Threat actor types", displayList: true, editable: true },
@@ -178,8 +213,15 @@ export const ENTITY_TYPES = [
         maxWidth: "500px"
       },
       { field: "tags", type: "list", label: "Tags", displayList: true, editable: false },
-      { field: "related_observables_count", type: "text", label: "Related observables", displayList: true, editable: false, sortable: true },
-      { field: "aliases", type: "list", label: "Aliases", displayList: true },
+      {
+        field: "related_observables_count",
+        type: "text",
+        label: "Related observables",
+        displayList: true,
+        editable: false,
+        sortable: true
+      },
+      { field: "aliases", type: "list", label: "Aliases", displayList: true, editable: true },
       { field: "description", type: "longtext", label: "Description", displayList: false, editable: true }
     ],
     filterAliases: ["aliases"],
@@ -198,8 +240,24 @@ export const ENTITY_TYPES = [
         sortable: true,
         width: "200px"
       },
-      { field: "first_seen", type: "date", label: "First seen", displayList: true, editable: true, sortable: true, width: "200px" },
-      { field: "last_seen", type: "date", label: "Last seen", displayList: true, editable: true, sortable: true, width: "200px" },
+      {
+        field: "first_seen",
+        type: "date",
+        label: "First seen",
+        displayList: true,
+        editable: true,
+        sortable: true,
+        width: "200px"
+      },
+      {
+        field: "last_seen",
+        type: "date",
+        label: "Last seen",
+        displayList: true,
+        editable: true,
+        sortable: true,
+        width: "200px"
+      },
       {
         field: "name",
         type: "text",
@@ -210,9 +268,16 @@ export const ENTITY_TYPES = [
         maxWidth: "500px"
       },
       { field: "tags", type: "list", label: "Tags", displayList: true, editable: false },
-      { field: "related_observables_count", type: "text", label: "Related observables", displayList: true, editable: false, sortable: true },
+      {
+        field: "related_observables_count",
+        type: "text",
+        label: "Related observables",
+        displayList: true,
+        editable: false,
+        sortable: true
+      },
       { field: "aliases", type: "list", label: "Aliases", displayList: true },
-      { field: "description", type: "longtext", label: "Description", displayList: false, editable: true },
+      { field: "description", type: "longtext", label: "Description", displayList: false, editable: true }
     ],
     filterAliases: ["aliases"],
     icon: "mdi-bullhorn"
@@ -240,7 +305,14 @@ export const ENTITY_TYPES = [
         maxWidth: "500px"
       },
       { field: "tags", type: "list", label: "Tags", displayList: true, editable: false },
-      { field: "related_observables_count", type: "text", label: "Related observables", displayList: true, editable: false, sortable: true },
+      {
+        field: "related_observables_count",
+        type: "text",
+        label: "Related observables",
+        displayList: true,
+        editable: false,
+        sortable: true
+      },
       { field: "aliases", type: "list", label: "Aliases", displayList: true },
       { field: "description", type: "longtext", label: "Description", displayList: false, editable: true }
     ],
@@ -270,7 +342,14 @@ export const ENTITY_TYPES = [
         maxWidth: "500px"
       },
       { field: "tags", type: "list", label: "Tags", displayList: true, editable: false },
-      { field: "related_observables_count", type: "text", label: "Related observables", displayList: true, editable: false, sortable: true },
+      {
+        field: "related_observables_count",
+        type: "text",
+        label: "Related observables",
+        displayList: true,
+        editable: false,
+        sortable: true
+      },
       { field: "description", type: "longtext", label: "Description", displayList: false, editable: true }
     ],
     filterAliases: [],
@@ -300,7 +379,14 @@ export const ENTITY_TYPES = [
       },
       { field: "title", type: "text", label: "Title", displayList: true, editable: true, sortable: true },
       { field: "tags", type: "list", label: "Tags", displayList: true, editable: false },
-      { field: "related_observables_count", type: "text", label: "Related observables", displayList: true, editable: false, sortable: true },
+      {
+        field: "related_observables_count",
+        type: "text",
+        label: "Related observables",
+        displayList: true,
+        editable: false,
+        sortable: true
+      },
       { field: "description", type: "longtext", label: "Description", displayList: false, editable: true }
     ],
     filterAliases: ["title"],
@@ -329,7 +415,14 @@ export const ENTITY_TYPES = [
         maxWidth: "500px"
       },
       { field: "tags", type: "list", label: "Tags", displayList: true, editable: false },
-      { field: "related_observables_count", type: "text", label: "Related observables", displayList: true, editable: false, sortable: true },
+      {
+        field: "related_observables_count",
+        type: "text",
+        label: "Related observables",
+        displayList: true,
+        editable: false,
+        sortable: true
+      },
       { field: "description", type: "longtext", label: "Description", displayList: false, editable: true }
     ],
     filterAliases: [],
