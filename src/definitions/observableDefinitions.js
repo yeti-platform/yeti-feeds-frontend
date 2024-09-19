@@ -1,3 +1,5 @@
+import { PRIVATE_OBSERVABLE_TYPES } from "@/definitions/private/privateObservableDefinitions.js";
+
 export const OBSERVABLE_TYPES = [
   {
     name: "Generic observable",
@@ -288,4 +290,5 @@ export const OBSERVABLE_TYPES = [
     icon: "mdi-bank"
   }
 ];
-import("@/definitions/private/privateObservableDefinitions.js").catch(e => Promise.reject("Module " + modulePath + " not found.")).then(module => { OBSERVABLE_TYPES.push(...module.OBSERVABLE_TYPES); })
+
+OBSERVABLE_TYPES.push(...PRIVATE_OBSERVABLE_TYPES);

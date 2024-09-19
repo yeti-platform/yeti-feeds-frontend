@@ -1,3 +1,5 @@
+import { PRIVATE_INDICATOR_TYPES } from "@/definitions/private/privateIndicatorDefinitions.js";
+
 export const DIAMOND_MODEL = ["adversary", "capability", "infrastructure", "victim"];
 export const QUERY_TYPES = ["opensearch", "osquery", "sql", "splunk", "censys", "shodan"];
 
@@ -251,4 +253,4 @@ export const INDICATOR_TYPES = [
   }
 ];
 
-import("@/definitions/private/privateIndicatorDefinitions.js").catch(e => Promise.reject("Module " + modulePath + " not found.")).then(module => { INDICATOR_TYPES.push(...module.INDICATOR_TYPES); })
+INDICATOR_TYPES.push(...PRIVATE_INDICATOR_TYPES);

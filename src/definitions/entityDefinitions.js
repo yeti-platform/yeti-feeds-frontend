@@ -1,3 +1,5 @@
+import { PRIVATE_ENTITY_TYPES } from "@/definitions/private/privateEntityDefinitions.js";
+
 export const ENTITY_TYPES = [
   {
     name: "Investigation",
@@ -430,4 +432,4 @@ export const ENTITY_TYPES = [
   }
 ];
 
-import("@/definitions/private/privateEntityDefinitions.js").catch(e => Promise.reject("Module " + modulePath + " not found.")).then(module => { ENTITY_TYPES.push(...module.ENTITY_TYPES); })
+ENTITY_TYPES.push(...PRIVATE_ENTITY_TYPES);

@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "vite --host",
+    "prebuild": "./prebuild_script.sh",
     "build": "vite build",
     "build-check": "vue-tsc --noEmit && vite build",
     "preview": "vite preview",
