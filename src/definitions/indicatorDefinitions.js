@@ -250,3 +250,5 @@ export const INDICATOR_TYPES = [
     icon: "mdi-xml"
   }
 ];
+
+import("@/definitions/private/privateIndicatorDefinitions.js").catch(e => Promise.reject("Module " + modulePath + " not found.")).then(module => { INDICATOR_TYPES.push(...module.INDICATOR_TYPES); })

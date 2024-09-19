@@ -429,3 +429,5 @@ export const ENTITY_TYPES = [
     icon: "mdi-medical-bag"
   }
 ];
+
+import("@/definitions/private/privateEntityDefinitions.js").catch(e => Promise.reject("Module " + modulePath + " not found.")).then(module => { ENTITY_TYPES.push(...module.ENTITY_TYPES); })
