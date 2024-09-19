@@ -288,3 +288,4 @@ export const OBSERVABLE_TYPES = [
     icon: "mdi-bank"
   }
 ];
+import("@/definitions/private/privateObservableDefinitions.js").catch(e => Promise.reject("Module " + modulePath + " not found.")).then(module => { OBSERVABLE_TYPES.push(...module.OBSERVABLE_TYPES); })
