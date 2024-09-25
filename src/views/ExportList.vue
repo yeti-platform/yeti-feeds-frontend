@@ -92,9 +92,10 @@
         <v-btn color="primary" density="compact" v-if="!selectedExport.id" @click="newExport">Add new export</v-btn>
         <v-btn color="light" density="compact" @click="selectedExport = {}">Clear</v-btn>
       </v-btn-group>
-      <p>
-        Templates are read from
-        <code>{{ appStore.systemConfig?.system.templates_dir }}/*.jinja2</code>
+      <p class="mt-4">
+        Available templates are loaded from
+        <code>{{ appStore.systemConfig?.system.templates_dir }}/*.jinja2</code>. If you're using Docker mounts, check
+        your Docker config file.
       </p>
     </v-sheet>
   </v-navigation-drawer>
