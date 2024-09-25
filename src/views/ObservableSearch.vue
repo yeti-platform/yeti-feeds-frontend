@@ -204,7 +204,7 @@ export default {
     },
     loadExportTemplates() {
       axios
-        .post("/api/v2/templates/search", { query: { name: "" } })
+        .post("/api/v2/templates/search", { name: "" })
         .then(response => {
           this.exportTemplates = response.data.templates;
         })

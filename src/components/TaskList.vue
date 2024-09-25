@@ -47,6 +47,10 @@
             >
           </td>
 
+          <td v-if="displayColumn('template_name')">
+            {{ item.template_name }}
+          </td>
+
           <td v-if="displayColumn('frequency')">
             {{ moment.duration(item.frequency).humanize() }}
           </td>
@@ -150,6 +154,7 @@ export default {
       defaultHeaders: [
         { key: "name", title: "Name", sortable: true },
         { key: "acts_on", title: "Acts On" },
+        { key: "template_name", title: "Template name" },
         { key: "frequency", title: "Runs every", sortable: true },
         { key: "last_run", title: "Last run", width: "180px", sortable: true },
         { key: "description", title: "Description" },
