@@ -1,7 +1,11 @@
 <template>
   <div>
     <v-card class="ma-5" title="Feeds" subtitle="Feeds that ingest data into Yeti.">
-      <task-list task-type="feed"> </task-list>
+      <task-list
+        task-type="feed"
+        :display-columns="['name', 'frequency', 'last_run', 'description', 'status', 'toggle', 'refresh']"
+      >
+      </task-list>
     </v-card>
   </div>
 </template>

@@ -14,7 +14,6 @@ import DFIQSearch from "@/views/DFIQSearch.vue";
 import FeedList from "@/views/FeedList.vue";
 import AnalyticsList from "@/views/AnalyticsList.vue";
 import ExportList from "@/views/ExportList.vue";
-import ExportTemplates from "@/views/ExportTemplates.vue";
 import TaskList from "@/components/TaskList.vue";
 import UserProfile from "@/views/UserProfile.vue";
 import UserAdmin from "@/views/UserAdmin.vue";
@@ -151,18 +150,6 @@ const routes = [
         path: "",
         name: "Exports",
         component: ExportList,
-        props: true
-      }
-    ]
-  },
-  {
-    path: "/exports/templates",
-    component: Default,
-    children: [
-      {
-        path: "",
-        name: "ExportTemplates",
-        component: ExportTemplates,
         props: true
       }
     ]
