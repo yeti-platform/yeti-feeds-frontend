@@ -476,14 +476,12 @@ export default {
       }
     },
 
-  },
-
-//
-// utils
-//
+    //
+    // utils
+    //
 
     getIconForType(type: string) {
-      return this.objectTypes.find(objectType => objectType.type === type)?.icon;
+        return this.objectTypes.find(objectType => objectType.type === type)?.icon;
     },
 
     getObjectDetails() {
@@ -510,6 +508,9 @@ export default {
         })
         .finally();
     },
+
+  
+  },
 
 };
 
