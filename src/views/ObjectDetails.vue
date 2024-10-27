@@ -185,6 +185,10 @@
               ><v-icon size="x-large" start>mdi-flash</v-icon>Related indicators
               <v-chip class="ml-3" density="comfortable"> {{ relatedObjectTabCount["indicators"] }}</v-chip></v-tab
             >
+            <v-tab value="graph" @click="emitRefreshGraph"
+              ><v-icon @click="emitRefreshGraph" size="x-large" start>mdi-graph</v-icon>Graph
+              </v-tab
+            >
             <v-tab value="related-observables" href="#observables"
               ><v-icon size="x-large" start>mdi-text-search</v-icon>Related observables
               <v-chip class="ml-3" density="comfortable">{{ relatedObjectTabCount["observables"] }}</v-chip></v-tab
@@ -229,6 +233,13 @@
               />
             </v-window-item>
 
+            <v-window-item value="graph" eager>
+              <graph-objects
+                :id="id"
+                :source-type="typeToEndpointMapping[objectType]"
+              />
+            </v-window-item>
+
             <v-window-item value="related-observables" eager class="my-4">
               <direct-neighbors
                 :id="id"
@@ -270,6 +281,7 @@ import axios from "axios";
 import RelatedObjects from "@/components/RelatedObjects.vue";
 import DFIQTree from "@/components/DFIQTree.vue";
 import DirectNeighbors from "@/components/DirectNeighbors.vue";
+import GraphObjects from "@/components/GraphObjects.vue";
 import EditObject from "@/components/EditObject.vue";
 import EditDFIQObject from "@/components/DFIQ/EditDFIQObject.vue";
 import LinkObject from "@/components/LinkObject.vue";
@@ -305,7 +317,8 @@ export default {
     LinkObject,
     YetiMarkdown,
     YetiDFIQApproachTemplate,
-    DFIQTree
+    DFIQTree,
+    GraphObjects
   },
   data() {
     return {
@@ -333,7 +346,13 @@ export default {
     };
   },
   methods: {
+    emitRefreshGraph() {
+      console.log("Emitting refreshGraph");
+      let refreshGraphViewEvent = new Event('refreshGraphView');
+      window.dispatchEvent(refreshGraphViewEvent);
+    },
     getObjectDetails() {
+      console.log(`/api/v2/${this.typeToEndpointMapping[this.objectType]}/${this.id}`)
       axios
         .get(`/api/v2/${this.typeToEndpointMapping[this.objectType]}/${this.id}`)
         .then(response => {
