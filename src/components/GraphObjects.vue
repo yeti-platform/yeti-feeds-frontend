@@ -397,27 +397,6 @@ export default {
         const positions = circlepack(graph);
         animateNodes(graph, positions, { duration: 2000 });
       }
-      // backup
-      // else if (this.graph_layout == "Force Atlas") {
-      //   console.log("Apply Force Atlas layout");
-      //   if (graph.size > 1000) {
-      //     const settings = forceAtlas2.inferSettings(graph);
-      //     const positions = forceAtlas2(graph, {
-      //       iterations: 50,
-      //     });
-      //     const fa2Layout = new FA2Layout(graph, { iteration: 50, settings: settings });
-      //     fa2Layout.start();
-      //   }
-      //   else {
-      //     const positions = forceLayout(graph, {
-      //       maxIterations: 50,
-      //       settings: {
-      //         gravity: 10
-      //       }
-      //     })
-      //     forceLayout.assign(graph, {maxIterations: 50});
-      //   }
-      // }
     },
 
     //
