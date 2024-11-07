@@ -115,6 +115,13 @@ let shadow_container: HTMLDivElement;
 // we need to use the event retargeting feature of the shadow dom
 // https://pm.dartus.fr/posts/2021/shadow-dom-and-event-propagation/
 
+const DEFAULT_COLOR_MAP = {
+  observable: "#A4A2A2",
+  entity: "#72777B",
+  indicator: "#83929D",
+  dfiq: "#9AA3A0"
+};
+
 export default {
   name: "GraphObjects",
 
@@ -475,7 +482,7 @@ export default {
         const angle = (++i * 2 * Math.PI) / graph.order;
         x = 100 * Math.cos(angle);
         y = 100 * Math.sin(angle);
-        graph.addNode(id, { x: x, y: y, size: 15, label: label, color: "#7E57C2", ...data });
+        graph.addNode(id, { x: x, y: y, size: 15, label: label, color: this.getColorForObject(data), ...data });
       }
 
       for (const path of neighbors.paths) {
@@ -499,6 +506,14 @@ export default {
 
     getIconForType(type: string) {
       return this.objectTypes.find(objectType => objectType.type === type)?.icon;
+    },
+
+    getColorForObject(node) {
+      console.log("color", node);
+      return (
+        this.objectTypes.find(objectType => objectType.type === node.object_type)?.color ||
+        DEFAULT_COLOR_MAP[node.root_type]
+      );
     },
 
     getObjectDetails() {

@@ -55,7 +55,8 @@ export const DFIQ_TYPES = [
       }
     ],
     filterAliases: ["dfiq_tags", "dfiq_id"],
-    icon: "mdi-script"
+    icon: "mdi-script",
+    color: "#9A8F8A"
   },
   {
     name: "Facet",
@@ -112,7 +113,8 @@ export const DFIQ_TYPES = [
       }
     ],
     filterAliases: ["dfiq_tags", "dfiq_id", "parent_ids"],
-    icon: "mdi-magnify-scan"
+    icon: "mdi-magnify-scan",
+    color: "#8D8681"
   },
   {
     name: "Question",
@@ -169,7 +171,8 @@ export const DFIQ_TYPES = [
       }
     ],
     filterAliases: ["dfiq_tags", "dfiq_id", "parent_ids"],
-    icon: "mdi-help"
+    icon: "mdi-help",
+    color: "#68757A"
   }
 ];
 
