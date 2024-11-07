@@ -186,7 +186,7 @@
               <v-chip class="ml-3" density="comfortable"> {{ relatedObjectTabCount["indicators"] }}</v-chip></v-tab
             >
             <v-tab value="related-graph" @click="emitRefreshGraph" href="#graph"
-              ><v-icon @click="emitRefreshGraph" size="x-large" start>mdi-graph</v-icon>Graph
+              ><v-icon @click="emitRefreshGraph" size="x-large" start>mdi-graph</v-icon>Graph (Beta)
             </v-tab>
             <v-tab value="related-observables" href="#observables"
               ><v-icon size="x-large" start>mdi-text-search</v-icon>Related observables

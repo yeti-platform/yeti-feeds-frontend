@@ -162,7 +162,7 @@
               <v-chip class="ml-3" density="comfortable">{{ observable?.context.length }}</v-chip></v-tab
             >
             <v-tab value="graph" @click="emitRefreshGraph"
-              ><v-icon @click="emitRefreshGraph" size="x-large" start>mdi-graph</v-icon>Graph
+              ><v-icon @click="emitRefreshGraph" size="x-large" start>mdi-graph</v-icon>Graph (Beta)
               </v-tab
             >
             <v-tab value="related-observables"
