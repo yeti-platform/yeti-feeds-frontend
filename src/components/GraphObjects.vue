@@ -64,28 +64,21 @@
 
 <script lang="ts" setup>
 
+import { Sigma } from "sigma";
 import { MultiGraph } from "graphology"; 
 import EdgeCurveProgram from "@sigma/edge-curve";
-import forceAtlas2 from 'graphology-layout-forceatlas2';
-import FA2Layout from 'graphology-layout-forceatlas2/worker';
-import forceLayout from 'graphology-layout-force';
 import { animateNodes } from "sigma/utils";
 import { circlepack, circular, random } from "graphology-layout";
 import { EdgeArrowProgram } from "sigma/rendering";
 import noverlap from 'graphology-layout-noverlap';
 
-// import { h, render } from '@vue/runtime-dom'
-import { createVNode, render } from 'vue'
-
+// These imports will be supported in the future
 // import { random } from "graphology-layout";
 // import FA2Layout from "graphology-layout-forceatlas2/worker";
 // import forceAtlas2 from "graphology-layout-forceatlas2";
-import Sigma from "sigma";
 // import { NodeImageProgram } from "@sigma/node-image";
-import ForceSupervisor from "graphology-layout-force/worker";
+// import ForceSupervisor from "graphology-layout-force/worker";
 import axios from "axios";
-
-import { getCurrentInstance } from 'vue'
 
 import { ENTITY_TYPES } from "@/definitions/entityDefinitions.js";
 import { INDICATOR_TYPES } from "@/definitions/indicatorDefinitions.js";
@@ -94,11 +87,7 @@ import { DFIQ_TYPES } from "@/definitions/dfiqDefinitions.js";
 
 import GraphTooltip from "@/components/GraphTooltip.vue";
 
-import { defineCustomElement } from 'vue'
-import { exportNamespaceSpecifier } from "@babel/types";
-import { MouseCoords } from "sigma/dist/declarations/src/types";
-import { title } from "process";
-import { string } from "yaml/dist/schema/common/string";
+import MouseCoords from "sigma";
 
 </script>
 
