@@ -161,6 +161,10 @@
               ><v-icon size="x-large" start>mdi-information</v-icon>Context
               <v-chip class="ml-3" density="comfortable">{{ observable?.context.length }}</v-chip></v-tab
             >
+            <v-tab value="graph" @click="emitRefreshGraph"
+              ><v-icon @click="emitRefreshGraph" size="x-large" start>mdi-graph</v-icon>Graph (Beta)
+              </v-tab
+            >
             <v-tab value="related-observables"
               ><v-icon size="x-large" start>mdi-graph</v-icon>Related observables
               <v-chip class="ml-3" density="comfortable">{{ totalRelatedObservables }}</v-chip></v-tab
@@ -190,6 +194,12 @@
                 </v-table>
               </v-card>
               <div v-if="observable?.context.length == 0"><em>No context for observable</em></div>
+            </v-window-item>
+            <v-window-item value="graph">
+              <graph-objects
+                :id="id"
+                source-type="observables"
+              />
             </v-window-item>
             <v-window-item value="related-observables" eager>
               <direct-neighbors
@@ -242,6 +252,7 @@ import TaskList from "@/components/TaskList.vue";
 import RelatedObjects from "@/components/RelatedObjects.vue";
 import EditObject from "@/components/EditObject.vue";
 import DirectNeighbors from "@/components/DirectNeighbors.vue";
+import GraphObjects from "@/components/GraphObjects.vue";
 
 import LinkObject from "@/components/LinkObject.vue";
 import LinkObservables from "@/components/LinkObservables.vue";
@@ -265,7 +276,8 @@ export default {
     RelatedObjects,
     EditObject,
     LinkObject,
-    LinkObservables
+    LinkObservables,
+    GraphObjects
   },
   data() {
     return {
@@ -285,6 +297,11 @@ export default {
     };
   },
   methods: {
+    emitRefreshGraph() {
+      console.log("Emitting refreshGraph");
+      let refreshGraphViewEvent = new Event('refreshGraphView');
+      window.dispatchEvent(refreshGraphViewEvent);
+    },
     copyText(text) {
       navigator.clipboard.writeText(text);
       this.$eventBus.emit("displayMessage", {
