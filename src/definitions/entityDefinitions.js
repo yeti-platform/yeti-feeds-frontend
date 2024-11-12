@@ -26,9 +26,9 @@ export const ENTITY_TYPES = [
       { field: "reference", type: "text", label: "Reference", displayList: true, editable: true },
       { field: "tags", type: "list", label: "Tags", displayList: true, editable: false },
       {
-        field: "related_observables_count",
+        field: "total_links",
         type: "text",
-        label: "Related observables",
+        label: "Total links",
         displayList: true,
         editable: false,
         sortable: true
@@ -63,9 +63,9 @@ export const ENTITY_TYPES = [
       },
       { field: "tags", type: "list", label: "Tags", displayList: true, editable: false },
       {
-        field: "related_observables_count",
+        field: "total_links",
         type: "text",
-        label: "Related observables",
+        label: "Total links",
         displayList: true,
         editable: false,
         sortable: true
@@ -102,9 +102,9 @@ export const ENTITY_TYPES = [
       },
       { field: "tags", type: "list", label: "Tags", displayList: true, editable: false },
       {
-        field: "related_observables_count",
+        field: "total_links",
         type: "text",
-        label: "Related observables",
+        label: "Total links",
         displayList: true,
         editable: false,
         sortable: true
@@ -141,9 +141,9 @@ export const ENTITY_TYPES = [
       },
       { field: "tags", type: "list", label: "Tags", displayList: true, editable: false },
       {
-        field: "related_observables_count",
+        field: "total_links",
         type: "text",
-        label: "Related observables",
+        label: "Total links",
         displayList: true,
         editable: false,
         sortable: true
@@ -180,9 +180,9 @@ export const ENTITY_TYPES = [
       },
       { field: "tags", type: "list", label: "Tags", displayList: true, editable: false },
       {
-        field: "related_observables_count",
+        field: "total_links",
         type: "text",
-        label: "Related observables",
+        label: "Total links",
         displayList: true,
         editable: false,
         sortable: true
@@ -221,9 +221,9 @@ export const ENTITY_TYPES = [
       },
       { field: "tags", type: "list", label: "Tags", displayList: true, editable: false },
       {
-        field: "related_observables_count",
+        field: "total_links",
         type: "text",
-        label: "Related observables",
+        label: "Total links",
         displayList: true,
         editable: false,
         sortable: true
@@ -277,9 +277,9 @@ export const ENTITY_TYPES = [
       },
       { field: "tags", type: "list", label: "Tags", displayList: true, editable: false },
       {
-        field: "related_observables_count",
+        field: "total_links",
         type: "text",
-        label: "Related observables",
+        label: "Total links",
         displayList: true,
         editable: false,
         sortable: true
@@ -315,9 +315,9 @@ export const ENTITY_TYPES = [
       },
       { field: "tags", type: "list", label: "Tags", displayList: true, editable: false },
       {
-        field: "related_observables_count",
+        field: "total_links",
         type: "text",
-        label: "Related observables",
+        label: "Total links",
         displayList: true,
         editable: false,
         sortable: true
@@ -353,9 +353,9 @@ export const ENTITY_TYPES = [
       },
       { field: "tags", type: "list", label: "Tags", displayList: true, editable: false },
       {
-        field: "related_observables_count",
+        field: "total_links",
         type: "text",
-        label: "Related observables",
+        label: "Total links",
         displayList: true,
         editable: false,
         sortable: true
@@ -391,9 +391,9 @@ export const ENTITY_TYPES = [
       { field: "title", type: "text", label: "Title", displayList: true, editable: true, sortable: true },
       { field: "tags", type: "list", label: "Tags", displayList: true, editable: false },
       {
-        field: "related_observables_count",
+        field: "total_links",
         type: "text",
-        label: "Related observables",
+        label: "Total links",
         displayList: true,
         editable: false,
         sortable: true
@@ -428,9 +428,9 @@ export const ENTITY_TYPES = [
       },
       { field: "tags", type: "list", label: "Tags", displayList: true, editable: false },
       {
-        field: "related_observables_count",
+        field: "total_links",
         type: "text",
-        label: "Related observables",
+        label: "Total links",
         displayList: true,
         editable: false,
         sortable: true
