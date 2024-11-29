@@ -17,6 +17,14 @@
       subtitle="Analytics that trigger when an observable is added to the Yeti database."
     >
     </v-card>
+    <v-card
+      class="ma-5"
+      title="Event"
+      subtitle="Tasks triggered based on published events."
+    >
+    <task-list task-type="event" :display-columns="['name', 'acts_on', 'description', 'toggle']">
+    </task-list>
+    </v-card>
   </div>
 </template>
 
