@@ -40,13 +40,15 @@
       </template>
       <template v-slot:item.context="{ item }">
         <v-chip
-          v-for="context in item.context"
-          color="green"
-          :text="context.source"
-          class="mx-1"
           label
+          color="green"
           size="small"
-        ></v-chip>
+          class="mx-1"
+          v-for="source in new Set(item.context.map(c => c.source))"
+          v-bind:key="source"
+        >
+          {{  source }}
+        </v-chip>
       </template>
       <template v-slot:item.created="{ item }"> {{ moment(item.created).format("YYYY-MM-DD HH:mm:ss") }} </template>
     </v-data-table-server>
