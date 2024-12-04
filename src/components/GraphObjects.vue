@@ -488,7 +488,6 @@ export default {
     },
 
     getColorForObject(node) {
-      console.log("color", node);
       return (
         this.objectTypes.find(objectType => objectType.type === node.object_type)?.color ||
         DEFAULT_COLOR_MAP[node.root_type]
