@@ -77,7 +77,8 @@ export default {
   methods: {
     saveObject() {
       let patchRequest = {
-        type: this.object.type
+        type: this.object.type,
+        id: this.object.id
       };
       this.editableFields.forEach(field => {
         patchRequest[field.field] = this.localObject[field.field];
