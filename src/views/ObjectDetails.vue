@@ -62,6 +62,20 @@
         <v-card class="ma-2" variant="flat">
           <v-card-title class="d-flex"
             ><span class="me-auto"> Info</span>
+
+            <v-dialog>
+              <template v-slot:activator="{ props }">
+                <v-btn class="me-2" variant="tonal" color="primary" size="small" v-bind="props" append-icon="mdi-clock">
+                  timeline
+                </v-btn>
+              </template>
+              <template v-slot:default="{ isActive }">
+                <v-sheet>
+                  <timeline v-if="object" :object="object" :is-active="isActive" />
+                </v-sheet>
+              </template>
+            </v-dialog>
+
             <v-dialog :width="editWidth" :fullscreen="fullScreenEdit">
               <template v-slot:activator="{ props }">
                 <v-btn class="me-2" variant="tonal" color="primary" size="small" v-bind="props" append-icon="mdi-pencil"
@@ -291,6 +305,7 @@ import { INDICATOR_TYPES } from "@/definitions/indicatorDefinitions.js";
 import { DFIQ_TYPES } from "@/definitions/dfiqDefinitions.js";
 
 import moment from "moment";
+import Timeline from "@/components/Timeline.vue";
 </script>
 
 <script lang="ts">
@@ -314,7 +329,8 @@ export default {
     YetiMarkdown,
     YetiDFIQApproachTemplate,
     DFIQTree,
-    GraphObjects
+    GraphObjects,
+    Timeline
   },
   data() {
     return {
@@ -348,7 +364,6 @@ export default {
       window.dispatchEvent(refreshGraphViewEvent);
     },
     getObjectDetails() {
-      console.log(`/api/v2/${this.typeToEndpointMapping[this.objectType]}/${this.id}`);
       axios
         .get(`/api/v2/${this.typeToEndpointMapping[this.objectType]}/${this.id}`)
         .then(response => {
