@@ -10,10 +10,10 @@
     "lint": "eslint . --fix --ignore-path .gitignore"
   },
   "dependencies": {
+    "axios": "^1.7.4",
     "@date-io/moment": "^3.0.0",
     "@mdi/font": "^7.4.47",
     "@sigma/edge-curve": "^3.0.0-beta.16",
-    "axios": "^1.6.2",
     "core-js": "^3.29.0",
     "dompurify": "^3.0.6",
     "graphology": "^0.25.4",
