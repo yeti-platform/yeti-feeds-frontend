@@ -1,3 +1,7 @@
+import { PRIVATE_ENTITY_TYPES } from "@/definitions/private/privateEntityDefinitions.js";
+import { PRIVATE_INDICATOR_TYPES } from "@/definitions/private/privateIndicatorDefinitions.js";
+import { PRIVATE_OBSERVABLE_TYPES } from "@/definitions/private/privateObservableDefinitions.js";
+
 export const LINK_SUGGESTIONS = {
   observable: [],
   "attack-pattern": [
@@ -107,3 +111,18 @@ export const LINK_SUGGESTIONS = {
   facet: [{ verb: "Uses DFIQ question", targets: ["question"] }],
   question: [{ verb: "Uses indicator", targets: ["indicator"] }]
 };
+
+for (const entityType of PRIVATE_ENTITY_TYPES) {
+  console.log(entityType);
+  LINK_SUGGESTIONS[entityType.type] = [];
+}
+
+for (const indicatorType of PRIVATE_INDICATOR_TYPES) {
+  console.log(indicatorType);
+  LINK_SUGGESTIONS[indicatorType.type] = [];
+}
+
+for (const observableType of PRIVATE_OBSERVABLE_TYPES) {
+  console.log(observableType);
+  LINK_SUGGESTIONS[observableType.type] = [];
+}

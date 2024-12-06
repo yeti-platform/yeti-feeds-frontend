@@ -214,6 +214,17 @@ export const OBSERVABLE_TYPES = [
     icon: "mdi-folder-multiple-outline"
   },
   {
+    name: "Container Image",
+    type: "container_image",
+    fields: [
+      { field: "value", type: "text", label: "Value", displayList: true, editable: true },
+      { field: "tags", type: "list", label: "tags", displayList: true, editable: false },
+      { field: "created", type: "datetime", label: "Created", displayList: true, editable: false },
+      { field: "registry", type: "text", label: "Registry", displayList: false, editable: true },
+    ],
+    icon: "mdi-docker"
+  },
+  {
     name: "Docker Image",
     type: "docker_image",
     fields: [

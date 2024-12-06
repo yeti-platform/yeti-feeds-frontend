@@ -44,7 +44,8 @@ export const INDICATOR_TYPES = [
       { field: "description", type: "longtext", label: "Description", displayList: false, editable: true }
     ],
     filterAliases: ["aliases"],
-    icon: "mdi-script-text-outline"
+    icon: "mdi-script-text-outline",
+    color: "#80989E"
   },
   {
     name: "Regular expression",
@@ -84,7 +85,8 @@ export const INDICATOR_TYPES = [
       { field: "description", type: "longtext", label: "Description", displayList: false, editable: true }
     ],
     filterAliases: [],
-    icon: "mdi-regex"
+    icon: "mdi-regex",
+    color: "#A9A99D"
   },
   {
     name: "Query",
@@ -132,7 +134,8 @@ export const INDICATOR_TYPES = [
       { field: "description", type: "longtext", label: "Description", displayList: false, editable: true }
     ],
     filterAliases: ["target_systems"],
-    icon: "mdi-database-search"
+    icon: "mdi-database-search",
+    color: "#8B847C"
   },
   {
     name: "Yara",
@@ -171,7 +174,8 @@ export const INDICATOR_TYPES = [
       { field: "description", type: "longtext", label: "Description", displayList: false, editable: true }
     ],
     filterAliases: [],
-    icon: "mdi-code-braces"
+    icon: "mdi-code-braces",
+    color: "#96A4A2"
   },
   {
     name: "Suricata",
@@ -210,7 +214,8 @@ export const INDICATOR_TYPES = [
       { field: "description", type: "longtext", label: "Description", displayList: false, editable: true }
     ],
     filterAliases: [],
-    icon: "mdi-security-network"
+    icon: "mdi-security-network",
+    color: "#99ADA6"
   },
   {
     name: "Sigma",
@@ -249,7 +254,8 @@ export const INDICATOR_TYPES = [
       { field: "description", type: "longtext", label: "Description", displayList: false, editable: true }
     ],
     filterAliases: [],
-    icon: "mdi-xml"
+    icon: "mdi-xml",
+    color: "#8E9D99"
   }
 ];
 

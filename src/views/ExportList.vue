@@ -6,6 +6,17 @@
     ref="exportList"
     @taskSelected="task => selectExport(task)"
     @taskDownload="task => downloadExport(task)"
+    :display-columns="[
+      'name',
+      'template_name',
+      'acts_on',
+      'frequency',
+      'last_run',
+      'description',
+      'status',
+      'toggle',
+      'refresh'
+    ]"
   >
   </task-list>
 
@@ -81,16 +92,11 @@
         <v-btn color="primary" density="compact" v-if="!selectedExport.id" @click="newExport">Add new export</v-btn>
         <v-btn color="light" density="compact" @click="selectedExport = {}">Clear</v-btn>
       </v-btn-group>
-      <v-btn
-        color="blue-darken-1"
-        density="compact"
-        variant="text"
-        to="/exports/templates"
-        target="_blank"
-        class="pa-0 mt-5"
-      >
-        Open new template page
-      </v-btn>
+      <p class="mt-4">
+        Available templates are loaded from
+        <code>{{ appStore.systemConfig?.system.templates_dir }}/*.jinja2</code>. If you're using Docker mounts, check
+        your Docker config file.
+      </p>
     </v-sheet>
   </v-navigation-drawer>
 </template>
@@ -100,6 +106,7 @@ import { OBSERVABLE_TYPES } from "@/definitions/observableDefinitions.js";
 import axios from "axios";
 import TaskList from "@/components/TaskList.vue";
 import moment from "moment";
+import { useAppStore } from "@/store/app";
 </script>
 
 <script lang="ts">
@@ -117,11 +124,13 @@ export default {
       exportTemplates: [],
       selectedExport: {},
       timerListTemplates: null,
-      frequencyUnit: "hours"
+      frequencyUnit: "hours",
+      appStore: useAppStore()
     };
   },
   mounted() {
     this.listTemplates();
+    this.appStore.fetchSystemConfig();
   },
   created() {
     this.timerListTemplates = setInterval(this.listTemplates, 5000);
@@ -132,7 +141,7 @@ export default {
   methods: {
     listTemplates() {
       axios
-        .post("/api/v2/templates/search", { query: { name: "" } })
+        .post("/api/v2/templates/search", { name: "" })
         .then(response => (this.exportTemplates = response.data.templates.map(template => template.name)))
         .catch(error => {
           console.log(error);
