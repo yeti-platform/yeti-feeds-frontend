@@ -36,7 +36,7 @@
             <strong> {{ item.name }} </strong>
           </td>
           <td v-if="displayColumn('acts_on')">
-            <v-chip
+            <v-chip v-if="typeof item.acts_on === 'object'"
               size="small"
               class="mx-1"
               label
@@ -45,6 +45,11 @@
               :text="actType"
               >{{ actType }}</v-chip
             >
+            <v-chip v-else size="small" class="mx-1" label :text="item.acts_on">{{ item.acts_on }}</v-chip>
+          </td>
+
+          <td v-if="displayColumn('template_name')">
+            {{ item.template_name }}
           </td>
 
           <td v-if="displayColumn('frequency')">
@@ -150,6 +155,7 @@ export default {
       defaultHeaders: [
         { key: "name", title: "Name", sortable: true },
         { key: "acts_on", title: "Acts On" },
+        { key: "template_name", title: "Template name" },
         { key: "frequency", title: "Runs every", sortable: true },
         { key: "last_run", title: "Last run", width: "180px", sortable: true },
         { key: "description", title: "Description" },

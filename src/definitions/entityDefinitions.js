@@ -26,9 +26,9 @@ export const ENTITY_TYPES = [
       { field: "reference", type: "text", label: "Reference", displayList: true, editable: true },
       { field: "tags", type: "list", label: "Tags", displayList: true, editable: false },
       {
-        field: "related_observables_count",
+        field: "total_links",
         type: "text",
-        label: "Related observables",
+        label: "Total links",
         displayList: true,
         editable: false,
         sortable: true
@@ -36,7 +36,8 @@ export const ENTITY_TYPES = [
       { field: "description", type: "longtext", label: "Description", displayList: false, editable: true }
     ],
     filterAliases: ["reference"],
-    icon: "mdi-fire"
+    icon: "mdi-fire",
+    color: "#5F7A76"
   },
   {
     name: "Malware",
@@ -62,9 +63,9 @@ export const ENTITY_TYPES = [
       },
       { field: "tags", type: "list", label: "Tags", displayList: true, editable: false },
       {
-        field: "related_observables_count",
+        field: "total_links",
         type: "text",
-        label: "Related observables",
+        label: "Total links",
         displayList: true,
         editable: false,
         sortable: true
@@ -74,7 +75,8 @@ export const ENTITY_TYPES = [
       { field: "description", type: "longtext", label: "Description", displayList: false, editable: true }
     ],
     filterAliases: ["family", "aliases"],
-    icon: "mdi-spider"
+    icon: "mdi-spider",
+    color: "#7A6F6E"
   },
   {
     name: "Tool",
@@ -100,9 +102,9 @@ export const ENTITY_TYPES = [
       },
       { field: "tags", type: "list", label: "Tags", displayList: true, editable: false },
       {
-        field: "related_observables_count",
+        field: "total_links",
         type: "text",
-        label: "Related observables",
+        label: "Total links",
         displayList: true,
         editable: false,
         sortable: true
@@ -112,7 +114,8 @@ export const ENTITY_TYPES = [
       { field: "description", type: "longtext", label: "Description", displayList: false, editable: true }
     ],
     filterAliases: ["aliases"],
-    icon: "mdi-tools"
+    icon: "mdi-tools",
+    color: "#A5A58A"
   },
   {
     name: "Attack pattern",
@@ -138,9 +141,9 @@ export const ENTITY_TYPES = [
       },
       { field: "tags", type: "list", label: "Tags", displayList: true, editable: false },
       {
-        field: "related_observables_count",
+        field: "total_links",
         type: "text",
-        label: "Related observables",
+        label: "Total links",
         displayList: true,
         editable: false,
         sortable: true
@@ -150,7 +153,8 @@ export const ENTITY_TYPES = [
       { field: "description", type: "longtext", label: "Description", displayList: false, editable: true }
     ],
     filterAliases: ["aliases"],
-    icon: "mdi-flash"
+    icon: "mdi-flash",
+    color: "#6D8B92"
   },
   {
     name: "Threat actor",
@@ -176,9 +180,9 @@ export const ENTITY_TYPES = [
       },
       { field: "tags", type: "list", label: "Tags", displayList: true, editable: false },
       {
-        field: "related_observables_count",
+        field: "total_links",
         type: "text",
-        label: "Related observables",
+        label: "Total links",
         displayList: true,
         editable: false,
         sortable: true
@@ -190,7 +194,8 @@ export const ENTITY_TYPES = [
       { field: "last_seen", type: "date", label: "Last seen", displayList: true, editable: true, width: "200px" }
     ],
     filterAliases: ["aliases"],
-    icon: "mdi-incognito"
+    icon: "mdi-incognito",
+    color: "#92957A"
   },
   {
     name: "Intrusion set",
@@ -216,9 +221,9 @@ export const ENTITY_TYPES = [
       },
       { field: "tags", type: "list", label: "Tags", displayList: true, editable: false },
       {
-        field: "related_observables_count",
+        field: "total_links",
         type: "text",
-        label: "Related observables",
+        label: "Total links",
         displayList: true,
         editable: false,
         sortable: true
@@ -227,7 +232,8 @@ export const ENTITY_TYPES = [
       { field: "description", type: "longtext", label: "Description", displayList: false, editable: true }
     ],
     filterAliases: ["aliases"],
-    icon: "mdi-account-tie"
+    icon: "mdi-account-tie",
+    color: "#B8C2A6"
   },
   {
     name: "Campaign",
@@ -271,9 +277,9 @@ export const ENTITY_TYPES = [
       },
       { field: "tags", type: "list", label: "Tags", displayList: true, editable: false },
       {
-        field: "related_observables_count",
+        field: "total_links",
         type: "text",
-        label: "Related observables",
+        label: "Total links",
         displayList: true,
         editable: false,
         sortable: true
@@ -282,7 +288,8 @@ export const ENTITY_TYPES = [
       { field: "description", type: "longtext", label: "Description", displayList: false, editable: true }
     ],
     filterAliases: ["aliases"],
-    icon: "mdi-bullhorn"
+    icon: "mdi-bullhorn",
+    color: "#8C8A93"
   },
   {
     name: "Identity",
@@ -308,9 +315,9 @@ export const ENTITY_TYPES = [
       },
       { field: "tags", type: "list", label: "Tags", displayList: true, editable: false },
       {
-        field: "related_observables_count",
+        field: "total_links",
         type: "text",
-        label: "Related observables",
+        label: "Total links",
         displayList: true,
         editable: false,
         sortable: true
@@ -319,7 +326,8 @@ export const ENTITY_TYPES = [
       { field: "description", type: "longtext", label: "Description", displayList: false, editable: true }
     ],
     filterAliases: ["aliases"],
-    icon: "mdi-information-outline"
+    icon: "mdi-information-outline",
+    color: "#5A6B72"
   },
   {
     name: "Company",
@@ -345,9 +353,9 @@ export const ENTITY_TYPES = [
       },
       { field: "tags", type: "list", label: "Tags", displayList: true, editable: false },
       {
-        field: "related_observables_count",
+        field: "total_links",
         type: "text",
-        label: "Related observables",
+        label: "Total links",
         displayList: true,
         editable: false,
         sortable: true
@@ -355,7 +363,8 @@ export const ENTITY_TYPES = [
       { field: "description", type: "longtext", label: "Description", displayList: false, editable: true }
     ],
     filterAliases: [],
-    icon: "mdi-office-building"
+    icon: "mdi-office-building",
+    color: "#7B8284"
   },
   {
     name: "Vulnerability",
@@ -382,9 +391,9 @@ export const ENTITY_TYPES = [
       { field: "title", type: "text", label: "Title", displayList: true, editable: true, sortable: true },
       { field: "tags", type: "list", label: "Tags", displayList: true, editable: false },
       {
-        field: "related_observables_count",
+        field: "total_links",
         type: "text",
-        label: "Related observables",
+        label: "Total links",
         displayList: true,
         editable: false,
         sortable: true
@@ -392,7 +401,8 @@ export const ENTITY_TYPES = [
       { field: "description", type: "longtext", label: "Description", displayList: false, editable: true }
     ],
     filterAliases: ["title"],
-    icon: "mdi-shield-alert"
+    icon: "mdi-shield-alert",
+    color: "#A8B2B1"
   },
   {
     name: "Course of action",
@@ -418,9 +428,9 @@ export const ENTITY_TYPES = [
       },
       { field: "tags", type: "list", label: "Tags", displayList: true, editable: false },
       {
-        field: "related_observables_count",
+        field: "total_links",
         type: "text",
-        label: "Related observables",
+        label: "Total links",
         displayList: true,
         editable: false,
         sortable: true
@@ -428,7 +438,8 @@ export const ENTITY_TYPES = [
       { field: "description", type: "longtext", label: "Description", displayList: false, editable: true }
     ],
     filterAliases: [],
-    icon: "mdi-medical-bag"
+    icon: "mdi-medical-bag",
+    color: "#768585"
   }
 ];
 
