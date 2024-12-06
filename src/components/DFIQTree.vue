@@ -214,7 +214,22 @@
                   </div>
                 </span>
 
-                <span v-else>??{{ step.type }} {{ step.value }}</span>
+                <span v-else>
+                  <span class="me-2">{{ step.name }}</span>
+                  <v-chip density="compact" size="small">{{ step.type }}</v-chip>
+                  <div class="indicator-preview" @click="copyText(step.value)">
+                    <v-btn
+                      variant="text"
+                      size="small"
+                      color="grey"
+                      icon="mdi-content-copy"
+                      density="compact"
+                      class="me-2 clipboard-copy"
+                      title="Copy to clipboard"
+                      ripple
+                    /><code>{{ step.value }}</code>
+                  </div>
+                </span>
               </li>
             </ul>
           </li>
@@ -310,6 +325,7 @@ export default {
       if (step.type.match(/query/gi)) {
         return "mdi-database-search";
       }
+      return "mdi-cog";
     },
     getDetailsLink(treeItem) {
       return {
