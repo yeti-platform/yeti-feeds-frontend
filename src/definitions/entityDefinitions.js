@@ -8,7 +8,7 @@ export const ENTITY_TYPES = [
       {
         field: "created",
         type: "date",
-        label: "Created on",
+        label: "Created",
         displayList: true,
         editable: false,
         sortable: true,
@@ -33,7 +33,16 @@ export const ENTITY_TYPES = [
         editable: false,
         sortable: true
       },
-      { field: "description", type: "longtext", label: "Description", displayList: false, editable: true }
+      { field: "description", type: "longtext", label: "Description", displayList: false, editable: true },
+      {
+        field: "modified",
+        type: "date",
+        label: "Modified",
+        displayList: true,
+        editable: false,
+        sortable: true,
+        width: "200px"
+      }
     ],
     filterAliases: ["reference"],
     icon: "mdi-fire",
@@ -72,7 +81,16 @@ export const ENTITY_TYPES = [
       },
       { field: "family", type: "text", label: "Family", displayList: true, editable: true },
       { field: "aliases", type: "list", label: "Aliases", displayList: true, editable: true },
-      { field: "description", type: "longtext", label: "Description", displayList: false, editable: true }
+      { field: "description", type: "longtext", label: "Description", displayList: false, editable: true },
+      {
+        field: "modified",
+        type: "date",
+        label: "Modified",
+        displayList: true,
+        editable: false,
+        sortable: true,
+        width: "200px"
+      }
     ],
     filterAliases: ["family", "aliases"],
     icon: "mdi-spider",
@@ -111,7 +129,16 @@ export const ENTITY_TYPES = [
       },
       { field: "aliases", type: "list", label: "Aliases", displayList: true, editable: true },
       { field: "kill_chain_phases", type: "list", label: "Kill chain phases", displayList: true, editable: true },
-      { field: "description", type: "longtext", label: "Description", displayList: false, editable: true }
+      { field: "description", type: "longtext", label: "Description", displayList: false, editable: true },
+      {
+        field: "modified",
+        type: "date",
+        label: "Modified",
+        displayList: true,
+        editable: false,
+        sortable: true,
+        width: "200px"
+      }
     ],
     filterAliases: ["aliases"],
     icon: "mdi-tools",
@@ -150,7 +177,16 @@ export const ENTITY_TYPES = [
       },
       { field: "aliases", type: "list", label: "Aliases", displayList: true, editable: true },
       { field: "kill_chain_phases", type: "list", label: "Kill chain phases", displayList: true, editable: true },
-      { field: "description", type: "longtext", label: "Description", displayList: false, editable: true }
+      { field: "description", type: "longtext", label: "Description", displayList: false, editable: true },
+      {
+        field: "modified",
+        type: "date",
+        label: "Modified",
+        displayList: true,
+        editable: false,
+        sortable: true,
+        width: "200px"
+      }
     ],
     filterAliases: ["aliases"],
     icon: "mdi-flash",
@@ -191,7 +227,16 @@ export const ENTITY_TYPES = [
       { field: "description", type: "longtext", label: "Description", displayList: false, editable: true },
       { field: "threat_actor_types", type: "list", label: "Threat actor types", displayList: true, editable: true },
       { field: "first_seen", type: "date", label: "First seen", displayList: true, editable: true, width: "200px" },
-      { field: "last_seen", type: "date", label: "Last seen", displayList: true, editable: true, width: "200px" }
+      { field: "last_seen", type: "date", label: "Last seen", displayList: true, editable: true, width: "200px" },
+      {
+        field: "modified",
+        type: "date",
+        label: "Modified",
+        displayList: true,
+        editable: false,
+        sortable: true,
+        width: "200px"
+      }
     ],
     filterAliases: ["aliases"],
     icon: "mdi-incognito",
@@ -229,7 +274,16 @@ export const ENTITY_TYPES = [
         sortable: true
       },
       { field: "aliases", type: "list", label: "Aliases", displayList: true, editable: true },
-      { field: "description", type: "longtext", label: "Description", displayList: false, editable: true }
+      { field: "description", type: "longtext", label: "Description", displayList: false, editable: true },
+      {
+        field: "modified",
+        type: "date",
+        label: "Modified",
+        displayList: true,
+        editable: false,
+        sortable: true,
+        width: "200px"
+      }
     ],
     filterAliases: ["aliases"],
     icon: "mdi-account-tie",
@@ -285,7 +339,16 @@ export const ENTITY_TYPES = [
         sortable: true
       },
       { field: "aliases", type: "list", label: "Aliases", displayList: true },
-      { field: "description", type: "longtext", label: "Description", displayList: false, editable: true }
+      { field: "description", type: "longtext", label: "Description", displayList: false, editable: true },
+      {
+        field: "modified",
+        type: "date",
+        label: "Modified",
+        displayList: true,
+        editable: false,
+        sortable: true,
+        width: "200px"
+      }
     ],
     filterAliases: ["aliases"],
     icon: "mdi-bullhorn",
@@ -323,7 +386,16 @@ export const ENTITY_TYPES = [
         sortable: true
       },
       { field: "aliases", type: "list", label: "Aliases", displayList: true },
-      { field: "description", type: "longtext", label: "Description", displayList: false, editable: true }
+      { field: "description", type: "longtext", label: "Description", displayList: false, editable: true },
+      {
+        field: "modified",
+        type: "date",
+        label: "Modified",
+        displayList: true,
+        editable: false,
+        sortable: true,
+        width: "200px"
+      }
     ],
     filterAliases: ["aliases"],
     icon: "mdi-information-outline",
@@ -360,7 +432,16 @@ export const ENTITY_TYPES = [
         editable: false,
         sortable: true
       },
-      { field: "description", type: "longtext", label: "Description", displayList: false, editable: true }
+      { field: "description", type: "longtext", label: "Description", displayList: false, editable: true },
+      {
+        field: "modified",
+        type: "date",
+        label: "Modified",
+        displayList: true,
+        editable: false,
+        sortable: true,
+        width: "200px"
+      }
     ],
     filterAliases: [],
     icon: "mdi-office-building",
@@ -398,7 +479,16 @@ export const ENTITY_TYPES = [
         editable: false,
         sortable: true
       },
-      { field: "description", type: "longtext", label: "Description", displayList: false, editable: true }
+      { field: "description", type: "longtext", label: "Description", displayList: false, editable: true },
+      {
+        field: "modified",
+        type: "date",
+        label: "Modified",
+        displayList: true,
+        editable: false,
+        sortable: true,
+        width: "200px"
+      }
     ],
     filterAliases: ["title"],
     icon: "mdi-shield-alert",
@@ -435,7 +525,16 @@ export const ENTITY_TYPES = [
         editable: false,
         sortable: true
       },
-      { field: "description", type: "longtext", label: "Description", displayList: false, editable: true }
+      { field: "description", type: "longtext", label: "Description", displayList: false, editable: true },
+      {
+        field: "modified",
+        type: "date",
+        label: "Modified",
+        displayList: true,
+        editable: false,
+        sortable: true,
+        width: "200px"
+      }
     ],
     filterAliases: [],
     icon: "mdi-medical-bag",
