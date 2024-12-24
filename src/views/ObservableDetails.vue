@@ -77,6 +77,18 @@
       </v-col>
       <v-col cols="4">
         <v-sheet class="ma-2 d-flex justify-end bg-background" variant="flat">
+          <v-dialog>
+            <template v-slot:activator="{ props }">
+              <v-btn class="me-2" variant="tonal" color="primary" size="small" v-bind="props" append-icon="mdi-clock">
+                timeline
+              </v-btn>
+            </template>
+            <template v-slot:default="{ isActive }">
+              <v-sheet>
+                <timeline v-if="observable" :object="observable" :is-active="isActive" />
+              </v-sheet>
+            </template>
+          </v-dialog>
           <v-dialog :width="editWidth" :fullscreen="fullScreenEdit">
             <template v-slot:activator="{ props }">
               <v-btn class="me-2" variant="tonal" color="primary" size="small" v-bind="props" append-icon="mdi-pencil"
@@ -174,8 +186,7 @@
           <v-tabs v-model="activeTab" color="primary">
             <v-tab value="graph" @click="emitRefreshGraph"
               ><v-icon @click="emitRefreshGraph" size="x-large" start>mdi-graph</v-icon>Graph (Beta)
-              </v-tab
-            >
+            </v-tab>
             <v-tab value="related-observables"
               ><v-icon size="x-large" start>mdi-graph</v-icon>Related observables
               <v-chip class="ml-3" density="comfortable">{{ totalRelatedObservables }}</v-chip></v-tab
@@ -192,10 +203,7 @@
 
           <v-window v-model="activeTab" class="pa-5">
             <v-window-item value="graph">
-              <graph-objects
-                :id="id"
-                source-type="observables"
-              />
+              <graph-objects :id="id" source-type="observables" />
             </v-window-item>
             <v-window-item value="related-observables" eager>
               <direct-neighbors
@@ -259,6 +267,7 @@ import { OBSERVABLE_TYPES } from "@/definitions/observableDefinitions.js";
 import moment from "moment";
 import { VTreeview } from 'vuetify/labs/VTreeview';
 
+import Timeline from "@/components/Timeline.vue";
 </script>
 
 <script lang="ts">
@@ -276,7 +285,8 @@ export default {
     EditObject,
     LinkObject,
     LinkObservables,
-    GraphObjects
+    GraphObjects,
+    Timeline
   },
   data() {
     return {
@@ -298,7 +308,7 @@ export default {
   methods: {
     emitRefreshGraph() {
       console.log("Emitting refreshGraph");
-      let refreshGraphViewEvent = new Event('refreshGraphView');
+      let refreshGraphViewEvent = new Event("refreshGraphView");
       window.dispatchEvent(refreshGraphViewEvent);
     },
     copyText(text) {
