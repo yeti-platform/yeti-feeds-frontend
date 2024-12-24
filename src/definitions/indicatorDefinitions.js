@@ -41,7 +41,16 @@ export const INDICATOR_TYPES = [
         editable: true,
         width: "160px"
       },
-      { field: "description", type: "longtext", label: "Description", displayList: false, editable: true }
+      { field: "description", type: "longtext", label: "Description", displayList: false, editable: true },
+      {
+        field: "modified",
+        type: "date",
+        label: "Modified",
+        displayList: true,
+        editable: false,
+        sortable: true,
+        width: "200px"
+      }
     ],
     filterAliases: ["aliases"],
     icon: "mdi-script-text-outline",
@@ -82,7 +91,16 @@ export const INDICATOR_TYPES = [
         editable: true,
         width: "160px"
       },
-      { field: "description", type: "longtext", label: "Description", displayList: false, editable: true }
+      { field: "description", type: "longtext", label: "Description", displayList: false, editable: true },
+      {
+        field: "modified",
+        type: "date",
+        label: "Modified",
+        displayList: true,
+        editable: false,
+        sortable: true,
+        width: "200px"
+      }
     ],
     filterAliases: [],
     icon: "mdi-regex",
@@ -131,7 +149,16 @@ export const INDICATOR_TYPES = [
         displayList: true,
         editable: true
       },
-      { field: "description", type: "longtext", label: "Description", displayList: false, editable: true }
+      { field: "description", type: "longtext", label: "Description", displayList: false, editable: true },
+      {
+        field: "modified",
+        type: "date",
+        label: "Modified",
+        displayList: true,
+        editable: false,
+        sortable: true,
+        width: "200px"
+      }
     ],
     filterAliases: ["target_systems"],
     icon: "mdi-database-search",
@@ -171,7 +198,16 @@ export const INDICATOR_TYPES = [
         displayList: true,
         editable: true
       },
-      { field: "description", type: "longtext", label: "Description", displayList: false, editable: true }
+      { field: "description", type: "longtext", label: "Description", displayList: false, editable: true },
+      {
+        field: "modified",
+        type: "date",
+        label: "Modified",
+        displayList: true,
+        editable: false,
+        sortable: true,
+        width: "200px"
+      }
     ],
     filterAliases: [],
     icon: "mdi-code-braces",
@@ -211,7 +247,16 @@ export const INDICATOR_TYPES = [
         displayList: true,
         editable: true
       },
-      { field: "description", type: "longtext", label: "Description", displayList: false, editable: true }
+      { field: "description", type: "longtext", label: "Description", displayList: false, editable: true },
+      {
+        field: "modified",
+        type: "date",
+        label: "Modified",
+        displayList: true,
+        editable: false,
+        sortable: true,
+        width: "200px"
+      }
     ],
     filterAliases: [],
     icon: "mdi-security-network",
@@ -251,7 +296,16 @@ export const INDICATOR_TYPES = [
         displayList: true,
         editable: true
       },
-      { field: "description", type: "longtext", label: "Description", displayList: false, editable: true }
+      { field: "description", type: "longtext", label: "Description", displayList: false, editable: true },
+      {
+        field: "modified",
+        type: "date",
+        label: "Modified",
+        displayList: true,
+        editable: false,
+        sortable: true,
+        width: "200px"
+      }
     ],
     filterAliases: [],
     icon: "mdi-xml",

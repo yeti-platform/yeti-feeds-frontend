@@ -43,7 +43,6 @@ export const DFIQ_TYPES = [
       { field: "dfiq_tags", type: "list", label: "DFIQ tags", displayList: true, editable: true },
       { field: "contributors", type: "list", label: "Contributors", displayList: false, editable: true },
       { field: "description", type: "longtext", label: "Description", displayList: false, editable: true },
-      { field: "modified", type: "date", label: "Modified on", displayList: false, editable: false },
       {
         field: "created",
         type: "date",
@@ -51,6 +50,15 @@ export const DFIQ_TYPES = [
         displayList: true,
         editable: false,
         width: "200px",
+        sortable: true
+      },
+      {
+        field: "modified",
+        type: "date",
+        label: "Modified on",
+        width: "200px",
+        displayList: true,
+        editable: false,
         sortable: true
       }
     ],
@@ -101,7 +109,6 @@ export const DFIQ_TYPES = [
       { field: "parent_ids", type: "list", label: "Parent IDs", displayList: true, editable: true },
       { field: "description", type: "longtext", label: "Description", displayList: false, editable: true },
       { field: "contributors", type: "list", label: "Contributors", displayList: false, editable: true },
-      { field: "modified", type: "date", label: "Modified on", displayList: false, editable: false },
       {
         field: "created",
         type: "date",
@@ -109,6 +116,15 @@ export const DFIQ_TYPES = [
         displayList: true,
         editable: false,
         width: "200px",
+        sortable: true
+      },
+      {
+        field: "modified",
+        type: "date",
+        label: "Modified on",
+        width: "200px",
+        displayList: true,
+        editable: false,
         sortable: true
       }
     ],
@@ -159,7 +175,6 @@ export const DFIQ_TYPES = [
       { field: "parent_ids", type: "list", label: "Parent IDs", displayList: true, editable: true },
       { field: "contributors", type: "list", label: "Contributors", displayList: false, editable: true },
       { field: "description", type: "longtext", label: "Description", displayList: false, editable: true },
-      { field: "modified", type: "date", label: "Modified on", displayList: false, editable: false },
       {
         field: "created",
         type: "date",
@@ -167,6 +182,15 @@ export const DFIQ_TYPES = [
         displayList: true,
         editable: false,
         width: "200px",
+        sortable: true
+      },
+      {
+        field: "modified",
+        type: "date",
+        label: "Modified on",
+        width: "200px",
+        displayList: true,
+        editable: false,
         sortable: true
       }
     ],
