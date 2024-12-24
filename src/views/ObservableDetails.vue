@@ -47,7 +47,7 @@
                     v-for="source in new Set(observable?.context.map(c => c.source))"
                     v-bind:key="source"
                   >
-                    {{ source }}
+                  {{  source }}
                   </v-chip>
                 </td>
               </tr>
@@ -58,6 +58,21 @@
               </tr>
             </tbody>
           </v-table>
+          <v-card elevation="0" variant="outlined">
+            <v-card-title>Contexts</v-card-title>
+                  <v-treeview
+                    :items=ContextTreeView()
+                    item-value="id"
+                    activatable
+                    open-on-click
+                    open-all
+                    density="compact"
+                    max-height="300"
+                    width="100%"
+                  >
+                </v-treeview>
+              </v-card>
+
         </v-sheet>
       </v-col>
       <v-col cols="4">
@@ -157,10 +172,6 @@
       <v-container fluid>
         <v-sheet>
           <v-tabs v-model="activeTab" color="primary">
-            <v-tab value="context"
-              ><v-icon size="x-large" start>mdi-information</v-icon>Context
-              <v-chip class="ml-3" density="comfortable">{{ observable?.context.length }}</v-chip></v-tab
-            >
             <v-tab value="graph" @click="emitRefreshGraph"
               ><v-icon @click="emitRefreshGraph" size="x-large" start>mdi-graph</v-icon>Graph (Beta)
               </v-tab
@@ -180,21 +191,6 @@
           </v-tabs>
 
           <v-window v-model="activeTab" class="pa-5">
-            <v-window-item value="context" eager>
-              <v-card v-for="(context, index) in observable?.context" elevation="0" variant="outlined">
-                <v-card-title>{{ context.source }}</v-card-title>
-
-                <v-table>
-                  <tbody>
-                    <tr v-for="key in Object.keys(context).filter(k => k !== 'source')" v-bind:key="key">
-                      <th>{{ key }}</th>
-                      <td>{{ context[key] }}</td>
-                    </tr>
-                  </tbody>
-                </v-table>
-              </v-card>
-              <div v-if="observable?.context.length == 0"><em>No context for observable</em></div>
-            </v-window-item>
             <v-window-item value="graph">
               <graph-objects
                 :id="id"
@@ -261,9 +257,12 @@ import { ENTITY_TYPES } from "@/definitions/entityDefinitions.js";
 import { INDICATOR_TYPES } from "@/definitions/indicatorDefinitions.js";
 import { OBSERVABLE_TYPES } from "@/definitions/observableDefinitions.js";
 import moment from "moment";
+import { VTreeview } from 'vuetify/labs/VTreeview';
+
 </script>
 
 <script lang="ts">
+
 export default {
   props: {
     id: {
@@ -344,8 +343,97 @@ export default {
     toggleFullscreen(fullscreen: boolean) {
       this.fullScreenEdit = !this.fullScreenEdit;
       this.editWidth = fullscreen ? "100%" : "75%";
-    }
-  },
+    },
+
+    ContextTreeView() {
+      var items = []
+      var id = 0
+      var id = 0
+      if (this.observable === null) {
+        return items
+      }
+      function treeify(root, data) {
+        if (Array.isArray(data)) {
+          var count = 0
+          for (const item of data) {
+            var element = {"id": id++, "title": count.toString(), "children": []}
+            root.push(element)
+            count++
+            treeify(element.children, item);
+          }
+        }
+        else if (typeof data === 'object') {
+          for (const [key, value] of Object.entries(data))
+            {
+              if (key === "source") {
+                continue
+              }
+              if (value === null) {
+                var title = key + ": N/A"
+                var element = {"id": id++, "title": title}
+                root.push(element)
+              }
+              else if (Array.isArray(value) || typeof value === 'object') {
+                element = {"id": id++, "title": key, "children": []}
+                root.push(element)
+                treeify(element.children, value)
+              }
+              else {
+                var title = key + ": " + value
+                var element = {"id": id++, "title": title}
+                root.push(element)
+              }
+            }
+        }
+      }
+      for (const ctx of this.observable.context) {
+        var element = {"id": id++, "title": ctx.source, "children": [], "color": "warning"}
+        items.push(element)
+          treeify(element.children, ctx)
+      }
+      return items
+    },
+
+    jsonToTreeView(input: any) {
+      var id = 0
+      var items = []
+      treeify(items, input)
+      function treeify(root, data) {
+        if (Array.isArray(data)) {
+          var count = 0
+          for (const item of data) {
+            var element = {"id": id++, "title": count.toString(), "children": []}
+            root.push(element)
+            count++
+            treeify(element.children, item);
+          }
+        }
+        else if (typeof data === 'object') {
+          for (const [key, value] of Object.entries(data))
+            {
+              if (value === null) {
+                var title = key + ": N/A"
+                var element = {"id": id++, "title": title}
+                root.push(element)
+              }
+              else if (Array.isArray(value) || typeof value === 'object') {
+                element = {"id": id++, "title": key, "children": []}
+                root.push(element)
+                treeify(element.children, value)
+              }
+              else {
+                var title = key + ": " + value
+                var element = {"id": id++, "title": title}
+                root.push(element)
+              }
+            }
+        }
+      }
+      return items
+    },
+},
+
+
   computed: {
     getObservableTypeDefinition() {
       return this.observableTypes.find(typeDef => typeDef.type === this.observable?.type);
