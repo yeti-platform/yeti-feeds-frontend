@@ -403,44 +403,6 @@ export default {
       }
       return items
     },
-
-    jsonToTreeView(input: any) {
-      var id = 0
-      var items = []
-      treeify(items, input)
-      function treeify(root, data) {
-        if (Array.isArray(data)) {
-          var count = 0
-          for (const item of data) {
-            var element = {"id": id++, "title": count.toString(), "children": []}
-            root.push(element)
-            count++
-            treeify(element.children, item);
-          }
-        }
-        else if (typeof data === 'object') {
-          for (const [key, value] of Object.entries(data))
-            {
-              if (value === null) {
-                var title = key + ": N/A"
-                var element = {"id": id++, "title": title}
-                root.push(element)
-              }
-              else if (Array.isArray(value) || typeof value === 'object') {
-                element = {"id": id++, "title": key, "children": []}
-                root.push(element)
-                treeify(element.children, value)
-              }
-              else {
-                var title = key + ": " + value
-                var element = {"id": id++, "title": title}
-                root.push(element)
-              }
-            }
-        }
-      }
-      return items
-    },
 },
 
 
