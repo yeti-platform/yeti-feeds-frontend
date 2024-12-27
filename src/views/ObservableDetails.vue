@@ -10,7 +10,7 @@
             </div>
           </template>
         </v-card>
-        <v-sheet class="ma-2">
+        <v-sheet class="ma-2" v-if="observable?.value.length > 70">
           <v-expansion-panels>
             <v-expansion-panel>
               <v-expansion-panel-title v-slot="{ expanded }">
