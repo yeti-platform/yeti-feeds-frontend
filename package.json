@@ -29,9 +29,9 @@
     "pinia": "^2.0.0",
     "roboto-fontface": "*",
     "sigma": "^3.0.0-beta.33",
-    "vue": "^3.2.0",
+    "vue": "^3.5.13",
     "vue-router": "^4.0.0",
-    "vuetify": "^3.0.0",
+    "vuetify": "^3.7.4",
     "yaml": "^2.4.3"
   },
   "devDependencies": {
