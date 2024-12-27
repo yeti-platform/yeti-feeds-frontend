@@ -10,6 +10,7 @@ import "vuetify/styles";
 import { md3 } from "vuetify/blueprints";
 import { aliases, mdi } from "vuetify/iconsets/mdi";
 import colors from "vuetify/util/colors";
+import { VTreeview, VTreeviewItem } from 'vuetify/labs/VTreeview'
 
 // Composables
 import { createVuetify, type ThemeDefinition } from "vuetify";
@@ -59,6 +60,10 @@ export default createVuetify({
   defaults: {
     global: {
       ripple: false
+    },
+    components: {
+      VTreeview,
+      VTreeviewItem
     },
     VApp: {
       style: 'font-family: "Roboto", sans-serif;'
