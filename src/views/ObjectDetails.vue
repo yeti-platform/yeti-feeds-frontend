@@ -150,6 +150,9 @@
                 <td v-if="field.type === 'list'">
                   <v-chip v-for="item in object[field.field]" :text="item" class="mr-1" />
                 </td>
+                <td v-else-if="field.type === 'yara'">
+                  <v-chip v-for="item in object[field.field]" class="mr-1" density="compact">{{ item }} </v-chip>
+                </td>
                 <td v-else-if="field.type === 'date'">
                   {{ moment(object[field.field]).toISOString() }}
                 </td>
