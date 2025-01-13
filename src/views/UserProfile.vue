@@ -47,6 +47,11 @@
         </div>
       </v-col>
     </v-row>
+    <v-row>
+      <v-col>
+        <group-list :user-id="id || user.id" :memberships-only="true"></group-list>
+      </v-col>
+    </v-row>
   </v-container>
 </template>
 
@@ -54,11 +59,15 @@
 import axios from "axios";
 import { useUserStore } from "@/store/user";
 import { useAppStore } from "@/store/app";
+import GroupList from "@/components/GroupList.vue";
 </script>
 
 <script lang="ts">
 export default {
   name: "UserProfile",
+  components: {
+    GroupList
+  },
   data() {
     return {
       profile: null,
@@ -83,7 +92,7 @@ export default {
       axios
         .get(`/api/v2/users/${id}`)
         .then(response => {
-          this.profile = response.data;
+          this.profile = response.data.user;
         })
         .catch(error => {
           console.log(error);

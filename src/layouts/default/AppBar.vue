@@ -28,6 +28,7 @@
         <v-menu activator="parent">
           <v-list>
             <v-list-item :to="{ name: 'UserAdmin' }" prepend-icon="mdi-account-multiple"> Users </v-list-item>
+            <v-list-item :to="{ name: 'GroupAdmin' }" prepend-icon="mdi-account-multiple"> Groups </v-list-item>
             <v-list-item :to="{ name: 'TagsAdmin' }" prepend-icon="mdi-tag"> Tags </v-list-item>
             <v-list-item :to="{ name: 'System' }" prepend-icon="mdi-application-cog"> System </v-list-item>
           </v-list>
