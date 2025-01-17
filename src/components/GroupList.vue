@@ -101,7 +101,7 @@
     </v-card-text>
     <!-- add buttons ad the end to add a new group -->
     <v-card-actions>
-      <v-dialog width="50%">
+      <v-dialog width="50%" v-if="user.admin">
         <template v-slot:activator="{ props }">
           <v-btn color="primary" variant="tonal" v-bind="props" @click="editGroup = { name: null, description: null }"
             ><v-icon>mdi-plus</v-icon>Create group</v-btn
