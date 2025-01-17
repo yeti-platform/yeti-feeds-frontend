@@ -9,7 +9,13 @@
     <v-card-actions>
       <v-btn text="Toggle full screen" color="primary" @click="toggleFullScreen"></v-btn>
       <v-spacer></v-spacer>
-      <v-btn text="Delete object" color="cancel" variant="tonal" @click="dialogDelete = true"></v-btn>
+      <v-btn
+        text="Delete object"
+        color="cancel"
+        variant="tonal"
+        @click="dialogDelete = true"
+        v-if="hasOwnerPerms"
+      ></v-btn>
       <v-btn text="Cancel" color="cancel" @click="isActive.value = false"></v-btn>
       <v-btn text="Save" color="primary" @click="saveObject" variant="tonal"></v-btn>
     </v-card-actions>
@@ -44,6 +50,7 @@ import { INDICATOR_TYPES } from "@/definitions/indicatorDefinitions.js";
 import { OBSERVABLE_TYPES } from "@/definitions/observableDefinitions.js";
 import { DFIQ_TYPES } from "@/definitions/dfiqDefinitions.js";
 import ObjectFields from "@/components/ObjectFields.vue";
+import { useUserStore } from "@/store/user";
 </script>
 
 <script lang="ts">
@@ -70,7 +77,8 @@ export default {
         indicator: "indicators",
         dfiq: "dfiq"
       },
-      dialogDelete: false
+      dialogDelete: false,
+      userStore: useUserStore()
     };
   },
   mounted() {},
@@ -132,6 +140,9 @@ export default {
     }
   },
   computed: {
+    user() {
+      return this.userStore.user;
+    },
     typeDefinition() {
       return (
         ENTITY_TYPES.find(t => t.type === this.object.type) ||
@@ -142,6 +153,9 @@ export default {
     },
     editableFields() {
       return this.typeDefinition.fields.filter(field => field.editable);
+    },
+    hasOwnerPerms() {
+      return this.user.admin || this.object.acls[this.user.username] & 7;
     }
   }
 };

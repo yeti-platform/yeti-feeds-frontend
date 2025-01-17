@@ -47,7 +47,7 @@
                     v-for="source in new Set(observable?.context.map(c => c.source))"
                     v-bind:key="source"
                   >
-                  {{  source }}
+                    {{ source }}
                   </v-chip>
                 </td>
               </tr>
@@ -60,19 +60,18 @@
           </v-table>
           <v-card elevation="0" variant="outlined">
             <v-card-title>Contexts</v-card-title>
-                  <v-treeview
-                    :items=ContextTreeView()
-                    item-value="id"
-                    activatable
-                    open-on-click
-                    open-all
-                    density="compact"
-                    max-height="300"
-                    width="100%"
-                  >
-                </v-treeview>
-              </v-card>
-
+            <v-treeview
+              :items="ContextTreeView()"
+              item-value="id"
+              activatable
+              open-on-click
+              open-all
+              density="compact"
+              max-height="300"
+              width="100%"
+            >
+            </v-treeview>
+          </v-card>
         </v-sheet>
       </v-col>
       <v-col cols="4">
@@ -89,7 +88,7 @@
               </v-sheet>
             </template>
           </v-dialog>
-          <v-dialog :width="editWidth" :fullscreen="fullScreenEdit">
+          <v-dialog :width="editWidth" :fullscreen="fullScreenEdit" v-if="hasEditPerms">
             <template v-slot:activator="{ props }">
               <v-btn class="me-2" variant="tonal" color="primary" size="small" v-bind="props" append-icon="mdi-pencil"
                 >Edit
@@ -265,13 +264,14 @@ import { ENTITY_TYPES } from "@/definitions/entityDefinitions.js";
 import { INDICATOR_TYPES } from "@/definitions/indicatorDefinitions.js";
 import { OBSERVABLE_TYPES } from "@/definitions/observableDefinitions.js";
 import moment from "moment";
-import { VTreeview } from 'vuetify/labs/VTreeview';
+import { VTreeview } from "vuetify/labs/VTreeview";
 
 import Timeline from "@/components/Timeline.vue";
+
+import { useUserStore } from "@/store/user";
 </script>
 
 <script lang="ts">
-
 export default {
   props: {
     id: {
@@ -302,7 +302,8 @@ export default {
       totalRelatedIndicators: 0,
       editWidth: 600,
       fullScreenEdit: false,
-      newLinkMenu: false
+      newLinkMenu: false,
+      userStore: useUserStore()
     };
   },
   methods: {
@@ -356,63 +357,67 @@ export default {
     },
 
     ContextTreeView() {
-      var items = []
-      var id = 0
-      var id = 0
+      var items = [];
+      var id = 0;
+      var id = 0;
       if (this.observable === null) {
-        return items
+        return items;
       }
       function treeify(root, data) {
         if (Array.isArray(data)) {
-          var count = 0
+          var count = 0;
           for (const item of data) {
-            var element = {"id": id++, "title": count.toString(), "children": []}
-            root.push(element)
-            count++
+            var element = { id: id++, title: count.toString(), children: [] };
+            root.push(element);
+            count++;
             treeify(element.children, item);
           }
-        }
-        else if (typeof data === 'object') {
-          for (const [key, value] of Object.entries(data))
-            {
-              if (key === "source") {
-                continue
-              }
-              if (value === null) {
-                var title = key + ": N/A"
-                var element = {"id": id++, "title": title}
-                root.push(element)
-              }
-              else if (Array.isArray(value) || typeof value === 'object') {
-                element = {"id": id++, "title": key, "children": []}
-                root.push(element)
-                treeify(element.children, value)
-              }
-              else {
-                var title = key + ": " + value
-                var element = {"id": id++, "title": title}
-                root.push(element)
-              }
+        } else if (typeof data === "object") {
+          for (const [key, value] of Object.entries(data)) {
+            if (key === "source") {
+              continue;
             }
+            if (value === null) {
+              var title = key + ": N/A";
+              var element = { id: id++, title: title };
+              root.push(element);
+            } else if (Array.isArray(value) || typeof value === "object") {
+              element = { id: id++, title: key, children: [] };
+              root.push(element);
+              treeify(element.children, value);
+            } else {
+              var title = key + ": " + value;
+              var element = { id: id++, title: title };
+              root.push(element);
+            }
+          }
         }
       }
       for (const ctx of this.observable.context) {
-        var element = {"id": id++, "title": ctx.source, "children": [], "color": "warning"}
-        items.push(element)
-          treeify(element.children, ctx)
+        var element = { id: id++, title: ctx.source, children: [], color: "warning" };
+        items.push(element);
+        treeify(element.children, ctx);
       }
-      return items
-    },
-},
-
+      return items;
+    }
+  },
 
   computed: {
+    user() {
+      return this.userStore.user;
+    },
     getObservableTypeDefinition() {
       return this.observableTypes.find(typeDef => typeDef.type === this.observable?.type);
     },
     getObservableInfoFields() {
       const hideFields = ["value", "tags", "description"];
       return this.getObservableTypeDefinition?.fields.filter(field => !hideFields.includes(field.field));
+    },
+    hasEditPerms() {
+      return this.user.admin || this.object.acls[this.user.username] & 4;
+    },
+    hasOwnerPerms() {
+      return this.user.admin || this.object.acls[this.user.username] & 7;
     }
   },
   mounted() {

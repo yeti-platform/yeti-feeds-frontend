@@ -76,7 +76,8 @@
               </template>
             </v-dialog>
 
-            <v-dialog :width="editWidth" :fullscreen="fullScreenEdit">
+            <!-- edit -->
+            <v-dialog :width="editWidth" :fullscreen="fullScreenEdit" v-if="hasEditPerms">
               <template v-slot:activator="{ props }">
                 <v-btn class="me-2" variant="tonal" color="primary" size="small" v-bind="props" append-icon="mdi-pencil"
                   >Edit
@@ -309,6 +310,7 @@ import { DFIQ_TYPES } from "@/definitions/dfiqDefinitions.js";
 
 import moment from "moment";
 import Timeline from "@/components/Timeline.vue";
+import { useUserStore } from "@/store/user";
 </script>
 
 <script lang="ts">
@@ -357,7 +359,8 @@ export default {
       hideFieldsInfoBox: ["name", "description", "tags", "pattern"],
       fullScreenEdit: false,
       editWidth: "75%",
-      newLinkMenu: false
+      newLinkMenu: false,
+      userStore: useUserStore()
     };
   },
   methods: {
@@ -424,6 +427,9 @@ export default {
     }
   },
   computed: {
+    user() {
+      return this.userStore.user;
+    },
     getObjectTypeDefintions() {
       return this.objectTypes[this.objectType].find(typeDef => typeDef.type === this.object?.type);
     },
@@ -435,6 +441,12 @@ export default {
     },
     activeHash() {
       return this.$route.hash;
+    },
+    hasEditPerms() {
+      return this.user.admin || this.object.acls[this.user.username] & 4;
+    },
+    hasOwnerPerms() {
+      return this.user.admin || this.object.acls[this.user.username] & 7;
     }
   },
   mounted() {

@@ -364,7 +364,7 @@
       <v-btn text="Toggle full screen" color="primary" @click="toggleFullScreen"></v-btn>
       <v-spacer></v-spacer>
       <v-btn
-        v-if="newType === ''"
+        v-if="newType === '' && hasOwnerPerms"
         text="Delete object"
         color="cancel"
         variant="tonal"
@@ -407,6 +407,7 @@ import axios from "axios";
 
 import ObjectFields from "@/components/ObjectFields.vue";
 import { DFIQ_TYPES, DFIQ_TEMPLATES, FORM_METADATA } from "@/definitions/dfiqDefinitions.js";
+import { useUserStore } from "@/store/user";
 
 import _ from "lodash";
 import { parse, stringify } from "yaml";
@@ -466,7 +467,8 @@ export default {
       DFIQParentHierarchy: {
         facet: ["scenario"],
         question: ["facet", "scenario"]
-      }
+      },
+      userStore: useUserStore()
     };
   },
   mounted() {
@@ -666,6 +668,9 @@ export default {
     }
   },
   computed: {
+    user() {
+      return this.userStore.user;
+    },
     renderedYaml() {
       return stringify(this.parsedYaml);
     },
@@ -680,6 +685,9 @@ export default {
         return [];
       }
       return FORM_METADATA[this.localObject.type].rules;
+    },
+    hasOwnerPerms() {
+      return this.user.admin || this.localObject.acls[this.user.username] & 7;
     }
   },
   watch: {
