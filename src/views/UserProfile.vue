@@ -22,6 +22,24 @@
                       <v-btn size="small" variant="outlined" @click="resetApiKey(profile)"> Reset key </v-btn>
                     </td>
                   </tr>
+                  <tr>
+                    <th>Global role</th>
+                    <td>
+                      <v-combobox
+                        v-model="profile.global_role"
+                        :items="roleMapping"
+                        label="Global role"
+                        item-title="name"
+                        item-value="value"
+                        density="compact"
+                        :return-object="false"
+                        @update:modelValue="saveUserSettings"
+                        :disabled="!user.admin"
+                        :hide-details="true"
+                      ></v-combobox>
+                    </td>
+                    <!-- combobox to update role -->
+                  </tr>
                 </tbody>
               </template>
             </v-table>
@@ -77,7 +95,13 @@ export default {
       activeTab: 0,
       userStore: useUserStore(),
       appStore: useAppStore(),
-      showPassword: false
+      showPassword: false,
+      roleMapping: [
+        { name: "No access", value: 0 },
+        { name: "Read only", value: 1 },
+        { name: "Read/write", value: 3 },
+        { name: "Admin", value: 7 }
+      ]
     };
   },
   props: {
