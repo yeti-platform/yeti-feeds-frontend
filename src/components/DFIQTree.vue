@@ -50,15 +50,12 @@
             <v-chip density="compact" size="small">forensicartifact</v-chip>
           </span>
           <span v-else>
-            <v-tooltip location="top" :open-delay="300">
-              <template v-slot:activator="{ props }">
-                {{ sanitizeTitle(dfiqTree) }}
-                <v-icon v-bind="props" class="ml-2 text-disabled" size="small">mdi-eye</v-icon>
-              </template>
-              <span
-                ><v-chip size="x-small">{{ dfiqTree.object.type }}</v-chip> {{ dfiqTree.object.description }}</span
-              >
-            </v-tooltip>
+            {{ sanitizeTitle(dfiqTree) }}
+
+            <span>
+              <v-chip label class="mr-2" size="x-small" v-for="tag in dfiqTree.object.dfiq_tags">{{ tag }}</v-chip>
+            </span>
+
             <span class="me-2"></span>
             <v-chip density="compact" size="small" v-if="dfiqTree.object.type === 'query'">{{
               dfiqTree.object.query_type
@@ -66,6 +63,14 @@
           </span>
 
           <span class="item-controls">
+            <v-tooltip location="top" :open-delay="300">
+              <template v-slot:activator="{ props }">
+                <v-icon v-bind="props" class="mr-1 text-disabled" size="small">mdi-information</v-icon>
+              </template>
+              <span
+                ><v-chip size="x-small">{{ dfiqTree.object.type }}</v-chip> {{ dfiqTree.object.description }}</span
+              >
+            </v-tooltip>
             <v-btn
               variant="text"
               size="small"
