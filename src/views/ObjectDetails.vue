@@ -380,6 +380,10 @@ export default {
         })
         .catch(error => {
           console.log(error);
+          this.$eventBus.emit("displayMessage", {
+            status: "error",
+            message: error.response.data.detail
+          });
         })
         .finally();
     },
@@ -443,10 +447,10 @@ export default {
       return this.$route.hash;
     },
     hasEditPerms() {
-      return this.user.admin || this.object.acls[this.user.username] & 4;
+      return this.user.admin || this.object?.acls[this.user.username] & 4;
     },
     hasOwnerPerms() {
-      return this.user.admin || this.object.acls[this.user.username] & 7;
+      return this.user.admin || this.object?.acls[this.user.username] & 7;
     }
   },
   mounted() {
