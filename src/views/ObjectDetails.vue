@@ -65,6 +65,26 @@
 
             <v-dialog>
               <template v-slot:activator="{ props }">
+                <v-btn
+                  class="me-2"
+                  variant="tonal"
+                  color="primary"
+                  size="small"
+                  v-bind="props"
+                  append-icon="mdi-account-plus"
+                >
+                  share
+                </v-btn>
+              </template>
+              <template v-slot:default="{ isActive }">
+                <v-sheet>
+                  <ACL-edit v-if="object" :group="object" :allow-groups="true" @members-updated="getObjectDetails" />
+                </v-sheet>
+              </template>
+            </v-dialog>
+
+            <v-dialog>
+              <template v-slot:activator="{ props }">
                 <v-btn class="me-2" variant="tonal" color="primary" size="small" v-bind="props" append-icon="mdi-clock">
                   timeline
                 </v-btn>
@@ -77,7 +97,7 @@
             </v-dialog>
 
             <!-- edit -->
-            <v-dialog :width="editWidth" :fullscreen="fullScreenEdit" v-if="hasEditPerms">
+            <v-dialog :width="editWidth" :fullscreen="fullScreenEdit" v-if="hasEditPerms || true">
               <template v-slot:activator="{ props }">
                 <v-btn class="me-2" variant="tonal" color="primary" size="small" v-bind="props" append-icon="mdi-pencil"
                   >Edit
@@ -294,6 +314,7 @@ import axios from "axios";
 
 import RelatedObjects from "@/components/RelatedObjects.vue";
 import DFIQTree from "@/components/DFIQTree.vue";
+import ACLEdit from "@/components/ACLEdit.vue";
 import DirectNeighbors from "@/components/DirectNeighbors.vue";
 import GraphObjects from "@/components/GraphObjects.vue";
 import EditObject from "@/components/EditObject.vue";
@@ -335,7 +356,8 @@ export default {
     YetiDFIQApproachTemplate,
     DFIQTree,
     GraphObjects,
-    Timeline
+    Timeline,
+    ACLEdit
   },
   data() {
     return {

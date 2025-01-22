@@ -1,6 +1,8 @@
 <template>
   <v-card>
-    <v-card-title>Members of {{ group.name }}</v-card-title>
+    <v-card-title
+      >ACL for <code>{{ group.name }}</code></v-card-title
+    >
     <v-card-text>
       <v-container fluid>
         <v-row>
@@ -50,8 +52,8 @@
             <v-combobox
               v-model="selectedUsers"
               :items="systemUsersFiltered"
-              label="Select users (existing or new)"
-              item-title="username"
+              label="Select identities"
+              item-title="name"
               item-value="id"
               density="compact"
               multiple
@@ -90,7 +92,7 @@ import _ from "lodash";
 
 <script lang="ts">
 export default {
-  name: "GroupMemberEdit",
+  name: "ACLEdit",
   props: {
     group: {
       type: Object,
@@ -99,6 +101,10 @@ export default {
     isActive: {
       type: Object,
       default: null
+    },
+    allowGroups: {
+      type: Boolean,
+      default: false
     }
   },
   data() {
@@ -112,6 +118,7 @@ export default {
         { title: "", value: "remove", sortable: false }
       ],
       systemUsers: [],
+      systemGroups: [],
       selectedUsers: [],
       userListLoading: false,
       selectedRole: 1,
@@ -126,7 +133,7 @@ export default {
   methods: {
     getMembershipData() {
       axios
-        .get(`/api/v2/groups/${this.group.id}`)
+        .get(`/api/v2/${this.endpointForType}/${this.group.id}`)
         .then(response => {
           this.ACLTableData = this.generateAclTable(response.data);
         })
@@ -157,7 +164,7 @@ export default {
         })
         .then(response => {
           this.systemUsers = response.data.users.map((user: any) => {
-            return { id: user.id, username: user.username };
+            return { id: user.id, name: user.username, type: "user" };
           });
         })
         .catch(error => {
@@ -166,11 +173,31 @@ export default {
         .finally(() => {
           this.userListLoading = false;
         });
+
+      if (this.allowGroups) {
+        axios
+          .post("/api/v2/groups/search", {
+            page: 0,
+            count: 1000,
+            name: searchQuery
+          })
+          .then(response => {
+            this.systemGroups = response.data.groups.map((group: any) => {
+              return { id: group.id, name: group.name, type: "group" };
+            });
+          })
+          .catch(error => {
+            console.log(error);
+          })
+          .finally(() => {
+            this.userListLoading = false;
+          });
+      }
     },
     validateUsers(model: any) {
-      let validUsernames = this.systemUsers.map((user: any) => user.username);
+      let validUsernames = this.systemUsers.concat(this.systemGroups).map((user: any) => user.name);
       this.selectedUsers = model.filter((user: any) => {
-        return user.username && validUsernames.includes(user.username);
+        return user.name && validUsernames.includes(user.name);
       });
     },
     addToSelectedUsers(selectedItems: Array<Object>) {
@@ -178,7 +205,8 @@ export default {
       const existingIds = this.selectedUsers.map(user => user.id);
       selectedItems.forEach(item => {
         if (!existingIds.includes(item.id)) {
-          this.selectedUsers.push({ id: item.id, username: item.name });
+          let type = item.source.includes("user") ? "user" : "group";
+          this.selectedUsers.push({ id: item.id, name: item.name, type: type });
         }
       });
 
@@ -187,17 +215,26 @@ export default {
       });
     },
     removeMember(membership) {
-      console.log(membership);
+      let sourceType = membership.source.includes("users") ? "user" : "group";
       const request = {
-        ids: [membership.id],
+        ids: [{ id: membership.id, type: sourceType }],
         role: 0
       };
       axios
-        .post(`/api/v2/groups/${this.group.id}/update-members`, request)
+        .post(`/api/v2/rbac/${this.group.root_type}/${this.group.id}/update-members`, request)
         .then(response => {
+          let msg = "";
+          let status = "success";
+          if (response.data.updated > 0) {
+            msg += `Members removed: ${response.data.updated}`;
+          }
+          if (response.data.failed > 0) {
+            status = "warning";
+            msg += ` Failed: ${response.data.failed}`;
+          }
           this.$eventBus.emit("displayMessage", {
-            status: "success",
-            message: `User ${membership.name} removed from group.`
+            status: status,
+            message: msg
           });
           this.$emit("members-updated");
         })
@@ -210,11 +247,11 @@ export default {
     },
     updateMembers() {
       let request = {
-        ids: this.selectedUsers.map((user: any) => user.id),
+        ids: this.selectedUsers.map((user: any) => ({ id: user.id, type: user.type })),
         role: this.selectedRole
       };
       axios
-        .post(`/api/v2/groups/${this.group.id}/update-members`, request)
+        .post(`/api/v2/rbac/${this.group.root_type}/${this.group.id}/update-members`, request)
         .then(response => {
           let msg = "";
           let status = "success";
@@ -254,20 +291,31 @@ export default {
   },
   computed: {
     systemUsersFiltered() {
-      return this.systemUsers;
-      return this.systemUsers.filter(user => !this.ACLTable.map(user => user.name).includes(user.username));
+      return this.systemUsers.concat(this.systemGroups);
+    },
+    endpointForType() {
+      const endpointMap = {
+        rbacgroup: "groups",
+        entity: "entities",
+        indicator: "indicators",
+        observable: "observables",
+        dfiq: "dfiq",
+        user: "users"
+      };
+      return endpointMap[this.group.root_type];
+    },
+    allIdentities() {
+      return this.systemUsers.concat(this.systemGroups);
     }
   },
   mounted() {
     this.listUsers();
     this.getMembershipData();
-    // this.ACLTableData = this.generateAclTable(this.group);
   },
   watch: {
     group: {
       handler: function (val) {
         this.getMembershipData();
-        // this.ACLTableData = this.generateAclTable(val);
       },
       deep: true
     }

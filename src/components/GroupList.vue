@@ -4,7 +4,7 @@
     <v-card-text>
       <v-text-field
         v-model="groupSearch"
-        label="Search groups"
+        placeholder="Search groups"
         prepend-inner-icon="mdi-magnify"
         variant="outlined"
         hide-details
@@ -69,11 +69,7 @@
               >
             </template>
             <template v-slot:default="{ isActive }"
-              ><group-member-edit
-                :group="item"
-                @members-updated="getGroupData"
-                :is-active="isActive"
-              ></group-member-edit>
+              ><ACL-edit :group="item" @members-updated="getGroupData" :is-active="isActive" />
             </template>
           </v-dialog>
         </template>
@@ -128,14 +124,14 @@
 <script lang="ts" setup>
 import axios from "axios";
 import { useUserStore } from "@/store/user";
-import GroupMemberEdit from "@/components/GroupMemberEdit.vue";
+import ACLEdit from "@/components/ACLEdit.vue";
 </script>
 
 <script lang="ts">
 export default {
   name: "GroupList",
   components: {
-    GroupMemberEdit
+    ACLEdit
   },
   props: {
     userId: {
