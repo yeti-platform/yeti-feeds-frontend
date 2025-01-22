@@ -447,10 +447,10 @@ export default {
       return this.$route.hash;
     },
     hasEditPerms() {
-      return this.user.admin || this.object?.acls[this.user.username] & 4;
+      return this.user.admin || this.object?.acls[this.user.username].role & 3;
     },
     hasOwnerPerms() {
-      return this.user.admin || this.object?.acls[this.user.username] & 7;
+      return this.user.admin || this.object?.acls[this.user.username].role & 7;
     }
   },
   mounted() {

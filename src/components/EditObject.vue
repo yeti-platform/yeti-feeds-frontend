@@ -155,7 +155,7 @@ export default {
       return this.typeDefinition.fields.filter(field => field.editable);
     },
     hasOwnerPerms() {
-      return this.user.admin || this.object.acls[this.user.username] & 7;
+      return this.user.admin || this.object.acls[this.user.username].role & 7;
     }
   }
 };

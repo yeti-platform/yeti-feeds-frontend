@@ -687,7 +687,7 @@ export default {
       return FORM_METADATA[this.localObject.type].rules;
     },
     hasOwnerPerms() {
-      return this.user.admin || this.localObject.acls[this.user.username] & 7;
+      return this.user.admin || this.localObject.acls[this.user.username].role & 7;
     }
   },
   watch: {

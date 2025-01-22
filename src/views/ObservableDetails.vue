@@ -414,10 +414,10 @@ export default {
       return this.getObservableTypeDefinition?.fields.filter(field => !hideFields.includes(field.field));
     },
     hasEditPerms() {
-      return this.user.admin || this.object.acls[this.user.username] & 4;
+      return this.user.admin || this.object.acls[this.user.username].role & 4;
     },
     hasOwnerPerms() {
-      return this.user.admin || this.object.acls[this.user.username] & 7;
+      return this.user.admin || this.object.acls[this.user.username].role & 7;
     }
   },
   mounted() {
