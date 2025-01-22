@@ -69,7 +69,7 @@
               >
             </template>
             <template v-slot:default="{ isActive }"
-              ><ACL-edit :group="item" @members-updated="getGroupData" :is-active="isActive" />
+              ><ACL-edit :object="item" @members-updated="getGroupData" :is-active="isActive" />
             </template>
           </v-dialog>
         </template>

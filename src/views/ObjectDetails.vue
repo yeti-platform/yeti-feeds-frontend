@@ -78,7 +78,7 @@
               </template>
               <template v-slot:default="{ isActive }">
                 <v-sheet>
-                  <ACL-edit v-if="object" :group="object" :allow-groups="true" @members-updated="getObjectDetails" />
+                  <ACL-edit v-if="object" :object="object" :allow-groups="true" @members-updated="getObjectDetails" />
                 </v-sheet>
               </template>
             </v-dialog>

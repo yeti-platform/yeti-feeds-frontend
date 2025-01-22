@@ -1,7 +1,7 @@
 <template>
   <v-card>
     <v-card-title
-      >ACL for <code>{{ group.name }}</code></v-card-title
+      >ACL for <code>{{ object.name || object.value }}</code></v-card-title
     >
     <v-card-text>
       <v-container fluid>
@@ -94,7 +94,7 @@ import _ from "lodash";
 export default {
   name: "ACLEdit",
   props: {
-    group: {
+    object: {
       type: Object,
       default: null
     },
@@ -133,7 +133,7 @@ export default {
   methods: {
     getMembershipData() {
       axios
-        .get(`/api/v2/${this.endpointForType}/${this.group.id}`)
+        .get(`/api/v2/${this.endpointForType}/${this.object.id}`)
         .then(response => {
           this.ACLTableData = this.generateAclTable(response.data);
         })
@@ -221,7 +221,7 @@ export default {
         role: 0
       };
       axios
-        .post(`/api/v2/rbac/${this.group.root_type}/${this.group.id}/update-members`, request)
+        .post(`/api/v2/rbac/${this.object.root_type}/${this.object.id}/update-members`, request)
         .then(response => {
           let msg = "";
           let status = "success";
@@ -251,7 +251,7 @@ export default {
         role: this.selectedRole
       };
       axios
-        .post(`/api/v2/rbac/${this.group.root_type}/${this.group.id}/update-members`, request)
+        .post(`/api/v2/rbac/${this.object.root_type}/${this.object.id}/update-members`, request)
         .then(response => {
           let msg = "";
           let status = "success";
@@ -302,7 +302,7 @@ export default {
         dfiq: "dfiq",
         user: "users"
       };
-      return endpointMap[this.group.root_type];
+      return endpointMap[this.object.root_type];
     },
     allIdentities() {
       return this.systemUsers.concat(this.systemGroups);
