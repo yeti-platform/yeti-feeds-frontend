@@ -68,9 +68,7 @@
                 ><v-icon>mdi-account-multiple-plus-outline</v-icon></v-btn
               >
             </template>
-            <template v-slot:default="{ isActive }"
-              ><ACL-edit :object="item" @members-updated="getGroupData" :is-active="isActive" />
-            </template>
+            <template v-slot:default="{ isActive }"><ACL-edit :object="item" :is-active="isActive" /> </template>
           </v-dialog>
         </template>
         <template v-slot:item.acls="{ value }">

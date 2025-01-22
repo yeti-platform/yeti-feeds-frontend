@@ -125,8 +125,7 @@ export default {
       roleItems: [
         { title: "Owner", value: 7 },
         { title: "Writer", value: 3 },
-        { title: "Reader", value: 1 },
-        { title: "Remove", value: 0 }
+        { title: "Reader", value: 1 }
       ]
     };
   },
@@ -221,21 +220,13 @@ export default {
         role: 0
       };
       axios
-        .post(`/api/v2/rbac/${this.object.root_type}/${this.object.id}/update-members`, request)
+        .delete(`/api/v2/rbac/${membership.id}`)
         .then(response => {
-          let msg = "";
-          let status = "success";
-          if (response.data.updated > 0) {
-            msg += `Members removed: ${response.data.updated}`;
-          }
-          if (response.data.failed > 0) {
-            status = "warning";
-            msg += ` Failed: ${response.data.failed}`;
-          }
           this.$eventBus.emit("displayMessage", {
-            status: status,
-            message: msg
+            status: "success",
+            message: "Members removed."
           });
+          this.getMembershipData();
           this.$emit("members-updated");
         })
         .catch(error => {
@@ -266,6 +257,7 @@ export default {
             status: status,
             message: msg
           });
+          this.getMembershipData();
           this.$emit("members-updated");
         })
         .catch(error => {

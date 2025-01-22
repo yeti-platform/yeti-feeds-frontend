@@ -91,12 +91,7 @@
             </template>
             <template v-slot:default="{ isActive }">
               <v-sheet>
-                <ACL-edit
-                  v-if="observable"
-                  :object="observable"
-                  :allow-groups="true"
-                  @members-updated="getObservableDetails"
-                />
+                <ACL-edit v-if="observable" :object="observable" :allow-groups="true" />
               </v-sheet>
             </template>
           </v-dialog>
@@ -441,10 +436,10 @@ export default {
       return this.getObservableTypeDefinition?.fields.filter(field => !hideFields.includes(field.field));
     },
     hasEditPerms() {
-      return this.user.admin || this.object.acls[this.user.username].role & 4;
+      return this.user.admin || this.object?.acls[this.user.username].role & 4;
     },
     hasOwnerPerms() {
-      return this.user.admin || this.object.acls[this.user.username].role & 7;
+      return this.user.admin || this.object?.acls[this.user.username].role & 7;
     }
   },
   mounted() {
