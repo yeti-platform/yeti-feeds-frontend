@@ -163,7 +163,7 @@ export default {
     },
     saveUserSettings() {
       axios
-        .post("/api/v2/users/", this.profile)
+        .patch(`/api/v2/users/${this.profile.id}`, this.profile)
         .then(() => {
           this.$eventBus.emit("displayMessage", {
             message: "Settings successfully updated.",
