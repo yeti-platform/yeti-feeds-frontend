@@ -78,6 +78,31 @@
         <v-sheet class="ma-2 d-flex justify-end bg-background" variant="flat">
           <v-dialog>
             <template v-slot:activator="{ props }">
+              <v-btn
+                class="me-2"
+                variant="tonal"
+                color="primary"
+                size="small"
+                v-bind="props"
+                append-icon="mdi-account-plus"
+              >
+                share
+              </v-btn>
+            </template>
+            <template v-slot:default="{ isActive }">
+              <v-sheet>
+                <ACL-edit
+                  v-if="observable"
+                  :object="observable"
+                  :allow-groups="true"
+                  @members-updated="getObservableDetails"
+                />
+              </v-sheet>
+            </template>
+          </v-dialog>
+
+          <v-dialog>
+            <template v-slot:activator="{ props }">
               <v-btn class="me-2" variant="tonal" color="primary" size="small" v-bind="props" append-icon="mdi-clock">
                 timeline
               </v-btn>
@@ -254,6 +279,7 @@ import axios from "axios";
 import TaskList from "@/components/TaskList.vue";
 import RelatedObjects from "@/components/RelatedObjects.vue";
 import EditObject from "@/components/EditObject.vue";
+import ACLEdit from "@/components/ACLEdit.vue";
 import DirectNeighbors from "@/components/DirectNeighbors.vue";
 import GraphObjects from "@/components/GraphObjects.vue";
 
@@ -286,7 +312,8 @@ export default {
     LinkObject,
     LinkObservables,
     GraphObjects,
-    Timeline
+    Timeline,
+    ACLEdit
   },
   data() {
     return {
