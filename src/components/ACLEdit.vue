@@ -203,14 +203,15 @@ export default {
       console.log(selectedItems);
       const existingIds = this.selectedUsers.map(user => user.id);
       selectedItems.forEach(item => {
-        if (!existingIds.includes(item.id)) {
+        let id = item.source.split("/")[1];
+        if (!existingIds.includes(id)) {
           let type = item.source.includes("user") ? "user" : "group";
-          this.selectedUsers.push({ id: item.id, name: item.name, type: type });
+          this.selectedUsers.push({ id: id, name: item.name, type: type });
         }
       });
 
       this.selectedUsers = this.selectedUsers.filter(user => {
-        return selectedItems.map(item => item.id).includes(user.id);
+        return selectedItems.map(item => item.source.split("/")[1]).includes(user.id);
       });
     },
     removeMember(membership) {
