@@ -436,10 +436,10 @@ export default {
       return this.getObservableTypeDefinition?.fields.filter(field => !hideFields.includes(field.field));
     },
     hasEditPerms() {
-      return this.userStore.hasEditPerms(this.object);
+      return this.userStore.hasEditPerms(this.observable);
     },
     hasOwnerPerms() {
-      return this.userStore.hasOwnerPerms(this.object);
+      return this.userStore.hasOwnerPerms(this.observable);
     }
   },
   mounted() {
