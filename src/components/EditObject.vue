@@ -154,8 +154,11 @@ export default {
     editableFields() {
       return this.typeDefinition.fields.filter(field => field.editable);
     },
+    hasEditPerms() {
+      return this.userStore.hasEditPerms(this.object);
+    },
     hasOwnerPerms() {
-      return this.user.admin || this.object.acls[this.user.username].role & 7;
+      return this.userStore.hasOwnerPerms(this.object);
     }
   }
 };

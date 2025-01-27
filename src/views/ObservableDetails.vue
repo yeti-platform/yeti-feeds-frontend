@@ -76,7 +76,7 @@
       </v-col>
       <v-col cols="4">
         <v-sheet class="ma-2 d-flex justify-end bg-background" variant="flat">
-          <v-dialog>
+          <v-dialog v-if="hasOwnerPerms">
             <template v-slot:activator="{ props }">
               <v-btn
                 class="me-2"
@@ -436,10 +436,10 @@ export default {
       return this.getObservableTypeDefinition?.fields.filter(field => !hideFields.includes(field.field));
     },
     hasEditPerms() {
-      return this.user.admin || this.object?.acls[this.user.username].role & 4;
+      return this.userStore.hasEditPerms(this.object);
     },
     hasOwnerPerms() {
-      return this.user.admin || this.object?.acls[this.user.username].role & 7;
+      return this.userStore.hasOwnerPerms(this.object);
     }
   },
   mounted() {

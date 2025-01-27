@@ -2,6 +2,11 @@
 import { defineStore } from "pinia";
 import axios from "axios";
 
+export enum Role {
+  WRITER = 3,
+  OWNER = 7
+}
+
 export const useUserStore = defineStore("user", {
   state: () => ({
     user: null
@@ -79,6 +84,15 @@ export const useUserStore = defineStore("user", {
             reject(err);
           });
       });
+    },
+    hasEditPerms(object: Object, user: Object): boolean {
+      let role = object?.acls[this.user.username]?.role;
+      return this.user.admin || (role & Role.WRITER) === Role.WRITER;
+    },
+
+    hasOwnerPerms(object: Object, user: Object): boolean {
+      let role = object?.acls[this.user.username]?.role;
+      return this.user.admin || (role & Role.OWNER) === Role.OWNER;
     }
   }
 });

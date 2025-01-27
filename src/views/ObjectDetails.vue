@@ -28,9 +28,7 @@
                 <v-icon class="ml-2" v-if="approach.tags.map(tag => tag.toLowerCase()).includes('macos')"
                   >mdi-apple
                 </v-icon>
-                <v-icon class="ml-2" v-if="approach.tags.map(tag => tag.toLowerCase()).includes('linux')"
-                  >mdi-penguin
-                </v-icon>
+                <v-icon class="ml-2" v-if="approach.tags.map(tag.toLowerCase()).includes('linux')">mdi-penguin </v-icon>
               </v-expansion-panel-title>
               <v-expansion-panel-text>
                 <yeti-DFIQ-approach-template :approach="approach" />
@@ -63,7 +61,7 @@
           <v-card-title class="d-flex"
             ><span class="me-auto"> Info</span>
 
-            <v-dialog>
+            <v-dialog v-if="hasOwnerPerms">
               <template v-slot:activator="{ props }">
                 <v-btn
                   class="me-2"
@@ -97,7 +95,7 @@
             </v-dialog>
 
             <!-- edit -->
-            <v-dialog :width="editWidth" :fullscreen="fullScreenEdit" v-if="hasEditPerms || true">
+            <v-dialog :width="editWidth" :fullscreen="fullScreenEdit" v-if="hasEditPerms">
               <template v-slot:activator="{ props }">
                 <v-btn class="me-2" variant="tonal" color="primary" size="small" v-bind="props" append-icon="mdi-pencil"
                   >Edit
@@ -332,6 +330,7 @@ import { DFIQ_TYPES } from "@/definitions/dfiqDefinitions.js";
 import moment from "moment";
 import Timeline from "@/components/Timeline.vue";
 import { useUserStore } from "@/store/user";
+import { RBACService } from "@/services/rbac";
 </script>
 
 <script lang="ts">
@@ -469,10 +468,10 @@ export default {
       return this.$route.hash;
     },
     hasEditPerms() {
-      return this.user.admin || this.object?.acls[this.user.username].role & 3;
+      return this.userStore.hasEditPerms(this.object);
     },
     hasOwnerPerms() {
-      return this.user.admin || this.object?.acls[this.user.username].role & 7;
+      return this.userStore.hasOwnerPerms(this.object);
     }
   },
   mounted() {
