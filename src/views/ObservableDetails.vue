@@ -187,9 +187,8 @@
             <template v-slot:chip="tag">
               <v-chip
                 :text="tag.item.value"
-                label
-                size="large"
                 :color="observable?.tags[tag.item.value]?.fresh ? 'primary' : 'grey'"
+                size="default"
             /></template>
             <template v-slot:append>
               <v-btn variant="tonal" color="primary" class="me-2" @click="saveTags">Save</v-btn>

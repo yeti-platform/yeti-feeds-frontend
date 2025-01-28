@@ -188,7 +188,7 @@
             prepend-inner-icon="mdi-tag"
             class="ma-2"
           >
-            <template v-slot:chip="tag"> <v-chip :text="tag.item.value" label size="large" color="primary" /></template>
+            <template v-slot:chip="tag"> <v-chip :text="tag.item.value" size="default" color="primary" /></template>
             <template v-slot:append>
               <v-btn variant="tonal" color="primary" class="me-2" @click="saveTags">Save</v-btn>
             </template>
