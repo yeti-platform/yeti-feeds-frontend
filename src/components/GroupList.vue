@@ -14,7 +14,7 @@
       <v-data-table :items="groups" :headers="groupTableHeaders" density="compact" :search="groupSearch">
         <template v-slot:item.actions="{ item }">
           <!-- delete -->
-          <v-dialog max-width="420px" v-if="item.perms & 4 || user.admin">
+          <v-dialog max-width="420px" v-if="hasOwnerPerms(item)">
             <template v-slot:activator="{ props }">
               <v-btn v-bind="props" class="ms-2" size="small" variant="outlined" color="error"
                 ><v-icon>mdi-delete</v-icon></v-btn
@@ -34,7 +34,7 @@
             </template>
           </v-dialog>
           <!-- edit -->
-          <v-dialog max-width="420px" v-if="item.perms & 2 || user.admin">
+          <v-dialog max-width="420px" v-if="hasEditPerms(item)">
             <template v-slot:activator="{ props }">
               <v-btn
                 v-bind="props"
@@ -61,8 +61,8 @@
               </v-card>
             </template>
           </v-dialog>
-          <!-- user list -->
-          <v-dialog width="75%" v-if="user.admin">
+
+          <v-dialog width="75%" v-if="hasOwnerPerms(item)">
             <template v-slot:activator="{ props }">
               <v-btn v-bind="props" class="ms-2" size="small" variant="outlined" color="primary"
                 ><v-icon>mdi-account-multiple-plus-outline</v-icon></v-btn
@@ -93,9 +93,9 @@
         </template>
       </v-data-table>
     </v-card-text>
-    <!-- add buttons ad the end to add a new group -->
+
     <v-card-actions>
-      <v-dialog width="50%" v-if="user.admin">
+      <v-dialog width="50%">
         <template v-slot:activator="{ props }">
           <v-btn color="primary" variant="tonal" v-bind="props" @click="editGroup = { name: null, description: null }"
             ><v-icon>mdi-plus</v-icon>Create group</v-btn
@@ -223,8 +223,6 @@ export default {
         .finally(() => {});
     },
     deleteGroup(group) {
-      // add confirmation popup
-
       axios
         .delete(`/api/v2/groups/${group.id}`)
         .then(() => {
@@ -235,22 +233,7 @@ export default {
         })
         .finally(() => {});
     },
-    getHumanReadablePerms(membership) {
-      if (membership.role == 7) {
-        return ":owner";
-      }
-      if (membership.role == 3) {
-        return ":writer";
-      }
-      if (membership.role == 1) {
-        return ":read-only";
-      }
-      if (membership.role == 0) {
-        return ":no-access";
-      }
-    },
     getPermColor(membership) {
-      // return "orange";
       if (membership.role == 7) {
         return "orange";
       }
@@ -263,6 +246,12 @@ export default {
       if (membership.role == 0) {
         return "grey";
       }
+    },
+    hasEditPerms(group) {
+      return this.userStore.hasEditPerms(group);
+    },
+    hasOwnerPerms(group) {
+      return this.userStore.hasOwnerPerms(group);
     }
   },
   computed: {
