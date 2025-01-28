@@ -85,12 +85,12 @@ export const useUserStore = defineStore("user", {
           });
       });
     },
-    hasEditPerms(object: Object, user: Object): boolean {
+    hasEditPerms(object: Object): boolean {
       let role = object?.acls[this.user.username]?.role;
       return this.user.admin || (role & Role.WRITER) === Role.WRITER;
     },
 
-    hasOwnerPerms(object: Object, user: Object): boolean {
+    hasOwnerPerms(object: Object): boolean {
       let role = object?.acls[this.user.username]?.role;
       return this.user.admin || (role & Role.OWNER) === Role.OWNER;
     }
