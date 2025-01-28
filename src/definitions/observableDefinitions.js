@@ -188,7 +188,7 @@ export const OBSERVABLE_TYPES = [
       { field: "created", type: "datetime", label: "Created", displayList: true, editable: false },
       { field: "modified", type: "datetime", label: "Modified", displayList: true, editable: false }
     ],
-    icon: "mdi-hash"
+    icon: "mdi-pound"
   },
   {
     name: "TLSH",
@@ -199,7 +199,7 @@ export const OBSERVABLE_TYPES = [
       { field: "created", type: "datetime", label: "Created", displayList: true, editable: false },
       { field: "modified", type: "datetime", label: "Modified", displayList: true, editable: false }
     ],
-    icon: "mdi-hash"
+    icon: "mdi-pound"
   },
   {
     name: "SSDEEP",
@@ -210,7 +210,7 @@ export const OBSERVABLE_TYPES = [
       { field: "created", type: "datetime", label: "Created", displayList: true, editable: false },
       { field: "modified", type: "datetime", label: "Modified", displayList: true, editable: false }
     ],
-    icon: "mdi-hash"
+    icon: "mdi-pound"
   },
   {
     name: "Email",
@@ -335,12 +335,10 @@ export const OBSERVABLE_TYPES = [
       { field: "tags", type: "list", label: "tags", displayList: true, editable: false },
       { field: "created", type: "datetime", label: "Created", displayList: true, editable: false },
       { field: "auth_type", type: "text", label: "Auth type", displayList: false, editable: true },
-      { field: "name", type: "text", label: "Name", displayList: false, editable: true },
-
+      { field: "name", type: "text", label: "Name", displayList: false, editable: true }
     ],
     icon: "mdi-file-outline"
-  },
-
+  }
 ];
 
 OBSERVABLE_TYPES.push(...PRIVATE_OBSERVABLE_TYPES);
