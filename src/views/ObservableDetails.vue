@@ -46,20 +46,19 @@
                     color="green"
                     v-for="source in new Set(observable?.context.map(c => c.source))"
                     v-bind:key="source"
+                    size="small"
                   >
                     {{ source }}
                   </v-chip>
                 </td>
               </tr>
-              <tr v-for="field in getObservableInfoFields">
+              <tr v-for="field in getObservableDetailFields">
                 <th>{{ field.label }}</th>
-                <td v-if="field.field === 'created'">{{ moment(observable[field.field]).toISOString() }}</td>
-                <td v-else>{{ observable[field.field] }}</td>
+                <td>{{ observable[field.field] }}</td>
               </tr>
             </tbody>
           </v-table>
-          <v-card elevation="0" variant="outlined">
-            <v-card-title>Contexts</v-card-title>
+          <v-card>
             <v-treeview
               :items="ContextTreeView()"
               item-value="id"
@@ -75,92 +74,103 @@
         </v-sheet>
       </v-col>
       <v-col cols="4">
-        <v-sheet class="ma-2 d-flex justify-end bg-background" variant="flat">
-          <v-dialog v-if="hasOwnerPerms">
-            <template v-slot:activator="{ props }">
-              <v-btn
-                class="me-2"
-                variant="tonal"
-                color="primary"
-                size="small"
-                v-bind="props"
-                append-icon="mdi-account-plus"
-              >
-                share
-              </v-btn>
-            </template>
-            <template v-slot:default="{ isActive }">
-              <v-sheet>
-                <ACL-edit v-if="observable" :object="observable" :allow-groups="true" />
-              </v-sheet>
-            </template>
-          </v-dialog>
+        <v-card class="ma-2" variant="flat" v-if="observable">
+          <v-card-title class="d-flex"
+            ><span class="me-auto"> Info</span>
+            <!-- timeline -->
+            <v-dialog>
+              <template v-slot:activator="{ props }">
+                <v-btn class="me-2" variant="tonal" color="primary" size="small" v-bind="props" append-icon="mdi-clock">
+                  timeline
+                </v-btn>
+              </template>
+              <template v-slot:default="{ isActive }">
+                <v-sheet>
+                  <timeline v-if="observable" :object="observable" :is-active="isActive" />
+                </v-sheet>
+              </template> </v-dialog
+          ></v-card-title>
+          <v-table density="compact">
+            <tbody>
+              <tr v-for="field in getObservableInfoFields">
+                <th>{{ field.label }}</th>
+                <td v-if="['created', 'modified'].includes(field.field)">
+                  {{ moment(observable[field.field]).toISOString() }}
+                </td>
+                <td v-else>{{ observable[field.field] }}</td>
+              </tr>
+            </tbody>
+          </v-table>
+          <v-card-actions>
+            <!-- share -->
+            <v-dialog v-if="hasOwnerPerms">
+              <template v-slot:activator="{ props }">
+                <v-btn variant="tonal" color="primary" size="small" v-bind="props" append-icon="mdi-account-plus">
+                  share
+                </v-btn>
+              </template>
+              <template v-slot:default="{ isActive }">
+                <v-sheet>
+                  <ACL-edit v-if="observable" :object="observable" :allow-groups="true" />
+                </v-sheet>
+              </template>
+            </v-dialog>
+            <!-- edit -->
+            <v-dialog :width="editWidth" :fullscreen="fullScreenEdit" v-if="hasEditPerms">
+              <template v-slot:activator="{ props }">
+                <v-btn variant="tonal" color="primary" size="small" v-bind="props" append-icon="mdi-pencil"
+                  >Edit
+                </v-btn>
+              </template>
 
-          <v-dialog>
-            <template v-slot:activator="{ props }">
-              <v-btn class="me-2" variant="tonal" color="primary" size="small" v-bind="props" append-icon="mdi-clock">
-                timeline
-              </v-btn>
-            </template>
-            <template v-slot:default="{ isActive }">
-              <v-sheet>
-                <timeline v-if="observable" :object="observable" :is-active="isActive" />
-              </v-sheet>
-            </template>
-          </v-dialog>
-          <v-dialog :width="editWidth" :fullscreen="fullScreenEdit" v-if="hasEditPerms">
-            <template v-slot:activator="{ props }">
-              <v-btn class="me-2" variant="tonal" color="primary" size="small" v-bind="props" append-icon="mdi-pencil"
-                >Edit
-              </v-btn>
-            </template>
+              <template v-slot:default="{ isActive }">
+                <edit-object
+                  :object="observable"
+                  :is-active="isActive"
+                  @success="obs => (observable = obs)"
+                  @toggle-fullscreen="toggleFullscreen"
+                />
+              </template>
+            </v-dialog>
 
-            <template v-slot:default="{ isActive }">
-              <edit-object
-                :object="observable"
-                :is-active="isActive"
-                @success="obs => (observable = obs)"
-                @toggle-fullscreen="toggleFullscreen"
-              />
-            </template>
-          </v-dialog>
+            <!-- link -->
+            <v-menu v-model="newLinkMenu" persistent no-click-animation @click:outside="newLinkMenu = false">
+              <template v-slot:activator="{ props }">
+                <v-btn variant="tonal" color="primary" size="small" v-bind="props" append-icon="mdi-link">
+                  new link...
+                </v-btn>
+              </template>
+              <v-list>
+                <v-list-item density="compact">
+                  <v-dialog :width="editWidth">
+                    <template v-slot:activator="{ props }">
+                      <v-btn class="me-2" variant="text" color="primary" v-bind="props" size="small"
+                        >entities / indicators
+                      </v-btn>
+                    </template>
 
-          <v-menu v-model="newLinkMenu" persistent no-click-animation @click:outside="newLinkMenu = false">
-            <template v-slot:activator="{ props }">
-              <v-btn class="me-2" variant="tonal" color="primary" size="small" v-bind="props" append-icon="mdi-link">
-                new link...
-              </v-btn>
-            </template>
-            <v-list>
-              <v-list-item density="compact">
-                <v-dialog :width="editWidth">
-                  <template v-slot:activator="{ props }">
-                    <v-btn class="me-2" variant="text" color="primary" v-bind="props" size="small"
-                      >entities / indicators
-                    </v-btn>
-                  </template>
+                    <template v-slot:default="{ isActive }">
+                      <v-sheet>
+                        <link-object :object="observable" :is-active="isActive" />
+                      </v-sheet>
+                    </template>
+                  </v-dialog>
+                </v-list-item>
+                <v-list-item density="compact">
+                  <v-dialog :width="editWidth">
+                    <template v-slot:activator="{ props }">
+                      <v-btn variant="text" color="primary" v-bind="props" size="small">observables </v-btn>
+                    </template>
 
-                  <template v-slot:default="{ isActive }">
-                    <v-sheet>
-                      <link-object :object="observable" :is-active="isActive" />
-                    </v-sheet>
-                  </template>
-                </v-dialog>
-              </v-list-item>
-              <v-list-item density="compact">
-                <v-dialog :width="editWidth">
-                  <template v-slot:activator="{ props }">
-                    <v-btn variant="text" color="primary" v-bind="props" size="small">observables </v-btn>
-                  </template>
-
-                  <template v-slot:default="{ isActive }">
-                    <link-observables :linkTarget="observable" :is-active="isActive" />
-                  </template>
-                </v-dialog>
-              </v-list-item>
-            </v-list>
-          </v-menu>
-        </v-sheet>
+                    <template v-slot:default="{ isActive }">
+                      <link-observables :linkTarget="observable" :is-active="isActive" />
+                    </template>
+                  </v-dialog>
+                </v-list-item>
+              </v-list>
+            </v-menu>
+          </v-card-actions>
+        </v-card>
         <v-card class="ma-2" variant="flat">
           <v-card-title>Tags</v-card-title>
 
@@ -431,9 +441,13 @@ export default {
     getObservableTypeDefinition() {
       return this.observableTypes.find(typeDef => typeDef.type === this.observable?.type);
     },
-    getObservableInfoFields() {
-      const hideFields = ["value", "tags", "description"];
+    getObservableDetailFields() {
+      const hideFields = ["value", "tags", "description", "created", "modified"];
       return this.getObservableTypeDefinition?.fields.filter(field => !hideFields.includes(field.field));
+    },
+    getObservableInfoFields() {
+      const fields = ["created", "modified"];
+      return this.getObservableTypeDefinition?.fields.filter(field => fields.includes(field.field));
     },
     hasEditPerms() {
       return this.userStore.hasEditPerms(this.observable);

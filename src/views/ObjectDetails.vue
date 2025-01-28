@@ -61,26 +61,7 @@
           <v-card-title class="d-flex"
             ><span class="me-auto"> Info</span>
 
-            <v-dialog v-if="hasOwnerPerms">
-              <template v-slot:activator="{ props }">
-                <v-btn
-                  class="me-2"
-                  variant="tonal"
-                  color="primary"
-                  size="small"
-                  v-bind="props"
-                  append-icon="mdi-account-plus"
-                >
-                  share
-                </v-btn>
-              </template>
-              <template v-slot:default="{ isActive }">
-                <v-sheet>
-                  <ACL-edit v-if="object" :object="object" :allow-groups="true" />
-                </v-sheet>
-              </template>
-            </v-dialog>
-
+            <!-- timeline -->
             <v-dialog>
               <template v-slot:activator="{ props }">
                 <v-btn class="me-2" variant="tonal" color="primary" size="small" v-bind="props" append-icon="mdi-clock">
@@ -93,11 +74,43 @@
                 </v-sheet>
               </template>
             </v-dialog>
+          </v-card-title>
 
+          <v-table density="compact">
+            <tbody>
+              <tr v-for="field in getObjectInfoFields">
+                <th>{{ field.label }}</th>
+                <td v-if="field.type === 'list'">
+                  <v-chip v-for="item in object[field.field]" :text="item" class="mr-1" />
+                </td>
+                <td v-else-if="field.type === 'yara'">
+                  <v-chip v-for="item in object[field.field]" class="mr-1" density="compact">{{ item }} </v-chip>
+                </td>
+                <td v-else-if="field.type === 'date'">
+                  {{ moment(object[field.field]).toISOString() }}
+                </td>
+                <td v-else>{{ object[field.field] }}</td>
+              </tr>
+            </tbody>
+          </v-table>
+          <v-card-actions>
+            <!-- share -->
+            <v-dialog v-if="hasOwnerPerms">
+              <template v-slot:activator="{ props }">
+                <v-btn variant="tonal" color="primary" size="small" v-bind="props" append-icon="mdi-account-plus">
+                  share
+                </v-btn>
+              </template>
+              <template v-slot:default="{ isActive }">
+                <v-sheet>
+                  <ACL-edit v-if="object" :object="object" :allow-groups="true" />
+                </v-sheet>
+              </template>
+            </v-dialog>
             <!-- edit -->
             <v-dialog :width="editWidth" :fullscreen="fullScreenEdit" v-if="hasEditPerms">
               <template v-slot:activator="{ props }">
-                <v-btn class="me-2" variant="tonal" color="primary" size="small" v-bind="props" append-icon="mdi-pencil"
+                <v-btn variant="tonal" color="primary" size="small" v-bind="props" append-icon="mdi-pencil"
                   >Edit
                 </v-btn>
               </template>
@@ -119,7 +132,7 @@
                 />
               </template>
             </v-dialog>
-
+            <!-- nwe link -->
             <v-menu
               v-model="newLinkMenu"
               persistent
@@ -128,7 +141,7 @@
               v-if="object?.root_type !== 'dfiq'"
             >
               <template v-slot:activator="{ props }">
-                <v-btn class="me-2" variant="tonal" color="primary" size="small" v-bind="props" append-icon="mdi-link">
+                <v-btn variant="tonal" color="primary" size="small" v-bind="props" append-icon="mdi-link">
                   new link...
                 </v-btn>
               </template>
@@ -161,24 +174,7 @@
                 </v-list-item>
               </v-list>
             </v-menu>
-          </v-card-title>
-          <v-table density="compact">
-            <tbody>
-              <tr v-for="field in getObjectInfoFields">
-                <th>{{ field.label }}</th>
-                <td v-if="field.type === 'list'">
-                  <v-chip v-for="item in object[field.field]" :text="item" class="mr-1" />
-                </td>
-                <td v-else-if="field.type === 'yara'">
-                  <v-chip v-for="item in object[field.field]" class="mr-1" density="compact">{{ item }} </v-chip>
-                </td>
-                <td v-else-if="field.type === 'date'">
-                  {{ moment(object[field.field]).toISOString() }}
-                </td>
-                <td v-else>{{ object[field.field] }}</td>
-              </tr>
-            </tbody>
-          </v-table>
+          </v-card-actions>
         </v-card>
         <v-card v-if="object?.root_type !== 'dfiq'" class="ma-2" variant="flat">
           <v-card-title>Tags</v-card-title>
