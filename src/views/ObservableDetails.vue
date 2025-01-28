@@ -103,7 +103,7 @@
           </v-table>
           <v-card-actions>
             <!-- share -->
-            <v-dialog v-if="hasOwnerPerms">
+            <v-dialog v-if="hasOwnerPerms && RBACEnabled">
               <template v-slot:activator="{ props }">
                 <v-btn variant="tonal" color="primary" size="small" v-bind="props" append-icon="mdi-account-plus">
                   share
@@ -300,6 +300,7 @@ import { VTreeview } from "vuetify/labs/VTreeview";
 import Timeline from "@/components/Timeline.vue";
 
 import { useUserStore } from "@/store/user";
+import { useAppStore } from "@/store/app";
 </script>
 
 <script lang="ts">
@@ -335,7 +336,8 @@ export default {
       editWidth: 600,
       fullScreenEdit: false,
       newLinkMenu: false,
-      userStore: useUserStore()
+      userStore: useUserStore(),
+      appStore: useAppStore()
     };
   },
   methods: {
@@ -454,6 +456,9 @@ export default {
     },
     hasOwnerPerms() {
       return this.userStore.hasOwnerPerms(this.observable);
+    },
+    RBACEnabled() {
+      return this.appStore.RBACEnabled;
     }
   },
   mounted() {

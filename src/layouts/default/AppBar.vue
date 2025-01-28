@@ -30,7 +30,9 @@
             <v-list-item :to="{ name: 'UserAdmin' }" prepend-icon="mdi-account-circle" v-if="user.admin">
               Users
             </v-list-item>
-            <v-list-item :to="{ name: 'GroupAdmin' }" prepend-icon="mdi-account-multiple-outline"> Groups </v-list-item>
+            <v-list-item v-if="RBACEnabled" :to="{ name: 'GroupAdmin' }" prepend-icon="mdi-account-multiple-outline">
+              Groups
+            </v-list-item>
             <v-list-item :to="{ name: 'TagsAdmin' }" prepend-icon="mdi-tag"> Tags </v-list-item>
             <v-list-item :to="{ name: 'Status' }" prepend-icon="mdi-cog"> Status </v-list-item>
           </v-list>
@@ -53,6 +55,7 @@
 
 <script lang="ts" setup>
 import { useUserStore } from "@/store/user";
+import { useAppStore } from "@/store/app";
 import { useTheme } from "vuetify";
 
 const theme = useTheme();
@@ -68,6 +71,9 @@ export default {
   computed: {
     user() {
       return useUserStore().user;
+    },
+    RBACEnabled() {
+      return useAppStore().RBACEnabled;
     }
   },
   methods: {

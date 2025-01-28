@@ -95,7 +95,7 @@
           </v-table>
           <v-card-actions>
             <!-- share -->
-            <v-dialog v-if="hasOwnerPerms">
+            <v-dialog v-if="hasOwnerPerms && RBACEnabled">
               <template v-slot:activator="{ props }">
                 <v-btn variant="tonal" color="primary" size="small" v-bind="props" append-icon="mdi-account-plus">
                   share
@@ -326,7 +326,7 @@ import { DFIQ_TYPES } from "@/definitions/dfiqDefinitions.js";
 import moment from "moment";
 import Timeline from "@/components/Timeline.vue";
 import { useUserStore } from "@/store/user";
-import { RBACService } from "@/services/rbac";
+import { useAppStore } from "@/store/app";
 </script>
 
 <script lang="ts">
@@ -377,7 +377,8 @@ export default {
       fullScreenEdit: false,
       editWidth: "75%",
       newLinkMenu: false,
-      userStore: useUserStore()
+      userStore: useUserStore(),
+      appStore: useAppStore()
     };
   },
   methods: {
@@ -468,6 +469,9 @@ export default {
     },
     hasOwnerPerms() {
       return this.userStore.hasOwnerPerms(this.object);
+    },
+    RBACEnabled() {
+      return this.appStore.RBACEnabled;
     }
   },
   mounted() {
