@@ -173,7 +173,7 @@ const routes = [
     ]
   },
   {
-    path: "/admin",
+    path: "/system",
     component: Default,
     children: [
       {
@@ -195,8 +195,8 @@ const routes = [
         props: true
       },
       {
-        path: "system",
-        name: "System",
+        path: "status",
+        name: "Status",
         component: System,
         props: true
       }
