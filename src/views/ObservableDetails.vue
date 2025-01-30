@@ -46,102 +46,131 @@
                     color="green"
                     v-for="source in new Set(observable?.context.map(c => c.source))"
                     v-bind:key="source"
+                    size="small"
                   >
-                  {{  source }}
+                    {{ source }}
                   </v-chip>
                 </td>
               </tr>
+              <tr v-for="field in getObservableDetailFields">
+                <th>{{ field.label }}</th>
+                <td>{{ observable[field.field] }}</td>
+              </tr>
+            </tbody>
+          </v-table>
+          <v-card>
+            <v-treeview
+              :items="ContextTreeView()"
+              item-value="id"
+              activatable
+              open-on-click
+              open-all
+              density="compact"
+              max-height="300"
+              width="100%"
+            >
+            </v-treeview>
+          </v-card>
+        </v-sheet>
+      </v-col>
+      <v-col cols="4">
+        <v-card class="ma-2" variant="flat" v-if="observable">
+          <v-card-title class="d-flex"
+            ><span class="me-auto"> Info</span>
+            <!-- timeline -->
+            <v-dialog>
+              <template v-slot:activator="{ props }">
+                <v-btn class="me-2" variant="tonal" color="primary" size="small" v-bind="props" append-icon="mdi-clock">
+                  timeline
+                </v-btn>
+              </template>
+              <template v-slot:default="{ isActive }">
+                <v-sheet>
+                  <timeline v-if="observable" :object="observable" :is-active="isActive" />
+                </v-sheet>
+              </template> </v-dialog
+          ></v-card-title>
+          <v-table density="compact">
+            <tbody>
               <tr v-for="field in getObservableInfoFields">
                 <th>{{ field.label }}</th>
-                <td v-if="field.field === 'created'">{{ moment(observable[field.field]).toISOString() }}</td>
+                <td v-if="['created', 'modified'].includes(field.field)">
+                  {{ moment(observable[field.field]).toISOString() }}
+                </td>
                 <td v-else>{{ observable[field.field] }}</td>
               </tr>
             </tbody>
           </v-table>
-          <v-card elevation="0" variant="outlined">
-            <v-card-title>Contexts</v-card-title>
-                  <v-treeview
-                    :items=ContextTreeView()
-                    item-value="id"
-                    activatable
-                    open-on-click
-                    open-all
-                    density="compact"
-                    max-height="300"
-                    width="100%"
-                  >
-                </v-treeview>
-              </v-card>
+          <v-card-actions>
+            <!-- share -->
+            <v-dialog v-if="hasOwnerPerms && RBACEnabled">
+              <template v-slot:activator="{ props }">
+                <v-btn variant="tonal" color="primary" size="small" v-bind="props" append-icon="mdi-account-plus">
+                  share
+                </v-btn>
+              </template>
+              <template v-slot:default="{ isActive }">
+                <v-sheet>
+                  <ACL-edit v-if="observable" :object="observable" :allow-groups="true" />
+                </v-sheet>
+              </template>
+            </v-dialog>
+            <!-- edit -->
+            <v-dialog :width="editWidth" :fullscreen="fullScreenEdit" v-if="hasEditPerms">
+              <template v-slot:activator="{ props }">
+                <v-btn variant="tonal" color="primary" size="small" v-bind="props" append-icon="mdi-pencil"
+                  >Edit
+                </v-btn>
+              </template>
 
-        </v-sheet>
-      </v-col>
-      <v-col cols="4">
-        <v-sheet class="ma-2 d-flex justify-end bg-background" variant="flat">
-          <v-dialog>
-            <template v-slot:activator="{ props }">
-              <v-btn class="me-2" variant="tonal" color="primary" size="small" v-bind="props" append-icon="mdi-clock">
-                timeline
-              </v-btn>
-            </template>
-            <template v-slot:default="{ isActive }">
-              <v-sheet>
-                <timeline v-if="observable" :object="observable" :is-active="isActive" />
-              </v-sheet>
-            </template>
-          </v-dialog>
-          <v-dialog :width="editWidth" :fullscreen="fullScreenEdit">
-            <template v-slot:activator="{ props }">
-              <v-btn class="me-2" variant="tonal" color="primary" size="small" v-bind="props" append-icon="mdi-pencil"
-                >Edit
-              </v-btn>
-            </template>
+              <template v-slot:default="{ isActive }">
+                <edit-object
+                  :object="observable"
+                  :is-active="isActive"
+                  @success="obs => (observable = obs)"
+                  @toggle-fullscreen="toggleFullscreen"
+                />
+              </template>
+            </v-dialog>
 
-            <template v-slot:default="{ isActive }">
-              <edit-object
-                :object="observable"
-                :is-active="isActive"
-                @success="obs => (observable = obs)"
-                @toggle-fullscreen="toggleFullscreen"
-              />
-            </template>
-          </v-dialog>
+            <!-- link -->
+            <v-menu v-model="newLinkMenu" persistent no-click-animation @click:outside="newLinkMenu = false">
+              <template v-slot:activator="{ props }">
+                <v-btn variant="tonal" color="primary" size="small" v-bind="props" append-icon="mdi-link">
+                  new link...
+                </v-btn>
+              </template>
+              <v-list>
+                <v-list-item density="compact">
+                  <v-dialog :width="editWidth">
+                    <template v-slot:activator="{ props }">
+                      <v-btn class="me-2" variant="text" color="primary" v-bind="props" size="small"
+                        >entities / indicators
+                      </v-btn>
+                    </template>
 
-          <v-menu v-model="newLinkMenu" persistent no-click-animation @click:outside="newLinkMenu = false">
-            <template v-slot:activator="{ props }">
-              <v-btn class="me-2" variant="tonal" color="primary" size="small" v-bind="props" append-icon="mdi-link">
-                new link...
-              </v-btn>
-            </template>
-            <v-list>
-              <v-list-item density="compact">
-                <v-dialog :width="editWidth">
-                  <template v-slot:activator="{ props }">
-                    <v-btn class="me-2" variant="text" color="primary" v-bind="props" size="small"
-                      >entities / indicators
-                    </v-btn>
-                  </template>
+                    <template v-slot:default="{ isActive }">
+                      <v-sheet>
+                        <link-object :object="observable" :is-active="isActive" />
+                      </v-sheet>
+                    </template>
+                  </v-dialog>
+                </v-list-item>
+                <v-list-item density="compact">
+                  <v-dialog :width="editWidth">
+                    <template v-slot:activator="{ props }">
+                      <v-btn variant="text" color="primary" v-bind="props" size="small">observables </v-btn>
+                    </template>
 
-                  <template v-slot:default="{ isActive }">
-                    <v-sheet>
-                      <link-object :object="observable" :is-active="isActive" />
-                    </v-sheet>
-                  </template>
-                </v-dialog>
-              </v-list-item>
-              <v-list-item density="compact">
-                <v-dialog :width="editWidth">
-                  <template v-slot:activator="{ props }">
-                    <v-btn variant="text" color="primary" v-bind="props" size="small">observables </v-btn>
-                  </template>
-
-                  <template v-slot:default="{ isActive }">
-                    <link-observables :linkTarget="observable" :is-active="isActive" />
-                  </template>
-                </v-dialog>
-              </v-list-item>
-            </v-list>
-          </v-menu>
-        </v-sheet>
+                    <template v-slot:default="{ isActive }">
+                      <link-observables :linkTarget="observable" :is-active="isActive" />
+                    </template>
+                  </v-dialog>
+                </v-list-item>
+              </v-list>
+            </v-menu>
+          </v-card-actions>
+        </v-card>
         <v-card class="ma-2" variant="flat">
           <v-card-title>Tags</v-card-title>
 
@@ -158,9 +187,8 @@
             <template v-slot:chip="tag">
               <v-chip
                 :text="tag.item.value"
-                label
-                size="large"
                 :color="observable?.tags[tag.item.value]?.fresh ? 'primary' : 'grey'"
+                size="default"
             /></template>
             <template v-slot:append>
               <v-btn variant="tonal" color="primary" class="me-2" @click="saveTags">Save</v-btn>
@@ -255,6 +283,7 @@ import axios from "axios";
 import TaskList from "@/components/TaskList.vue";
 import RelatedObjects from "@/components/RelatedObjects.vue";
 import EditObject from "@/components/EditObject.vue";
+import ACLEdit from "@/components/ACLEdit.vue";
 import DirectNeighbors from "@/components/DirectNeighbors.vue";
 import GraphObjects from "@/components/GraphObjects.vue";
 
@@ -265,13 +294,15 @@ import { ENTITY_TYPES } from "@/definitions/entityDefinitions.js";
 import { INDICATOR_TYPES } from "@/definitions/indicatorDefinitions.js";
 import { OBSERVABLE_TYPES } from "@/definitions/observableDefinitions.js";
 import moment from "moment";
-import { VTreeview } from 'vuetify/labs/VTreeview';
+import { VTreeview } from "vuetify/labs/VTreeview";
 
 import Timeline from "@/components/Timeline.vue";
+
+import { useUserStore } from "@/store/user";
+import { useAppStore } from "@/store/app";
 </script>
 
 <script lang="ts">
-
 export default {
   props: {
     id: {
@@ -286,7 +317,8 @@ export default {
     LinkObject,
     LinkObservables,
     GraphObjects,
-    Timeline
+    Timeline,
+    ACLEdit
   },
   data() {
     return {
@@ -302,7 +334,9 @@ export default {
       totalRelatedIndicators: 0,
       editWidth: 600,
       fullScreenEdit: false,
-      newLinkMenu: false
+      newLinkMenu: false,
+      userStore: useUserStore(),
+      appStore: useAppStore()
     };
   },
   methods: {
@@ -356,63 +390,74 @@ export default {
     },
 
     ContextTreeView() {
-      var items = []
-      var id = 0
-      var id = 0
+      var items = [];
+      var id = 0;
+      var id = 0;
       if (this.observable === null) {
-        return items
+        return items;
       }
       function treeify(root, data) {
         if (Array.isArray(data)) {
-          var count = 0
+          var count = 0;
           for (const item of data) {
-            var element = {"id": id++, "title": count.toString(), "children": []}
-            root.push(element)
-            count++
+            var element = { id: id++, title: count.toString(), children: [] };
+            root.push(element);
+            count++;
             treeify(element.children, item);
           }
-        }
-        else if (typeof data === 'object') {
-          for (const [key, value] of Object.entries(data))
-            {
-              if (key === "source") {
-                continue
-              }
-              if (value === null) {
-                var title = key + ": N/A"
-                var element = {"id": id++, "title": title}
-                root.push(element)
-              }
-              else if (Array.isArray(value) || typeof value === 'object') {
-                element = {"id": id++, "title": key, "children": []}
-                root.push(element)
-                treeify(element.children, value)
-              }
-              else {
-                var title = key + ": " + value
-                var element = {"id": id++, "title": title}
-                root.push(element)
-              }
+        } else if (typeof data === "object") {
+          for (const [key, value] of Object.entries(data)) {
+            if (key === "source") {
+              continue;
             }
+            if (value === null) {
+              var title = key + ": N/A";
+              var element = { id: id++, title: title };
+              root.push(element);
+            } else if (Array.isArray(value) || typeof value === "object") {
+              element = { id: id++, title: key, children: [] };
+              root.push(element);
+              treeify(element.children, value);
+            } else {
+              var title = key + ": " + value;
+              var element = { id: id++, title: title };
+              root.push(element);
+            }
+          }
         }
       }
       for (const ctx of this.observable.context) {
-        var element = {"id": id++, "title": ctx.source, "children": [], "color": "warning"}
-        items.push(element)
-          treeify(element.children, ctx)
+        var element = { id: id++, title: ctx.source, children: [], color: "warning" };
+        items.push(element);
+        treeify(element.children, ctx);
       }
-      return items
-    },
-},
-
+      return items;
+    }
+  },
 
   computed: {
+    user() {
+      return this.userStore.user;
+    },
     getObservableTypeDefinition() {
       return this.observableTypes.find(typeDef => typeDef.type === this.observable?.type);
     },
-    getObservableInfoFields() {
-      const hideFields = ["value", "tags", "description"];
+    getObservableDetailFields() {
+      const hideFields = ["value", "tags", "description", "created", "modified"];
       return this.getObservableTypeDefinition?.fields.filter(field => !hideFields.includes(field.field));
+    },
+    getObservableInfoFields() {
+      const fields = ["created", "modified"];
+      return this.getObservableTypeDefinition?.fields.filter(field => fields.includes(field.field));
+    },
+    hasEditPerms() {
+      return this.userStore.hasEditPerms(this.observable);
+    },
+    hasOwnerPerms() {
+      return this.userStore.hasOwnerPerms(this.observable);
+    },
+    RBACEnabled() {
+      return this.appStore.RBACEnabled;
     }
   },
   mounted() {

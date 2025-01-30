@@ -14,9 +14,9 @@ import DFIQSearch from "@/views/DFIQSearch.vue";
 import FeedList from "@/views/FeedList.vue";
 import AnalyticsList from "@/views/AnalyticsList.vue";
 import ExportList from "@/views/ExportList.vue";
-import TaskList from "@/components/TaskList.vue";
 import UserProfile from "@/views/UserProfile.vue";
 import UserAdmin from "@/views/UserAdmin.vue";
+import GroupAdmin from "@/views/GroupAdmin.vue";
 import TagsAdmin from "@/views/TagsAdmin.vue";
 import System from "@/views/System.vue";
 
@@ -173,7 +173,7 @@ const routes = [
     ]
   },
   {
-    path: "/admin",
+    path: "/system",
     component: Default,
     children: [
       {
@@ -183,14 +183,20 @@ const routes = [
         props: true
       },
       {
+        path: "groups",
+        name: "GroupAdmin",
+        component: GroupAdmin,
+        props: true
+      },
+      {
         path: "tags",
         name: "TagsAdmin",
         component: TagsAdmin,
         props: true
       },
       {
-        path: "system",
-        name: "System",
+        path: "status",
+        name: "Status",
         component: System,
         props: true
       }
@@ -204,6 +210,7 @@ const router = createRouter({
 });
 
 import { useUserStore } from "../store/user";
+import GroupList from "@/components/GroupList.vue";
 
 router.beforeEach((to, _from, next) => {
   const userStore = useUserStore();

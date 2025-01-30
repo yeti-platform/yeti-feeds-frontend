@@ -22,14 +22,19 @@
         </v-menu>
       </v-btn>
       <v-divider vertical class="mx-2"></v-divider>
-      <v-btn prepend-icon="mdi-key" v-if="user.admin">
-        Admin
+      <v-btn prepend-icon="mdi-application-cog">
+        System
 
         <v-menu activator="parent">
           <v-list>
-            <v-list-item :to="{ name: 'UserAdmin' }" prepend-icon="mdi-account-multiple"> Users </v-list-item>
+            <v-list-item :to="{ name: 'UserAdmin' }" prepend-icon="mdi-account-circle" v-if="user.admin">
+              Users
+            </v-list-item>
+            <v-list-item v-if="RBACEnabled" :to="{ name: 'GroupAdmin' }" prepend-icon="mdi-account-multiple-outline">
+              Groups
+            </v-list-item>
             <v-list-item :to="{ name: 'TagsAdmin' }" prepend-icon="mdi-tag"> Tags </v-list-item>
-            <v-list-item :to="{ name: 'System' }" prepend-icon="mdi-application-cog"> System </v-list-item>
+            <v-list-item :to="{ name: 'Status' }" prepend-icon="mdi-cog"> Status </v-list-item>
           </v-list>
         </v-menu>
       </v-btn>
@@ -50,6 +55,7 @@
 
 <script lang="ts" setup>
 import { useUserStore } from "@/store/user";
+import { useAppStore } from "@/store/app";
 import { useTheme } from "vuetify";
 
 const theme = useTheme();
@@ -65,6 +71,9 @@ export default {
   computed: {
     user() {
       return useUserStore().user;
+    },
+    RBACEnabled() {
+      return useAppStore().RBACEnabled;
     }
   },
   methods: {

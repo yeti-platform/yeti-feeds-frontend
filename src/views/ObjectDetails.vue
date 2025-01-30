@@ -28,9 +28,7 @@
                 <v-icon class="ml-2" v-if="approach.tags.map(tag => tag.toLowerCase()).includes('macos')"
                   >mdi-apple
                 </v-icon>
-                <v-icon class="ml-2" v-if="approach.tags.map(tag => tag.toLowerCase()).includes('linux')"
-                  >mdi-penguin
-                </v-icon>
+                <v-icon class="ml-2" v-if="approach.tags.map(tag.toLowerCase()).includes('linux')">mdi-penguin </v-icon>
               </v-expansion-panel-title>
               <v-expansion-panel-text>
                 <yeti-DFIQ-approach-template :approach="approach" />
@@ -63,6 +61,7 @@
           <v-card-title class="d-flex"
             ><span class="me-auto"> Info</span>
 
+            <!-- timeline -->
             <v-dialog>
               <template v-slot:activator="{ props }">
                 <v-btn class="me-2" variant="tonal" color="primary" size="small" v-bind="props" append-icon="mdi-clock">
@@ -75,10 +74,43 @@
                 </v-sheet>
               </template>
             </v-dialog>
+          </v-card-title>
 
-            <v-dialog :width="editWidth" :fullscreen="fullScreenEdit">
+          <v-table density="compact">
+            <tbody>
+              <tr v-for="field in getObjectInfoFields">
+                <th>{{ field.label }}</th>
+                <td v-if="field.type === 'list'">
+                  <v-chip v-for="item in object[field.field]" :text="item" class="mr-1" />
+                </td>
+                <td v-else-if="field.type === 'yara'">
+                  <v-chip v-for="item in object[field.field]" class="mr-1" density="compact">{{ item }} </v-chip>
+                </td>
+                <td v-else-if="field.type === 'date'">
+                  {{ moment(object[field.field]).toISOString() }}
+                </td>
+                <td v-else>{{ object[field.field] }}</td>
+              </tr>
+            </tbody>
+          </v-table>
+          <v-card-actions>
+            <!-- share -->
+            <v-dialog v-if="hasOwnerPerms && RBACEnabled">
               <template v-slot:activator="{ props }">
-                <v-btn class="me-2" variant="tonal" color="primary" size="small" v-bind="props" append-icon="mdi-pencil"
+                <v-btn variant="tonal" color="primary" size="small" v-bind="props" append-icon="mdi-account-plus">
+                  share
+                </v-btn>
+              </template>
+              <template v-slot:default="{ isActive }">
+                <v-sheet>
+                  <ACL-edit v-if="object" :object="object" :allow-groups="true" />
+                </v-sheet>
+              </template>
+            </v-dialog>
+            <!-- edit -->
+            <v-dialog :width="editWidth" :fullscreen="fullScreenEdit" v-if="hasEditPerms">
+              <template v-slot:activator="{ props }">
+                <v-btn variant="tonal" color="primary" size="small" v-bind="props" append-icon="mdi-pencil"
                   >Edit
                 </v-btn>
               </template>
@@ -100,7 +132,7 @@
                 />
               </template>
             </v-dialog>
-
+            <!-- nwe link -->
             <v-menu
               v-model="newLinkMenu"
               persistent
@@ -109,7 +141,7 @@
               v-if="object?.root_type !== 'dfiq'"
             >
               <template v-slot:activator="{ props }">
-                <v-btn class="me-2" variant="tonal" color="primary" size="small" v-bind="props" append-icon="mdi-link">
+                <v-btn variant="tonal" color="primary" size="small" v-bind="props" append-icon="mdi-link">
                   new link...
                 </v-btn>
               </template>
@@ -142,24 +174,7 @@
                 </v-list-item>
               </v-list>
             </v-menu>
-          </v-card-title>
-          <v-table density="compact">
-            <tbody>
-              <tr v-for="field in getObjectInfoFields">
-                <th>{{ field.label }}</th>
-                <td v-if="field.type === 'list'">
-                  <v-chip v-for="item in object[field.field]" :text="item" class="mr-1" />
-                </td>
-                <td v-else-if="field.type === 'yara'">
-                  <v-chip v-for="item in object[field.field]" class="mr-1" density="compact">{{ item }} </v-chip>
-                </td>
-                <td v-else-if="field.type === 'date'">
-                  {{ moment(object[field.field]).toISOString() }}
-                </td>
-                <td v-else>{{ object[field.field] }}</td>
-              </tr>
-            </tbody>
-          </v-table>
+          </v-card-actions>
         </v-card>
         <v-card v-if="object?.root_type !== 'dfiq'" class="ma-2" variant="flat">
           <v-card-title>Tags</v-card-title>
@@ -173,7 +188,7 @@
             prepend-inner-icon="mdi-tag"
             class="ma-2"
           >
-            <template v-slot:chip="tag"> <v-chip :text="tag.item.value" label size="large" color="primary" /></template>
+            <template v-slot:chip="tag"> <v-chip :text="tag.item.value" size="default" color="primary" /></template>
             <template v-slot:append>
               <v-btn variant="tonal" color="primary" class="me-2" @click="saveTags">Save</v-btn>
             </template>
@@ -293,6 +308,7 @@ import axios from "axios";
 
 import RelatedObjects from "@/components/RelatedObjects.vue";
 import DFIQTree from "@/components/DFIQTree.vue";
+import ACLEdit from "@/components/ACLEdit.vue";
 import DirectNeighbors from "@/components/DirectNeighbors.vue";
 import GraphObjects from "@/components/GraphObjects.vue";
 import EditObject from "@/components/EditObject.vue";
@@ -309,6 +325,8 @@ import { DFIQ_TYPES } from "@/definitions/dfiqDefinitions.js";
 
 import moment from "moment";
 import Timeline from "@/components/Timeline.vue";
+import { useUserStore } from "@/store/user";
+import { useAppStore } from "@/store/app";
 </script>
 
 <script lang="ts">
@@ -333,7 +351,8 @@ export default {
     YetiDFIQApproachTemplate,
     DFIQTree,
     GraphObjects,
-    Timeline
+    Timeline,
+    ACLEdit
   },
   data() {
     return {
@@ -357,7 +376,9 @@ export default {
       hideFieldsInfoBox: ["name", "description", "tags", "pattern"],
       fullScreenEdit: false,
       editWidth: "75%",
-      newLinkMenu: false
+      newLinkMenu: false,
+      userStore: useUserStore(),
+      appStore: useAppStore()
     };
   },
   methods: {
@@ -377,6 +398,10 @@ export default {
         })
         .catch(error => {
           console.log(error);
+          this.$eventBus.emit("displayMessage", {
+            status: "error",
+            message: error.response.data.detail
+          });
         })
         .finally();
     },
@@ -424,6 +449,9 @@ export default {
     }
   },
   computed: {
+    user() {
+      return this.userStore.user;
+    },
     getObjectTypeDefintions() {
       return this.objectTypes[this.objectType].find(typeDef => typeDef.type === this.object?.type);
     },
@@ -435,6 +463,15 @@ export default {
     },
     activeHash() {
       return this.$route.hash;
+    },
+    hasEditPerms() {
+      return this.userStore.hasEditPerms(this.object);
+    },
+    hasOwnerPerms() {
+      return this.userStore.hasOwnerPerms(this.object);
+    },
+    RBACEnabled() {
+      return this.appStore.RBACEnabled;
     }
   },
   mounted() {

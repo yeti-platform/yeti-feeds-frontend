@@ -22,6 +22,24 @@
                       <v-btn size="small" variant="outlined" @click="resetApiKey(profile)"> Reset key </v-btn>
                     </td>
                   </tr>
+                  <tr>
+                    <th>Global role</th>
+                    <td>
+                      <v-combobox
+                        v-model="profile.global_role"
+                        :items="roleMapping"
+                        label="Global role"
+                        item-title="name"
+                        item-value="value"
+                        density="compact"
+                        :return-object="false"
+                        @update:modelValue="saveUserSettings"
+                        :disabled="!user.admin"
+                        :hide-details="true"
+                      ></v-combobox>
+                    </td>
+                    <!-- combobox to update role -->
+                  </tr>
                 </tbody>
               </template>
             </v-table>
@@ -47,6 +65,11 @@
         </div>
       </v-col>
     </v-row>
+    <v-row>
+      <v-col>
+        <group-list :user-id="id || user.id" :memberships-only="true"></group-list>
+      </v-col>
+    </v-row>
   </v-container>
 </template>
 
@@ -54,11 +77,15 @@
 import axios from "axios";
 import { useUserStore } from "@/store/user";
 import { useAppStore } from "@/store/app";
+import GroupList from "@/components/GroupList.vue";
 </script>
 
 <script lang="ts">
 export default {
   name: "UserProfile",
+  components: {
+    GroupList
+  },
   data() {
     return {
       profile: null,
@@ -68,7 +95,13 @@ export default {
       activeTab: 0,
       userStore: useUserStore(),
       appStore: useAppStore(),
-      showPassword: false
+      showPassword: false,
+      roleMapping: [
+        { name: "No access", value: 0 },
+        { name: "Read only", value: 1 },
+        { name: "Read/write", value: 3 },
+        { name: "Admin", value: 7 }
+      ]
     };
   },
   props: {
@@ -83,7 +116,7 @@ export default {
       axios
         .get(`/api/v2/users/${id}`)
         .then(response => {
-          this.profile = response.data;
+          this.profile = response.data.user;
         })
         .catch(error => {
           console.log(error);
@@ -130,7 +163,7 @@ export default {
     },
     saveUserSettings() {
       axios
-        .post("/api/v2/users/", this.profile)
+        .patch(`/api/v2/users/${this.profile.id}`, this.profile)
         .then(() => {
           this.$eventBus.emit("displayMessage", {
             message: "Settings successfully updated.",
