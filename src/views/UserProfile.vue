@@ -55,7 +55,9 @@
               :type="showPassword ? 'text' : 'password'"
               @click:append="showPassword = !showPassword"
             ></v-text-field>
-            <v-btn type="is-primary" @click="changeUserPassword">Save</v-btn>
+            <v-btn type="is-primary" @click="changeUserPassword" :disabled="newPassword === null"
+              >Change password</v-btn
+            >
           </v-card-text>
         </v-card>
         <div v-if="authModule === 'oidc'">
