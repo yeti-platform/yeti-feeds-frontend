@@ -24,7 +24,7 @@
                         item-value="value"
                         density="compact"
                         :return-object="false"
-                        @update:modelValue="saveUserSettings"
+                        @update:modelValue="updateUserRole"
                         :disabled="!user.admin"
                         :hide-details="true"
                       ></v-combobox>
@@ -55,7 +55,9 @@
               :type="showPassword ? 'text' : 'password'"
               @click:append="showPassword = !showPassword"
             ></v-text-field>
-            <v-btn type="is-primary" @click="changeUserPassword">Save</v-btn>
+            <v-btn type="is-primary" @click="changeUserPassword" :disabled="newPassword === null"
+              >Change password</v-btn
+            >
           </v-card-text>
         </v-card>
         <div v-if="authModule === 'oidc'">
@@ -146,9 +148,12 @@ export default {
           this.newPassword = null;
         });
     },
-    saveUserSettings() {
+    updateUserRole() {
       axios
-        .patch(`/api/v2/users/${this.profile.id}`, this.profile)
+        .patch(`/api/v2/users/role`, {
+          role: this.profile.global_role,
+          user_id: this.profile.id
+        })
         .then(() => {
           this.$eventBus.emit("displayMessage", {
             message: "Settings successfully updated.",
