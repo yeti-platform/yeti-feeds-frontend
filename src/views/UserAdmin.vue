@@ -6,25 +6,57 @@
         <router-link :to="{ name: 'UserProfileAdmin', params: { id: item.id } }">{{ item.username }}</router-link>
       </template>
       <template v-slot:item.admin="{ item }">
-        <v-switch density="compact" color="green" v-model="item.admin" @change="toggleUser(item, 'admin')"></v-switch>
+        <v-switch
+          density="compact"
+          color="green"
+          v-model="item.admin"
+          hide-details
+          @change="toggleUser(item, 'admin')"
+        ></v-switch>
       </template>
       <template v-slot:item.enabled="{ item }">
         <v-switch
           density="compact"
           color="green"
           v-model="item.enabled"
+          hide-details
           @change="toggleUser(item, 'enabled')"
         ></v-switch>
       </template>
-      <template v-slot:item.api_key="{ item }">
-        <code>{{ item.api_key }}</code>
+      <template v-slot:item.api_keys="{ item }">
+        <code
+          ><v-chip v-for="apiKey in item.api_keys" class="me-2" density="compact" color="green">{{
+            apiKey.name
+          }}</v-chip
+          >{{
+        }}</code>
       </template>
 
       <template v-slot:item.actions="{ item }">
-        <v-btn size="small" variant="outlined" @click="resetApiKey(item)">
-          <v-icon class="me-2">mdi-key</v-icon>
-          Reset API key
-        </v-btn>
+        <v-dialog>
+          <template v-slot:activator="{ props }">
+            <v-btn v-bind="props" size="small" variant="outlined" prepend-icon="mdi-key"> Manage API keys </v-btn>
+          </template>
+          <template v-slot:default="{ isActive }">
+            <v-card>
+              <v-card-title class="text-h6">API key management for {{ item.username }}</v-card-title>
+              <v-card-text>
+                <api-key-management
+                  :profile-id="item.id"
+                  :apiKeys="item.api_keys"
+                  @api-key-update="data => (item.api_keys = data)"
+                >
+                </api-key-management>
+              </v-card-text>
+              <v-card-actions>
+                <v-spacer></v-spacer>
+                <v-btn color="light" variant="text" @click="isActive.value = false">Cancel</v-btn>
+                <v-spacer></v-spacer>
+              </v-card-actions>
+            </v-card>
+          </template>
+        </v-dialog>
+
         <v-btn class="ms-2" size="small" variant="outlined" color="error" @click="showDeleteDialog(item)">
           <v-icon>mdi-delete</v-icon>
         </v-btn>
@@ -77,17 +109,21 @@
 
 <script lang="ts" setup>
 import axios from "axios";
+import ApiKeyManagement from "@/components/ApiKeyManagement.vue";
 </script>
 
 <script lang="ts">
 export default {
   name: "UserAdmin",
+  components: {
+    ApiKeyManagement
+  },
   data() {
     return {
       users: [],
       headers: [
         { key: "username", sortable: true, title: "Username" },
-        { key: "api_key", sortable: false, title: "API key" },
+        { key: "api_keys", sortable: false, title: "API keys" },
         { key: "admin", sortable: false, title: "Admin" },
         { key: "enabled", sortable: false, title: "Enabled" },
         { key: "actions", sortable: false, title: "Actions" }

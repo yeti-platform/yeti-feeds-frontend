@@ -14,15 +14,6 @@
                     <td></td>
                   </tr>
                   <tr>
-                    <td>API key</td>
-                    <td>
-                      <code>{{ profile.api_key }}</code>
-                    </td>
-                    <td>
-                      <v-btn size="small" variant="outlined" @click="resetApiKey(profile)"> Reset key </v-btn>
-                    </td>
-                  </tr>
-                  <tr>
                     <th>Global role</th>
                     <td>
                       <v-combobox
@@ -45,6 +36,13 @@
             </v-table>
           </v-card-text>
         </v-card>
+        <api-key-management
+          v-if="profile"
+          :profile-id="profile.id"
+          :apiKeys="profile.api_keys"
+          @api-key-update="data => (profile.api_keys = data)"
+        >
+        </api-key-management>
       </v-col>
       <v-col cols="4">
         <v-card v-if="authModule === 'local'" variant="flat">
@@ -78,13 +76,15 @@ import axios from "axios";
 import { useUserStore } from "@/store/user";
 import { useAppStore } from "@/store/app";
 import GroupList from "@/components/GroupList.vue";
+import ApiKeyManagement from "@/components/ApiKeyManagement.vue";
 </script>
 
 <script lang="ts">
 export default {
   name: "UserProfile",
   components: {
-    GroupList
+    GroupList,
+    ApiKeyManagement
   },
   data() {
     return {
@@ -117,21 +117,6 @@ export default {
         .get(`/api/v2/users/${id}`)
         .then(response => {
           this.profile = response.data.user;
-        })
-        .catch(error => {
-          console.log(error);
-        })
-        .finally(() => {});
-    },
-    resetApiKey() {
-      axios
-        .post(`/api/v2/users/reset-api-key`, { user_id: this.profile.id })
-        .then(response => {
-          this.profile.api_key = response.data.api_key;
-          this.$eventBus.emit("displayMessage", {
-            message: "API key succesfully reset.",
-            status: "success"
-          });
         })
         .catch(error => {
           console.log(error);
