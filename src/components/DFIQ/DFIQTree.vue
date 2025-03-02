@@ -285,7 +285,7 @@ export default {
     },
     dfiqTreeFilter: {
       type: String,
-      default: "GCE"
+      default: ""
     }
   },
   data() {
