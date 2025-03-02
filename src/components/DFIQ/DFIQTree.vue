@@ -61,7 +61,7 @@
                 size="small"
                 rounded
                 v-for="tag in dfiqTree.object.dfiq_tags"
-                >{{ tag }}!</v-chip
+                >{{ tag }}</v-chip
               >
             </span>
 
