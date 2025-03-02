@@ -10,7 +10,7 @@ import "vuetify/styles";
 import { md3 } from "vuetify/blueprints";
 import { aliases, mdi } from "vuetify/iconsets/mdi";
 import colors from "vuetify/util/colors";
-import { VTreeview, VTreeviewItem } from 'vuetify/labs/VTreeview'
+import { VTreeview, VTreeviewItem } from "vuetify/labs/VTreeview";
 
 // Composables
 import { createVuetify, type ThemeDefinition } from "vuetify";
@@ -22,7 +22,9 @@ const yetiDarkTheme: ThemeDefinition = {
     // primary: "#1867C0",
     // secondary: "#5CBBF6",
     background: "#111111",
-    surface: "#21212121",
+    // surface: "#21212121",
+    surface: "#212121",
+    "surface-alt": "#313131",
     // "primary-darken-1": "#3700B3",
     // "secondary-darken-1": "#018786",
     // error: "#B00020",
@@ -40,6 +42,7 @@ const yetiLightTheme: ThemeDefinition = {
   colors: {
     // background: '#FFFFFF',
     surface: colors.grey.lighten5,
+    "surface-alt": colors.grey.lighten4,
     primary: colors.blue.darken1,
     "primary-darken-1": colors.blue.darken2,
     // secondary: '#03DAC6',
