@@ -68,12 +68,11 @@
           <p class="mb-4 ml-4">
             Approaches describe specific ways to answer the question, providing a specific list of steps to follow.
           </p>
-          <v-expansion-panels v-model="expandedPanel">
-            <v-expansion-panel
-              :title="approach.name || 'Untitled approach ' + index"
-              v-for="(approach, index) in parsedYaml.approaches"
-              v-bind:key="`approach-${index}`"
-            >
+          <v-expansion-panels v-model="expandedPanel" static>
+            <v-expansion-panel v-for="(approach, index) in parsedYaml.approaches" v-bind:key="`approach-${index}`">
+              <v-expansion-panel-title color="surface-alt">
+                {{ approach.name || "Untitled approach " + index }}
+              </v-expansion-panel-title>
               <v-expansion-panel-text>
                 <div class="text-h6 mb-4">Main info</div>
                 <v-text-field

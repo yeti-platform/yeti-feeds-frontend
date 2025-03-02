@@ -15,26 +15,10 @@
             <yeti-markdown :text="object.description || 'No description provided'" />
           </v-card-text>
         </v-card>
-
         <v-card class="ma-2" v-if="object?.root_type === 'dfiq' && object?.type === 'question'">
           <v-card-title>Approaches</v-card-title>
-          <v-expansion-panels>
-            <v-expansion-panel v-for="approach in object.approaches">
-              <v-expansion-panel-title>
-                {{ approach.name }}
-                <v-icon class="ml-2" v-if="approach.tags.map(tag => tag.toLowerCase()).includes('windows')"
-                  >mdi-microsoft-windows-classic</v-icon
-                >
-                <v-icon class="ml-2" v-if="approach.tags.map(tag => tag.toLowerCase()).includes('macos')"
-                  >mdi-apple
-                </v-icon>
-                <v-icon class="ml-2" v-if="approach.tags.map(tag.toLowerCase()).includes('linux')">mdi-penguin </v-icon>
-              </v-expansion-panel-title>
-              <v-expansion-panel-text>
-                <yeti-DFIQ-approach-template :approach="approach" />
-              </v-expansion-panel-text>
-            </v-expansion-panel>
-          </v-expansion-panels>
+          <v-card-text> </v-card-text>
+          <DFIQ-approaches :question="object"></DFIQ-approaches>
         </v-card>
 
         <v-card v-if="object?.pattern" class="ma-2" variant="flat">
@@ -307,7 +291,7 @@
 import axios from "axios";
 
 import RelatedObjects from "@/components/RelatedObjects.vue";
-import DFIQTree from "@/components/DFIQTree.vue";
+import DFIQTree from "@/components/DFIQ/DFIQTree.vue";
 import ACLEdit from "@/components/ACLEdit.vue";
 import DirectNeighbors from "@/components/DirectNeighbors.vue";
 import GraphObjects from "@/components/GraphObjects.vue";
@@ -327,6 +311,7 @@ import moment from "moment";
 import Timeline from "@/components/Timeline.vue";
 import { useUserStore } from "@/store/user";
 import { useAppStore } from "@/store/app";
+import DFIQApproaches from "@/components/DFIQ/DFIQApproaches.vue";
 </script>
 
 <script lang="ts">
@@ -348,7 +333,7 @@ export default {
     EditDFIQObject,
     LinkObject,
     YetiMarkdown,
-    YetiDFIQApproachTemplate,
+    DFIQApproaches,
     DFIQTree,
     GraphObjects,
     Timeline,
@@ -395,6 +380,7 @@ export default {
           this.object = response.data;
           this.objectTags = this.object.tags ? Object.keys(this.object.tags) : [];
           this.navigateToFirstPopulatedTab();
+          this.appStore.setPageTitleFromObject(this.object);
         })
         .catch(error => {
           console.log(error);

@@ -361,6 +361,7 @@ export default {
           this.observableTags = Object.keys(this.observable.tags);
           // Switch back to Context view when reloading the page.
           this.activeTab = 0;
+          this.appStore.setPageTitleFromObject(this.observable);
         })
         .catch(error => {
           console.log(error);

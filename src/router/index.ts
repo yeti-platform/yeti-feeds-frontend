@@ -46,7 +46,8 @@ const routes = [
       {
         path: "",
         name: "ObservableMatch",
-        component: ObservableMatch
+        component: ObservableMatch,
+        meta: { title: "Search & add observables" }
       }
     ]
   },
@@ -57,7 +58,8 @@ const routes = [
       {
         path: "",
         name: "ObservableSearch",
-        component: ObservableSearch
+        component: ObservableSearch,
+        meta: { title: "Observables" }
       },
       {
         path: ":id([0-9]+)",
@@ -162,13 +164,15 @@ const routes = [
         path: "",
         name: "UserProfile",
         component: UserProfile,
-        props: true
+        props: true,
+        meta: { title: "User profile" }
       },
       {
         path: ":id([0-9]+)",
         name: "UserProfileAdmin",
         component: UserProfile,
-        props: true
+        props: true,
+        meta: { title: "User profile" }
       }
     ]
   },
@@ -180,25 +184,29 @@ const routes = [
         path: "users",
         name: "UserAdmin",
         component: UserAdmin,
-        props: true
+        props: true,
+        meta: { title: "Users" }
       },
       {
         path: "groups",
         name: "GroupAdmin",
         component: GroupAdmin,
-        props: true
+        props: true,
+        meta: { title: "Groups" }
       },
       {
         path: "tags",
         name: "TagsAdmin",
         component: TagsAdmin,
-        props: true
+        props: true,
+        meta: { title: "Tags" }
       },
       {
         path: "status",
         name: "Status",
         component: System,
-        props: true
+        props: true,
+        meta: { title: "Status" }
       }
     ]
   }
@@ -211,9 +219,16 @@ const router = createRouter({
 
 import { useUserStore } from "../store/user";
 import GroupList from "@/components/GroupList.vue";
+import { metaProperty } from "@babel/types";
 
 router.beforeEach((to, _from, next) => {
   const userStore = useUserStore();
+  document.title = "Yeti";
+  if (to.meta.title) {
+    document.title = `${to.meta.title} - Yeti`;
+  } else {
+    document.title = `${to.name} - Yeti`;
+  }
   if (to.name === "Login") {
     next();
   } else if (userStore.user === null) {
