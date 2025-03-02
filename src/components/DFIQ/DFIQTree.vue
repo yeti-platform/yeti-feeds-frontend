@@ -2,30 +2,20 @@
   <div>
     <v-container fluid v-if="topLevel">
       <v-row>
-        <v-btn
-          v-if="dfiqGraph.paths?.length > 0"
-          @click="expandedControl = !expandedControl"
-          class="me-2"
-          variant="outlined"
+        <v-btn v-if="dfiqGraph.paths?.length > 0" @click="expandAll = !expandAll" class="me-2" variant="outlined">
+          <v-icon size="x-large">{{ expandAll ? "mdi-chevron-down" : "mdi-chevron-right" }}</v-icon>
+          {{ expandAll ? "Collapse all" : "Expand all" }}</v-btn
         >
-          <v-icon size="x-large">{{ expandedControl ? "mdi-chevron-down" : "mdi-chevron-right" }}</v-icon>
-          {{ expandedControl ? "Collapse all" : "Expand all" }}</v-btn
-        >
-        <v-combobox
-          v-model="indicatorTypesControl"
-          :items="availableIndicatorTypes"
+        <v-text-field
+          v-model="dfiqTreeFilterControl"
           density="compact"
           variant="outlined"
-          label="Include indicator types"
-          chips
-          multiple
+          label="Filter items"
           hide-details
-          hide-selected
           max-width="600"
-          open-on-clear
           clearable
           prepend-inner-icon="mdi-filter"
-        ></v-combobox>
+        ></v-text-field>
       </v-row>
     </v-container>
     <ul class="ml-2 dfiq-tree cursor-pointer" v-if="shouldDisplay(dfiqTree)">
@@ -155,18 +145,25 @@
       </li>
 
       <!-- Recursive DFIQ children -->
-      <li class="ml-2 border-s" v-show="dfiqTree.children && expanded" v-for="child in dfiqTree.children">
+      <li
+        class="ml-2 border-s"
+        v-show="dfiqTree.children && (expanded || (dfiqTreeFilter !== '' && shouldDisplay(dfiqTree)))"
+        v-for="child in dfiqTree.children"
+      >
         <DFIQ-tree
           v-if="dfiqTree.object?.root_type === 'dfiq' && dfiqTree.object?.type !== 'question'"
           :treeRoot="child"
-          :expanded-control="expandedControl"
-          :display-indicator-types="indicatorTypesControl"
+          :expanded-control="topLevel ? expandAll : expandedControl"
+          :dfiq-tree-filter="topLevel ? dfiqTreeFilterControl : dfiqTreeFilter"
         />
       </li>
       <!-- Stop recursion if we're doing a question -->
       <li v-show="expanded" class="ml-2" v-if="dfiqTree.object?.type === 'question'">
         <ul class="ml-2 dfiq-tree">
-          <li class="my-2" v-for="(approach, index) in dfiqTree.object.approaches">
+          <li
+            class="my-2"
+            v-for="(approach, index) in dfiqTree.object.approaches.filter(a => shouldDisplayApproach(a))"
+          >
             <span @click="approach.expanded = !approach.expanded">
               <v-icon color="grey-darken-2" class="me-1">{{
                 approach.expanded ? "mdi-chevron-down" : "mdi-chevron-right"
@@ -217,8 +214,11 @@
                 </v-dialog>
               </span>
             </span>
-            <ul class="ml-4 dfiq-tree" v-show="approach.expanded">
-              <li class="mt-2 ml-6" v-for="step in approach.steps">
+            <ul
+              class="ml-4 dfiq-tree"
+              v-show="approach.expanded || (dfiqTreeFilter !== '' && shouldDisplayApproach(approach))"
+            >
+              <li class="mt-2 ml-6" v-for="step in approach.steps.filter(s => shouldDisplayStep(s))">
                 <v-icon color="grey-darken-2" size="x-small" class="me-2">{{ getDFIQStepIcon(step) }}</v-icon>
                 <span v-if="step.type?.match(/artifact/gi)">
                   <code class="me-2">{{ step.value }}</code>
@@ -283,24 +283,23 @@ export default {
       type: Boolean,
       default: false
     },
-    displayIndicatorTypes: {
-      type: Array,
-      default: () => {
-        return [];
-      }
+    dfiqTreeFilter: {
+      type: String,
+      default: "GCE"
     }
   },
   data() {
     return {
       dfiqGraph: {},
       expanded: true,
-      indicatorTypesControl: [],
+      expandAll: true,
       editWidth: "75%",
       fullScreenEdit: false,
       DFIQHierarchy: {
         scenario: ["facet", "question"],
         facet: ["question"]
-      }
+      },
+      dfiqTreeFilterControl: ""
     };
   },
   methods: {
@@ -354,32 +353,32 @@ export default {
       });
     },
     shouldDisplay(treeItem) {
-      if (this.displayIndicatorTypes.length === 0) {
+      if (this.dfiqTreeFilter === "") {
         return true;
       }
-      if (!treeItem.object) {
-        return false;
+      if (treeItem.object.name.includes(this.dfiqTreeFilter)) {
+        return true;
       }
-      if (treeItem.object.type === "query" && !this.displayIndicatorTypes.includes(treeItem.object.query_type)) {
-        return false;
+      if (treeItem.object.type === "question") {
+        return treeItem.object.approaches?.some(approach => this.shouldDisplayApproach(approach));
       }
-      if (treeItem.object.type === "forensicartifact" && !this.displayIndicatorTypes.includes("forensicartifact")) {
-        return false;
-      }
-      // don't display if children are only queries with no displayIndicatorTypes
-      if (
-        treeItem.children?.length > 0 &&
-        treeItem.children?.every(
-          child => child.object.type === "query" && !this.displayIndicatorTypes.includes(child.object.query_type)
-        )
-      ) {
-        return false;
-      }
-      // display only if all the children have at least one reason to be displayed
       if (treeItem.children?.length > 0) {
         return treeItem.children?.some(child => this.shouldDisplay(child));
       }
-      return true;
+
+      return false;
+    },
+    shouldDisplayApproach(approach) {
+      if (approach?.steps?.some(step => this.shouldDisplayStep(step))) {
+        return true;
+      }
+      if (approach?.name.includes(this.dfiqTreeFilter)) {
+        return true;
+      }
+    },
+    shouldDisplayStep(step) {
+      const fields = ["name", "value", "type", "stage"];
+      return fields.some(f => step[f].includes(this.dfiqTreeFilter));
     },
     sanitizeTitle(dfiqItem) {
       if (dfiqItem.object.type !== "query") {
@@ -466,9 +465,12 @@ export default {
   watch: {
     expandedControl() {
       this.expanded = this.expandedControl;
-    },
-    displayIndicatorTypes() {
-      this.indicatorTypesControl = this.displayIndicatorTypes;
+      if (this.dfiqTree.object.type === "question") {
+        console.log("question", this.expandedControl);
+        this.dfiqTree.object.approaches.forEach(approach => {
+          approach.expanded = this.expandedControl;
+        });
+      }
     },
     dfiqObjectId() {
       this.getDFIQData();
