@@ -1,37 +1,54 @@
 <template>
   <v-sheet>
-    <v-chip v-for="tag in approach.tags" class="ml-2" density="comfortable" variant="tonal" color="primary" rounded>{{
-      tag
-    }}</v-chip>
-    <div class="yeti-markdown" v-html="markdownifyText(approach.description)"></div>
-    <div class="mt-5" v-if="approach.references.length > 0">
+    <div v-if="approach.description">
+      <p class="text-h6">Description</p>
+      <div class="yeti-markdown" v-html="markdownifyText(approach.description)"></div>
+    </div>
+    <div v-else class="text-disabled">No description</div>
+
+    <div v-if="approach.references.length > 0">
       <div class="font-weight-bold mb-2">References:</div>
       <ul class="ml-5">
-        <li class="mb-2" v-for="ref in approach.references"><span v-html="markdownifyText(ref)"></span></li>
+        <li v-for="ref in approach.references"><span v-html="markdownifyText(ref)"></span></li>
       </ul>
       <ul class="ml-5" v-if="approach.references_internal?.length > 0">
-        <li class="mb-2" v-for="ref in approach.references_internal">
+        <li v-for="ref in approach.references_internal">
           <span v-html="markdownifyText(ref)"></span>
         </li>
       </ul>
     </div>
-    <div v-else class="mt-5"><em>No references</em></div>
+    <div v-else class="text-disabled">No references</div>
   </v-sheet>
 
-  <v-divider class="my-7" v-if="approach.notes.covered.length + approach.notes.not_covered.length > 0"></v-divider>
-  <div class="mt-5" v-else><em>No coverage data</em></div>
+  <v-divider class="my-4"></v-divider>
 
   <v-sheet>
+    <p class="text-h6 mb-4">Steps</p>
+    <p v-if="approach.steps.length == 0" class="text-disabled">No steps</p>
     <ol>
-      <li v-for="step in approach.steps" class="ml-2 mb-4">
-        <!-- {{ step }} -->
+      <li v-for="step in approach.steps" class="ml-6 mb-4">
         <div>
           {{ step.name }}
-          <v-chip class="ml-2" density="compact" variant="tonal" color="primary" rounded>{{ step.type }}</v-chip>
-          <v-chip class="ml-2" density="compact" variant="tonal" color="primary" rounded>{{ step.stage }}</v-chip>
+          <v-chip class="ml-2" density="compact" size="small" variant="tonal" color="success" rounded>{{
+            step.stage
+          }}</v-chip>
+          <v-chip class="ml-2" density="compact" size="small" variant="tonal" color="primary" rounded>{{
+            step.type
+          }}</v-chip>
         </div>
-        <div class="ma-2">
-          <code>{{ step.value }}</code>
+        <p>{{ step.description }}</p>
+        <div class="ma-2 clipboard-copy" @click="copyText(step.value)">
+          <v-btn
+            variant="text"
+            size="small"
+            color="grey"
+            icon="mdi-content-copy"
+            density="compact"
+            class="me-2 clipboard-copy-button"
+            title="Copy to clipboard"
+            ripple
+          />
+          <code class="text-medium-emphasis text-size">{{ step.value }}</code>
         </div>
         <!-- <div>
             <v-chip class="ml-3" density="comfortable" variant="tonal" color="primary" rounded>{{ step.type }}</v-chip>
@@ -43,25 +60,23 @@
     </ol>
   </v-sheet>
 
-  <v-divider class="my-7" v-if="approach.notes.covered.length + approach.notes.not_covered.length > 0"></v-divider>
+  <v-divider class="my-4"></v-divider>
 
-  <v-card class="dfiq-covered ma-4" v-if="approach.notes.covered.length > 0">
-    <v-card-title>Covered</v-card-title>
-    <v-card-text>
-      <ul>
-        <li class="mb-2 ml-5" v-for="ref in approach.notes.covered"><span v-html="markdownifyText(ref)"></span></li>
-      </ul>
-    </v-card-text>
-  </v-card>
+  <p class="text-disabled" v-if="!hasCoverage">No coverage data</p>
 
-  <v-card class="dfiq-not-covered ma-4" v-if="approach.notes.not_covered.length > 0">
-    <v-card-title>Not covered</v-card-title>
-    <v-card-text>
-      <ul>
-        <li class="mb-2 ml-5" v-for="ref in approach.notes.not_covered"><span v-html="markdownifyText(ref)"></span></li>
-      </ul>
-    </v-card-text>
-  </v-card>
+  <div class="dfiq-covered mb-2 px-2 py-1 rounded" v-if="approach.notes.covered.length > 0">
+    <p class="font-weight-bold">Covered</p>
+    <ul>
+      <li class="mb-2 ml-5" v-for="ref in approach.notes.covered"><span v-html="markdownifyText(ref)"></span></li>
+    </ul>
+  </div>
+
+  <div class="dfiq-not-covered mb-2 px-2 py-1 rounded" v-if="approach.notes.not_covered.length > 0">
+    <p class="font-weight-bold">Not covered</p>
+    <ul>
+      <li class="mb-2 ml-5" v-for="ref in approach.notes.not_covered"><span v-html="markdownifyText(ref)"></span></li>
+    </ul>
+  </div>
 </template>
 
 <script lang="ts" setup>
@@ -85,9 +100,19 @@ export default {
   methods: {
     markdownifyText(text) {
       return DOMPurify.sanitize(marked(text));
+    },
+    copyText(text) {
+      navigator.clipboard.writeText(text);
+      this.$eventBus.emit("displayMessage", {
+        status: "info",
+        message: "Query copied to clipboard!"
+      });
     }
   },
   computed: {
+    hasCoverage() {
+      return this.approach.notes.covered.length + this.approach.notes.not_covered.length > 0;
+    },
     viewCoverageMarkdown() {
       let text = `### Notes \n\n`;
       if (this.view.notes.covered.length > 0) {
@@ -166,5 +191,22 @@ export default {
   border: 2px solid rgb(var(--v-theme-error));
   background: rgba(155, 0, 0, 0.05);
   opacity: 0.8;
+}
+
+.clipboard-copy > .clipboard-copy-button {
+  opacity: 0;
+}
+
+.clipboard-copy:hover > .clipboard-copy-button {
+  opacity: 1;
+}
+
+.indicator-preview {
+  font-size: 0.8em;
+  opacity: 0.6;
+}
+
+.clipboard-copy {
+  cursor: pointer;
 }
 </style>

@@ -53,7 +53,16 @@
             {{ sanitizeTitle(dfiqTree) }}
 
             <span>
-              <v-chip label class="mr-2" size="x-small" v-for="tag in dfiqTree.object.dfiq_tags">{{ tag }}</v-chip>
+              <v-chip
+                class="mr-2"
+                density="comfortable"
+                variant="tonal"
+                color="primary"
+                size="small"
+                rounded
+                v-for="tag in dfiqTree.object.dfiq_tags"
+                >{{ tag }}!</v-chip
+              >
             </span>
 
             <span class="me-2"></span>
@@ -162,7 +171,21 @@
               <v-icon color="grey-darken-2" class="me-1">{{
                 approach.expanded ? "mdi-chevron-down" : "mdi-chevron-right"
               }}</v-icon>
-              <v-icon color="grey-darken-2" size="x-small" class="me-2">mdi-monitor </v-icon>{{ approach.name }}
+              <span class="inline">
+                <v-icon color="grey-darken-2" size="x-small" class="me-2">mdi-monitor </v-icon>
+                {{ approach.name }}
+                <v-chip
+                  v-for="tag in approach.tags"
+                  class="ml-2"
+                  density="comfortable"
+                  variant="tonal"
+                  color="primary"
+                  size="small"
+                  rounded
+                  >{{ tag }}</v-chip
+                >
+              </span>
+
               <span class="item-controls">
                 <v-dialog :width="editWidth" :fullscreen="fullScreenEdit">
                   <template v-slot:activator="{ props }">
@@ -195,41 +218,23 @@
               </span>
             </span>
             <ul class="ml-4 dfiq-tree" v-show="approach.expanded">
-              <!-- <li class="mt-2 ml-6" v-for="step in approach.steps.filter(step => step.type.match(/artifact|query/gi))"> -->
               <li class="mt-2 ml-6" v-for="step in approach.steps">
                 <v-icon color="grey-darken-2" size="x-small" class="me-2">{{ getDFIQStepIcon(step) }}</v-icon>
-                <span v-if="step.type === 'ForensicArtifact'">
+                <span v-if="step.type?.match(/artifact/gi)">
                   <code class="me-2">{{ step.value }}</code>
                   <v-chip density="compact" size="small">{{ step.type }}</v-chip>
                 </span>
-                <span v-else-if="step.type.match(/query/gi)">
-                  <span class="me-2">{{ step.name }}</span>
-                  <v-chip density="compact" size="small">{{ step.type }}</v-chip>
-                  <div class="indicator-preview" @click="copyText(step.value)">
-                    <v-btn
-                      variant="text"
-                      size="small"
-                      color="grey"
-                      icon="mdi-content-copy"
-                      density="compact"
-                      class="me-2 clipboard-copy"
-                      title="Copy to clipboard"
-                      ripple
-                    /><code>{{ step.value }}</code>
-                  </div>
-                </span>
-
                 <span v-else>
                   <span class="me-2">{{ step.name }}</span>
-                  <v-chip density="compact" size="small">{{ step.type }}</v-chip>
-                  <div class="indicator-preview" @click="copyText(step.value)">
+                  <v-chip v-if="step.type" density="compact" size="small">{{ step.type }}</v-chip>
+                  <div v-if="step.value" class="indicator-preview clipboard-copy" @click="copyText(step.value)">
                     <v-btn
                       variant="text"
                       size="small"
                       color="grey"
                       icon="mdi-content-copy"
                       density="compact"
-                      class="me-2 clipboard-copy"
+                      class="me-2 clipboard-copy-button"
                       title="Copy to clipboard"
                       ripple
                     /><code>{{ step.value }}</code>
@@ -324,6 +329,9 @@ export default {
       ).icon;
     },
     getDFIQStepIcon(step) {
+      if (step.type === null) {
+        return "mdi-cog";
+      }
       if (step.type.match(/forensicartifact/gi)) {
         return "mdi-script-text-outline";
       }
@@ -480,11 +488,11 @@ export default {
   opacity: 0.6;
 }
 
-li > .clipboard-copy {
+.clipboard-copy > .clipboard-copy-button {
   opacity: 0;
 }
 
-li:hover > .clipboard-copy {
+.clipboard-copy:hover > .clipboard-copy-button {
   opacity: 1;
 }
 
