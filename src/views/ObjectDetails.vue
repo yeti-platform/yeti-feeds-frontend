@@ -380,6 +380,7 @@ export default {
           this.object = response.data;
           this.objectTags = this.object.tags ? Object.keys(this.object.tags) : [];
           this.navigateToFirstPopulatedTab();
+          this.appStore.setPageTitleFromObject(this.object);
         })
         .catch(error => {
           console.log(error);
