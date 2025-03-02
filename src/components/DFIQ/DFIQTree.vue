@@ -356,7 +356,7 @@ export default {
       if (this.dfiqTreeFilter === "") {
         return true;
       }
-      if (treeItem.object.name.includes(this.dfiqTreeFilter)) {
+      if (treeItem.object.name.toLowerCase().includes(this.dfiqTreeFilter.toLowerCase())) {
         return true;
       }
       if (treeItem.object.type === "question") {
@@ -372,13 +372,13 @@ export default {
       if (approach?.steps?.some(step => this.shouldDisplayStep(step))) {
         return true;
       }
-      if (approach?.name.includes(this.dfiqTreeFilter)) {
+      if (approach?.name.toLowerCase().includes(this.dfiqTreeFilter.toLowerCase())) {
         return true;
       }
     },
     shouldDisplayStep(step) {
       const fields = ["name", "value", "type", "stage"];
-      return fields.some(f => step[f]?.includes(this.dfiqTreeFilter));
+      return fields.some(f => step[f]?.toLowerCase().includes(this.dfiqTreeFilter.toLowerCase()));
     },
     sanitizeTitle(dfiqItem) {
       if (dfiqItem.object.type !== "query") {
