@@ -29,10 +29,10 @@
       <li v-for="step in approach.steps" class="ml-6 mb-4">
         <div>
           {{ step.name }}
-          <v-chip class="ml-2" density="compact" size="small" variant="tonal" color="success" rounded>{{
+          <v-chip label class="ml-2" density="compact" size="small" variant="tonal" color="success" rounded>{{
             step.stage
           }}</v-chip>
-          <v-chip class="ml-2" density="compact" size="small" variant="tonal" color="primary" rounded>{{
+          <v-chip label class="ml-2" density="compact" size="small" variant="tonal" color="primary" rounded>{{
             step.type
           }}</v-chip>
         </div>
