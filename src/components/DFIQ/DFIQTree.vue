@@ -2,7 +2,7 @@
   <div>
     <v-container fluid v-if="topLevel">
       <v-row>
-        <v-btn v-if="dfiqGraph.paths?.length > 0" @click="expandAll = !expandAll" class="me-2" variant="outlined">
+        <v-btn @click="expandAll = !expandAll" class="me-2" variant="outlined">
           <v-icon size="x-large">{{ expandAll ? "mdi-chevron-down" : "mdi-chevron-right" }}</v-icon>
           {{ expandAll ? "Collapse all" : "Expand all" }}</v-btn
         >
@@ -378,7 +378,7 @@ export default {
     },
     shouldDisplayStep(step) {
       const fields = ["name", "value", "type", "stage"];
-      return fields.some(f => step[f].includes(this.dfiqTreeFilter));
+      return fields.some(f => step[f]?.includes(this.dfiqTreeFilter));
     },
     sanitizeTitle(dfiqItem) {
       if (dfiqItem.object.type !== "query") {
@@ -397,6 +397,14 @@ export default {
     },
     emitDFIQUpdate(obj) {
       this.$eventBus.emit("DFIQupdated", obj);
+    },
+    expandCheck(expansion) {
+      this.expanded = expansion;
+      if (this.dfiqTree.object.type === "question") {
+        this.dfiqTree.object.approaches.forEach(approach => {
+          approach.expanded = expansion;
+        });
+      }
     }
   },
   computed: {
@@ -464,13 +472,10 @@ export default {
   },
   watch: {
     expandedControl() {
-      this.expanded = this.expandedControl;
-      if (this.dfiqTree.object.type === "question") {
-        console.log("question", this.expandedControl);
-        this.dfiqTree.object.approaches.forEach(approach => {
-          approach.expanded = this.expandedControl;
-        });
-      }
+      this.expandCheck(this.expandedControl);
+    },
+    expandAll() {
+      this.expandCheck(this.expandAll);
     },
     dfiqObjectId() {
       this.getDFIQData();
