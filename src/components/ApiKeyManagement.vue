@@ -70,14 +70,16 @@
               />
             </v-card-text>
             <v-card-text v-else>
-              This is the only time your API key will be accessable. Please copy it to your clipboard now and store it
+              This is the only time your API key will be accessible. Please copy it to your clipboard now and store it
               in a secure location. You'll need it to access the API and won't be able to retrieve it again later.
-              <br />
-              <div class="d-flex justify-center">
-                <v-btn class="mt-6" @click="copyApiKey(newApiKeyToken, isActive)" prepend-icon="mdi-content-copy"
-                  >Copy API key to clipboard</v-btn
-                >
-              </div>
+              <v-text-field
+                class="mt-3"
+                v-model="newApiKeyToken"
+                append-inner-icon="mdi-content-copy"
+                @click="copyApiKey(newApiKeyToken)"
+                hint="Click the textfield to copy the key to your clipboard"
+                persistent-hint
+              ></v-text-field>
             </v-card-text>
             <v-card-actions v-if="!newApiKeyToken">
               <v-spacer></v-spacer>
@@ -170,14 +172,12 @@ export default {
         })
         .finally(() => {});
     },
-    copyApiKey(text, isActive) {
+    copyApiKey(text) {
       navigator.clipboard.writeText(text);
       this.$eventBus.emit("displayMessage", {
         status: "info",
         message: "API key copied to clipboard!"
       });
-      this.newApiKeyToken = null;
-      isActive.value = false;
     }
   }
 };
