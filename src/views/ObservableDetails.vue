@@ -35,43 +35,20 @@
             </v-expansion-panel>
           </v-expansion-panels>
         </v-sheet>
-        <v-sheet class="ma-2">
-          <v-table density="compact">
-            <tbody>
-              <tr>
-                <th>Context sources</th>
-                <td>
-                  <v-chip
-                    label
-                    color="green"
-                    v-for="source in new Set(observable?.context.map(c => c.source))"
-                    v-bind:key="source"
-                    size="small"
-                  >
-                    {{ source }}
-                  </v-chip>
-                </td>
-              </tr>
-              <tr v-for="field in getObservableDetailFields">
-                <th>{{ field.label }}</th>
-                <td>{{ observable[field.field] }}</td>
-              </tr>
-            </tbody>
-          </v-table>
-          <v-card>
-            <v-treeview
-              :items="ContextTreeView()"
-              item-value="id"
-              activatable
-              open-on-click
-              open-all
-              density="compact"
-              max-height="300"
-              width="100%"
-            >
-            </v-treeview>
-          </v-card>
-        </v-sheet>
+        <object-context
+          v-if="observable"
+          :context="observable.context"
+          @update:context="ctx => (observable.context = ctx)"
+          :update-endpoint="`observables/${observable.id}`"
+        />
+        <v-table>
+          <tbody>
+            <tr v-for="field in getObservableDetailFields">
+              <th>{{ field.label }}</th>
+              <td>{{ observable[field.field] }}</td>
+            </tr>
+          </tbody>
+        </v-table>
       </v-col>
       <v-col cols="4">
         <v-card class="ma-2" variant="flat" v-if="observable">
@@ -284,6 +261,7 @@ import TaskList from "@/components/TaskList.vue";
 import RelatedObjects from "@/components/RelatedObjects.vue";
 import EditObject from "@/components/EditObject.vue";
 import ACLEdit from "@/components/ACLEdit.vue";
+import ObjectContext from "@/components/ObjectContext.vue";
 import DirectNeighbors from "@/components/DirectNeighbors.vue";
 import GraphObjects from "@/components/GraphObjects.vue";
 
@@ -294,7 +272,6 @@ import { ENTITY_TYPES } from "@/definitions/entityDefinitions.js";
 import { INDICATOR_TYPES } from "@/definitions/indicatorDefinitions.js";
 import { OBSERVABLE_TYPES } from "@/definitions/observableDefinitions.js";
 import moment from "moment";
-import { VTreeview } from "vuetify/labs/VTreeview";
 
 import Timeline from "@/components/Timeline.vue";
 
@@ -318,7 +295,8 @@ export default {
     LinkObservables,
     GraphObjects,
     Timeline,
-    ACLEdit
+    ACLEdit,
+    ObjectContext
   },
   data() {
     return {
@@ -388,51 +366,6 @@ export default {
     toggleFullscreen(fullscreen: boolean) {
       this.fullScreenEdit = !this.fullScreenEdit;
       this.editWidth = fullscreen ? "100%" : "75%";
-    },
-
-    ContextTreeView() {
-      var items = [];
-      var id = 0;
-      var id = 0;
-      if (this.observable === null) {
-        return items;
-      }
-      function treeify(root, data) {
-        if (Array.isArray(data)) {
-          var count = 0;
-          for (const item of data) {
-            var element = { id: id++, title: count.toString(), children: [] };
-            root.push(element);
-            count++;
-            treeify(element.children, item);
-          }
-        } else if (typeof data === "object") {
-          for (const [key, value] of Object.entries(data)) {
-            if (key === "source") {
-              continue;
-            }
-            if (value === null) {
-              var title = key + ": N/A";
-              var element = { id: id++, title: title };
-              root.push(element);
-            } else if (Array.isArray(value) || typeof value === "object") {
-              element = { id: id++, title: key, children: [] };
-              root.push(element);
-              treeify(element.children, value);
-            } else {
-              var title = key + ": " + value;
-              var element = { id: id++, title: title };
-              root.push(element);
-            }
-          }
-        }
-      }
-      for (const ctx of this.observable.context) {
-        var element = { id: id++, title: ctx.source, children: [], color: "warning" };
-        items.push(element);
-        treeify(element.children, ctx);
-      }
-      return items;
     }
   },
 
