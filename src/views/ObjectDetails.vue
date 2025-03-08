@@ -300,7 +300,6 @@ import EditDFIQObject from "@/components/DFIQ/EditDFIQObject.vue";
 import LinkObject from "@/components/LinkObject.vue";
 import LinkObservables from "@/components/LinkObservables.vue";
 import YetiMarkdown from "@/components/YetiMarkdown.vue";
-import YetiDFIQApproachTemplate from "@/components/YetiDFIQApproachTemplate.vue";
 
 import { ENTITY_TYPES } from "@/definitions/entityDefinitions.js";
 import { OBSERVABLE_TYPES } from "@/definitions/observableDefinitions.js";
