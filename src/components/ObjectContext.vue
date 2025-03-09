@@ -3,7 +3,7 @@
     <v-expansion-panels>
       <v-expansion-panel>
         <v-expansion-panel-title class="edit-ctx-title break-title">
-          <p class="text-subtitle-1">Context entries</p>
+          <p class="text-subtitle-1 me-2">Context entries</p>
           <v-chip
             label
             color="green"
@@ -15,6 +15,7 @@
           >
             {{ source }}
           </v-chip>
+
           <v-dialog height="90%">
             <template v-slot:activator="{ props }">
               <v-btn v-bind="props" class="ms-2 edit-ctx-btn" size="small" variant="text" density="comfortable"
