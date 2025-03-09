@@ -105,8 +105,7 @@ export default {
         return;
       }
       axios
-
-        .post(`/api/v2/${this.updateEndpoint}/context/replace`, { context: contextPayload })
+        .put(`/api/v2/${this.updateEndpoint}/context`, { context: contextPayload })
         .then(response => {
           this.$emit("update:context", response.data.context);
           isActive.value = false;
