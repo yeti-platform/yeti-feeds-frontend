@@ -1,6 +1,6 @@
 <template>
   <v-card class="ma-2">
-    <v-expansion-panels>
+    <v-expansion-panels :readonly="this.context.length === 0" flat static>
       <v-expansion-panel>
         <v-expansion-panel-title class="edit-ctx-title break-title">
           <p class="text-subtitle-1 me-2">Context entries</p>
@@ -19,7 +19,7 @@
           <v-dialog height="90%">
             <template v-slot:activator="{ props }">
               <v-btn v-bind="props" class="ms-2 edit-ctx-btn" size="small" variant="text" density="comfortable"
-                ><v-icon class="me-2">mdi-pencil</v-icon>edit</v-btn
+                ><v-icon class="me-2">mdi-pencil</v-icon>{{ this.context.length === 0 ? "add" : "edit" }}</v-btn
               >
             </template>
             <template v-slot:default="{ isActive }">

@@ -1,5 +1,5 @@
 <template>
-  <v-expansion-panels multiple flaat static>
+  <v-expansion-panels multiple flat static>
     <v-expansion-panel v-for="(approach, index) in question.approaches">
       <v-expansion-panel-title class="approach-title d-flex justify-end">
         <span class="me-4">{{ approach.name }}</span>
