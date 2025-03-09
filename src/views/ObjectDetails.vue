@@ -28,17 +28,12 @@
           </v-card-text></v-card
         >
 
-        <v-card v-for="(context, index) in object?.context" class="ma-2" variant="flat">
-          <v-card-title>{{ context.source }}</v-card-title>
-          <v-table>
-            <tbody>
-              <tr v-for="key in Object.keys(context).filter(k => k !== 'source')" v-bind:key="key">
-                <th>{{ key }}</th>
-                <td><yeti-markdown :text="context[key]" /></td>
-              </tr>
-            </tbody>
-          </v-table>
-        </v-card>
+        <object-context
+          v-if="object"
+          :context="object.context"
+          @update:context="ctx => (object.context = ctx)"
+          :update-endpoint="`${typeToEndpointMapping[objectType]}/${object.id}`"
+        />
       </v-col>
       <v-col cols="4">
         <v-card class="ma-2" variant="flat">
@@ -300,6 +295,7 @@ import EditDFIQObject from "@/components/DFIQ/EditDFIQObject.vue";
 import LinkObject from "@/components/LinkObject.vue";
 import LinkObservables from "@/components/LinkObservables.vue";
 import YetiMarkdown from "@/components/YetiMarkdown.vue";
+import ObjectContext from "@/components/ObjectContext.vue";
 
 import { ENTITY_TYPES } from "@/definitions/entityDefinitions.js";
 import { OBSERVABLE_TYPES } from "@/definitions/observableDefinitions.js";
@@ -336,7 +332,8 @@ export default {
     DFIQTree,
     GraphObjects,
     Timeline,
-    ACLEdit
+    ACLEdit,
+    ObjectContext
   },
   data() {
     return {
