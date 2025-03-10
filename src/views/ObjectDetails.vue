@@ -29,7 +29,7 @@
         >
 
         <object-context
-          v-if="object"
+          v-if="object?.context"
           :context="object.context"
           @update:context="ctx => (object.context = ctx)"
           :update-endpoint="`${typeToEndpointMapping[objectType]}/${object.id}`"
