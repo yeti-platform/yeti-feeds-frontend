@@ -187,7 +187,7 @@
     </v-row>
     <v-row>
       <v-container fluid>
-        <v-sheet>
+        <v-sheet v-if="observable">
           <v-tabs v-model="activeTab" color="primary">
             <v-tab value="graph" @click="emitRefreshGraph"
               ><v-icon @click="emitRefreshGraph" size="x-large" start>mdi-graph</v-icon>Graph (Beta)
@@ -206,9 +206,9 @@
             </v-tab>
           </v-tabs>
 
-          <v-window v-model="activeTab" class="pa-5">
+          <v-window v-model="activeTab" class="pa-5" v-if="observable">
             <v-window-item value="graph">
-              <graph-objects :id="id" source-type="observables" />
+              <graph-objects :object="observable" source-type="observables" />
             </v-window-item>
             <v-window-item value="related-observables" eager>
               <direct-neighbors

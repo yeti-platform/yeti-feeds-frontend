@@ -177,7 +177,7 @@
     </v-row>
     <v-row>
       <v-container fluid>
-        <v-sheet>
+        <v-sheet v-if="object">
           <v-tabs v-model="activeTab" color="primary">
             <v-tab value="related-dfiq-tree" href="#dfiq-tree" v-if="object?.root_type === 'dfiq'"
               ><v-icon size="x-large" start>mdi-file-tree</v-icon>DFIQ tree</v-tab
@@ -244,7 +244,7 @@
             </v-window-item>
 
             <v-window-item value="related-graph" eager>
-              <graph-objects :id="id" :source-type="typeToEndpointMapping[objectType]" />
+              <graph-objects :object="object" :source-type="typeToEndpointMapping[objectType]" />
             </v-window-item>
 
             <v-window-item value="related-observables" eager class="my-4">
