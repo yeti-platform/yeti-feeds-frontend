@@ -2,7 +2,7 @@
   <v-container fluid>
     <v-row align="start" no-gutters>
       <v-col>
-        <v-card class="ma-2" variant="flat">
+        <v-card class="ma-2" variant="flat" :loading="!object">
           <template v-slot:title>
             <div class="d-flex yeti-object-title">
               <div>

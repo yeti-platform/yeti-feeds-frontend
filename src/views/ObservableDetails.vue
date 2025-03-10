@@ -2,7 +2,7 @@
   <v-container fluid>
     <v-row align="start" no-gutters>
       <v-col cols="8">
-        <v-card class="ma-2 break-title" variant="flat">
+        <v-card class="ma-2 break-title" variant="flat" :loading="!observable">
           <template v-slot:title>
             <div class="d-flex">
               <v-chip class="mr-3 flex-shrink-0" color="primary" :text="observable?.type" label></v-chip>
