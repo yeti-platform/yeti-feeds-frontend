@@ -21,7 +21,7 @@
             density="compact"
           ></v-text-field>
           <v-text-field
-            label="DFIQ ID"
+            label="DFIQ ID (optional)"
             placeholder="e.g. S0001, F0001, Q0001"
             persistent-placeholder
             v-model="parsedYaml.id"
@@ -50,6 +50,14 @@
           <v-combobox
             label="Tags"
             v-model="parsedYaml.tags"
+            chips
+            multiple
+            density="compact"
+            :delimiters="[',', ' ', ';']"
+          ></v-combobox>
+          <v-combobox
+            label="Contributors"
+            v-model="parsedYaml.contributors"
             chips
             multiple
             density="compact"
@@ -454,7 +462,7 @@ export default {
       },
       validatingYaml: false,
       yamlValidationError: { valid: true },
-      updateApproachIndicators: true,
+      updateApproachIndicators: false,
       dialogDelete: false,
       activeTab: "user-form",
       parsedYaml: {},
