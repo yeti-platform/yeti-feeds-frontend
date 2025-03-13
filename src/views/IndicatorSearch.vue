@@ -30,7 +30,7 @@
       <v-text-field
         v-model="searchQueryLocal"
         prepend-inner-icon="mdi-magnify"
-        label="Search indicators"
+        label="Search indicators ↵"
         density="compact"
         class="mt-2"
         hint="e.g. created>2024-01-01, supported_os=windows"
