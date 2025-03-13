@@ -8,7 +8,6 @@
       density="compact"
       :items="items"
       @update:options="loadOjects"
-      :search="searchQueryDebounced"
       :show-select="showSelect"
       :item-value="item => item.id"
       :items-per-page-options="[
@@ -20,6 +19,8 @@
       :sort-by="sortBy"
       v-model="selectedObservables"
       hover
+      :loading="loading"
+      loading-text="Loading data..."
       class="fixed-table"
     >
       <template v-slot:item.value="{ item }">
@@ -47,7 +48,7 @@
           v-for="source in new Set(item.context.map(c => c.source))"
           v-bind:key="source"
         >
-          {{  source }}
+          {{ source }}
         </v-chip>
       </template>
       <template v-slot:item.created="{ item }"> {{ moment(item.created).format("YYYY-MM-DD HH:mm:ss") }} </template>
@@ -58,9 +59,11 @@
       <v-text-field
         v-model="searchQuery"
         prepend-inner-icon="mdi-magnify"
-        label="Search observables"
+        label="Search observables ↵"
         density="compact"
         class="mt-2"
+        @click:prepend-inner="loadOjects({ page: 1, itemsPerPage: perPage, sortBy: sortBy })"
+        @keyup.enter="loadOjects({ page: 1, itemsPerPage: perPage, sortBy: sortBy })"
       />
     </v-list-item>
     <v-list-item class="mb-4">
@@ -138,7 +141,7 @@ export default {
       perPage: 25,
       total: 0,
       searchQuery: "",
-      searchQueryDebounced: "",
+      loading: false,
       showSelect: false,
       selectedObservables: [],
       bulkTags: [],
@@ -193,6 +196,7 @@ export default {
       itemsPerPage: number;
       sortBy: Array<{ key: string; order: string }>;
     }) {
+      this.loading = true;
       let params = {
         page: page - 1,
         count: itemsPerPage,
@@ -202,6 +206,7 @@ export default {
       axios.post("/api/v2/observables/search", params).then(response => {
         this.items = response.data.observables;
         this.total = response.data.total;
+        this.loading = false;
       });
     },
     loadExportTemplates() {
@@ -263,11 +268,6 @@ export default {
   },
   mounted() {
     this.loadExportTemplates();
-  },
-  watch: {
-    searchQuery: _.debounce(function () {
-      this.searchQueryDebounced = this.searchQuery;
-    }, 200)
   }
 };
 </script>
