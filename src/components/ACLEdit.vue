@@ -268,12 +268,13 @@ export default {
           });
         });
     },
-    generateAclTable(group) {
+    generateAclTable(obj) {
       let memberList = [];
-      for (let key in group.acls) {
-        if (group.acls[key].role != 0) {
-          let id = group.acls[key].source.replace("users/", "");
-          memberList.push({ name: key, id, ...group.acls[key] });
+      console.log(obj);
+      for (let key in obj.acls) {
+        if (obj.acls[key].role != 0) {
+          let id = obj.acls[key].source.replace("users/", "");
+          memberList.push({ name: key, id, ...obj.acls[key] });
         }
       }
       return memberList;
@@ -303,7 +304,7 @@ export default {
   },
   mounted() {
     this.listUsers();
-    this.getMembershipData();
+    this.ACLTableData = this.generateAclTable(this.object);
   },
   watch: {
     group: {

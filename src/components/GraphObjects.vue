@@ -126,7 +126,7 @@ export default {
   name: "GraphObjects",
 
   props: {
-    id: { type: String, required: true },
+    object: { type: Object, required: true },
     sourceType: { type: String, default: "observable" }
   },
 
@@ -361,7 +361,7 @@ export default {
         this.selected_dfiq
       );
       let graphSearchRequest = {
-        source: `${this.sourceType}/${this.id}`,
+        source: `${this.sourceType}/${this.object.id}`,
         target_types: target_types,
         graph: "links",
         hops: 1,
@@ -495,27 +495,19 @@ export default {
     },
 
     getObjectDetails() {
-      axios
-        .get(`/api/v2/${this.sourceType}/${this.id}`)
-        .then(response => {
-          var data = response.data;
-          if (data.root_type == "observable") {
-            var label = data.value;
-            delete data.value;
-          } else {
-            var label = data.name;
-            delete data.name;
-          }
-          data.label = label;
-          data.object_type = data.type;
-          delete data.type;
-          data.yeti_object_id = `${this.sourceType}/${this.id}`;
-          this.selected_node = { ...data };
-        })
-        .catch(error => {
-          console.log(error);
-        })
-        .finally();
+      var data = { ...this.object };
+      if (data.root_type == "observable") {
+        var label = data.value;
+        delete data.value;
+      } else {
+        var label = data.name;
+        delete data.name;
+      }
+      data.label = label;
+      data.object_type = data.type;
+      delete data.type;
+      data.yeti_object_id = `${this.sourceType}/${this.id}`;
+      this.selected_node = data;
     }
   }
 };
