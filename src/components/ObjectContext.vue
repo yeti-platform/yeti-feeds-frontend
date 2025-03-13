@@ -16,17 +16,25 @@
             {{ source }}
           </v-chip>
 
-          <v-dialog height="90%">
+          <v-dialog v-model="editContextVisible" height="80%">
             <template v-slot:activator="{ props }">
               <v-btn v-bind="props" class="ms-2 edit-ctx-btn" size="small" variant="text" density="comfortable"
                 ><v-icon class="me-2">mdi-pencil</v-icon>{{ this.context.length === 0 ? "add" : "edit" }}</v-btn
               >
             </template>
             <template v-slot:default="{ isActive }">
-              <v-card max-height="100%">
+              <v-card>
                 <v-card-title class="text-h6">Edit context</v-card-title>
-                <v-card-text>
-                  <v-textarea class="yeti-code" v-model="jsonContext" v-on:input="checkJson" rows="1" auto-grow />
+                <v-card-text ref="textareaContainer">
+                  <div class="yeti-code-container">
+                    <textarea
+                      id="edit-textarea"
+                      ref="editTextarea"
+                      v-model="jsonContext"
+                      @input="adjustSize"
+                    ></textarea>
+                    <highlightjs id="highlight" autodetect :code="jsonContext" />
+                  </div>
                   <v-alert type="error" v-if="jsonError !== ''">Invalid JSON: {{ jsonError }}</v-alert>
                 </v-card-text>
                 <v-card-actions>
@@ -60,8 +68,15 @@
 import axios from "axios";
 import { VTreeview } from "vuetify/labs/VTreeview";
 
+import "highlight.js/lib/common";
+import hljsVuePlugin from "@highlightjs/vue-plugin";
+import { nextTick } from "vue";
+
 export default {
-  components: { VTreeview },
+  components: {
+    VTreeview,
+    highlightjs: hljsVuePlugin.component
+  },
   props: {
     context: {
       type: Object,
@@ -76,18 +91,19 @@ export default {
     return {
       jsonContext: JSON.stringify(this.context, null, 2),
       jsonError: "",
-      showCtxDetails: true
+      showCtxDetails: true,
+      editContextVisible: false
     };
   },
-  // watch: {
-  //   context: {
-  //     handler(newContext) {
-  //       this.jsonContext = JSON.stringify(newContext, null, 2);
-  //     },
-  //     deep: true
-  //   }
-  // },
   methods: {
+    adjustSize() {
+      const textarea = this.$refs.editTextarea;
+      const container = this.$refs.textareaContainer;
+      textarea.style.height = "auto";
+      textarea.style.height = textarea.scrollHeight + "px";
+      console.log(window.getComputedStyle(container).height);
+      this.checkJson();
+    },
     checkJson() {
       try {
         JSON.parse(this.jsonContext);
@@ -155,6 +171,16 @@ export default {
       }
       return items;
     }
+  },
+  watch: {
+    editContextVisible(val) {
+      if (val) {
+        nextTick(() => {
+          this.$refs.editTextarea.focus();
+          this.adjustSize();
+        });
+      }
+    }
   }
 };
 </script>
@@ -176,5 +202,39 @@ export default {
 
 .edit-ctx-title:hover .edit-ctx-btn {
   display: inline;
+}
+
+#edit-textarea {
+  z-index: 1;
+  width: 90%;
+  resize: none;
+  font-family: monospace;
+  font-size: 15pt;
+  position: absolute;
+  padding: 15pt;
+  letter-spacing: 0.5px;
+  color: transparent;
+  background: transparent;
+  caret-color: black;
+  border: none;
+}
+
+#edit-textarea:focus,
+#edit-textarea:focus-visible {
+  outline: none;
+}
+
+#highlight {
+  z-index: 0;
+  display: block;
+  font-size: 15pt;
+}
+
+#highlight code {
+  border-radius: 5px;
+}
+
+.yeti-code-container {
+  position: relative;
 }
 </style>
