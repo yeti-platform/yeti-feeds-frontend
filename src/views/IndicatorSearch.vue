@@ -16,7 +16,7 @@
         <object-list
           searchType="indicators"
           :search-subtype="typeDef.type"
-          :search-query="searchQueryDebounced"
+          :search-query="searchQuery"
           :headers="getFieldForType(typeDef.type)"
           :filter-aliases="getAliasesForType(typeDef.type)"
           @totalUpdated="countIndicators(typeDef.type, $event)"
@@ -28,12 +28,14 @@
   <v-navigation-drawer permament location="right" width="400" ref="drawer">
     <v-list-item class="mt-4">
       <v-text-field
-        v-model="searchQuery"
+        v-model="searchQueryLocal"
         prepend-inner-icon="mdi-magnify"
         label="Search indicators"
         density="compact"
         class="mt-2"
         hint="e.g. created>2024-01-01, supported_os=windows"
+        @click:prepend-inner="() => (searchQuery = searchQueryLocal)"
+        @keyup.enter="() => (searchQuery = searchQueryLocal)"
       />
     </v-list-item>
     <v-list-item>
@@ -78,7 +80,7 @@ export default {
   data() {
     return {
       searchQuery: "",
-      searchQueryDebounced: "",
+      searchQueryLocal: "",
       indicatorTypes: INDICATOR_TYPES,
       indicatorCount: INDICATOR_TYPES.reduce((acc, cur) => {
         acc[cur.type] = 0;
@@ -144,9 +146,6 @@ export default {
     }
   },
   watch: {
-    searchQuery: _.debounce(function () {
-      this.searchQueryDebounced = this.searchQuery;
-    }, 200),
     activeHash() {
       this.activeTab = this.activeHash.replace("#", "");
       if (this.activeTab === "") {
