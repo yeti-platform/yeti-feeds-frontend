@@ -694,7 +694,7 @@ export default {
       return FORM_METADATA[this.localObject.type].rules;
     },
     hasOwnerPerms() {
-      return this.user.admin || this.localObject.acls[this.user.username].role & 7;
+      return this.userStore.hasOwnerPerms(this.localObject);
     }
   },
   watch: {
