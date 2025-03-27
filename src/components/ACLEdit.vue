@@ -27,7 +27,12 @@
               return-object
             >
               <template v-slot:item.name="{ item }">
-                <router-link :to="{ name: 'UserProfileAdmin', params: { id: item.source.replace('users/', '') } }">{{
+                <router-link
+                  v-if="item.source.includes('users/')"
+                  :to="{ name: 'UserProfileAdmin', params: { id: item.source.replace('users/', '') } }"
+                  >{{ item.name }}</router-link
+                >
+                <router-link v-if="item.source.includes('groups/')" :to="{ name: 'GroupAdmin' }">{{
                   item.name
                 }}</router-link>
               </template>
@@ -132,7 +137,8 @@ export default {
   methods: {
     getMembershipData() {
       axios
-        .get(`/api/v2/${this.endpointForType}/${this.object.id}`)
+        // .get(`/api/v2/${this.endpointForType}/${this.object.id}`)
+        .get(`/api/v2/rbac/${this.object.root_type}/${this.object.id}`)
         .then(response => {
           this.ACLTableData = this.generateAclTable(response.data);
         })
@@ -304,7 +310,8 @@ export default {
   },
   mounted() {
     this.listUsers();
-    this.ACLTableData = this.generateAclTable(this.object);
+    this.getMembershipData();
+    // this.ACLTableData = this.generateAclTable(this.object);
   },
   watch: {
     group: {
