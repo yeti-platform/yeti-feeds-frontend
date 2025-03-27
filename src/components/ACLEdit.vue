@@ -137,7 +137,6 @@ export default {
   methods: {
     getMembershipData() {
       axios
-        // .get(`/api/v2/${this.endpointForType}/${this.object.id}`)
         .get(`/api/v2/rbac/${this.object.root_type}/${this.object.id}`)
         .then(response => {
           this.ACLTableData = this.generateAclTable(response.data);
@@ -311,7 +310,6 @@ export default {
   mounted() {
     this.listUsers();
     this.getMembershipData();
-    // this.ACLTableData = this.generateAclTable(this.object);
   },
   watch: {
     group: {
