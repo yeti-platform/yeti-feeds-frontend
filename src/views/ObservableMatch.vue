@@ -193,6 +193,67 @@
 
         <v-card class="mb-4">
           <v-card-title
+            >Bloom filter matches
+            <v-chip density="comfortable" class="ml-3">{{ bloomResults.length }}</v-chip>
+          </v-card-title>
+          <v-card-subtitle v-if="bloomResults.length > 0">
+            Values that match loaded bloom filters can be added to the database here. Type will be guessed unless
+            specified.
+          </v-card-subtitle>
+          <v-card-text v-if="bloomResults.length > 0">
+            <div class="d-flex pl-0">
+              <v-btn
+                prepend-icon="mdi-plus"
+                class="me-3"
+                variant="tonal"
+                @click="addBloom"
+                :disabled="selectedBloom.length === 0"
+                >Add
+                {{
+                  selectedBloom.length === 0 || selectedBloom.length == bloomResults.length
+                    ? "all"
+                    : selectedBloom.length
+                }}</v-btn
+              >
+              <v-select
+                class="me-3"
+                v-model="addTypeBloom"
+                :items="observableTypes"
+                density="compact"
+                placeholder="Force type"
+                variant="outlined"
+                hide-details
+              ></v-select>
+              <v-combobox
+                density="compact"
+                chips
+                multiple
+                v-model="addTagsBloom"
+                hide-details
+                placeholder="Optional tags"
+                :delimiters="[',', ' ', ';']"
+              ></v-combobox>
+            </div>
+            <v-data-table
+              show-select
+              v-model="selectedBloom"
+              :item-value="item => item.value"
+              :headers="[
+                { title: 'Value', key: 'value' },
+                { title: 'Hits', key: 'hits' }
+              ]"
+              density="compact"
+              :items="bloomResults"
+            >
+              <template v-slot:item.hits="{ item }">
+                <v-chip v-for="name in item.hits" :text="name" class="me-1" size="small"></v-chip>
+              </template>
+            </v-data-table>
+          </v-card-text>
+        </v-card>
+
+        <v-card class="mb-4">
+          <v-card-title
             >Unknown observables
             <v-chip density="comfortable" class="ml-3">{{ searchResults.unknown.length }}</v-chip>
           </v-card-title>
@@ -205,7 +266,7 @@
                 prepend-icon="mdi-plus"
                 class="me-3"
                 variant="tonal"
-                @click="addUknown"
+                @click="addUnknown"
                 :disabled="selectedUnknown.length === 0"
                 >Add
                 {{
@@ -266,6 +327,8 @@ export default {
       // search field
       textSearch: "",
       searchResults: null,
+      bloomResults: [],
+      selectedBloom: [],
       regexMatch: false,
       addAndTag: false,
       addTypeSearch: "guess",
@@ -275,12 +338,28 @@ export default {
       knownLinkTarget: null,
       addTagsUnknown: [],
       addTypeUnknown: "guess",
+      addTagsBloom: [],
+      addTypeBloom: "guess",
       selectedUnknown: [],
       selectedKnown: [],
       loading: false
     };
   },
   methods: {
+    bloomSearch() {
+      let params = {
+        values: this.observableList
+      };
+      axios
+        .post("/api/v2/bloom/search", params)
+        .then(response => {
+          this.bloomResults = response.data;
+        })
+        .catch(error => {
+          return console.log(error);
+        })
+        .finally(() => {});
+    },
     matchObservables() {
       this.loading = true;
       this.selectedKnown = [];
@@ -299,6 +378,7 @@ export default {
         add_type: this.addTypeSearch,
         regex_match: this.regexMatch
       };
+      this.bloomSearch();
       axios
         .post("/api/v2/graph/match", params)
         .then(response => {
@@ -354,7 +434,40 @@ export default {
       };
       axios.post("/api/v2/graph/add", params);
     },
-    addUknown() {
+    addBloom() {
+      const observables = this.selectedBloom.map(obs => {
+        return {
+          value: obs,
+          tags: this.addTagsBloom,
+          type: this.addTypeBloom
+        };
+      });
+      axios
+        .post("/api/v2/observables/bulk", { observables })
+        .then(response => {
+          console.log(response.data);
+          let message = `${response.data.added.length} observables added`;
+          if (response.data.failed.length > 0) {
+            message += `, ${response.data.failed.length} failed`;
+          }
+          this.$eventBus.emit("displayMessage", {
+            status: "success",
+            message: message
+          });
+          this.selectedBloom = [];
+          this.addTypeBloom = "guess";
+          this.addTagsBloom = [];
+          this.matchObservables();
+        })
+        .catch(error => {
+          this.$eventBus.emit("displayMessage", {
+            status: "error",
+            message: error.response.data.detail
+          });
+        })
+        .finally(() => {});
+    },
+    addUnknown() {
       const observables = this.selectedUnknown.map(obs => {
         return {
           value: obs,
