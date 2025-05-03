@@ -207,10 +207,6 @@
               ><v-icon size="x-large" start>mdi-chat-question</v-icon>Related DFIQ
               <v-chip class="ml-3" density="comfortable">{{ relatedObjectTabCount["dfiq"] }}</v-chip></v-tab
             >
-            <v-tab value="related-tagged" href="#tagged"
-              ><v-icon size="x-large" start>mdi-tag</v-icon>Tag relationships
-              <v-chip class="ml-3" density="comfortable">{{ relatedObjectTabCount["tagged"] }}</v-chip></v-tab
-            >
           </v-tabs>
 
           <v-window v-model="activeTab">
@@ -263,17 +259,6 @@
                 :target-types="objectTypes['dfiq'].map(def => def.type)"
                 @totalUpdated="value => countObjects('dfiq', value)"
               />
-            </v-window-item>
-
-            <v-window-item value="related-tagged" eager class="my-4">
-              <related-objects
-                :id="id"
-                :source-type="typeToEndpointMapping[objectType]"
-                :hops="2"
-                graph="tagged"
-                :target-types="objectTypes['observable'].map(def => def.type)"
-                @totalUpdated="value => countObjects('tagged', value)"
-              ></related-objects>
             </v-window-item>
           </v-window>
         </v-sheet>
