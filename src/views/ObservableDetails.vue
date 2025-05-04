@@ -164,7 +164,7 @@
             <template v-slot:chip="tag">
               <v-chip
                 :text="tag.item.value"
-                :color="observable?.tags[tag.item.value]?.fresh ? 'primary' : 'grey'"
+                :color="observable?.tags.filter(t => t.name == tag.item.value)[0]?.fresh ? 'primary' : 'grey'"
                 size="default"
             /></template>
             <template v-slot:append>
@@ -336,7 +336,7 @@ export default {
         .then(response => {
           let tagNames: string[] = [];
           this.observable = response.data;
-          this.observableTags = Object.keys(this.observable.tags);
+          this.observableTags = this.observable.tags.map(tag => tag.name);
           // Switch back to Context view when reloading the page.
           this.activeTab = 0;
           this.appStore.setPageTitleFromObject(this.observable);

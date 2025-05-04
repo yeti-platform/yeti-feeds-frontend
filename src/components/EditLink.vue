@@ -11,22 +11,24 @@
       <v-textarea label="Description" v-model="localEdge.description"></v-textarea>
       <div class="d-flex justify-center">
         <table>
-          <tr>
-            <td>
-              <v-chip
-                :text="vertices[edge.source].name || vertices[edge.source].value"
-                :prepend-icon="getIconForType(vertices[edge.source].type)"
-              />
-            </td>
-            <td>→</td>
-            <td>
-              <code>{{ localEdge.type || "?" }}</code>
-            </td>
-            <td>→</td>
-            <td>
-              <v-chip :text="vertices[edge.target].name" :prepend-icon="getIconForType(vertices[edge.target].type)" />
-            </td>
-          </tr>
+          <tbody>
+            <tr>
+              <td>
+                <v-chip
+                  :text="vertices[edge.source].name || vertices[edge.source].value"
+                  :prepend-icon="getIconForType(vertices[edge.source].type)"
+                />
+              </td>
+              <td>→</td>
+              <td>
+                <code>{{ localEdge.type || "?" }}</code>
+              </td>
+              <td>→</td>
+              <td>
+                <v-chip :text="vertices[edge.target].name" :prepend-icon="getIconForType(vertices[edge.target].type)" />
+              </td>
+            </tr>
+          </tbody>
         </table>
       </div>
     </v-card-text>

@@ -95,13 +95,13 @@
       <template v-slot:item.relevant_node.tags="{ item }">
         <v-chip
           v-if="item.relevant_node.tags"
-          v-for="tag in Object.keys(item.relevant_node.tags)"
-          :key="tag"
+          v-for="tag in item.relevant_node.tags"
+          :key="tag.name"
           class="mr-2"
-          :color="item.relevant_node.tags[tag].fresh ? 'primary' : 'grey'"
+          :color="tag.fresh ? 'primary' : 'grey'"
           density="compact"
         >
-          {{ tag }}
+          {{ tag.name }}
         </v-chip>
       </template>
 

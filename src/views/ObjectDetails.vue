@@ -359,7 +359,7 @@ export default {
         .then(response => {
           let tagNames: string[] = [];
           this.object = response.data;
-          this.objectTags = this.object.tags ? Object.keys(this.object.tags) : [];
+          this.objectTags = this.object.tags ? this.object.tags.map(tag => tag.name) : [];
           this.navigateToFirstPopulatedTab();
           this.appStore.setPageTitleFromObject(this.object);
         })

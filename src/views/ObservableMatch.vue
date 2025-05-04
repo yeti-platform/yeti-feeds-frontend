@@ -87,9 +87,9 @@
                   </template>
                   <template v-slot:item.tags="{ item }">
                     <v-chip
-                      v-for="name in Object.keys(item.tags)"
-                      :color="item.tags[name].fresh ? 'blue' : 'grey'"
-                      :text="name"
+                      v-for="tag in item.tags"
+                      :color="tag.fresh ? 'blue' : 'grey'"
+                      :text="tag.name"
                       class="me-1"
                       size="small"
                     ></v-chip>
@@ -174,9 +174,9 @@
               </template>
               <template v-slot:item.tags="{ item }">
                 <v-chip
-                  v-for="name in Object.keys(item.tags)"
-                  :color="item.tags[name].fresh ? 'blue' : 'grey'"
-                  :text="name"
+                  v-for="tag in item.tags"
+                  :color="tag.fresh ? 'blue' : 'grey'"
+                  :text="tag.name"
                   class="me-1"
                   size="small"
                 ></v-chip>
