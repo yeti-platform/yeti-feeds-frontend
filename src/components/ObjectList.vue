@@ -194,15 +194,6 @@ export default {
           this.loading = false;
         });
     }
-  },
-  watch: {
-    searchQuery() {
-      this.loadOjects({
-        page: this.page,
-        itemsPerPage: this.perPage,
-        sortBy: this.sortBy
-      });
-    }
   }
 };
 </script>
