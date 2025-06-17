@@ -31,9 +31,9 @@
       </template>
       <template v-slot:item.tags="{ item }">
         <v-chip
-          v-for="name in Object.keys(item.tags)"
-          :color="item.tags[name].fresh ? 'blue ' : 'red'"
-          :text="name"
+          v-for="tag in item.tags"
+          :color="tag.fresh ? 'blue ' : 'red'"
+          :text="tag.name"
           class="mx-1"
           label
           size="small"
