@@ -41,6 +41,7 @@
         </v-list-item>
         <v-list-item v-if="selectedTag">
           <v-text-field v-model="selectedTag.name" label="Name" density="compact" class="pt-2" />
+          <v-text-field v-model="selectedTag.description" label="Description" density="compact" class="pt-2" />
           <v-text-field v-model="selectedTagDefaultExpiration" label="Default expiration (days)" density="compact" />
           <v-combobox
             v-model="selectedTag.produces"
@@ -124,6 +125,7 @@ export default {
       totalTags: 0,
       tagHeaders: [
         { title: "Name", key: "name" },
+        { title: "Description", key: "description"},
         { title: "Default expiration (days)", key: "default_expiration" },
         { title: "Produces", key: "produces" },
         { title: "Replaces", key: "replaces" },
@@ -164,6 +166,7 @@ export default {
     updateTag() {
       const params = {
         name: this.selectedTag.name,
+        description: this.selectedTag.description,
         produces: this.selectedTag.produces.map(tag => tag.name || tag),
         replaces: this.selectedTag.replaces.map(tag => tag.name || tag),
         default_expiration: moment.duration(this.selectedTagDefaultExpiration, "days")
@@ -172,10 +175,10 @@ export default {
         .put(`/api/v2/tags/${this.selectedTag.id}`, params)
         .then(() => {
           this.$eventBus.emit("displayMessage", {
-            message: `Tag ${this.selectedTag.name} succesfully updated`,
+            message: `Tag ${this.selectedTag.name} successfully updated`,
             status: "success"
           });
-          this.searchTags(this.page, this.perPage);
+          this.searchTags({ page: this.page, itemsPerPage: this.perPage, sortBy: null });
         })
         .catch(error => {
           console.log(error);
@@ -195,7 +198,7 @@ export default {
             message: "Changes succesfully changed.",
             status: "success"
           });
-          this.searchTags();
+          this.searchTags({ page: this.page, itemsPerPage: this.perPage, sortBy: null });
         })
         .catch(error => {
           console.log(error);
