@@ -34,7 +34,7 @@ const routes = [
         localStorage.removeItem("next");
         return { path: redirect_uri };
       } else {
-        return { name: "ObservableMatch" };
+        return { name: "GlobalSearch" };
       }
     },
     name: "Home"
@@ -45,9 +45,21 @@ const routes = [
     children: [
       {
         path: "",
+        name: "GlobalSearch",
+        component: () => import("@/views/GlobalSearch.vue"),
+        meta: { title: "Global Search" }
+      }
+    ]
+  },
+  {
+    path: "/match",
+    component: Default,
+    children: [
+      {
+        path: "",
         name: "ObservableMatch",
         component: ObservableMatch,
-        meta: { title: "Search & add observables" }
+        meta: { title: "Observable matching" }
       }
     ]
   },
