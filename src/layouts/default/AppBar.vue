@@ -6,11 +6,20 @@
       >
     </v-app-bar-title>
     <template v-slot:append>
-      <v-btn :to="{ path: '/search' }">Search</v-btn>
-      <v-btn :to="{ path: '/observables' }">Observables</v-btn>
-      <v-btn :to="{ path: '/entities' }">Entities</v-btn>
-      <v-btn :to="{ path: '/indicators' }">Indicators</v-btn>
-      <v-btn :to="{ path: '/dfiq' }">DFIQ</v-btn>
+      <v-btn :to="{ path: '/search' }">Global search</v-btn>
+      <v-btn :to="{ path: '/match' }">Observable matching</v-btn>
+      <v-btn
+        >Objects
+        <v-menu activator="parent">
+          <v-list>
+            <v-list-item :to="{ path: '/observables' }">Observables </v-list-item>
+            <v-list-item :to="{ path: '/indicators' }">Indicators </v-list-item>
+            <v-list-item :to="{ path: '/entities' }">Entities </v-list-item>
+            <v-list-item :to="{ path: '/dfiq' }">DFIQ </v-list-item>
+          </v-list>
+        </v-menu>
+      </v-btn>
+
       <v-btn>
         Automation
         <v-menu activator="parent">

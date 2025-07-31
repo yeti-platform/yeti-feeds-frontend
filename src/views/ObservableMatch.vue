@@ -2,7 +2,7 @@
   <v-container>
     <v-row>
       <v-col>
-        <div class="text-h4 mb-4">Search & add observables</div>
+        <div class="text-h4 mb-4">Observable matching</div>
         <v-textarea v-model="textSearch" auto-grow></v-textarea>
         <div class="d-flex pl-0">
           <v-btn @click="matchObservables" class="me-3" :disabled="observableList.length < 1">Launch search</v-btn>
