@@ -1,5 +1,5 @@
 #  Container used to build the minified frontend JS code
-FROM node:buster AS frontend-builder
+FROM node:bullseye AS frontend-builder
 
 ADD . /app
 WORKDIR /app
