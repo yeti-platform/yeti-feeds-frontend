@@ -60,7 +60,7 @@
         <v-toolbar color="transparent" flat class="mb-2 px-0">
           <v-spacer></v-spacer>
           <v-btn
-            variant="text"
+            variant="tonal"
             size="small"
             color="primary"
             class="mr-2"
@@ -69,25 +69,22 @@
           >
             {{ allCollapsed ? 'Expand All' : 'Collapse All' }}
           </v-btn>
-          <v-btn
-            variant="outlined"
-            size="small"
-            color="secondary"
-            @click="showThoughts = !showThoughts"
-            :prepend-icon="showThoughts ? 'mdi-eye-off' : 'mdi-eye'"
-          >
-            {{ showThoughts ? 'Hide Thoughts' : 'Show Thoughts' }}
-          </v-btn>
-          <v-btn
-            variant="outlined"
-            size="small"
-            color="secondary"
-            class="ml-2"
-            @click="showToolCalls = !showToolCalls"
-            :prepend-icon="showToolCalls ? 'mdi-wrench-clock' : 'mdi-wrench'"
-          >
-            {{ showToolCalls ? 'Hide Tools' : 'Show Tools' }}
-          </v-btn>
+            <v-btn
+              @click="showThoughts = !showThoughts"
+              :prepend-icon="showThoughts ? 'mdi-eye-off' : 'mdi-eye'"
+              class="mr-2"
+              color="primary" variant="outlined" size="small"
+            >
+              {{ showThoughts ? 'Hide Thoughts' : 'Show Thoughts' }}
+            </v-btn>
+            <v-btn
+              @click="showToolCalls = !showToolCalls"
+              :prepend-icon="showToolCalls ? 'mdi-wrench-clock' : 'mdi-wrench'"
+              class="mr-2"
+              color="primary" variant="outlined" size="small"
+            >
+              {{ showToolCalls ? 'Hide Tools' : 'Show Tools' }}
+            </v-btn>
         </v-toolbar>
 
         <v-text-field
