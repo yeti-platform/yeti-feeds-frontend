@@ -10,37 +10,43 @@
             :class="['message-wrapper', msg.sender === 'user' ? 'user-message' : 'agent-message']"
           >
             <div v-if="msg.sender === 'user'" class="pa-3 mb-2 d-inline-block rounded-card bg-primary text-white">
-              <div style="white-space: pre-wrap">{{ msg.parts[0]?.text }}</div>
+              <div class="pre-wrap">{{ msg.parts[0]?.text }}</div>
             </div>
             <div v-else class="agent-message-layout">
               <div v-if="msg.parts.length > 0" class="message-parts-container">
                 <template v-for="(part, idx) in msg.parts" :key="idx">
-                  <div v-if="part.thought" v-show="showThoughts" class="pa-3 mb-2 rounded-card part thought">
+                  <div v-if="part.type === 'thought'" v-show="showThoughts" class="agent-bubble thought">
                     <div class="d-flex align-center mb-1 text-caption cursor-pointer" @click="part.collapsed = !part.collapsed">
                       <v-icon size="small" class="mr-1">mdi-brain</v-icon>
                       <span class="font-weight-bold flex-grow-1">Thought</span>
                       <v-icon size="small">{{ part.collapsed ? 'mdi-chevron-down' : 'mdi-chevron-up' }}</v-icon>
                     </div>
-                    <div v-show="!part.collapsed" style="white-space: pre-wrap" class="mt-2">{{ part.text }}</div>
+                    <div v-show="!part.collapsed" class="mt-2 pre-wrap">{{ part.text }}</div>
                   </div>
-                  <div v-else-if="part.functionCall" v-show="showToolCalls" class="pa-3 mb-2 rounded-card part tool-call">
+                  <div v-else-if="part.type === 'transfer'" class="agent-bubble transfer-call">
+                    <div class="d-flex align-center text-caption font-weight-bold">
+                      <v-icon size="small" class="mr-2">mdi-swap-horizontal</v-icon>
+                      <span>Agent transfer: {{ msg.author || 'system' }} &rarr; {{ part.destination || 'unknown agent' }}</span>
+                    </div>
+                  </div>
+                  <div v-else-if="part.type === 'functionCall'" v-show="showToolCalls" class="agent-bubble tool-call">
                     <div class="d-flex align-center mb-1 text-caption text-secondary cursor-pointer" @click="part.collapsed = !part.collapsed">
                       <v-icon size="small" class="mr-1">mdi-wrench</v-icon>
-                      <span class="font-weight-bold flex-grow-1">Tool Call: {{ part.functionCall.name }}</span>
+                      <span class="font-weight-bold flex-grow-1">Tool Call: {{ part.name }}</span>
                       <v-icon size="small">{{ part.collapsed ? 'mdi-chevron-down' : 'mdi-chevron-up' }}</v-icon>
                     </div>
-                    <div v-show="!part.collapsed" class="text-caption text-mono code-block mt-2">{{ JSON.stringify(part.functionCall.args, null, 2) }}</div>
+                    <div v-show="!part.collapsed" class="text-caption code-block mt-2">{{ JSON.stringify(part.args, null, 2) }}</div>
                   </div>
-                  <div v-else-if="part.functionResponse" v-show="showToolCalls" class="pa-3 mb-2 rounded-card part tool-response">
+                  <div v-else-if="part.type === 'functionResponse'" v-show="showToolCalls" class="agent-bubble tool-response">
                     <div class="d-flex align-center mb-1 text-caption text-secondary cursor-pointer" @click="part.collapsed = !part.collapsed">
                       <v-icon size="small" class="mr-1">mdi-check-circle-outline</v-icon>
-                      <span class="font-weight-bold flex-grow-1">Tool Response: {{ part.functionResponse.name }}</span>
+                      <span class="font-weight-bold flex-grow-1">Tool Response: {{ part.name }}</span>
                       <v-icon size="small">{{ part.collapsed ? 'mdi-chevron-down' : 'mdi-chevron-up' }}</v-icon>
                     </div>
-                    <div v-show="!part.collapsed" class="text-caption text-mono code-block mt-2">{{ typeof part.functionResponse.response === 'string' ? part.functionResponse.response : JSON.stringify(part.functionResponse.response, null, 2) }}</div>
+                    <div v-show="!part.collapsed" class="text-caption code-block mt-2">{{ typeof part.response === 'string' ? part.response : JSON.stringify(part.response, null, 2) }}</div>
                   </div>
-                  <div v-else-if="part.text !== undefined" class="pa-3 mb-2 d-inline-block rounded-card part">
-                    <div style="white-space: pre-wrap">{{ part.text }}</div>
+                  <div v-else-if="part.type === 'text'" class="agent-bubble d-inline-block">
+                    <div class="pre-wrap">{{ part.text }}</div>
                   </div>
                 </template>
               </div>
@@ -103,21 +109,43 @@
 </template>
 
 <script lang="ts">
-interface MessagePart {
-  text?: string;
-  thought?: boolean;
+type MessagePartType = 'text' | 'thought' | 'functionCall' | 'functionResponse' | 'transfer';
+
+interface BaseMessagePart {
+  type: MessagePartType;
   collapsed?: boolean;
-  functionCall?: {
-    id: string;
-    name: string;
-    args: Record<string, any>;
-  };
-  functionResponse?: {
-    id: string;
-    name: string;
-    response: any;
-  };
 }
+
+interface TextPart extends BaseMessagePart {
+  type: 'text';
+  text: string;
+}
+
+interface ThoughtPart extends BaseMessagePart {
+  type: 'thought';
+  text: string;
+}
+
+interface FunctionCallPart extends BaseMessagePart {
+  type: 'functionCall';
+  id: string;
+  name: string;
+  args: Record<string, any>;
+}
+
+interface FunctionResponsePart extends BaseMessagePart {
+  type: 'functionResponse';
+  id: string;
+  name: string;
+  response: any;
+}
+
+interface TransferPart extends BaseMessagePart {
+  type: 'transfer';
+  destination: string;
+}
+
+type MessagePart = TextPart | ThoughtPart | FunctionCallPart | FunctionResponsePart | TransferPart;
 
 interface ChatMessage {
   sender: "user" | "agent";
@@ -165,7 +193,7 @@ export default {
       for (const msg of this.messages) {
         if (msg.sender === "agent") {
           for (const part of msg.parts) {
-            if (part.thought || part.functionCall || part.functionResponse) {
+            if (part.type !== 'text' && part.type !== 'transfer') {
               part.collapsed = this.allCollapsed;
             }
           }
@@ -177,7 +205,7 @@ export default {
       const text = this.userInput.trim();
       if (!text) return;
 
-      this.messages.push({ sender: "user", parts: [{ text: text, thought: false }] });
+      this.messages.push({ sender: "user", parts: [{ type: 'text', text: text }] });
       this.userInput = "";
       this.loading = true;
 
@@ -236,7 +264,7 @@ export default {
         }
       } catch (err) {
         console.error("Stream connection failed", err);
-        agentMsgObject.parts.push({ text: "\n[Error connecting to agent]", thought: false });
+        agentMsgObject.parts.push({ type: 'text', text: "\n[Error connecting to agent]" });
       }
     },
 
@@ -248,26 +276,64 @@ export default {
       if (event.content && event.content.parts) {
         for (const part of event.content.parts) {
           if (part.text !== undefined) {
+            const isThought = !!part.thought;
             const lastPart = agentMsgObject.parts[agentMsgObject.parts.length - 1];
-            if (lastPart && lastPart.text !== undefined && !!lastPart.thought === !!part.thought) {
-              lastPart.text += part.text.trim();
+
+            // If the chunk types match, append it to the active part string
+            if (lastPart && (
+                (lastPart.type === 'thought' && isThought) ||
+                (lastPart.type === 'text' && !isThought)
+               )) {
+                 if (lastPart.type === 'thought' || lastPart.type === 'text') {
+                   lastPart.text += part.text.trim();
+                 }
+            } else {
+              if (isThought) {
+                agentMsgObject.parts.push({
+                   type: 'thought',
+                   text: part.text.trim(),
+                   collapsed: this.allCollapsed
+                });
+              } else {
+                agentMsgObject.parts.push({
+                   type: 'text',
+                   text: part.text.trim()
+                });
+              }
+            }
+          } else if (part.function_call) {
+            if (part.function_call.name === 'transfer_to_agent') {
+              agentMsgObject.parts.push({
+                type: 'transfer',
+                destination: event.actions?.transfer_to_agent || (part.function_call.args && part.function_call.args.agent) || 'unknown agent',
+                collapsed: false
+              });
             } else {
               agentMsgObject.parts.push({
-                text: part.text.trim(),
-                thought: !!part.thought,
+                type: 'functionCall',
+                ...part.function_call,
                 collapsed: this.allCollapsed
               });
             }
-          } else if (part.function_call) {
-            agentMsgObject.parts.push({
-              functionCall: part.function_call,
-              collapsed: this.allCollapsed
-            });
           } else if (part.function_response) {
-            agentMsgObject.parts.push({
-              functionResponse: part.function_response,
-              collapsed: this.allCollapsed
-            });
+            if (part.function_response.name === 'transfer_to_agent') {
+              const lastPart = agentMsgObject.parts[agentMsgObject.parts.length - 1];
+              // Avoid duplicate visual transfer chunks for functionResponse
+              if (lastPart && lastPart.type === 'transfer') {
+                continue;
+              }
+              agentMsgObject.parts.push({
+                type: 'transfer',
+                destination: event.actions?.transfer_to_agent || 'unknown agent',
+                collapsed: false
+              });
+            } else {
+              agentMsgObject.parts.push({
+                type: 'functionResponse',
+                ...part.function_response,
+                collapsed: this.allCollapsed
+              });
+            }
           }
         }
       }
@@ -316,35 +382,51 @@ export default {
   border-radius: 8px;
 }
 
-.part {
+.agent-bubble {
   background-color: #f5f5f5;
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 8px;
 }
 
 .thought {
+  background-color: #fff3bc;
+  color: #bf6744;
+  border: 1px dashed #d68261;
   opacity: 0.8;
   font-style: italic;
   font-size: 0.95em;
 }
 
-.text-mono {
-  font-family: monospace;
-}
-
 .code-block {
+  font-family: monospace;
   background-color: rgba(0, 0, 0, 0.05);
   padding: 8px;
   border-radius: 4px;
   max-height: 200px;
   overflow-y: auto;
-  white-space: pre-wrap;
   word-break: break-all;
+  white-space: pre-wrap;
+}
+
+.pre-wrap {
+  white-space: pre-wrap;
 }
 
 .tool-call {
   background-color: #e3f2fd;
+  border: 1px dashed #90caf9;
 }
 
 .tool-response {
   background-color: #e8f5e9;
+  border: 1px dashed #a5d6a7;
 }
+
+.transfer-call {
+  background-color: #f3e5f5;
+  border: 1px dashed #ce93d8;
+  color: #6a1b9a;
+}
+
 </style>
