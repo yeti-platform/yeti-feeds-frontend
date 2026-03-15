@@ -2,7 +2,27 @@
   <v-container fluid class="mx-10 mt-3">
     <v-row>
       <v-col>
-        <h2 class="mb-4">Agent Chat (session ID {{ sessionId }})</h2>
+        <div class="d-flex align-center mb-4">
+          <h2 class="mr-4">Agent chat</h2>
+          <v-combobox
+            v-model="sessionId"
+            :items="availableSessions"
+            :item-title="item => item.id"
+            label="Session ID"
+            density="compact"
+            variant="outlined"
+            hide-details
+            class="flex-grow-1"
+          ></v-combobox>
+          <v-btn
+            color="primary"
+            class="ml-2"
+            @click="createNewSession"
+            prepend-icon="mdi-plus"
+          >
+            New Session
+          </v-btn>
+        </div>
         <div class="chat-container mb-4" ref="chatContainer">
           <div
             v-for="(msg, index) in messages"
@@ -180,11 +200,41 @@ export default {
       showThoughts: true as boolean,
       showToolCalls: true as boolean,
       allCollapsed: false as boolean,
-      userId: "user-123",
-      sessionId: "session-" + Math.random().toString(36).substring(7)
+      userId: "yeti",
+      sessionId: "session-" + Math.random().toString(36).substring(7),
+      availableSessions: [] as string[]
     };
   },
+  async mounted() {
+    await this.fetchSessions();
+    if (!this.availableSessions.includes(this.sessionId)) {
+      this.availableSessions.push(this.sessionId);
+    }
+  },
   methods: {
+    async fetchSessions() {
+      try {
+        const response = await fetch(`http://localhost:3000/api/v2/agents/sessions/${this.userId}`);
+        if (response.ok) {
+          const data = await response.json();
+          // Assume data is an array of strings or has a specific structure. Assuming string array.
+          if (Array.isArray(data)) {
+            this.availableSessions = data;
+          } else if (data.sessions && Array.isArray(data.sessions)) {
+            this.availableSessions = data.sessions;
+          }
+        }
+      } catch (err) {
+        console.error("Failed to fetch sessions", err);
+      }
+    },
+    createNewSession() {
+      this.sessionId = "session-" + Math.random().toString(36).substring(7);
+      if (!this.availableSessions.includes(this.sessionId)) {
+        this.availableSessions.push(this.sessionId);
+      }
+      this.messages = [];
+    },
     toggleAllCollapsed() {
       this.allCollapsed = !this.allCollapsed;
       for (const msg of this.messages) {
