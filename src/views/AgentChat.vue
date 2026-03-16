@@ -214,7 +214,7 @@ export default {
   methods: {
     async fetchSessions() {
       try {
-        const response = await fetch(`http://localhost:3000/api/v2/agents/sessions/${this.userId}`);
+        const response = await fetch(`http://localhost:3000/api/v2/agents/sessions`);
         if (response.ok) {
           const data = await response.json();
           // Assume data is an array of strings or has a specific structure. Assuming string array.
@@ -266,7 +266,6 @@ export default {
 
     async sendMessageStream(userText: string, agentMsgObject: ChatMessage) {
       const payload = {
-        user_id: this.userId,
         session_id: this.sessionId,
         text: userText
       };
