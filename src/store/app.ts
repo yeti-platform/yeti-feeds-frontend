@@ -4,7 +4,7 @@ import axios from "axios";
 
 export const useAppStore = defineStore("app", {
   state: () => ({
-    systemConfig: null
+    systemConfig: null as any
   }),
   getters: {
     RBACEnabled: state => {
@@ -12,6 +12,12 @@ export const useAppStore = defineStore("app", {
         state.fetchSystemConfig();
       }
       return state.systemConfig?.rbac_enabled;
+    },
+    agentsEnabled: state => {
+      if (!state.systemConfig) {
+        state.fetchSystemConfig();
+      }
+      return state.systemConfig?.agents_enabled;
     }
   },
   actions: {
@@ -19,7 +25,7 @@ export const useAppStore = defineStore("app", {
       const response = await axios.get("/api/v2/system/config");
       this.systemConfig = await response.data;
     },
-    async setPageTitleFromObject(object) {
+    async setPageTitleFromObject(object: any) {
       let baseTitle = `${object.root_type}:${object.type} - Yeti`;
 
       if (["entity", "indicator", "dfiq"].includes(object.root_type)) {

@@ -6,7 +6,7 @@
       >
     </v-app-bar-title>
     <template v-slot:append>
-      <v-btn :to="{ path: '/chat' }">Chat</v-btn>
+      <v-btn v-if="agentsEnabled" :to="{ path: '/chat' }">Agent chat</v-btn>
       <v-btn :to="{ path: '/search' }">Global search</v-btn>
       <v-btn :to="{ path: '/match' }">Observable matching</v-btn>
       <v-btn
@@ -84,6 +84,9 @@ export default {
     },
     RBACEnabled() {
       return useAppStore().RBACEnabled;
+    },
+    agentsEnabled() {
+      return useAppStore().agentsEnabled;
     }
   },
   methods: {
