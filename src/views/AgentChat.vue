@@ -362,9 +362,10 @@ export default {
             }
           } else if (part.function_call) {
             if (part.function_call.name === 'transfer_to_agent') {
+              console.log('Transferring to agent', part.function_call.args);
               agentMsgObject.parts.push({
                 type: 'transfer',
-                destination: event.actions?.transfer_to_agent || (part.function_call.args && part.function_call.args.agent) || 'unknown agent',
+                destination: event.actions?.transfer_to_agent || (part.function_call.args && part.function_call.args.agent_name) || 'unknown agent',
                 collapsed: false
               });
             } else {
