@@ -429,16 +429,16 @@ export default {
 }
 
 .agent-bubble {
-  background-color: #f5f5f5;
+  background-color: rgb(var(--v-theme-agent-bubble));
   border-radius: 8px;
   padding: 12px;
   margin-bottom: 8px;
 }
 
 .thought {
-  background-color: #fff3bc;
-  color: #bf6744;
-  border: 1px dashed #d68261;
+  background-color: rgb(var(--v-theme-agent-thought));
+  color: rgb(var(--v-theme-agent-thought-text));
+  border: 1px dashed rgb(var(--v-theme-agent-thought-border));
   opacity: 0.8;
   font-style: italic;
   font-size: 0.95em;
@@ -446,7 +446,7 @@ export default {
 
 .code-block {
   font-family: monospace;
-  background-color: rgba(0, 0, 0, 0.05);
+  background-color: rgba(var(--v-theme-on-surface), 0.05);
   padding: 8px;
   border-radius: 4px;
   max-height: 200px;
@@ -460,19 +460,19 @@ export default {
 }
 
 .tool-call {
-  background-color: #e3f2fd;
-  border: 1px dashed #90caf9;
+  background-color: rgb(var(--v-theme-agent-tool-call));
+  border: 1px dashed rgb(var(--v-theme-agent-tool-call-border));
 }
 
 .tool-response {
-  background-color: #e8f5e9;
-  border: 1px dashed #a5d6a7;
+  background-color: rgb(var(--v-theme-agent-tool-response));
+  border: 1px dashed rgb(var(--v-theme-agent-tool-response-border));
 }
 
 .transfer-call {
-  background-color: #f3e5f5;
-  border: 1px dashed #ce93d8;
-  color: #6a1b9a;
+  background-color: rgb(var(--v-theme-agent-transfer));
+  border: 1px dashed rgb(var(--v-theme-agent-transfer-border));
+  color: rgb(var(--v-theme-agent-transfer-text));
 }
 
 </style>
