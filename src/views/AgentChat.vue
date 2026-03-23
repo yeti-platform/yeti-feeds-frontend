@@ -248,6 +248,18 @@ export default {
       }
     },
 
+    scrollToBottom() {
+      this.$nextTick(() => {
+        const container = this.$refs.chatContainer as HTMLElement;
+        if (container) {
+          container.scrollTo({
+            top: container.scrollHeight,
+            behavior: "smooth"
+          });
+        }
+      });
+    },
+
     async sendMessage() {
       const text = this.userInput.trim();
       if (!text) return;
@@ -255,6 +267,7 @@ export default {
       this.messages.push({ sender: "user", parts: [{ type: 'text', text: text }] });
       this.userInput = "";
       this.loading = true;
+      this.scrollToBottom();
 
       this.messages.push({ sender: "agent", parts: [] });
       // We need to reference the object in the array to update it
@@ -382,6 +395,7 @@ export default {
             }
           }
         }
+        this.scrollToBottom();
       }
     }
   }
