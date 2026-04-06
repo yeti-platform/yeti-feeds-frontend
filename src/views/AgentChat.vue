@@ -174,6 +174,10 @@ interface ChatMessage {
 
 interface AgentEvent {
   author?: string;
+  role?: string;
+  actions?: {
+    transfer_to_agent?: string;
+  };
   content?: {
     parts?: Array<{
       text?: string;
@@ -190,6 +194,13 @@ interface AgentEvent {
       };
     }>;
   };
+}
+
+interface ADKSession {
+  id: string;
+  appName: string;
+  userId: string;
+  events: AgentEvent[];
 }
 
 export default {
@@ -213,20 +224,65 @@ export default {
       this.availableSessions.push(this.sessionId);
     }
   },
+  watch: {
+    sessionId(newVal) {
+      if (newVal) {
+        this.fetchSessionHistory(newVal);
+      }
+    }
+  },
   methods: {
     async fetchSessions() {
       try {
         const response = await axios.get(`/api/v2/agents/sessions`);
         const data = response.data;
-        // Assume data is an array of strings or has a specific structure. Assuming string array.
         if (Array.isArray(data)) {
-          this.availableSessions = data;
+          this.availableSessions = data.map(s => typeof s === 'string' ? s : s.id);
         } else if (data.sessions && Array.isArray(data.sessions)) {
-          this.availableSessions = data.sessions;
+          this.availableSessions = data.sessions.map(s => typeof s === 'string' ? s : s.id);
         }
       } catch (err) {
         console.error("Failed to fetch sessions", err);
       }
+    },
+    async fetchSessionHistory(sessionId: string) {
+      this.loading = true;
+      try {
+        const response = await axios.get(`/api/v2/agents/sessions/${sessionId}`);
+        const session: ADKSession = response.data;
+        this.reconstructMessages(session.events);
+      } catch (err) {
+        console.error(`Failed to fetch history for session ${sessionId}`, err);
+        // Clear messages if session not found or error
+        this.messages = [];
+      } finally {
+        this.loading = false;
+      }
+    },
+    reconstructMessages(events: AgentEvent[]) {
+      this.messages = [];
+      if (!events || events.length === 0) return;
+
+      let currentAgentMsg: ChatMessage | null = null;
+
+      for (const event of events) {
+        // If the event indicates it's from the user
+        if (event.author === 'user' || event.role === 'user') {
+          const text = event.content?.parts?.map(p => p.text).filter(t => !!t).join('') || '';
+          if (text) {
+            this.messages.push({ sender: 'user', parts: [{ type: 'text', text }] });
+          }
+          currentAgentMsg = null;
+        } else {
+          // If it's an agent event
+          if (!currentAgentMsg) {
+            currentAgentMsg = { sender: "agent", parts: [], author: event.author };
+            this.messages.push(currentAgentMsg);
+          }
+          this.handleAgentEvent(event, currentAgentMsg);
+        }
+      }
+      this.scrollToBottom();
     },
     createNewSession() {
       this.sessionId = "session-" + Math.random().toString(36).substring(7);
@@ -275,6 +331,11 @@ export default {
 
       await this.sendMessageStream(text, currentAgentMsg);
       this.loading = false;
+      
+      // Update session list in case this is the first message
+      if (!this.availableSessions.includes(this.sessionId)) {
+         this.fetchSessions();
+      }
     },
 
     async sendMessageStream(userText: string, agentMsgObject: ChatMessage) {
