@@ -221,6 +221,18 @@ const routes = [
         meta: { title: "Status" }
       }
     ]
+  },
+  {
+    path: "/chat",
+    component: Default,
+    children: [
+      {
+        path: "",
+        name: "AgentChat",
+        component: () => import("@/views/AgentChat.vue"),
+        meta: { title: "Agent Chat" }
+      }
+    ]
   }
 ];
 

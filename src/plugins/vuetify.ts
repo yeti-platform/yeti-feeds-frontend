@@ -32,6 +32,18 @@ const yetiDarkTheme: ThemeDefinition = {
     success: colors.green.lighten3,
     error: colors.red.lighten3,
     warning: colors.orange.lighten3,
+    // agent chat custom colors
+    "agent-bubble": "#333333",
+    "agent-thought": "#3d351b",
+    "agent-thought-border": "#8c5a45",
+    "agent-thought-text": "#f2a685",
+    "agent-tool-call": "#1a2a3a",
+    "agent-tool-call-border": "#455a64",
+    "agent-tool-response": "#1b2e1b",
+    "agent-tool-response-border": "#2e4d2e",
+    "agent-transfer": "#2e1a2e",
+    "agent-transfer-border": "#4a2a4a",
+    "agent-transfer-text": "#d199d1",
     // custom
     "app-bar-color": "#212121"
   }
@@ -52,6 +64,19 @@ const yetiLightTheme: ThemeDefinition = {
     // success: '#4CAF50',
     error: colors.red.lighten3,
     // warning: '#FB8C00',
+    // custom
+    // agent chat custom colors
+    "agent-bubble": "#f5f5f5",
+    "agent-thought": "#fff3bc",
+    "agent-thought-border": "#d68261",
+    "agent-thought-text": "#bf6744",
+    "agent-tool-call": "#e3f2fd",
+    "agent-tool-call-border": "#90caf9",
+    "agent-tool-response": "#e8f5e9",
+    "agent-tool-response-border": "#a5d6a7",
+    "agent-transfer": "#f3e5f5",
+    "agent-transfer-border": "#ce93d8",
+    "agent-transfer-text": "#6a1b9a",
     // custom
     cancel: colors.red.darken1,
     "app-bar-color": "#212121"
