@@ -155,26 +155,30 @@ export default {
     graph = new MultiGraph();
     this.createSigmaShadow();
 
-    renderer = new Sigma(graph, shadow_container, {
-      allowInvalidContainer: true,
-      defaultEdgeType: "straight",
-      enableEdgeEvents: true,
-      renderEdgeLabels: true,
-      edgeProgramClasses: {
-        straight: EdgeArrowProgram,
-        curved: EdgeCurveProgram
-      }
-    });
-    // Put the mouse canvas on top, so events can be catched even if the logs container is in front
-    renderer.getCanvases().mouse.style.cssText = "z-index: 100; position: absolute";
+    try {
+      renderer = new Sigma(graph, shadow_container, {
+        allowInvalidContainer: true,
+        defaultEdgeType: "straight",
+        enableEdgeEvents: true,
+        renderEdgeLabels: true,
+        edgeProgramClasses: {
+          straight: EdgeArrowProgram,
+          curved: EdgeCurveProgram
+        }
+      });
+      // Put the mouse canvas on top, so events can be catched even if the logs container is in front
+      renderer.getCanvases().mouse.style.cssText = "z-index: 100; position: absolute";
 
-    // bind sigma events
-    renderer.on("enterNode", ({ event, node }) => this.displayTooltip(event, node));
-    renderer.on("leaveNode", () => {
-      this.show_tooltip = false;
-    });
-    renderer.on("rightClickNode", ({ event, node }) => this.displayContextMenu(event, node));
-    renderer.on("clickNode", ({ node }) => this.updateSelectedNode(node));
+      // bind sigma events
+      renderer.on("enterNode", ({ event, node }) => this.displayTooltip(event, node));
+      renderer.on("leaveNode", () => {
+        this.show_tooltip = false;
+      });
+      renderer.on("rightClickNode", ({ event, node }) => this.displayContextMenu(event, node));
+      renderer.on("clickNode", ({ node }) => this.updateSelectedNode(node));
+    } catch (e) {
+      console.warn("Failed to initialize Sigma renderer. Graph visualization will be disabled:", e);
+    }
 
     window.addEventListener("refreshGraphView", event => {
       setTimeout(this.updateRenderer, 1000);
