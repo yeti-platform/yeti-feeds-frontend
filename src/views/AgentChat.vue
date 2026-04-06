@@ -126,6 +126,8 @@
 </template>
 
 <script lang="ts">
+import axios from "axios";
+
 type MessagePartType = 'text' | 'thought' | 'functionCall' | 'functionResponse' | 'transfer';
 
 interface BaseMessagePart {
@@ -214,15 +216,13 @@ export default {
   methods: {
     async fetchSessions() {
       try {
-        const response = await fetch(`http://localhost:3000/api/v2/agents/sessions`);
-        if (response.ok) {
-          const data = await response.json();
-          // Assume data is an array of strings or has a specific structure. Assuming string array.
-          if (Array.isArray(data)) {
-            this.availableSessions = data;
-          } else if (data.sessions && Array.isArray(data.sessions)) {
-            this.availableSessions = data.sessions;
-          }
+        const response = await axios.get(`/api/v2/agents/sessions`);
+        const data = response.data;
+        // Assume data is an array of strings or has a specific structure. Assuming string array.
+        if (Array.isArray(data)) {
+          this.availableSessions = data;
+        } else if (data.sessions && Array.isArray(data.sessions)) {
+          this.availableSessions = data.sessions;
         }
       } catch (err) {
         console.error("Failed to fetch sessions", err);
@@ -284,7 +284,7 @@ export default {
       };
 
       try {
-        const response = await fetch("http://localhost:3000/api/v2/agents/stream", {
+        const response = await fetch(`/api/v2/agents/stream`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload)
