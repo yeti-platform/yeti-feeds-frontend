@@ -7,7 +7,6 @@
           <v-combobox
             v-model="sessionId"
             :items="availableSessions"
-            :item-title="item => item.id"
             label="Session ID"
             density="compact"
             variant="outlined"
