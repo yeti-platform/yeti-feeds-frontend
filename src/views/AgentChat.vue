@@ -68,6 +68,13 @@
                   <div v-else-if="part.type === 'text'" class="agent-bubble d-inline-block">
                     <div class="pre-wrap">{{ part.text }}</div>
                   </div>
+                  <div v-else-if="part.type === 'error'" class="agent-bubble error-bubble d-inline-block">
+                    <div class="d-flex align-center text-caption font-weight-bold mb-1">
+                      <v-icon size="small" class="mr-2">mdi-alert-circle</v-icon>
+                      <span>Error</span>
+                    </div>
+                    <div class="pre-wrap">{{ part.text }}</div>
+                  </div>
                 </template>
               </div>
               <div v-if="loading && index === messages.length - 1" class="pa-3 mb-2 d-inline-block rounded-card bg-surface">
@@ -128,7 +135,7 @@
 <script lang="ts">
 import axios from "axios";
 
-type MessagePartType = 'text' | 'thought' | 'functionCall' | 'functionResponse' | 'transfer';
+type MessagePartType = 'text' | 'thought' | 'functionCall' | 'functionResponse' | 'transfer' | 'error';
 
 interface BaseMessagePart {
   type: MessagePartType;
@@ -164,7 +171,13 @@ interface TransferPart extends BaseMessagePart {
   destination: string;
 }
 
-type MessagePart = TextPart | ThoughtPart | FunctionCallPart | FunctionResponsePart | TransferPart;
+interface ErrorPart extends BaseMessagePart {
+  type: 'error';
+  text: string;
+  errorType?: string;
+}
+
+type MessagePart = TextPart | ThoughtPart | FunctionCallPart | FunctionResponsePart | TransferPart | ErrorPart;
 
 interface ChatMessage {
   sender: "user" | "agent";
@@ -175,6 +188,8 @@ interface ChatMessage {
 interface AgentEvent {
   author?: string;
   role?: string;
+  error?: string;
+  error_type?: string;
   actions?: {
     transfer_to_agent?: string;
   };
@@ -393,6 +408,16 @@ export default {
         agentMsgObject.author = event.author;
       }
 
+      if (event.error) {
+        agentMsgObject.parts.push({
+          type: 'error',
+          text: event.error,
+          errorType: event.error_type
+        });
+        this.scrollToBottom();
+        return;
+      }
+
       if (event.content && event.content.parts) {
         for (const part of event.content.parts) {
           if (part.text !== undefined) {
@@ -549,6 +574,12 @@ export default {
   background-color: rgb(var(--v-theme-agent-transfer));
   border: 1px dashed rgb(var(--v-theme-agent-transfer-border));
   color: rgb(var(--v-theme-agent-transfer-text));
+}
+
+.error-bubble {
+  background-color: rgba(var(--v-theme-error), 0.1);
+  border: 1px solid rgb(var(--v-theme-error));
+  color: rgb(var(--v-theme-error));
 }
 
 </style>
