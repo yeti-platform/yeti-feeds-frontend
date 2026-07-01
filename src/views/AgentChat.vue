@@ -23,63 +23,85 @@
             New Session
           </v-btn>
         </div>
-        <div class="chat-container mb-4" ref="chatContainer">
+        <div class="chat-container mb-4 border rounded-lg" ref="chatContainer">
           <div
             v-for="(msg, index) in messages"
             :key="index"
             :class="['message-wrapper', msg.sender === 'user' ? 'user-message' : 'agent-message']"
           >
-            <div v-if="msg.sender === 'user'" class="pa-3 mb-2 d-inline-block rounded-card bg-primary text-white">
-              <div class="pre-wrap">{{ msg.parts[0]?.text }}</div>
-            </div>
+            <v-card v-if="msg.sender === 'user'" color="primary" variant="flat" rounded="lg" class="agent-card d-inline-block">
+              <v-card-text class="pre-wrap">{{ msg.parts[0]?.text }}</v-card-text>
+            </v-card>
             <div v-else class="agent-message-layout">
               <div v-if="msg.parts.length > 0" class="message-parts-container">
                 <template v-for="(part, idx) in msg.parts" :key="idx">
-                  <div v-if="part.type === 'thought'" v-show="showThoughts" class="agent-bubble thought">
-                    <div class="d-flex align-center mb-1 text-caption cursor-pointer" @click="part.collapsed = !part.collapsed">
-                      <v-icon size="small" class="mr-1">mdi-brain</v-icon>
-                      <span class="font-weight-bold flex-grow-1">Thought</span>
-                      <v-icon size="small">{{ part.collapsed ? 'mdi-chevron-down' : 'mdi-chevron-up' }}</v-icon>
-                    </div>
-                    <div v-show="!part.collapsed" class="mt-2 pre-wrap">{{ part.text }}</div>
-                  </div>
-                  <div v-else-if="part.type === 'transfer'" class="agent-bubble transfer-call">
-                    <div class="d-flex align-center text-caption font-weight-bold">
-                      <v-icon size="small" class="mr-2">mdi-swap-horizontal</v-icon>
-                      <span>Agent transfer: {{ msg.author || 'system' }} &rarr; {{ part.destination || 'unknown agent' }}</span>
-                    </div>
-                  </div>
-                  <div v-else-if="part.type === 'functionCall'" v-show="showToolCalls" class="agent-bubble tool-call">
-                    <div class="d-flex align-center mb-1 text-caption text-secondary cursor-pointer" @click="part.collapsed = !part.collapsed">
-                      <v-icon size="small" class="mr-1">mdi-wrench</v-icon>
-                      <span class="font-weight-bold flex-grow-1">Tool Call: {{ part.name }}</span>
-                      <v-icon size="small">{{ part.collapsed ? 'mdi-chevron-down' : 'mdi-chevron-up' }}</v-icon>
-                    </div>
-                    <div v-show="!part.collapsed" class="text-caption code-block mt-2">{{ JSON.stringify(part.args, null, 2) }}</div>
-                  </div>
-                  <div v-else-if="part.type === 'functionResponse'" v-show="showToolCalls" class="agent-bubble tool-response">
-                    <div class="d-flex align-center mb-1 text-caption text-secondary cursor-pointer" @click="part.collapsed = !part.collapsed">
-                      <v-icon size="small" class="mr-1">mdi-check-circle-outline</v-icon>
-                      <span class="font-weight-bold flex-grow-1">Tool Response: {{ part.name }}</span>
-                      <v-icon size="small">{{ part.collapsed ? 'mdi-chevron-down' : 'mdi-chevron-up' }}</v-icon>
-                    </div>
-                    <div v-show="!part.collapsed" class="text-caption code-block mt-2">{{ typeof part.response === 'string' ? part.response : JSON.stringify(part.response, null, 2) }}</div>
-                  </div>
-                  <div v-else-if="part.type === 'text'" class="agent-bubble d-inline-block">
-                    <div class="pre-wrap">{{ part.text }}</div>
-                  </div>
-                  <div v-else-if="part.type === 'error'" class="agent-bubble error-bubble d-inline-block">
-                    <div class="d-flex align-center text-caption font-weight-bold mb-1">
-                      <v-icon size="small" class="mr-2">mdi-alert-circle</v-icon>
-                      <span>Error</span>
-                    </div>
-                    <div class="pre-wrap">{{ part.text }}</div>
-                  </div>
+                  <v-card v-if="part.type === 'thought'" color="warning" variant="tonal" rounded="lg" class="agent-card">
+                    <v-card-item class="py-2 cursor-pointer" @click="part.collapsed = !part.collapsed">
+                      <template v-slot:prepend><v-icon size="small">mdi-brain</v-icon></template>
+                      <v-card-title class="text-caption font-weight-bold">Thought</v-card-title>
+                      <template v-slot:append>
+                        <v-icon size="small">{{ part.collapsed ? 'mdi-chevron-down' : 'mdi-chevron-up' }}</v-icon>
+                      </template>
+                    </v-card-item>
+                    <v-expand-transition>
+                      <v-card-text v-show="!part.collapsed" class="pre-wrap pt-0">{{ part.text }}</v-card-text>
+                    </v-expand-transition>
+                  </v-card>
+                  <v-alert
+                    v-else-if="part.type === 'transfer'"
+                    type="info"
+                    variant="tonal"
+                    density="compact"
+                    rounded="lg"
+                    icon="mdi-swap-horizontal"
+                    class="agent-card text-caption font-weight-bold"
+                  >
+                    Agent transfer: {{ msg.author || 'system' }} &rarr; {{ part.destination || 'unknown agent' }}
+                  </v-alert>
+                  <v-card v-else-if="part.type === 'functionCall'" color="info" variant="tonal" rounded="lg" class="agent-card">
+                    <v-card-item class="py-2 cursor-pointer" @click="part.collapsed = !part.collapsed">
+                      <template v-slot:prepend><v-icon size="small">mdi-wrench</v-icon></template>
+                      <v-card-title class="text-caption font-weight-bold">Tool Call: {{ part.name }}</v-card-title>
+                      <template v-slot:append>
+                        <v-icon size="small">{{ part.collapsed ? 'mdi-chevron-down' : 'mdi-chevron-up' }}</v-icon>
+                      </template>
+                    </v-card-item>
+                    <v-expand-transition>
+                      <v-card-text v-show="!part.collapsed" class="code-block pt-0">{{ JSON.stringify(part.args, null, 2) }}</v-card-text>
+                    </v-expand-transition>
+                  </v-card>
+                  <v-card v-else-if="part.type === 'functionResponse'" color="success" variant="tonal" rounded="lg" class="agent-card">
+                    <v-card-item class="py-2 cursor-pointer" @click="part.collapsed = !part.collapsed">
+                      <template v-slot:prepend><v-icon size="small">mdi-check-circle-outline</v-icon></template>
+                      <v-card-title class="text-caption font-weight-bold">Tool Response: {{ part.name }}</v-card-title>
+                      <template v-slot:append>
+                        <v-icon size="small">{{ part.collapsed ? 'mdi-chevron-down' : 'mdi-chevron-up' }}</v-icon>
+                      </template>
+                    </v-card-item>
+                    <v-expand-transition>
+                      <v-card-text v-show="!part.collapsed" class="code-block pt-0">{{ typeof part.response === 'string' ? part.response : JSON.stringify(part.response, null, 2) }}</v-card-text>
+                    </v-expand-transition>
+                  </v-card>
+                  <v-card v-else-if="part.type === 'text'" color="surface-alt" variant="flat" rounded="lg" class="agent-card">
+                    <v-card-text class="pre-wrap">{{ part.text }}</v-card-text>
+                  </v-card>
+                  <v-alert
+                    v-else-if="part.type === 'error'"
+                    type="error"
+                    variant="tonal"
+                    rounded="lg"
+                    icon="mdi-alert-circle"
+                    class="agent-card pre-wrap"
+                  >
+                    {{ part.text }}
+                  </v-alert>
                 </template>
               </div>
-              <div v-if="loading && index === messages.length - 1" class="pa-3 mb-2 d-inline-block rounded-card bg-surface">
-                <v-progress-circular indeterminate size="20" width="2"></v-progress-circular>
-              </div>
+              <v-card v-if="loading && index === messages.length - 1" color="surface-alt" variant="flat" rounded="lg" class="agent-card">
+                <v-card-text class="d-flex align-center py-2">
+                  <v-progress-circular indeterminate size="20" width="2"></v-progress-circular>
+                </v-card-text>
+              </v-card>
             </div>
           </div>
         </div>
@@ -97,20 +119,20 @@
             {{ allCollapsed ? 'Expand All' : 'Collapse All' }}
           </v-btn>
             <v-btn
-              @click="showThoughts = !showThoughts"
-              :prepend-icon="showThoughts ? 'mdi-eye-off' : 'mdi-eye'"
+              @click="toggleThoughts"
+              :prepend-icon="thoughtsCollapsed ? 'mdi-unfold-more-horizontal' : 'mdi-unfold-less-horizontal'"
               class="mr-2"
               color="primary" variant="outlined" size="small"
             >
-              {{ showThoughts ? 'Hide Thoughts' : 'Show Thoughts' }}
+              {{ thoughtsCollapsed ? 'Expand Thoughts' : 'Collapse Thoughts' }}
             </v-btn>
             <v-btn
-              @click="showToolCalls = !showToolCalls"
-              :prepend-icon="showToolCalls ? 'mdi-wrench-clock' : 'mdi-wrench'"
+              @click="toggleTools"
+              :prepend-icon="toolsCollapsed ? 'mdi-unfold-more-horizontal' : 'mdi-unfold-less-horizontal'"
               class="mr-2"
               color="primary" variant="outlined" size="small"
             >
-              {{ showToolCalls ? 'Hide Tools' : 'Show Tools' }}
+              {{ toolsCollapsed ? 'Expand Tools' : 'Collapse Tools' }}
             </v-btn>
         </v-toolbar>
 
@@ -225,8 +247,8 @@ export default {
       userInput: "" as string,
       messages: [] as ChatMessage[],
       loading: false as boolean,
-      showThoughts: true as boolean,
-      showToolCalls: true as boolean,
+      thoughtsCollapsed: false as boolean,
+      toolsCollapsed: false as boolean,
       allCollapsed: false as boolean,
       userId: "yeti",
       sessionId: "session-" + Math.random().toString(36).substring(7),
@@ -308,11 +330,37 @@ export default {
     },
     toggleAllCollapsed() {
       this.allCollapsed = !this.allCollapsed;
+      this.thoughtsCollapsed = this.allCollapsed;
+      this.toolsCollapsed = this.allCollapsed;
       for (const msg of this.messages) {
         if (msg.sender === "agent") {
           for (const part of msg.parts) {
             if (part.type !== 'text' && part.type !== 'transfer') {
               part.collapsed = this.allCollapsed;
+            }
+          }
+        }
+      }
+    },
+    toggleThoughts() {
+      this.thoughtsCollapsed = !this.thoughtsCollapsed;
+      for (const msg of this.messages) {
+        if (msg.sender === "agent") {
+          for (const part of msg.parts) {
+            if (part.type === 'thought') {
+              part.collapsed = this.thoughtsCollapsed;
+            }
+          }
+        }
+      }
+    },
+    toggleTools() {
+      this.toolsCollapsed = !this.toolsCollapsed;
+      for (const msg of this.messages) {
+        if (msg.sender === "agent") {
+          for (const part of msg.parts) {
+            if (part.type === 'functionCall' || part.type === 'functionResponse') {
+              part.collapsed = this.toolsCollapsed;
             }
           }
         }
@@ -437,7 +485,7 @@ export default {
                 agentMsgObject.parts.push({
                    type: 'thought',
                    text: part.text.trim(),
-                   collapsed: this.allCollapsed
+                   collapsed: this.thoughtsCollapsed
                 });
               } else {
                 agentMsgObject.parts.push({
@@ -458,7 +506,7 @@ export default {
               agentMsgObject.parts.push({
                 type: 'functionCall',
                 ...part.function_call,
-                collapsed: this.allCollapsed
+                collapsed: this.toolsCollapsed
               });
             }
           } else if (part.function_response) {
@@ -477,7 +525,7 @@ export default {
               agentMsgObject.parts.push({
                 type: 'functionResponse',
                 ...part.function_response,
-                collapsed: this.allCollapsed
+                collapsed: this.toolsCollapsed
               });
             }
           }
@@ -493,9 +541,7 @@ export default {
 .chat-container {
   height: 60vh;
   overflow-y: auto;
-  border: 1px solid #aaa;
   padding: 1rem;
-  border-radius: 4px;
 }
 
 .message-wrapper {
@@ -525,31 +571,13 @@ export default {
   width: 100%;
 }
 
-.rounded-card {
-  border-radius: 8px;
-}
-
-.agent-bubble {
-  background-color: rgb(var(--v-theme-agent-bubble));
-  border-radius: 8px;
-  padding: 12px;
+.agent-card {
   margin-bottom: 8px;
-}
-
-.thought {
-  background-color: rgb(var(--v-theme-agent-thought));
-  color: rgb(var(--v-theme-agent-thought-text));
-  border: 1px dashed rgb(var(--v-theme-agent-thought-border));
-  opacity: 0.8;
-  font-style: italic;
-  font-size: 0.95em;
 }
 
 .code-block {
   font-family: monospace;
-  background-color: rgba(var(--v-theme-on-surface), 0.05);
-  padding: 8px;
-  border-radius: 4px;
+  font-size: 0.85em;
   max-height: 200px;
   overflow-y: auto;
   word-break: break-all;
@@ -559,27 +587,4 @@ export default {
 .pre-wrap {
   white-space: pre-wrap;
 }
-
-.tool-call {
-  background-color: rgb(var(--v-theme-agent-tool-call));
-  border: 1px dashed rgb(var(--v-theme-agent-tool-call-border));
-}
-
-.tool-response {
-  background-color: rgb(var(--v-theme-agent-tool-response));
-  border: 1px dashed rgb(var(--v-theme-agent-tool-response-border));
-}
-
-.transfer-call {
-  background-color: rgb(var(--v-theme-agent-transfer));
-  border: 1px dashed rgb(var(--v-theme-agent-transfer-border));
-  color: rgb(var(--v-theme-agent-transfer-text));
-}
-
-.error-bubble {
-  background-color: rgba(var(--v-theme-error), 0.1);
-  border: 1px solid rgb(var(--v-theme-error));
-  color: rgb(var(--v-theme-error));
-}
-
 </style>
