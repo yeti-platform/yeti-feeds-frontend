@@ -7,12 +7,27 @@
           <v-combobox
             v-model="sessionId"
             :items="availableSessions"
+            item-title="label"
+            item-value="id"
+            :return-object="false"
             label="Session ID"
             density="compact"
             variant="outlined"
             hide-details
             class="flex-grow-1"
-          ></v-combobox>
+          >
+            <template v-slot:item="{ item, props }">
+              <v-list-item v-bind="props" class="session-label">
+                <template v-if="item.raw.isNew" v-slot:append>
+                  <v-chip size="x-small" color="primary" variant="tonal">New</v-chip>
+                </template>
+              </v-list-item>
+            </template>
+            <template v-slot:selection="{ item }">
+              <span class="session-label text-truncate">{{ item.title }}</span>
+              <v-chip v-if="item.raw.isNew" size="x-small" color="primary" variant="tonal" class="ml-2">New</v-chip>
+            </template>
+          </v-combobox>
           <v-btn
             color="primary"
             class="ml-2"
@@ -237,6 +252,14 @@ interface ADKSession {
   appName: string;
   userId: string;
   events: AgentEvent[];
+  createTime?: number;
+}
+
+interface SessionSummary {
+  id: string;
+  createTime: number;
+  label: string;
+  isNew: boolean;
 }
 
 export default {
@@ -251,13 +274,13 @@ export default {
       allCollapsed: false as boolean,
       userId: "yeti",
       sessionId: "session-" + Math.random().toString(36).substring(7),
-      availableSessions: [] as string[]
+      availableSessions: [] as SessionSummary[]
     };
   },
   async mounted() {
     await this.fetchSessions();
-    if (!this.availableSessions.includes(this.sessionId)) {
-      this.availableSessions.push(this.sessionId);
+    if (!this.availableSessions.some(s => s.id === this.sessionId)) {
+      this.availableSessions.push(this.makeSessionSummary(this.sessionId));
     }
   },
   watch: {
@@ -268,15 +291,23 @@ export default {
     }
   },
   methods: {
+    makeSessionSummary(id: string, createTime?: number): SessionSummary {
+      const time = createTime || Date.now() / 1000;
+      const label = createTime
+        ? `${new Date(createTime * 1000).toISOString().slice(0, 19).replace('T', ' ')} — ${id}`
+        : id;
+      return { id, createTime: time, label, isNew: !createTime };
+    },
     async fetchSessions() {
       try {
         const response = await axios.get(`/api/v2/agents/sessions`);
         const data = response.data;
-        if (Array.isArray(data)) {
-          this.availableSessions = data.map(s => typeof s === 'string' ? s : s.id);
-        } else if (data.sessions && Array.isArray(data.sessions)) {
-          this.availableSessions = data.sessions.map(s => typeof s === 'string' ? s : s.id);
-        }
+        const items = Array.isArray(data) ? data : (Array.isArray(data.sessions) ? data.sessions : []);
+        this.availableSessions = items
+          .map((s: string | ADKSession) =>
+            typeof s === 'string' ? this.makeSessionSummary(s) : this.makeSessionSummary(s.id, s.createTime)
+          )
+          .sort((a: SessionSummary, b: SessionSummary) => a.createTime - b.createTime);
       } catch (err) {
         console.error("Failed to fetch sessions", err);
       }
@@ -322,8 +353,8 @@ export default {
     },
     createNewSession() {
       this.sessionId = "session-" + Math.random().toString(36).substring(7);
-      if (!this.availableSessions.includes(this.sessionId)) {
-        this.availableSessions.push(this.sessionId);
+      if (!this.availableSessions.some(s => s.id === this.sessionId)) {
+        this.availableSessions.push(this.makeSessionSummary(this.sessionId));
       }
       this.messages = [];
     },
@@ -393,10 +424,13 @@ export default {
 
       await this.sendMessageStream(text, currentAgentMsg);
       this.loading = false;
-      
-      // Update session list in case this is the first message
-      if (!this.availableSessions.includes(this.sessionId)) {
-         this.fetchSessions();
+
+      // The session now exists on the backend, so it's no longer a draft.
+      const entry = this.availableSessions.find(s => s.id === this.sessionId);
+      if (entry) {
+        entry.isNew = false;
+      } else {
+        this.fetchSessions();
       }
     },
 
@@ -537,6 +571,10 @@ export default {
 </script>
 
 <style scoped>
+.session-label {
+  font-family: monospace;
+}
+
 .chat-container {
   height: 60vh;
   overflow-y: auto;
