@@ -1,0 +1,16 @@
+name: Typecheck
+
+on: [pull_request]
+
+jobs:
+  typecheck:
+    runs-on: ubuntu-latest
+    name: Type-check ratchet
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install
+      - run: bash scripts/typecheck-ratchet.sh
