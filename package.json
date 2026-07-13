@@ -27,7 +27,6 @@
     "marked": "^15.0.3",
     "mitt": "^3.0.1",
     "moment": "^2.30.1",
-    "nvm": "^0.0.4",
     "pinia": "^2.0.0",
     "roboto-fontface": "*",
     "sigma": "^3.0.0-beta.33",
