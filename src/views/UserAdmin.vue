@@ -1,7 +1,6 @@
 <template>
   <v-sheet class="ma-5" width="100%">
     <v-data-table :items="users" :headers="headers" :search="userFilter" class="yeti-table" density="compact">
-      <!-- insert link to profile page on username field -->
       <template v-slot:item.username="{ item }">
         <router-link :to="{ name: 'UserProfileAdmin', params: { id: item.id } }">{{ item.username }}</router-link>
       </template>
@@ -24,18 +23,17 @@
         ></v-switch>
       </template>
       <template v-slot:item.api_keys="{ item }">
-        <code
-          ><v-chip v-for="apiKey in item.api_keys" class="me-2" density="compact" color="green">{{
-            apiKey.name
-          }}</v-chip
-          >{{
-        }}</code>
+        <code>
+          <v-chip v-for="apiKey in item.api_keys" :key="apiKey.name" class="me-2" density="compact" color="green">
+            {{ apiKey.name }}
+          </v-chip>
+        </code>
       </template>
 
       <template v-slot:item.actions="{ item }">
         <v-dialog>
           <template v-slot:activator="{ props }">
-            <v-btn v-bind="props" size="small" variant="outlined" prepend-icon="mdi-key"> Manage API keys </v-btn>
+            <v-btn v-bind="props" size="small" variant="outlined" prepend-icon="mdi-key">Manage API keys</v-btn>
           </template>
           <template v-slot:default="{ isActive }">
             <v-card>
@@ -43,10 +41,9 @@
               <v-card-text>
                 <api-key-management
                   :profile-id="item.id"
-                  :apiKeys="item.api_keys"
-                  @api-key-update="data => (item.api_keys = data)"
-                >
-                </api-key-management>
+                  :api-keys="item.api_keys ?? {}"
+                  @api-key-update="apiKeys => (item.api_keys = apiKeys)"
+                />
               </v-card-text>
               <v-card-actions>
                 <v-spacer></v-spacer>
@@ -60,23 +57,27 @@
         <v-btn class="ms-2" size="small" variant="outlined" color="error" @click="showDeleteDialog(item)">
           <v-icon>mdi-delete</v-icon>
         </v-btn>
-        <v-dialog v-model="dialogDelete" max-width="500px">
-          <v-card>
-            <v-card-title class="text-h5"
-              >Are you sure you want to delete user "{{ deletionCandidate?.username }}"?</v-card-title
-            >
-            <v-card-actions>
-              <v-spacer></v-spacer>
-              <v-btn variant="text" @click="dialogDelete = false">Cancel</v-btn>
-              <v-btn variant="text" @click="deleteUser">OK</v-btn>
-              <v-spacer></v-spacer>
-            </v-card-actions>
-          </v-card>
-        </v-dialog>
       </template>
     </v-data-table>
   </v-sheet>
-  <v-navigation-drawer permament location="right" width="400" ref="drawer">
+
+  <!-- One dialog for the whole table: it used to live inside the row slot, so it
+       was rendered once per user while all copies shared a single v-model. -->
+  <v-dialog v-model="dialogDelete" max-width="500px">
+    <v-card>
+      <v-card-title class="text-h5">
+        Are you sure you want to delete user "{{ deletionCandidate?.username }}"?
+      </v-card-title>
+      <v-card-actions>
+        <v-spacer></v-spacer>
+        <v-btn variant="text" @click="dialogDelete = false">Cancel</v-btn>
+        <v-btn variant="text" @click="deleteUser">OK</v-btn>
+        <v-spacer></v-spacer>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
+
+  <v-navigation-drawer permanent location="right" width="400">
     <v-list-item class="mt-4">
       <v-text-field
         v-model="userFilter"
@@ -107,126 +108,74 @@
   </v-navigation-drawer>
 </template>
 
-<script lang="ts" setup>
-import axios from "axios";
-import ApiKeyManagement from "@/components/ApiKeyManagement.vue";
-</script>
+<script setup lang="ts">
+import { onMounted, ref } from "vue";
 
-<script lang="ts">
-export default {
-  name: "UserAdmin",
-  components: {
-    ApiKeyManagement
-  },
-  data() {
-    return {
-      users: [],
-      headers: [
-        { key: "username", sortable: true, title: "Username" },
-        { key: "api_keys", sortable: false, title: "API keys" },
-        { key: "admin", sortable: false, title: "Admin" },
-        { key: "enabled", sortable: false, title: "Enabled" },
-        { key: "actions", sortable: false, title: "Actions" }
-      ],
-      userFilter: "",
-      newUsername: null,
-      newPassword: null,
-      newAdmin: false,
-      dialogDelete: false,
-      deletionCandidate: {},
-      showPassword: false
-    };
-  },
-  mounted() {
-    this.listUsers();
-  },
-  methods: {
-    listUsers() {
-      axios
-        .post("/api/v2/users/search", {
-          page: 0,
-          count: 1000,
-          username: this.userFilter
-        })
-        .then(response => {
-          this.users = response.data.users;
-        })
-        .catch(error => {
-          console.log(error);
-        })
-        .finally(() => {});
-    },
-    clearForm() {
-      this.newUsername = this.newPassword = null;
-      this.newAdmin = false;
-    },
-    addUser() {
-      axios
-        .post("/api/v2/users/", { username: this.newUsername, password: this.newPassword, admin: this.newAdmin })
-        .then(response => {
-          this.listUsers();
-          this.clearForm();
-          this.$eventBus.emit("displayMessage", {
-            message: `User ${response.data.username} successfully added`,
-            status: "success"
-          });
-        })
-        .catch(error => {
-          this.$eventBus.emit("displayMessage", {
-            message: "Error: " + error.response.data.error,
-            status: "error"
-          });
-        })
-        .finally(() => {});
-    },
-    toggleUser(user, field) {
-      axios
-        .post(`/api/v2/users/toggle`, { user_id: user.id, field: field })
-        .then(() => {
-          this.$eventBus.emit("displayMessage", {
-            message: `Changes saved`,
-            status: "success"
-          });
-        })
-        .catch(error => {
-          console.log(error);
-        })
-        .finally(() => {});
-    },
-    showDeleteDialog(user) {
-      this.deletionCandidate = user;
-      this.dialogDelete = true;
-    },
-    deleteUser() {
-      axios
-        .delete(`/api/v2/users/${this.deletionCandidate.id}`)
-        .then(() => {
-          this.dialogDelete = false;
-          this.deletionCandidate = null;
-          this.listUsers();
-        })
-        .catch(error => {
-          console.log(error);
-        })
-        .finally(() => {});
-    },
-    resetApiKey(user) {
-      axios
-        .post(`/api/v2/users/reset-api-key`, { user_id: user.id })
-        .then(response => {
-          user.api_key = response.data.api_key;
-          this.$eventBus.emit("displayMessage", {
-            status: "success",
-            message: `API key for user ${user.username} succesfully reset`
-          });
-        })
-        .catch(error => {
-          console.log(error);
-        })
-        .finally(() => {});
-    }
+import ApiKeyManagement from "@/components/ApiKeyManagement.vue";
+import { eventBus } from "@/plugins/eventbus";
+import type { ToggleableField, User } from "@/services/types";
+import * as usersApi from "@/services/users";
+
+const headers = [
+  { key: "username", sortable: true, title: "Username" },
+  { key: "api_keys", sortable: false, title: "API keys" },
+  { key: "admin", sortable: false, title: "Admin" },
+  { key: "enabled", sortable: false, title: "Enabled" },
+  { key: "actions", sortable: false, title: "Actions" }
+];
+
+const users = ref<User[]>([]);
+const userFilter = ref("");
+const newUsername = ref("");
+const newPassword = ref("");
+const newAdmin = ref(false);
+const showPassword = ref(false);
+const dialogDelete = ref(false);
+const deletionCandidate = ref<User | null>(null);
+
+async function listUsers() {
+  const response = await usersApi.search({ page: 0, count: 1000, username: userFilter.value });
+  users.value = response.users;
+}
+
+function clearForm() {
+  newUsername.value = "";
+  newPassword.value = "";
+  newAdmin.value = false;
+}
+
+async function addUser() {
+  const user = await usersApi.create({
+    username: newUsername.value,
+    password: newPassword.value,
+    admin: newAdmin.value
+  });
+  await listUsers();
+  clearForm();
+  eventBus.emit("displayMessage", { message: `User ${user.username} successfully added`, status: "success" });
+}
+
+async function toggleUser(user: User, field: ToggleableField) {
+  await usersApi.toggle({ user_id: user.id, field });
+  eventBus.emit("displayMessage", { message: "Changes saved", status: "success" });
+}
+
+function showDeleteDialog(user: User) {
+  deletionCandidate.value = user;
+  dialogDelete.value = true;
+}
+
+async function deleteUser() {
+  if (!deletionCandidate.value) {
+    return;
   }
-};
+  await usersApi.remove(deletionCandidate.value.id);
+  dialogDelete.value = false;
+  deletionCandidate.value = null;
+  await listUsers();
+}
+
+onMounted(listUsers);
 </script>
 
 <style>

@@ -1,98 +1,96 @@
-// Utilities
 import { defineStore } from "pinia";
-import axios from "axios";
 
+import * as authApi from "@/services/auth";
+import type { LooseYetiObject, User } from "@/services/types";
+
+/**
+ * The backend's `Permission` IntFlag: READ=1, WRITE=2, OWNER=4. The roles stored
+ * on an ACL are combinations of those.
+ */
 export enum Role {
   WRITER = 3,
   OWNER = 7
 }
 
+interface UserState {
+  user: User | null;
+}
+
 export const useUserStore = defineStore("user", {
-  state: () => ({
+  state: (): UserState => ({
     user: null
   }),
   actions: {
-    async OIDCBrowserRedirect() {
-      window.location.href = "/api/v2/auth/oidc-login";
+    OIDCBrowserRedirect() {
+      window.location.href = authApi.OIDC_LOGIN_URL;
     },
-    async OIDCAsyncRefresh() {
+
+    /** Logs in through an OIDC popup, polling /auth/me until the cookie lands. */
+    async OIDCAsyncRefresh(): Promise<User> {
+      const popup = window.open(authApi.OIDC_LOGIN_URL, "OIDC Login", "width=800,height=600");
       return new Promise((resolve, reject) => {
-        var popup = window.open("/api/v2/auth/oidc-login", "OIDC Login", "width=800,height=600");
-        const store = this;
-        var timer = setInterval(function () {
-          store
-            .userCheck()
-            .then(() => {
-              if (store.user !== null) {
-                popup?.close();
-                clearInterval(timer);
-                resolve(store.user);
-              }
-            })
-            .catch(error => {
-              popup?.close();
-              console.log(error);
+        const timer = setInterval(async () => {
+          try {
+            const user = await this.userCheck();
+            popup?.close();
+            clearInterval(timer);
+            resolve(user);
+          } catch (error) {
+            // Not authenticated *yet* — keep polling until the popup is closed.
+            if (popup?.closed) {
               clearInterval(timer);
               reject(error);
-            });
+            }
+          }
         }, 2000);
       });
     },
-    async userCheck() {
-      return new Promise((resolve, reject) => {
-        axios
-          .get("/api/v2/auth/me")
-          .then(response => {
-            console.log("User check success");
-            this.user = response.data;
-            resolve(response);
-          })
-          .catch(err => {
-            console.log("User check fail");
-            this.user = null;
-            reject(err.response.data.detail);
-          });
-      });
-    },
-    async userLocalLogin(form) {
-      return new Promise((resolve, reject) => {
-        axios
-          .post("/api/v2/auth/token", form)
-          .then(response => {
-            console.log("User login success");
-            this.userCheck().then(() => resolve(response));
-          })
-          .catch(err => {
-            console.log(err);
-            console.log(`User login fail: ${err.response.data.detail}`);
-            this.user = null;
-            reject(err);
-          });
-      });
-    },
-    async userLocalLogout() {
-      return new Promise((resolve, reject) => {
-        axios
-          .post("/api/v2/auth/logout")
-          .then(response => {
-            console.log("User logout success");
-            this.user = null;
-            resolve(response);
-          })
-          .catch(err => {
-            console.log("User logout fail");
-            reject(err);
-          });
-      });
-    },
-    hasEditPerms(object: Object): boolean {
-      let role = object?.acls[this.user.username]?.role;
-      return this.user.admin || (role & Role.WRITER) === Role.WRITER;
+
+    /** Resolves with the logged-in user; rejects (and clears it) if there is none. */
+    async userCheck(): Promise<User> {
+      try {
+        this.user = await authApi.me();
+        return this.user;
+      } catch (error) {
+        this.user = null;
+        throw error;
+      }
     },
 
-    hasOwnerPerms(object: Object): boolean {
-      let role = object?.acls[this.user.username]?.role;
-      return this.user.admin || (role & Role.OWNER) === Role.OWNER;
+    async userLocalLogin(username: string, password: string): Promise<User> {
+      try {
+        await authApi.login(username, password);
+      } catch (error) {
+        this.user = null;
+        throw error;
+      }
+      return this.userCheck();
+    },
+
+    async userLocalLogout(): Promise<void> {
+      await authApi.logout();
+      this.user = null;
+    },
+
+    /** True if the current user may edit `object` — admins always may. */
+    hasEditPerms(object: LooseYetiObject): boolean {
+      return this.hasRole(object, Role.WRITER);
+    },
+
+    hasOwnerPerms(object: LooseYetiObject): boolean {
+      return this.hasRole(object, Role.OWNER);
+    },
+
+    hasRole(object: LooseYetiObject, role: Role): boolean {
+      if (!this.user) {
+        return false;
+      }
+      if (this.user.admin) {
+        return true;
+      }
+      // Objects outside RBAC (and DFIQ) carry no acls at all.
+      const granted = object?.acls?.[this.user.username]?.role ?? 0;
+      return (granted & role) === role;
     }
   }
 });

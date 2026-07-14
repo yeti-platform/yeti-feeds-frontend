@@ -26,9 +26,7 @@ function errorMessage(error: AxiosError): string {
   }
   // FastAPI validation errors come back as a list of {loc, msg, type}.
   if (Array.isArray(detail)) {
-    const messages = detail
-      .map(item => (typeof item?.msg === "string" ? item.msg : null))
-      .filter(Boolean);
+    const messages = detail.map(item => (typeof item?.msg === "string" ? item.msg : null)).filter(Boolean);
     if (messages.length) {
       return messages.join(", ");
     }
@@ -41,10 +39,16 @@ http.interceptors.response.use(
   async (error: AxiosError) => {
     const status = error.response?.status;
 
-    // Session expired / not authenticated: send the user back to the login
-    // page. The auth endpoints are excluded — a 401 from /auth/token just means
-    // "wrong password", and Login.vue reports that itself.
-    if (status === 401 && !isAuthRequest(error.config?.url)) {
+    // The auth endpoints report their own failures: a 401 from /auth/token just
+    // means "wrong password" (Login.vue says so), and a 401 from /auth/me is the
+    // normal answer for a logged-out visitor — neither should redirect or raise
+    // a snackbar.
+    if (isAuthRequest(error.config?.url)) {
+      return Promise.reject(error);
+    }
+
+    // Session expired / not authenticated: send the user back to the login page.
+    if (status === 401) {
       // Imported lazily: the router pulls in the views, which pull in these
       // services, so a static import would be a cycle.
       const { default: router } = await import("@/router");
