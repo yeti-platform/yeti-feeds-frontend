@@ -72,8 +72,33 @@ export type AddContextRequest = Schemas["AddContextRequest"];
 export type ReplaceContextRequest = Schemas["ReplaceContextRequest"];
 export type DeleteContextRequest = Schemas["DeleteContextRequest"];
 
+// DFIQ
+export type DFIQSearchResponse = Schemas["DFIQSearchResponse"];
+/** Scenario | Facet | Question. */
+export type DFIQObject = DFIQSearchResponse["dfiq"][number];
+
 /**
  * The object families that share the generic /{root_type}/... endpoint shape.
- * The generic components (ObjectList, EditObject, ...) build URLs from this.
+ * The generic components (ObjectDetails, ObjectList, EditObject, ...) build
+ * URLs from this.
  */
-export type RootType = "observables" | "entities" | "indicators" | "dfiq";
+export type RootType = "observable" | "entity" | "indicator" | "dfiq";
+
+/** Root types that ObjectDetails renders (observables have their own view). */
+export type DetailRootType = Extract<RootType, "entity" | "indicator" | "dfiq">;
+export type ObjectDetail = Entity | Indicator | DFIQObject;
+
+/** Root types with a /tag endpoint — notably, DFIQ has none. */
+export type TaggableRootType = Extract<RootType, "observable" | "entity" | "indicator">;
+
+/**
+ * A Yeti object viewed through one of the *generic* components (ObjectDetails,
+ * ObjectList, EditObject...). Those render several object families with a single
+ * template and index fields dynamically (`object[field.field]`), and the
+ * families genuinely differ — DFIQ nodes have no tags/context, only indicators
+ * have a pattern. Typing that against ObjectDetail would mean splitting the
+ * template per type, which is a much bigger refactor than these components are
+ * worth right now. Use the precise types (Entity, Indicator, ...) anywhere the
+ * family is known statically.
+ */
+export type LooseYetiObject = Record<string, any>;

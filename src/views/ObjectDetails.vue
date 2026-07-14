@@ -31,7 +31,7 @@
         <object-context
           v-if="object?.context"
           :context="object.context"
-          @update:context="ctx => (object.context = ctx)"
+          @update:context="updateContext"
           :update-endpoint="`${typeToEndpointMapping[objectType]}/${object.id}`"
         />
       </v-col>
@@ -60,15 +60,15 @@
               <tr v-for="field in getObjectInfoFields">
                 <th>{{ field.label }}</th>
                 <td v-if="field.type === 'list'">
-                  <v-chip v-for="item in object[field.field]" :text="item" class="mr-1" />
+                  <v-chip v-for="item in object?.[field.field]" :text="item" class="mr-1" />
                 </td>
                 <td v-else-if="field.type === 'yara'">
-                  <v-chip v-for="item in object[field.field]" class="mr-1" density="compact">{{ item }} </v-chip>
+                  <v-chip v-for="item in object?.[field.field]" class="mr-1" density="compact">{{ item }} </v-chip>
                 </td>
                 <td v-else-if="field.type === 'date'">
-                  {{ moment(object[field.field]).toISOString() }}
+                  {{ moment(object?.[field.field]).toISOString() }}
                 </td>
-                <td v-else>{{ object[field.field] }}</td>
+                <td v-else>{{ object?.[field.field] }}</td>
               </tr>
             </tbody>
           </v-table>
@@ -97,14 +97,14 @@
               <template v-slot:default="{ isActive }">
                 <edit-DFIQ-object
                   v-if="object?.root_type === 'dfiq'"
-                  :object="object"
+                  :object="object ?? undefined"
                   :is-active="isActive"
                   @success="obj => (object = obj)"
                   @toggle-fullscreen="toggleFullscreen"
                 />
                 <edit-object
                   v-else
-                  :object="object"
+                  :object="object ?? undefined"
                   :is-active="isActive"
                   @success="obj => (object = obj)"
                   @toggle-fullscreen="toggleFullscreen"
@@ -135,7 +135,7 @@
 
                     <template v-slot:default="{ isActive }">
                       <v-sheet>
-                        <link-object :object="object" :is-active="isActive" />
+                        <link-object :object="object ?? undefined" :is-active="isActive" />
                       </v-sheet>
                     </template>
                   </v-dialog>
@@ -147,7 +147,7 @@
                     </template>
 
                     <template v-slot:default="{ isActive }">
-                      <link-observables :linkTarget="object" :is-active="isActive" />
+                      <link-observables :linkTarget="object ?? undefined" :is-active="isActive" />
                     </template>
                   </v-dialog>
                 </v-list-item>
@@ -267,197 +267,162 @@
   </v-container>
 </template>
 
-<script lang="ts" setup>
-import axios from "axios";
+<script setup lang="ts">
+import moment from "moment";
+import { computed, onMounted, ref, watch } from "vue";
+import { useRoute } from "vue-router";
 
-import RelatedObjects from "@/components/RelatedObjects.vue";
-import DFIQTree from "@/components/DFIQ/DFIQTree.vue";
 import ACLEdit from "@/components/ACLEdit.vue";
-import DirectNeighbors from "@/components/DirectNeighbors.vue";
-import GraphObjects from "@/components/GraphObjects.vue";
-import EditObject from "@/components/EditObject.vue";
+import DFIQApproaches from "@/components/DFIQ/DFIQApproaches.vue";
+import DFIQTree from "@/components/DFIQ/DFIQTree.vue";
 import EditDFIQObject from "@/components/DFIQ/EditDFIQObject.vue";
+import DirectNeighbors from "@/components/DirectNeighbors.vue";
+import EditObject from "@/components/EditObject.vue";
+import GraphObjects from "@/components/GraphObjects.vue";
 import LinkObject from "@/components/LinkObject.vue";
 import LinkObservables from "@/components/LinkObservables.vue";
-import YetiMarkdown from "@/components/YetiMarkdown.vue";
 import ObjectContext from "@/components/ObjectContext.vue";
-
-import { ENTITY_TYPES } from "@/definitions/entityDefinitions";
-import { OBSERVABLE_TYPES } from "@/definitions/observableDefinitions";
-import { INDICATOR_TYPES } from "@/definitions/indicatorDefinitions";
-import { DFIQ_TYPES } from "@/definitions/dfiqDefinitions";
-
-import moment from "moment";
+import RelatedObjects from "@/components/RelatedObjects.vue";
 import Timeline from "@/components/Timeline.vue";
-import { useUserStore } from "@/store/user";
+import YetiMarkdown from "@/components/YetiMarkdown.vue";
+
+import { DFIQ_TYPES } from "@/definitions/dfiqDefinitions";
+import { ENTITY_TYPES } from "@/definitions/entityDefinitions";
+import { INDICATOR_TYPES } from "@/definitions/indicatorDefinitions";
+import { OBSERVABLE_TYPES } from "@/definitions/observableDefinitions";
+import type { ObjectTypeDefinition } from "@/definitions/types";
+
+import { eventBus } from "@/plugins/eventbus";
+import * as objectsApi from "@/services/objects";
+import type { DetailRootType, LooseYetiObject, TaggableRootType } from "@/services/types";
 import { useAppStore } from "@/store/app";
-import DFIQApproaches from "@/components/DFIQ/DFIQApproaches.vue";
-</script>
+import { useUserStore } from "@/store/user";
 
-<script lang="ts">
-export default {
-  props: {
-    id: {
-      type: String,
-      required: true
-    },
-    objectType: {
-      type: String,
-      required: true
-    }
-  },
-  components: {
-    RelatedObjects,
-    DirectNeighbors,
-    EditObject,
-    EditDFIQObject,
-    LinkObject,
-    YetiMarkdown,
-    DFIQApproaches,
-    DFIQTree,
-    GraphObjects,
-    Timeline,
-    ACLEdit,
-    ObjectContext
-  },
-  data() {
-    return {
-      object: null,
-      activeTab: "related-indicators",
-      autoTab: true,
-      objectTypes: {
-        entity: ENTITY_TYPES,
-        observable: OBSERVABLE_TYPES,
-        indicator: INDICATOR_TYPES,
-        dfiq: DFIQ_TYPES
-      },
-      typeToEndpointMapping: {
-        entity: "entities",
-        observable: "observables",
-        indicator: "indicators",
-        dfiq: "dfiq"
-      },
-      objectTags: [],
-      relatedObjectTabCount: {},
-      hideFieldsInfoBox: ["name", "description", "tags", "pattern"],
-      fullScreenEdit: false,
-      editWidth: "75%",
-      newLinkMenu: false,
-      userStore: useUserStore(),
-      appStore: useAppStore()
-    };
-  },
-  methods: {
-    emitRefreshGraph() {
-      console.log("Emitting refreshGraph");
-      let refreshGraphViewEvent = new Event("refreshGraphView");
-      window.dispatchEvent(refreshGraphViewEvent);
-    },
-    getObjectDetails() {
-      axios
-        .get(`/api/v2/${this.typeToEndpointMapping[this.objectType]}/${this.id}`)
-        .then(response => {
-          let tagNames: string[] = [];
-          this.object = response.data;
-          this.objectTags = this.object.tags ? this.object.tags.map(tag => tag.name) : [];
-          this.navigateToFirstPopulatedTab();
-          this.appStore.setPageTitleFromObject(this.object);
-        })
-        .catch(error => {
-          console.log(error);
-          this.$eventBus.emit("displayMessage", {
-            status: "error",
-            message: error.response.data.detail
-          });
-        })
-        .finally();
-    },
-    saveTags() {
-      var params = {
-        ids: [this.object.id],
-        tags: this.objectTags,
-        strict: true
-      };
-      axios
-        .post(`/api/v2/${this.typeToEndpointMapping[this.objectType]}/tag`, params)
-        .then(() => {
-          this.getObjectDetails();
-          this.$eventBus.emit("displayMessage", { message: "Tags saved successfully", status: "success" });
-        })
-        .catch(error => {
-          console.log(error);
-        })
-        .finally();
-    },
-    countObjects(key: string, value: number) {
-      this.relatedObjectTabCount[key] = value;
-      if (!this.$route.hash && this.autoTab) {
-        this.navigateToFirstPopulatedTab();
-      }
-    },
-    navigateToFirstPopulatedTab() {
-      if (this.object?.root_type === "dfiq") {
-        this.activeTab = "related-dfiq-tree";
-        return;
-      }
-      let tabKeys = this.objectTypes.entity.map(entityType => entityType.type);
-      tabKeys = tabKeys.concat(["indicators", "observables", "tagged", "dfiq"]);
+const props = defineProps<{
+  id: string;
+  /** ObjectDetails serves entity/indicator/dfiq; observables have their own view. */
+  objectType: DetailRootType;
+}>();
 
-      for (const key of tabKeys) {
-        if (this.relatedObjectTabCount[key] > 0) {
-          this.activeTab = `related-${key}`;
-          return;
-        }
-      }
-    },
-    toggleFullscreen(fullscreen: boolean) {
-      this.fullScreenEdit = !this.fullScreenEdit;
-      this.editWidth = fullscreen ? "100%" : "75%";
-    }
-  },
-  computed: {
-    user() {
-      return this.userStore.user;
-    },
-    getObjectTypeDefintions() {
-      return this.objectTypes[this.objectType].find(typeDef => typeDef.type === this.object?.type);
-    },
-    getObjectInfoFields() {
-      return this.getObjectTypeDefintions?.fields.filter(field => !this.hideFieldsInfoBox.includes(field.field));
-    },
-    displayedEntityTypes() {
-      return this.objectTypes["entity"].filter(type => this.relatedObjectTabCount[type.type] > 0);
-    },
-    activeHash() {
-      return this.$route.hash;
-    },
-    hasEditPerms() {
-      return this.userStore.hasEditPerms(this.object);
-    },
-    hasOwnerPerms() {
-      return this.userStore.hasOwnerPerms(this.object);
-    },
-    RBACEnabled() {
-      return this.appStore.RBACEnabled;
-    }
-  },
-  mounted() {
-    this.getObjectDetails();
-    if (this.activeHash) {
-      this.autoTab = false;
-      this.activeTab = "related-" + this.activeHash.replace("#", "");
-    }
-  },
-  watch: {
-    id() {
-      this.getObjectDetails();
-    },
-    activeHash() {
-      this.activeTab = "related-" + this.activeHash.replace("#", "");
+const route = useRoute();
+const userStore = useUserStore();
+const appStore = useAppStore();
+
+const objectTypes: Record<string, ObjectTypeDefinition[]> = {
+  entity: ENTITY_TYPES,
+  observable: OBSERVABLE_TYPES,
+  indicator: INDICATOR_TYPES,
+  dfiq: DFIQ_TYPES
+};
+
+const HIDE_FIELDS_IN_INFO_BOX = ["name", "description", "tags", "pattern"];
+
+/** root_type -> API path segment. The template builds child-component URLs from it. */
+const typeToEndpointMapping = objectsApi.ENDPOINTS;
+
+const object = ref<LooseYetiObject | null>(null);
+const objectTags = ref<string[]>([]);
+const activeTab = ref("related-indicators");
+const autoTab = ref(true);
+const relatedObjectTabCount = ref<Record<string, number>>({});
+const fullScreenEdit = ref(false);
+const editWidth = ref("75%");
+const newLinkMenu = ref(false);
+
+const user = computed(() => userStore.user);
+const activeHash = computed(() => route.hash);
+const hasEditPerms = computed(() => (object.value ? userStore.hasEditPerms(object.value) : false));
+const hasOwnerPerms = computed(() => (object.value ? userStore.hasOwnerPerms(object.value) : false));
+const RBACEnabled = computed(() => appStore.RBACEnabled);
+
+const getObjectTypeDefintions = computed(() =>
+  objectTypes[props.objectType]?.find(typeDef => typeDef.type === object.value?.type)
+);
+
+const getObjectInfoFields = computed(() =>
+  getObjectTypeDefintions.value?.fields.filter(field => !HIDE_FIELDS_IN_INFO_BOX.includes(field.field))
+);
+
+const displayedEntityTypes = computed(() =>
+  objectTypes.entity.filter(type => relatedObjectTabCount.value[type.type] > 0)
+);
+
+function updateContext(context: unknown[]) {
+  if (object.value) {
+    object.value.context = context;
+  }
+}
+
+function emitRefreshGraph() {
+  window.dispatchEvent(new Event("refreshGraphView"));
+}
+
+function navigateToFirstPopulatedTab() {
+  if (object.value?.root_type === "dfiq") {
+    activeTab.value = "related-dfiq-tree";
+    return;
+  }
+  const tabKeys = objectTypes.entity
+    .map(entityType => entityType.type)
+    .concat(["indicators", "observables", "tagged", "dfiq"]);
+
+  for (const key of tabKeys) {
+    if (relatedObjectTabCount.value[key] > 0) {
+      activeTab.value = `related-${key}`;
+      return;
     }
   }
-};
+}
+
+async function getObjectDetails() {
+  // Errors are surfaced by the http interceptor's snackbar.
+  object.value = await objectsApi.details(props.objectType, props.id);
+  objectTags.value = object.value.tags?.map((tag: { name: string }) => tag.name) ?? [];
+  navigateToFirstPopulatedTab();
+  appStore.setPageTitleFromObject(object.value);
+}
+
+async function saveTags() {
+  if (!object.value) {
+    return;
+  }
+  // The tag editor is hidden for DFIQ (there is no /dfiq/tag endpoint), so the
+  // objectType here is always taggable.
+  await objectsApi.tag(props.objectType as TaggableRootType, {
+    ids: [String(object.value.id)],
+    tags: objectTags.value,
+    strict: true
+  });
+  await getObjectDetails();
+  eventBus.emit("displayMessage", { message: "Tags saved successfully", status: "success" });
+}
+
+function countObjects(key: string, value: number) {
+  relatedObjectTabCount.value[key] = value;
+  if (!route.hash && autoTab.value) {
+    navigateToFirstPopulatedTab();
+  }
+}
+
+function toggleFullscreen(fullscreen: boolean) {
+  fullScreenEdit.value = !fullScreenEdit.value;
+  editWidth.value = fullscreen ? "100%" : "75%";
+}
+
+watch(() => props.id, getObjectDetails);
+watch(activeHash, () => {
+  activeTab.value = "related-" + activeHash.value.replace("#", "");
+});
+
+onMounted(() => {
+  getObjectDetails();
+  if (activeHash.value) {
+    autoTab.value = false;
+    activeTab.value = "related-" + activeHash.value.replace("#", "");
+  }
+});
 </script>
+
 
 <style>
 .v-card-text.yeti-description,
