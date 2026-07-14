@@ -125,4 +125,41 @@ test.describe('Entity Details', () => {
     // Verify observable row
     await expect(page.locator('tbody tr').filter({ hasText: '10.0.0.1' })).toBeVisible();
   });
+
+  test('saves tags on the entity', async ({ page }) => {
+    const tagRequests: Array<Record<string, unknown>> = [];
+
+    await page.route('**/api/v2/graph/search', async route => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ vertices: {}, paths: [], total: 0 })
+      });
+    });
+
+    await page.route('**/api/v2/entities/tag', async route => {
+      tagRequests.push(route.request().postDataJSON());
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ tagged: 1, tags: {} })
+      });
+    });
+
+    await page.goto('/entities/123');
+    await expect(page.locator('.yeti-object-title code')).toContainText('Fancy Bear');
+
+    // The tag combobox is pre-populated from the entity's tags.
+    const tagBox = page.locator('.v-combobox input').first();
+    await tagBox.fill('newtag');
+    await tagBox.press('Enter');
+
+    await page.getByRole('button', { name: 'Save' }).click();
+
+    await expect.poll(() => tagRequests.length).toBe(1);
+    expect(tagRequests[0]).toMatchObject({ ids: ['123'], strict: true });
+    expect(tagRequests[0].tags).toContain('newtag');
+    // The pre-existing tags are preserved (strict: true replaces the whole set).
+    expect(tagRequests[0].tags).toContain('apt28');
+  });
 });
