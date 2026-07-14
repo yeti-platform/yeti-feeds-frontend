@@ -11,8 +11,9 @@ export async function toggle(name: string): Promise<unknown> {
   return data;
 }
 
+/** The body is a TaskParams envelope: {"params": {...}}, not the params alone. */
 export async function run(name: string, params: Record<string, unknown> = {}): Promise<unknown> {
-  const { data } = await http.post(`/tasks/${name}/run`, params);
+  const { data } = await http.post(`/tasks/${name}/run`, { params });
   return data;
 }
 

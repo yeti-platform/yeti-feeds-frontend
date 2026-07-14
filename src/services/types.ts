@@ -51,6 +51,7 @@ export type TagSearchResponse = Schemas["TagSearchResponse"];
 export type TagMultipleGetRequest = Schemas["TagMultipleGetRequest"];
 
 // Tasks / exports
+export type TaskType = Schemas["TaskType"];
 export type ExportTask = Schemas["ExportTask-Output"];
 export type ExportTaskInput = Schemas["ExportTask-Input"];
 export type TaskSearchRequest = Schemas["TaskSearchRequest"];

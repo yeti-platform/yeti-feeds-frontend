@@ -110,173 +110,162 @@
   </v-sheet>
 </template>
 
-<script lang="ts" setup>
-import axios from "axios";
-
+<script setup lang="ts">
 import moment from "moment";
+import { computed, onMounted, onUnmounted, ref } from "vue";
+
+import { eventBus } from "@/plugins/eventbus";
+import * as tasksApi from "@/services/tasks";
+import type { LooseYetiObject, TaskType } from "@/services/types";
+
+const props = withDefaults(
+  defineProps<{
+    taskType?: TaskType;
+    actsOnFilter?: string[];
+    actOnValue?: string;
+    displayColumns?: string[];
+    onlyEnabled?: boolean;
+    selectableTasks?: boolean;
+    downloadableTasks?: boolean;
+  }>(),
+  {
+    actsOnFilter: () => [],
+    displayColumns: () => [
+      "name",
+      "acts_on",
+      "frequency",
+      "last_run",
+      "description",
+      "status",
+      "toggle",
+      "refresh"
+    ],
+    onlyEnabled: false,
+    selectableTasks: false,
+    downloadableTasks: false
+  }
+);
+
+const emit = defineEmits<{
+  "task-selected": [task: LooseYetiObject];
+  taskDownload: [task: LooseYetiObject];
+}>();
+
+/** Tasks are a heterogeneous family (feed / analytics / export / event). */
+type Task = LooseYetiObject;
+
+const DEFAULT_HEADERS = [
+  { key: "name", title: "Name", sortable: true },
+  { key: "acts_on", title: "Acts On" },
+  { key: "template_name", title: "Template name" },
+  { key: "frequency", title: "Runs every", sortable: true },
+  { key: "last_run", title: "Last run", width: "180px", sortable: true },
+  { key: "description", title: "Description" },
+  { key: "status", title: "Status", width: "120px", sortable: true },
+  { key: "toggle", title: "Toggle", width: "80px" },
+  { key: "refresh", title: "", width: "110px" }
+];
+
+const tasks = ref<Task[]>([]);
+const selectedTask = ref<Task | null>(null);
+const sortBy = ref([{ key: "name", order: "asc" as const }]);
+const taskDisplayFilter = ref("");
+const taskHideDisabled = ref(false);
+
+let timer: ReturnType<typeof setInterval> | undefined;
+
+const displayedHeaders = computed(() =>
+  DEFAULT_HEADERS.filter(header => props.displayColumns.includes(header.key))
+);
+
+const filteredTasks = computed(() =>
+  tasks.value.filter(task => {
+    if (taskHideDisabled.value && !task.enabled) {
+      return false;
+    }
+    if (taskDisplayFilter.value) {
+      return task.name.toLowerCase().includes(taskDisplayFilter.value.toLowerCase());
+    }
+    return true;
+  })
+);
+
+function displayColumn(name: string): boolean {
+  return props.displayColumns.includes(name);
+}
+
+function isRefreshing(task: Task): boolean {
+  return task.status === "running";
+}
+
+function getRowClass(row: Task): string | undefined {
+  if (!row.enabled) {
+    return "disabled";
+  }
+  if (row.status === "completed") {
+    return "success";
+  }
+  if (row.status === "running") {
+    return "warning";
+  }
+  if (row.status === "failed") {
+    return "error";
+  }
+  return undefined;
+}
+
+function getHumanStatus(task: Task): string {
+  if (task.status === "completed") {
+    return "Completed";
+  }
+  if (task.status === "running") {
+    return "Running";
+  }
+  return "N/A";
+}
+
+/** v-checkbox emits null when it is unchecked. */
+function selectTask(task: Task | null) {
+  if (task) {
+    emit("task-selected", task);
+  }
+}
+
+async function listTasks() {
+  const response = await tasksApi.search({ type: props.taskType, page: 0, count: 200 });
+  let found = (response.tasks ?? []) as Task[];
+  if (props.actsOnFilter.length > 0) {
+    found = found.filter(task => task.acts_on?.some((actsOn: string) => props.actsOnFilter.includes(actsOn)));
+  }
+  if (props.onlyEnabled) {
+    found = found.filter(task => task.enabled);
+  }
+  tasks.value = found;
+  selectedTask.value = null;
+}
+
+async function toggle(task: Task) {
+  await tasksApi.toggle(task.name);
+}
+
+async function refresh(task: Task) {
+  // The endpoint takes a TaskParams envelope; tasksApi.run wraps it.
+  await tasksApi.run(task.name, props.actOnValue ? { value: props.actOnValue } : {});
+}
+
+onMounted(() => {
+  listTasks();
+  timer = setInterval(listTasks, 5000);
+  eventBus.on("taskUpdated", listTasks);
+});
+
+onUnmounted(() => {
+  clearInterval(timer);
+  // The old version cleared the interval but never removed this listener.
+  eventBus.off("taskUpdated", listTasks);
+});
 </script>
 
-<script lang="ts">
-export default {
-  name: "TaskList",
-  props: {
-    taskType: {
-      type: String
-    },
-    actsOnFilter: {
-      type: Array,
-      default: () => []
-    },
-    actOnValue: {
-      type: String
-    },
-    displayColumns: {
-      type: Array,
-      default: () => ["name", "acts_on", "frequency", "last_run", "description", "status", "toggle", "refresh"]
-    },
-    onlyEnabled: {
-      type: Boolean,
-      default: false
-    },
-    selectableTasks: {
-      type: Boolean,
-      default: false
-    },
-    downloadableTasks: {
-      type: Boolean,
-      default: false
-    }
-  },
-  data() {
-    return {
-      tasks: [],
-      timer: null,
-      selected: null,
-      defaultHeaders: [
-        { key: "name", title: "Name", sortable: true },
-        { key: "acts_on", title: "Acts On" },
-        { key: "template_name", title: "Template name" },
-        { key: "frequency", title: "Runs every", sortable: true },
-        { key: "last_run", title: "Last run", width: "180px", sortable: true },
-        { key: "description", title: "Description" },
-        { key: "status", title: "Status", width: "120px", sortable: true },
-        { key: "toggle", title: "Toggle", width: "80px" },
-        { key: "refresh", title: "", width: "110px" }
-      ],
-      sortBy: [{ key: "name", order: "asc" }],
-      selectedTask: null,
-      taskDisplayFilter: "",
-      taskHideDisabled: false
-    };
-  },
-  mounted() {
-    this.listTasks();
-  },
-  created() {
-    this.timer = setInterval(this.listTasks, 5000);
-    this.$eventBus.on("taskUpdated", this.listTasks);
-  },
-  unmounted() {
-    clearInterval(this.timer);
-  },
-  methods: {
-    toggle(task) {
-      axios
-        .post(`/api/v2/tasks/${task.name}/toggle`)
-        .then(() => {})
-        .catch(error => {
-          console.log(error);
-        });
-    },
-    listTasks() {
-      var params = {
-        type: this.taskType,
-        page: 0,
-        count: 200
-      };
-      axios
-        .post("/api/v2/tasks/search", params)
-        .then(response => {
-          let tasks = response.data.tasks.filter(task => {
-            if (this.actsOnFilter.length > 0) {
-              return task.acts_on.some(actsOn => this.actsOnFilter.includes(actsOn));
-            }
-            return true;
-          });
-          if (this.onlyEnabled) {
-            tasks = tasks.filter(task => task.enabled);
-          }
-          this.tasks = tasks;
-          this.selectedTask = null;
-        })
-        .catch(error => {
-          console.log(error);
-        })
-        .finally(() => {});
-    },
-    refresh(task) {
-      let taskParams = { params: {} };
-      if (this.actOnValue) {
-        taskParams.params["value"] = this.actOnValue;
-      }
-      axios
-        .post(`/api/v2/tasks/${task.name}/run`, taskParams)
-        .then(() => {})
-        .catch(error => {
-          console.log(error);
-        });
-    },
-    isRefreshing(task) {
-      return task.status === "running";
-    },
-    getRowClass(row) {
-      if (!row.enabled) {
-        return "disabled";
-      }
-      if (row.status === "completed") {
-        return "success";
-      }
-      if (row.status === "running") {
-        return "warning";
-      }
-      if (row.status === "failed") {
-        return "error";
-      }
-    },
-    getHumanStatus(task) {
-      if (task.status === "completed") {
-        return "Completed";
-      }
-      if (task.status === "running") {
-        return "Running";
-      }
-      return "N/A";
-    },
-    displayColumn(name) {
-      return this.displayColumns.includes(name);
-    },
-    selectTask(task) {
-      this.$emit("task-selected", task);
-    }
-  },
-  computed: {
-    displayedHeaders() {
-      return this.defaultHeaders.filter(header => this.displayColumns.includes(header.key));
-    },
-    filteredTasks() {
-      return this.tasks.filter(task => {
-        if (this.taskHideDisabled && !task.enabled) {
-          return false;
-        }
-        if (this.taskDisplayFilter) {
-          return task.name.toLowerCase().includes(this.taskDisplayFilter.toLowerCase());
-        }
-        return true;
-      });
-    }
-  }
-};
-</script>
 
 <style>
 /* Your component styles go here */
