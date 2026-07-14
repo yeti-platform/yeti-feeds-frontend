@@ -20,9 +20,9 @@ export async function remove(relationshipId: string): Promise<void> {
   await http.delete(`/graph/${relationshipId}`);
 }
 
-/** Swaps the source and target of a relationship. */
+/** Swaps the source and target of a relationship. (POST, not PATCH.) */
 export async function swap(relationshipId: string): Promise<unknown> {
-  const { data } = await http.patch(`/graph/${relationshipId}/swap`);
+  const { data } = await http.post(`/graph/${relationshipId}/swap`);
   return data;
 }
 

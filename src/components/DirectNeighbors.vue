@@ -162,202 +162,188 @@
   </div>
 </template>
 
-<script lang="ts" setup>
-import axios from "axios";
+<script setup lang="ts">
+import _ from "lodash";
 import moment from "moment";
+import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 
-import { ENTITY_TYPES } from "@/definitions/entityDefinitions";
-import { INDICATOR_TYPES } from "@/definitions/indicatorDefinitions";
-import { DFIQ_TYPES } from "@/definitions/dfiqDefinitions";
-import { OBSERVABLE_TYPES } from "@/definitions/observableDefinitions";
 import EditLink from "@/components/EditLink.vue";
 import YetiMarkdown from "@/components/YetiMarkdown.vue";
+import { DFIQ_TYPES } from "@/definitions/dfiqDefinitions";
+import { ENTITY_TYPES } from "@/definitions/entityDefinitions";
+import { INDICATOR_TYPES } from "@/definitions/indicatorDefinitions";
+import { OBSERVABLE_TYPES } from "@/definitions/observableDefinitions";
+import { eventBus } from "@/plugins/eventbus";
+import * as graphApi from "@/services/graph";
+import type { LooseYetiObject } from "@/services/types";
 
-import _ from "lodash";
-</script>
-
-<script lang="ts">
-export default {
-  name: "DirectNeighbors",
-  props: {
-    id: { type: String, required: true },
-    fields: { type: Array, default: () => ["value", "tags"] },
-    sourceType: { type: String, default: "observable" },
-    targetTypes: { type: Array, default: Array },
-    inlineIcons: { type: Boolean, default: false },
-    graph: { type: String, default: "links" },
-    hops: { type: Number, default: 1 }
-  },
-  components: {
-    EditLink,
-    YetiMarkdown
-  },
-  mounted() {
-    this.$eventBus.on("linkCreated", data => {
-      const souceType = data.source.type;
-      const targetType = data.target.type;
-      if (this.targetTypes.includes(targetType) || this.targetTypes.includes(souceType)) {
-        this.fetchNeighbors({ page: this.page, itemsPerPage: this.perPage, sortBy: this.sortBy });
-      }
-    });
-  },
-  data() {
-    return {
-      tempChains: [],
-      paths: [],
-      processedPaths: [],
-      vertices: {},
-      inlineDescription: true,
-      inlineMarkdown: true,
-      searchFilter: "",
-      page: 1,
-      perPage: 50,
-      total: 0,
-      loading: false,
-      objectTypes: ENTITY_TYPES.concat(INDICATOR_TYPES).concat(DFIQ_TYPES).concat(OBSERVABLE_TYPES),
-      showEditLink: false,
-      headers: [
-        { title: "", key: "direction", width: "10px" },
-        { title: "First linked", key: "created", width: "170px", sortable: true },
-        { title: "Last linked", key: "modified", width: "170px", sortable: true },
-        { title: "Type", key: "relevant_node.type", width: "10px", sortable: false },
-        { title: "Value", key: "relevant_node.value", maxWidth: "700px", sortable: false },
-        { title: "Tags", key: "relevant_node.tags", sortable: false },
-        { title: "Description", key: "description", sortable: false },
-        { title: "Count", key: "count", sortable: true },
-        { title: "", key: "controls", sortable: false }
-      ],
-      sortBy: [{ key: "modified", order: "desc" }]
-    };
-  },
-  methods: {
-    linkUpdateSuccess(edge, updatedEdge) {
-      edge.type = updatedEdge.type;
-      edge.description = updatedEdge.description;
-    },
-    getLabelForField(field) {
-      let fieldName = field.charAt(0).toUpperCase() + field.slice(1);
-      fieldName = fieldName.replace(/_/g, " ");
-      return fieldName;
-    },
-    fetchNeighbors({
-      page,
-      itemsPerPage,
-      sortBy
-    }: {
-      page: number;
-      itemsPerPage: number;
-      sortBy: Array<{ key: string; order: string }>;
-    }) {
-      this.loading = true;
-      let filters = [
-        {
-          key: "type",
-          value: this.searchFilter || "",
-          operator: "=~"
-        },
-        {
-          key: "description",
-          value: this.searchFilter || "",
-          operator: "=~"
-        },
-        {
-          key: "value",
-          value: this.searchFilter || "",
-          operator: "=~"
-        },
-        {
-          key: "name",
-          value: this.searchFilter || "",
-          operator: "=~"
-        },
-        {
-          key: "aliases",
-          value: this.searchFilter || "",
-          operator: "in"
-        }
-      ];
-      let graphSearchRequest = {
-        source: `${this.sourceType}/${this.id}`,
-        target_types: this.targetTypes,
-        graph: this.graph,
-        hops: this.hops,
-        direction: "any",
-        include_original: true,
-        filter: filters,
-        count: itemsPerPage === -1 ? 0 : itemsPerPage,
-        page: page - 1,
-        sorting: sortBy.map(sort => [sort.key, sort.order === "asc"])
-      };
-
-      axios
-        .post(`/api/v2/graph/search`, graphSearchRequest)
-        .then(response => {
-          this.vertices = response.data.vertices;
-          this.paths = response.data.paths;
-          this.processedPaths = response.data.paths.map(path => {
-            let processedPath = path[0];
-            let relevantNode = processedPath.source === this.extendedId ? processedPath.target : processedPath.source;
-            processedPath.relevant_node = this.vertices[relevantNode];
-            return processedPath;
-          });
-          this.total = response.data.total;
-          this.$emit("totalUpdated", this.total);
-        })
-        .catch(error => {
-          console.log(error);
-        })
-        .finally(() => (this.loading = false));
-    },
-    getVerticeFromNode(link) {
-      return link.source === this.extendedId ? this.vertices[link.target] : this.vertices[link.source];
-    },
-    swapLink(edgeId) {
-      axios
-        .post(`/api/v2/graph/${edgeId}/swap`)
-        .then(response => {
-          this.$eventBus.emit("displayMessage", { message: "Link direction swapped succesfully!", status: "success" });
-          this.fetchNeighbors({ page: this.page, itemsPerPage: this.perPage, sortBy: this.sortBy });
-        })
-        .catch(error => {
-          this.error = error;
-          console.log(error);
-        });
-    },
-    unlink(id) {
-      if (!confirm("Are you sure you want to delete this link?")) {
-        return;
-      }
-      axios
-        .delete(`/api/v2/graph/${id}`)
-        .then(() => {
-          this.fetchNeighbors({ page: this.page, itemsPerPage: this.perPage, sortBy: this.sortBy });
-        })
-        .catch(error => {
-          console.log(error);
-        });
-    },
-    getIconForType(type) {
-      return this.objectTypes.find(objectType => objectType.type === type)?.icon;
-    },
-    searchFilterDebounced: _.debounce(function (searchFilter) {
-      this.searchFilter = searchFilter;
-    }, 200)
-  },
-  computed: {
-    extendedId() {
-      return `${this.sourceType}/${this.id}`;
-    }
-  },
-  watch: {
-    id: function () {
-      this.page = 1;
-      this.perPage = 20;
-      this.fetchNeighbors({ page: this.page, itemsPerPage: this.perPage, sortBy: this.sortBy });
-    }
+const props = withDefaults(
+  defineProps<{
+    id: string;
+    fields?: string[];
+    sourceType?: string;
+    targetTypes?: string[];
+    inlineIcons?: boolean;
+    graph?: string;
+    hops?: number;
+  }>(),
+  {
+    fields: () => ["value", "tags"],
+    sourceType: "observable",
+    targetTypes: () => [],
+    inlineIcons: false,
+    graph: "links",
+    hops: 1
   }
-};
+);
+
+const emit = defineEmits<{ totalUpdated: [total: number] }>();
+
+/** A relationship edge, with the node on the other end resolved onto it. */
+type ProcessedPath = LooseYetiObject & { relevant_node: LooseYetiObject };
+
+interface SortItem {
+  key: string;
+  order?: boolean | "asc" | "desc";
+}
+interface TableOptions {
+  page: number;
+  itemsPerPage: number;
+  sortBy: SortItem[];
+}
+
+const objectTypes = ENTITY_TYPES.concat(INDICATOR_TYPES).concat(DFIQ_TYPES).concat(OBSERVABLE_TYPES);
+
+const headers = [
+  { title: "", key: "direction", width: "10px" },
+  { title: "First linked", key: "created", width: "170px", sortable: true },
+  { title: "Last linked", key: "modified", width: "170px", sortable: true },
+  { title: "Type", key: "relevant_node.type", width: "10px", sortable: false },
+  { title: "Value", key: "relevant_node.value", maxWidth: "700px", sortable: false },
+  { title: "Tags", key: "relevant_node.tags", sortable: false },
+  { title: "Description", key: "description", sortable: false },
+  { title: "Count", key: "count", sortable: true },
+  { title: "", key: "controls", sortable: false }
+];
+
+const vertices = ref<Record<string, LooseYetiObject>>({});
+const paths = ref<LooseYetiObject[][]>([]);
+const processedPaths = ref<ProcessedPath[]>([]);
+const tempChains = ref<unknown[]>([]);
+const inlineDescription = ref(true);
+const inlineMarkdown = ref(true);
+const searchFilter = ref("");
+const page = ref(1);
+const perPage = ref(50);
+const total = ref(0);
+const loading = ref(false);
+const showEditLink = ref(false);
+const sortBy = ref<SortItem[]>([{ key: "modified", order: "desc" }]);
+
+const extendedId = computed(() => `${props.sourceType}/${props.id}`);
+
+function getLabelForField(field: string): string {
+  const fieldName = field.charAt(0).toUpperCase() + field.slice(1);
+  return fieldName.replace(/_/g, " ");
+}
+
+function getIconForType(type: string): string | undefined {
+  return objectTypes.find(objectType => objectType.type === type)?.icon;
+}
+
+function getVerticeFromNode(link: LooseYetiObject): LooseYetiObject {
+  return link.source === extendedId.value ? vertices.value[link.target] : vertices.value[link.source];
+}
+
+function linkUpdateSuccess(edge: LooseYetiObject, updatedEdge: LooseYetiObject) {
+  edge.type = updatedEdge.type;
+  edge.description = updatedEdge.description;
+}
+
+async function fetchNeighbors({ page: requestedPage, itemsPerPage, sortBy: requestedSort }: TableOptions) {
+  loading.value = true;
+  // The same term is matched against several fields; the backend ORs them.
+  const filter = ["type", "description", "value", "name"]
+    .map(key => ({ key, value: searchFilter.value || "", operator: "=~" }))
+    .concat([{ key: "aliases", value: searchFilter.value || "", operator: "in" }]);
+
+  try {
+    const response = await graphApi.search({
+      source: extendedId.value,
+      target_types: props.targetTypes,
+      graph: props.graph,
+      hops: props.hops,
+      direction: "any",
+      include_original: true,
+      filter,
+      count: itemsPerPage === -1 ? 0 : itemsPerPage,
+      page: requestedPage - 1,
+      sorting: requestedSort.map(sort => [sort.key, sort.order === "asc"])
+    } as Parameters<typeof graphApi.search>[0]);
+
+    vertices.value = response.vertices as Record<string, LooseYetiObject>;
+    paths.value = response.paths as unknown as LooseYetiObject[][];
+    processedPaths.value = paths.value.map(path => {
+      const edge = path[0];
+      const relevantNode = edge.source === extendedId.value ? edge.target : edge.source;
+      return { ...edge, relevant_node: vertices.value[relevantNode] } as ProcessedPath;
+    });
+    total.value = response.total;
+    emit("totalUpdated", total.value);
+  } finally {
+    loading.value = false;
+  }
+}
+
+function refresh() {
+  fetchNeighbors({ page: page.value, itemsPerPage: perPage.value, sortBy: sortBy.value });
+}
+
+async function swapLink(edgeId: string) {
+  await graphApi.swap(edgeId);
+  eventBus.emit("displayMessage", { message: "Link direction swapped succesfully!", status: "success" });
+  refresh();
+}
+
+async function unlink(id: string) {
+  if (!confirm("Are you sure you want to delete this link?")) {
+    return;
+  }
+  await graphApi.remove(id);
+  refresh();
+}
+
+const searchFilterDebounced = _.debounce((value: string) => {
+  searchFilter.value = value;
+}, 200);
+
+/** Refresh when a link is created elsewhere and it touches one of our types. */
+function onLinkCreated(data: unknown) {
+  const link = data as { source?: { type?: string }; target?: { type?: string } };
+  const sourceType = link.source?.type;
+  const targetType = link.target?.type;
+  if (
+    (targetType && props.targetTypes.includes(targetType)) ||
+    (sourceType && props.targetTypes.includes(sourceType))
+  ) {
+    refresh();
+  }
+}
+
+onMounted(() => eventBus.on("linkCreated", onLinkCreated));
+// The old Options-API version never removed this listener.
+onUnmounted(() => eventBus.off("linkCreated", onLinkCreated));
+
+watch(
+  () => props.id,
+  () => {
+    page.value = 1;
+    perPage.value = 20;
+    refresh();
+  }
+);
 </script>
+
 
 <style>
 .short-links {
