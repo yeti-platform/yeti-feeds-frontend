@@ -1,7 +1,11 @@
 import http from "@/services/http";
 import type { TemplateSearchRequest, TemplateSearchResponse } from "@/services/types";
 
-export async function search(request: TemplateSearchRequest): Promise<TemplateSearchResponse> {
+/**
+ * Every field has a server-side default, so callers may pass only what they
+ * care about (openapi-typescript marks defaulted fields as required).
+ */
+export async function search(request: Partial<TemplateSearchRequest> = {}): Promise<TemplateSearchResponse> {
   const { data } = await http.post<TemplateSearchResponse>("/templates/search", request);
   return data;
 }

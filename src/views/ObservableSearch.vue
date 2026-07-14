@@ -7,9 +7,9 @@
       :headers="headers"
       density="compact"
       :items="items"
-      @update:options="loadOjects"
+      @update:options="loadObjects"
       :show-select="showSelect"
-      :item-value="item => item.id"
+      :item-value="(item: Observable) => item.id"
       :items-per-page-options="[
         { value: 10, title: '10' },
         { value: 25, title: '25' },
@@ -32,6 +32,7 @@
       <template v-slot:item.tags="{ item }">
         <v-chip
           v-for="tag in item.tags"
+          :key="tag.name"
           :color="tag.fresh ? 'blue ' : 'red'"
           :text="tag.name"
           class="mx-1"
@@ -40,14 +41,7 @@
         ></v-chip>
       </template>
       <template v-slot:item.context="{ item }">
-        <v-chip
-          label
-          color="green"
-          size="small"
-          class="mx-1"
-          v-for="source in new Set(item.context.map(c => c.source))"
-          v-bind:key="source"
-        >
+        <v-chip label color="green" size="small" class="mx-1" v-for="source in contextSources(item)" :key="source">
           {{ source }}
         </v-chip>
       </template>
@@ -62,8 +56,8 @@
         label="Search observables ↵"
         density="compact"
         class="mt-2"
-        @click:prepend-inner="loadOjects({ page: 1, itemsPerPage: perPage, sortBy: sortBy })"
-        @keyup.enter="loadOjects({ page: 1, itemsPerPage: perPage, sortBy: sortBy })"
+        @click:prepend-inner="searchFromDrawer"
+        @keyup.enter="searchFromDrawer"
       />
     </v-list-item>
     <v-list-item class="mb-4">
@@ -71,7 +65,7 @@
         New Observable
         <v-menu activator="parent">
           <v-list>
-            <v-dialog v-for="typeDef in observableTypes" :width="editWidth" :fullscreen="fullScreenEdit">
+            <v-dialog v-for="typeDef in observableTypes" :key="typeDef.type" :width="editWidth" :fullscreen="fullScreenEdit">
               <template v-slot:activator="{ props }">
                 <v-list-item v-bind="props"> {{ typeDef.name }} </v-list-item>
               </template>
@@ -116,160 +110,142 @@
   </v-navigation-drawer>
 </template>
 
-<script lang="ts" setup>
-import axios from "axios";
+<script setup lang="ts">
 import moment from "moment";
-import { OBSERVABLE_TYPES } from "@/definitions/observableDefinitions";
+import { onMounted, ref } from "vue";
+
 import NewObject from "@/components/NewObject.vue";
+import { OBSERVABLE_TYPES } from "@/definitions/observableDefinitions";
+import * as observablesApi from "@/services/observables";
+import * as templatesApi from "@/services/templates";
+import type { Observable, ObservableSearchRequest, Template } from "@/services/types";
 
-import _ from "lodash";
-</script>
+/** Vuetify's v-data-table-server emits these on @update:options. */
+interface SortItem {
+  key: string;
+  order?: boolean | "asc" | "desc";
+}
+interface TableOptions {
+  page: number;
+  itemsPerPage: number;
+  sortBy: SortItem[];
+}
 
-<script lang="ts">
-export default {
-  data() {
-    return {
-      items: [],
-      observableTypes: OBSERVABLE_TYPES,
-      headers: [
-        { title: "Created on", key: "created", width: "200px", sortable: true },
-        { title: "Value", key: "value", sortable: true },
-        { title: "Tags", key: "tags", width: "300px", sortable: false },
-        { title: "Context", key: "context", width: "300px", sortable: false }
-      ],
-      page: 1,
-      perPage: 25,
-      total: 0,
-      searchQuery: "",
-      loading: false,
-      showSelect: false,
-      selectedObservables: [],
-      bulkTags: [],
-      exportTemplates: [],
-      selectedExportTemplate: null,
-      fullScreenEdit: false,
-      editWidth: "50%",
-      newDialogActive: false,
-      sortBy: [{ key: "created", order: "desc" }]
-    };
-  },
-  methods: {
-    extractParamsFromSearchQuery(searchQuery, defaultKey) {
-      const pattern =
-        /(?<key>\w+)=(?<keyed_terms>[^\s,]+(?:,[^\s,]+)*)|(?<isolated_term>[^"\s]+)|"(?<quoted_term>[^"]+)"/g;
+const observableTypes = OBSERVABLE_TYPES;
+const headers = [
+  { title: "Created on", key: "created", width: "200px", sortable: true },
+  { title: "Value", key: "value", sortable: true },
+  { title: "Tags", key: "tags", width: "300px", sortable: false },
+  { title: "Context", key: "context", width: "300px", sortable: false }
+];
 
-      let resultObj: Record<string, string | string[]> = {};
-      let match;
+const items = ref<Observable[]>([]);
+const total = ref(0);
+const page = ref(1);
+const perPage = ref(25);
+const loading = ref(false);
+const searchQuery = ref("");
+const showSelect = ref(false);
+const selectedObservables = ref<string[]>([]);
+const bulkTags = ref<string[]>([]);
+const exportTemplates = ref<Template[]>([]);
+const selectedExportTemplate = ref<string | null>(null);
+const fullScreenEdit = ref(false);
+const editWidth = ref("50%");
+const sortBy = ref<SortItem[]>([{ key: "created", order: "desc" }]);
 
-      while ((match = pattern.exec(searchQuery)) !== null) {
-        let isolatedTerm = match.groups.isolated_term;
-        let quotedTerm = match.groups.quoted_term;
-        let key = match.groups.key;
-        let keyedTerms = match.groups.keyed_terms;
+/** The distinct context sources on an observable, for the chips column. */
+function contextSources(observable: Observable): string[] {
+  const sources = observable.context.map(entry => String((entry as Record<string, unknown>).source));
+  return [...new Set(sources)];
+}
 
-        let values;
-        if (key) {
-          if (key.startsWith("in__") || key.endsWith("__in") || key == "tags" || keyedTerms.includes(",")) {
-            values = keyedTerms.split(",").map(term => term.trim());
-          } else {
-            values = keyedTerms;
-          }
-          resultObj[key] = values;
-        }
+/**
+ * Turns the free-text search box into a query object.
+ * `key=a,b` becomes a list; a bare or quoted term searches `defaultKey`.
+ */
+function extractParamsFromSearchQuery(searchTerm: string, defaultKey: string): ObservableSearchRequest["query"] {
+  const pattern = /(?<key>\w+)=(?<keyed_terms>[^\s,]+(?:,[^\s,]+)*)|(?<isolated_term>[^"\s]+)|"(?<quoted_term>[^"]+)"/g;
+  const result: ObservableSearchRequest["query"] = {};
+  let match: RegExpExecArray | null;
 
-        // Logging isolated and quoted terms (optional)
-        if (isolatedTerm) {
-          resultObj[defaultKey] = isolatedTerm;
-        }
-        if (quotedTerm) {
-          resultObj[defaultKey] = quotedTerm;
-        }
-      }
-      return resultObj;
-    },
-    loadOjects({
-      page,
-      itemsPerPage,
-      sortBy
-    }: {
-      page: number;
-      itemsPerPage: number;
-      sortBy: Array<{ key: string; order: string }>;
-    }) {
-      this.loading = true;
-      let params = {
-        page: page - 1,
-        count: itemsPerPage,
-        query: this.extractParamsFromSearchQuery(this.searchQuery, "value"),
-        sorting: sortBy.map(sort => [sort.key, sort.order === "asc"])
-      };
-      axios.post("/api/v2/observables/search", params).then(response => {
-        this.items = response.data.observables;
-        this.total = response.data.total;
-        this.loading = false;
-      });
-    },
-    loadExportTemplates() {
-      axios
-        .post("/api/v2/templates/search", { name: "" })
-        .then(response => {
-          this.exportTemplates = response.data.templates;
-        })
-        .catch(error => {});
-    },
-    changeTags() {
-      var params = {
-        tags: this.bulkTags,
-        ids: this.selectedObservables,
-        strict: false
-      };
-      axios
-        .post(`/api/v2/observables/tag`, params)
-        .then(() => {
-          this.loadOjects({ page: this.page, itemsPerPage: this.perPage, sortBy: [] });
-          this.bulkTags = [];
-        })
-        .catch(error => {
-          return console.log(error);
-        });
-    },
-    downloadExport() {
-      var params = {
-        template_id: this.selectedExportTemplate,
-        observable_ids: [],
-        search_query: ""
-      };
-      if (this.selectedObservables.length) {
-        params.observable_ids = this.selectedObservables;
-      } else {
-        params.search_query = this.searchQuery;
-      }
+  while ((match = pattern.exec(searchTerm)) !== null) {
+    const groups = match.groups ?? {};
+    const { key, keyed_terms: keyedTerms, isolated_term: isolatedTerm, quoted_term: quotedTerm } = groups;
 
-      axios
-        .post("/api/v2/templates/render", params)
-        .then(response => {
-          var fileURL = window.URL.createObjectURL(new Blob([response.data]));
-          var fileLink = document.createElement("a");
-          var fileName = response.headers["content-disposition"].split("filename=")[1];
-          fileLink.href = fileURL;
-          fileLink.setAttribute("download", fileName);
-          document.body.appendChild(fileLink);
-
-          fileLink.click();
-        })
-        .catch(error => {
-          console.log(error);
-        });
-    },
-    toggleNewObjectFullscreen(fullscreen: boolean) {
-      this.fullScreenEdit = !this.fullScreenEdit;
-      this.editWidth = fullscreen ? "100%" : "50%";
+    if (key && keyedTerms) {
+      const isList = key.startsWith("in__") || key.endsWith("__in") || key === "tags" || keyedTerms.includes(",");
+      result[key] = isList ? keyedTerms.split(",").map(term => term.trim()) : keyedTerms;
     }
-  },
-  mounted() {
-    this.loadExportTemplates();
+    if (isolatedTerm) {
+      result[defaultKey] = isolatedTerm;
+    }
+    if (quotedTerm) {
+      result[defaultKey] = quotedTerm;
+    }
   }
-};
+  return result;
+}
+
+async function loadObjects({ page: requestedPage, itemsPerPage, sortBy: requestedSort }: TableOptions) {
+  loading.value = true;
+  try {
+    const response = await observablesApi.search({
+      page: requestedPage - 1,
+      count: itemsPerPage,
+      query: extractParamsFromSearchQuery(searchQuery.value, "value"),
+      sorting: requestedSort.map(sort => [sort.key, sort.order === "asc"])
+    });
+    items.value = response.observables;
+    total.value = response.total;
+  } finally {
+    // Errors already surfaced by the http interceptor's snackbar.
+    loading.value = false;
+  }
+}
+
+function searchFromDrawer() {
+  loadObjects({ page: 1, itemsPerPage: perPage.value, sortBy: sortBy.value });
+}
+
+async function loadExportTemplates() {
+  const response = await templatesApi.search({ name: "" });
+  exportTemplates.value = response.templates;
+}
+
+async function changeTags() {
+  await observablesApi.tag({
+    tags: bulkTags.value,
+    ids: selectedObservables.value,
+    strict: false
+  });
+  bulkTags.value = [];
+  await loadObjects({ page: page.value, itemsPerPage: perPage.value, sortBy: [] });
+}
+
+async function downloadExport() {
+  const useSelection = selectedObservables.value.length > 0;
+  const response = await templatesApi.render({
+    template_id: selectedExportTemplate.value,
+    observable_ids: useSelection ? selectedObservables.value : [],
+    search_query: useSelection ? "" : searchQuery.value
+  });
+
+  const fileUrl = window.URL.createObjectURL(new Blob([response.data]));
+  const fileName = String(response.headers["content-disposition"]).split("filename=")[1];
+  const fileLink = document.createElement("a");
+  fileLink.href = fileUrl;
+  fileLink.setAttribute("download", fileName);
+  document.body.appendChild(fileLink);
+  fileLink.click();
+}
+
+function toggleNewObjectFullscreen(fullscreen: boolean) {
+  fullScreenEdit.value = !fullScreenEdit.value;
+  editWidth.value = fullscreen ? "100%" : "50%";
+}
+
+onMounted(loadExportTemplates);
 </script>
 
 <style>
