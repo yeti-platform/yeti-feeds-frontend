@@ -19,6 +19,21 @@ export async function details(rootType: DetailRootType, id: string): Promise<Obj
 }
 
 /**
+ * Searches one object family by its endpoint segment ("entities", "indicators",
+ * "dfiq", ...), for the generic ObjectList.
+ *
+ * Each family returns its results under its own key (entities / indicators /
+ * dfiq / observables), so this normalises them to {items, total}.
+ */
+export async function searchByEndpoint(
+  endpoint: string,
+  request: Record<string, unknown>
+): Promise<{ items: LooseYetiObject[]; total: number }> {
+  const { data } = await http.post<Record<string, any>>(`/${endpoint}/search`, request);
+  return { items: data[endpoint] ?? [], total: data.total ?? 0 };
+}
+
+/**
  * Replaces an object's whole context.
  *
  * `path` is the already-built "<endpoint>/<id>" segment (e.g. "observables/123"),
