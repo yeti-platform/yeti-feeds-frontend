@@ -3,7 +3,7 @@
     <v-tabs v-model="activeTab" color="primary">
       <v-tab
         :value="typeDef.type"
-        v-for="typeDef in displayedindicatorTypes"
+        v-for="typeDef in displayedIndicatorTypes"
         @click="autoTab = false"
         :href="'#' + typeDef.type"
       >
@@ -62,96 +62,28 @@
   </v-navigation-drawer>
 </template>
 
-<script lang="ts" setup>
-import { INDICATOR_TYPES } from "@/definitions/indicatorDefinitions";
-import ObjectList from "@/components/ObjectList.vue";
+<script setup lang="ts">
 import NewObject from "@/components/NewObject.vue";
+import ObjectList from "@/components/ObjectList.vue";
+import { useTypeTabs } from "@/composables/useTypeTabs";
+import { INDICATOR_TYPES } from "@/definitions/indicatorDefinitions";
+import { ref } from "vue";
 
-import _ from "lodash";
-</script>
+const indicatorTypes = INDICATOR_TYPES;
 
-<script lang="ts">
-export default {
-  name: "indicatorSearch",
-  components: {
-    ObjectList,
-    NewObject
-  },
-  data() {
-    return {
-      searchQuery: "",
-      searchQueryLocal: "",
-      indicatorTypes: INDICATOR_TYPES,
-      indicatorCount: INDICATOR_TYPES.reduce((acc, cur) => {
-        acc[cur.type] = 0;
-        return acc;
-      }, {}),
-      activeTab: "",
-      autoTab: true,
-      fullScreenEdit: false,
-      editWidth: "75%",
-      newDialogActive: false
-    };
-  },
-  methods: {
-    countIndicators(type, count) {
-      this.indicatorCount[type] = count;
-      if (!this.$route.hash && this.autoTab) {
-        this.navigateToFirstPopulatedTab();
-      }
-    },
-    navigateToFirstPopulatedTab() {
-      for (const typeDef of this.indicatorTypes) {
-        if (this.indicatorCount[typeDef.type] > 0) {
-          this.activeTab = typeDef.type;
-          break;
-        }
-      }
-    },
-    getFieldForType(typeName) {
-      let fields = this.indicatorTypes.find(type => type.type === typeName).fields.filter(field => field.displayList);
-      return fields.map(field => {
-        return {
-          title: field.label,
-          key: field.field,
-          width: field.width,
-          maxWidth: field.maxWidth,
-          sortable: field.sortable || false
-        };
-      });
-    },
-    getAliasesForType(typeName) {
-      let typeDef = this.indicatorTypes.find(type => type.type === typeName);
-      return typeDef.filterAliases.map(alias => {
-        return [alias, typeDef.fields.find(field => field.field === alias).type];
-      });
-    },
-    toggleNewObjectFullscreen(fullscreen: boolean) {
-      this.fullScreenEdit = !this.fullScreenEdit;
-      this.editWidth = fullscreen ? "100%" : "75%";
-    }
-  },
-  computed: {
-    displayedindicatorTypes() {
-      return this.indicatorTypes.filter(type => this.indicatorCount[type.type] > 0);
-    },
-    activeHash() {
-      return this.$route.hash;
-    }
-  },
-  mounted() {
-    if (this.activeHash) {
-      this.autoTab = false;
-      this.activeTab = this.activeHash.replace("#", "");
-    }
-  },
-  watch: {
-    activeHash() {
-      this.activeTab = this.activeHash.replace("#", "");
-      if (this.activeTab === "") {
-        this.navigateToFirstPopulatedTab();
-      }
-    }
-  }
-};
+const searchQuery = ref("");
+const searchQueryLocal = ref("");
+
+const {
+  counts: indicatorCount,
+  activeTab,
+  autoTab,
+  fullScreenEdit,
+  editWidth,
+  displayedTypes: displayedIndicatorTypes,
+  countObjects: countIndicators,
+  getFieldForType,
+  getAliasesForType,
+  toggleNewObjectFullscreen
+} = useTypeTabs(indicatorTypes);
 </script>

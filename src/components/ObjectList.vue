@@ -13,7 +13,7 @@
       :headers="headers"
       density="compact"
       :items="items"
-      @update:options="loadOjects"
+      @update:options="loadObjects"
       :search="searchQuery"
       :item-value="item => item.id"
       hover
@@ -78,125 +78,111 @@
   </v-sheet>
 </template>
 
-<script lang="ts" setup>
-import axios from "axios";
-
+<script setup lang="ts">
 import moment from "moment";
-</script>
+import { ref } from "vue";
 
-<script lang="ts">
-export default {
-  name: "objectList",
-  props: {
-    searchQuery: {
-      type: String,
-      default: ""
-    },
-    searchType: {
-      type: String,
-      default: "entity"
-    },
-    searchSubtype: {
-      type: String,
-      default: ""
-    },
-    headers: {
-      type: Array,
-      default: () => [
-        { title: "Name", key: "name" },
-        { title: "Tags", key: "tags" },
-        { title: "Created on", key: "created", width: "200px" }
-      ]
-    },
-    filterAliases: {
-      type: Array,
-      default: () => []
-    },
-    checkable: {
-      type: Boolean,
-      default: false
+import * as objectsApi from "@/services/objects";
+import type { LooseYetiObject } from "@/services/types";
+
+const props = withDefaults(
+  defineProps<{
+    searchQuery?: string;
+    /** The endpoint segment to search: "entities" | "indicators" | "dfiq" | ... */
+    searchType?: string;
+    searchSubtype?: string;
+    headers?: Array<Record<string, unknown>>;
+    /** [alias, fieldType] pairs the backend widens the search with. */
+    filterAliases?: Array<[string, string]>;
+    checkable?: boolean;
+  }>(),
+  {
+    searchQuery: "",
+    searchType: "entity",
+    searchSubtype: "",
+    headers: () => [
+      { title: "Name", key: "name" },
+      { title: "Tags", key: "tags" },
+      { title: "Created on", key: "created", width: "200px" }
+    ],
+    filterAliases: () => [],
+    checkable: false
+  }
+);
+
+const emit = defineEmits<{ totalUpdated: [total: number] }>();
+
+interface SortItem {
+  key: string;
+  order?: boolean | "asc" | "desc";
+}
+interface TableOptions {
+  page: number;
+  itemsPerPage: number;
+  sortBy: SortItem[];
+}
+
+const items = ref<LooseYetiObject[]>([]);
+const page = ref(1);
+const perPage = ref(20);
+const total = ref(0);
+const loading = ref(true);
+const sortBy = ref<SortItem[]>([{ key: "name", order: "asc" }]);
+
+/**
+ * Turns the free-text search box into a query object.
+ * `key=a,b` becomes a list; a bare or quoted term searches `defaultKey`.
+ */
+function extractParamsFromSearchQuery(searchTerm: string, defaultKey: string): Record<string, string | string[]> {
+  const pattern =
+    /(?<key>\w+[<>~]?)=(?<keyed_terms>[^\s,]+(?:,[^\s,]+)*)|(?<isolated_term>[^"\s]+)|"(?<quoted_term>[^"]+)"/g;
+  const result: Record<string, string | string[]> = {};
+  let match: RegExpExecArray | null;
+
+  while ((match = pattern.exec(searchTerm)) !== null) {
+    const groups = match.groups ?? {};
+    const { key, keyed_terms: keyedTerms, isolated_term: isolatedTerm, quoted_term: quotedTerm } = groups;
+
+    if (key && keyedTerms) {
+      const isList = key.startsWith("in__") || key.endsWith("__in") || key === "tags" || keyedTerms.includes(",");
+      result[key] = isList ? keyedTerms.split(",").map(term => term.trim()) : keyedTerms;
     }
-  },
-  data() {
-    return {
-      items: [],
-      page: 1,
-      perPage: 20,
-      total: 0,
-      sortBy: [{ key: "name", order: "asc" }],
-      loading: true
-    };
-  },
-  methods: {
-    extractParamsFromSearchQuery(searchQuery, defaultKey) {
-      const pattern =
-        /(?<key>\w+[<>~]?)=(?<keyed_terms>[^\s,]+(?:,[^\s,]+)*)|(?<isolated_term>[^"\s]+)|"(?<quoted_term>[^"]+)"/g;
-
-      let resultObj: Record<string, string | string[]> = {};
-      let match;
-
-      while ((match = pattern.exec(searchQuery)) !== null) {
-        let isolatedTerm = match.groups.isolated_term;
-        let quotedTerm = match.groups.quoted_term;
-        let key = match.groups.key;
-        let keyedTerms = match.groups.keyed_terms;
-
-        let values;
-        if (key) {
-          if (key.startsWith("in__") || key.endsWith("__in") || key == "tags" || keyedTerms.includes(",")) {
-            values = keyedTerms.split(",").map(term => term.trim());
-          } else {
-            values = keyedTerms;
-          }
-          resultObj[key] = values;
-        }
-
-        // Logging isolated and quoted terms (optional)
-        if (isolatedTerm) {
-          resultObj[defaultKey] = isolatedTerm;
-        }
-        if (quotedTerm) {
-          resultObj[defaultKey] = quotedTerm;
-        }
-      }
-      return resultObj;
-    },
-    loadOjects({
-      page,
-      itemsPerPage,
-      sortBy
-    }: {
-      page: number;
-      itemsPerPage: number;
-      sortBy: Array<{ key: string; order: string }>;
-    }) {
-      this.loading = true;
-      let params = {
-        page: page - 1,
-        count: itemsPerPage === -1 ? 0 : itemsPerPage,
-        query: this.extractParamsFromSearchQuery(this.searchQuery, "name"),
-        filter_aliases: this.filterAliases,
-        sorting: sortBy.map(sort => [sort.key, sort.order === "asc"])
-      };
-      if (this.searchSubtype != "") {
-        params["type"] = this.searchSubtype;
-      }
-      axios
-        .post(`/api/v2/${this.searchType}/search`, params)
-        .then(response => {
-          this.items = response.data[this.searchType];
-          if (response.data.total != this.total) {
-            this.total = response.data.total;
-            this.$emit("totalUpdated", this.total);
-          }
-        })
-        .finally(() => {
-          this.loading = false;
-        });
+    if (isolatedTerm) {
+      result[defaultKey] = isolatedTerm;
+    }
+    if (quotedTerm) {
+      result[defaultKey] = quotedTerm;
     }
   }
-};
+  return result;
+}
+
+async function loadObjects({ page: requestedPage, itemsPerPage, sortBy: requestedSort }: TableOptions) {
+  loading.value = true;
+  const request: Record<string, unknown> = {
+    page: requestedPage - 1,
+    count: itemsPerPage === -1 ? 0 : itemsPerPage,
+    query: extractParamsFromSearchQuery(props.searchQuery, "name"),
+    filter_aliases: props.filterAliases,
+    sorting: requestedSort.map(sort => [sort.key, sort.order === "asc"])
+  };
+  if (props.searchSubtype !== "") {
+    request.type = props.searchSubtype;
+  }
+
+  try {
+    const response = await objectsApi.searchByEndpoint(props.searchType, request);
+    items.value = response.items;
+    if (response.total !== total.value) {
+      total.value = response.total;
+      emit("totalUpdated", total.value);
+    }
+  } finally {
+    loading.value = false;
+  }
+}
 </script>
+
 
 <style>
 .short-links {

@@ -63,96 +63,28 @@
   </v-navigation-drawer>
 </template>
 
-<script lang="ts" setup>
-import { DFIQ_TYPES } from "@/definitions/dfiqDefinitions";
-
-import EditDFIQObject from "@/components/DFIQ/EditDFIQObject.vue";
+<script setup lang="ts">
+import NewObject from "@/components/NewObject.vue";
 import ObjectList from "@/components/ObjectList.vue";
+import { useTypeTabs } from "@/composables/useTypeTabs";
+import { DFIQ_TYPES } from "@/definitions/dfiqDefinitions";
+import { ref } from "vue";
 
-import _ from "lodash";
-</script>
+const DFIQTypes = DFIQ_TYPES;
 
-<script lang="ts">
-export default {
-  name: "DFIQSearch",
-  components: {
-    ObjectList
-  },
-  data() {
-    return {
-      searchQuery: "",
-      searchQueryLocal: "",
-      DFIQTypes: DFIQ_TYPES,
-      DFIQCount: DFIQ_TYPES.reduce((acc, cur) => {
-        acc[cur.type] = 0;
-        return acc;
-      }, {}),
-      activeTab: "",
-      autoTab: true,
-      fullScreenEdit: false,
-      editWidth: "75%",
-      newDialogActive: false
-    };
-  },
-  methods: {
-    countDFIQ(type, count) {
-      this.DFIQCount[type] = count;
-      if (!this.$route.hash && this.autoTab) {
-        this.navigateToFirstPopulatedTab();
-      }
-    },
-    navigateToFirstPopulatedTab() {
-      for (const typeDef of this.DFIQTypes) {
-        if (this.DFIQCount[typeDef.type] > 0) {
-          this.activeTab = typeDef.type;
-          break;
-        }
-      }
-    },
-    getFieldForType(typeName) {
-      let fields = this.DFIQTypes.find(type => type.type === typeName).fields.filter(field => field.displayList);
-      return fields.map(field => {
-        return {
-          title: field.label,
-          key: field.field,
-          width: field.width,
-          maxWidth: field.maxWidth,
-          sortable: field.sortable || false
-        };
-      });
-    },
-    getAliasesForType(typeName) {
-      let typeDef = this.DFIQTypes.find(type => type.type === typeName);
-      return typeDef.filterAliases.map(alias => {
-        return [alias, typeDef.fields.find(field => field.field === alias).type];
-      });
-    },
-    toggleNewObjectFullscreen(fullscreen: boolean) {
-      this.fullScreenEdit = !this.fullScreenEdit;
-      this.editWidth = fullscreen ? "100%" : "75%";
-    }
-  },
-  computed: {
-    displayedDFIQTypes() {
-      return this.DFIQTypes.filter(type => this.DFIQCount[type.type] > 0);
-    },
-    activeHash() {
-      return this.$route.hash;
-    }
-  },
-  mounted() {
-    if (this.activeHash) {
-      this.autoTab = false;
-      this.activeTab = this.activeHash.replace("#", "");
-    }
-  },
-  watch: {
-    activeHash() {
-      this.activeTab = this.activeHash.replace("#", "");
-      if (this.activeTab === "") {
-        this.navigateToFirstPopulatedTab();
-      }
-    }
-  }
-};
+const searchQuery = ref("");
+const searchQueryLocal = ref("");
+
+const {
+  counts: DFIQCount,
+  activeTab,
+  autoTab,
+  fullScreenEdit,
+  editWidth,
+  displayedTypes: displayedDFIQTypes,
+  countObjects: countDFIQ,
+  getFieldForType,
+  getAliasesForType,
+  toggleNewObjectFullscreen
+} = useTypeTabs(DFIQTypes);
 </script>
