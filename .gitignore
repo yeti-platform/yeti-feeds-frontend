@@ -25,3 +25,6 @@ pnpm-debug.log*
 tsconfig.tsbuildinfo
 test-results/
 playwright-report/
+
+# transient input for `npm run generate-api`
+openapi.json
