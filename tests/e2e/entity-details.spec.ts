@@ -126,6 +126,72 @@ test.describe('Entity Details', () => {
     await expect(page.locator('tbody tr').filter({ hasText: '10.0.0.1' })).toBeVisible();
   });
 
+  test('swaps and removes a link from the related-objects table', async ({ page }) => {
+    const swapRequests: Array<{ method: string; url: string }> = [];
+    const deleteRequests: Array<{ method: string; url: string }> = [];
+
+    await page.route('**/api/v2/graph/search', async route => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          vertices: {
+            'observables/456': {
+              id: '456',
+              value: '10.0.0.1',
+              type: 'ipv4',
+              root_type: 'observable',
+              tags: []
+            }
+          },
+          paths: [
+            [
+              {
+                id: 'edge1',
+                source: 'entities/123',
+                target: 'observables/456',
+                type: 'resolves',
+                description: 'a link',
+                created: '2026-03-23T10:00:00Z',
+                modified: '2026-03-23T10:00:00Z',
+                count: 1
+              }
+            ]
+          ],
+          total: 1
+        })
+      });
+    });
+
+    // The swap endpoint is POST (not PATCH) — assert the verb too.
+    await page.route('**/api/v2/graph/edge1/swap', async route => {
+      swapRequests.push({ method: route.request().method(), url: route.request().url() });
+      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({}) });
+    });
+
+    await page.route('**/api/v2/graph/edge1', async route => {
+      deleteRequests.push({ method: route.request().method(), url: route.request().url() });
+      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({}) });
+    });
+
+    await page.goto('/entities/123');
+
+    // ObjectDetails renders one DirectNeighbors table per tab, so scope to the
+    // visible (active) one.
+    await expect(page.locator('tbody tr:visible').filter({ hasText: '10.0.0.1' }).first()).toBeVisible();
+
+    // Swap the link direction.
+    await page.locator('button:visible:has(.mdi-swap-horizontal)').first().click();
+    await expect.poll(() => swapRequests.length).toBe(1);
+    expect(swapRequests[0].method).toBe('POST');
+
+    // Unlink (the component asks for confirmation first).
+    page.once('dialog', dialog => dialog.accept());
+    await page.locator('button:visible:has(.mdi-link-off)').first().click();
+    await expect.poll(() => deleteRequests.length).toBe(1);
+    expect(deleteRequests[0].method).toBe('DELETE');
+  });
+
   test('saves tags on the entity', async ({ page }) => {
     const tagRequests: Array<Record<string, unknown>> = [];
 
