@@ -100,6 +100,85 @@ test.describe("Observable Details", () => {
     });
   });
 
+  test("shows the audit timeline in its dialog", async ({ page }) => {
+    await page.route("**/api/v2/audit/timeline/**", async route => {
+      // The route is /audit/timeline/{id:path}, so the id is the extended id.
+      expect(route.request().url()).toContain("/audit/timeline/observables/789");
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify([
+          [{ timestamp: "2026-03-23T10:00:00Z", actor: "alice", action: "create", details: {} }],
+          1
+        ])
+      });
+    });
+
+    await page.goto("/observables/789");
+    await expect(page.getByText("evil.example.com").first()).toBeVisible();
+
+    await page.getByRole("button", { name: "timeline" }).click();
+    await expect(page.getByText("alice").first()).toBeVisible();
+  });
+
+  test("renders and updates the object context", async ({ page }) => {
+    const contextPuts: Array<Record<string, unknown>> = [];
+
+    // Give this observable some context so ObjectContext has a tree to render.
+    await page.route("**/api/v2/observables/789", async route => {
+      if (route.request().method() !== "GET") {
+        await route.fallback();
+        return;
+      }
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          id: "789",
+          value: "evil.example.com",
+          type: "hostname",
+          root_type: "observable",
+          tags: [],
+          context: [{ source: "VirusTotal", malicious: 7 }],
+          acls: {},
+          created: "2026-03-23T10:00:00Z",
+          modified: "2026-03-23T10:00:00Z"
+        })
+      });
+    });
+
+    await page.route("**/api/v2/observables/789/context", async route => {
+      contextPuts.push(route.request().postDataJSON());
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ id: "789", context: [{ source: "VirusTotal", malicious: 9 }] })
+      });
+    });
+
+    await page.goto("/observables/789");
+
+    // The source of each context entry is shown as a chip.
+    await expect(page.getByText("VirusTotal").first()).toBeVisible();
+
+    // The context edit button is display:none until its title is hovered, and
+    // the page has another "Edit" button (for the object itself) — so scope to
+    // the class, and force the click so the actionability wait doesn't race the
+    // hover state.
+    await page.locator(".edit-ctx-title").first().hover();
+    await page.locator(".edit-ctx-btn").first().click({ force: true });
+
+    const dialog = page.locator(".v-overlay--active");
+    const editor = dialog.locator(".yeti-code textarea").first();
+    await editor.fill(JSON.stringify([{ source: "VirusTotal", malicious: 9 }]));
+    // Scope to the dialog: the Tags card has its own "Save", and it sits behind
+    // the modal overlay while this is open.
+    await dialog.getByRole("button", { name: "Save" }).click();
+
+    await expect.poll(() => contextPuts.length).toBe(1);
+    expect(contextPuts[0].context).toEqual([{ source: "VirusTotal", malicious: 9 }]);
+  });
+
   test("saves tags on the observable", async ({ page }) => {
     const tagRequests: Array<Record<string, unknown>> = [];
 
