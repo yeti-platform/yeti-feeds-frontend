@@ -282,7 +282,6 @@ import GraphObjects from "@/components/GraphObjects.vue";
 import LinkObject from "@/components/LinkObject.vue";
 import LinkObservables from "@/components/LinkObservables.vue";
 import ObjectContext from "@/components/ObjectContext.vue";
-import RelatedObjects from "@/components/RelatedObjects.vue";
 import Timeline from "@/components/Timeline.vue";
 import YetiMarkdown from "@/components/YetiMarkdown.vue";
 
