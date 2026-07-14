@@ -25,27 +25,6 @@ export const useUserStore = defineStore("user", {
       window.location.href = authApi.OIDC_LOGIN_URL;
     },
 
-    /** Logs in through an OIDC popup, polling /auth/me until the cookie lands. */
-    async OIDCAsyncRefresh(): Promise<User> {
-      const popup = window.open(authApi.OIDC_LOGIN_URL, "OIDC Login", "width=800,height=600");
-      return new Promise((resolve, reject) => {
-        const timer = setInterval(async () => {
-          try {
-            const user = await this.userCheck();
-            popup?.close();
-            clearInterval(timer);
-            resolve(user);
-          } catch (error) {
-            // Not authenticated *yet* — keep polling until the popup is closed.
-            if (popup?.closed) {
-              clearInterval(timer);
-              reject(error);
-            }
-          }
-        }, 2000);
-      });
-    },
-
     /** Resolves with the logged-in user; rejects (and clears it) if there is none. */
     async userCheck(): Promise<User> {
       try {
