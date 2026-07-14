@@ -1,5 +1,5 @@
 import http from "@/services/http";
-import type { DetailRootType, ObjectDetail, RootType, TaggableRootType } from "@/services/types";
+import type { DetailRootType, LooseYetiObject, ObjectDetail, RootType, TaggableRootType } from "@/services/types";
 
 /**
  * Generic access to the object endpoints, for the components that work across
@@ -15,6 +15,17 @@ export const ENDPOINTS: Record<RootType, string> = {
 
 export async function details(rootType: DetailRootType, id: string): Promise<ObjectDetail> {
   const { data } = await http.get<ObjectDetail>(`/${ENDPOINTS[rootType]}/${id}`);
+  return data;
+}
+
+/**
+ * Replaces an object's whole context.
+ *
+ * `path` is the already-built "<endpoint>/<id>" segment (e.g. "observables/123"),
+ * because ObjectContext is handed one by whichever details view renders it.
+ */
+export async function replaceContextAtPath(path: string, context: unknown[]): Promise<LooseYetiObject> {
+  const { data } = await http.put<LooseYetiObject>(`/${path}/context`, { context });
   return data;
 }
 

@@ -26,62 +26,51 @@
   </v-card-actions>
 </template>
 
-<script>
-import axios from "axios";
+<script setup lang="ts">
 import moment from "moment";
+import { onMounted, ref } from "vue";
 
-export default {
-  name: "Timeline",
-  props: {
-    object: {
-      type: Object,
-      default: () => {}
-    },
-    isActive: {
-      type: Object,
-      default: () => {}
-    }
+import * as auditApi from "@/services/audit";
+import { ENDPOINTS } from "@/services/objects";
+import type { LooseYetiObject, RootType } from "@/services/types";
+
+const props = defineProps<{
+  object: LooseYetiObject;
+  /** Provided by the v-dialog slot that renders this. */
+  isActive: { value: boolean };
+}>();
+
+interface TimelineEntry {
+  timestamp: string;
+  actor: string;
+  action: string;
+  details: unknown;
+}
+
+const timelineData = ref<TimelineEntry[]>([]);
+const timelineCount = ref(0);
+const search = ref("");
+
+const headers = [
+  {
+    title: "Timestamp (UTC)",
+    key: "timestamp",
+    value: (item: TimelineEntry) => moment(item.timestamp).format("YYYY-MM-DD HH:mm:ss"),
+    width: "190px",
+    sortable: true
   },
-  data() {
-    return {
-      timelineData: [],
-      timelineCount: 0,
-      headers: [
-        {
-          title: "Timestamp (UTC)",
-          key: "timestamp",
-          value: item => moment(item.timestamp).format("YYYY-MM-DD HH:mm:ss"),
-          width: "190px",
-          sortable: true
-        },
-        { title: "Actor", value: "actor" },
-        { title: "Action", value: "action" },
-        { title: "Details", key: "details", value: item => JSON.stringify(item.details) }
-      ],
-      typeToEndpointMapping: {
-        entity: "entities",
-        observable: "observables",
-        indicator: "indicators",
-        dfiq: "dfiq"
-      },
-      search: ""
-    };
-  },
-  methods: {
-    getTimeline() {
-      axios
-        .get(`/api/v2/audit/timeline/${this.typeToEndpointMapping[this.object.root_type]}/${this.object.id}`)
-        .then(response => {
-          this.timelineData = response.data[0];
-          this.timelineCount = response.data[1];
-        })
-        .catch(error => {
-          console.log(error);
-        });
-    }
-  },
-  mounted() {
-    this.getTimeline();
-  }
-};
+  { title: "Actor", value: "actor" },
+  { title: "Action", value: "action" },
+  { title: "Details", key: "details", value: (item: TimelineEntry) => JSON.stringify(item.details) }
+];
+
+async function getTimeline() {
+  // The audit route takes the extended id ("observables/123").
+  const extendedId = `${ENDPOINTS[props.object.root_type as RootType]}/${props.object.id}`;
+  const [entries, total] = await auditApi.timeline(extendedId);
+  timelineData.value = entries as unknown as TimelineEntry[];
+  timelineCount.value = total;
+}
+
+onMounted(getTimeline);
 </script>

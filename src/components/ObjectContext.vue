@@ -1,6 +1,6 @@
 <template>
   <v-card class="ma-2">
-    <v-expansion-panels :readonly="this.context.length === 0" flat static>
+    <v-expansion-panels :readonly="context.length === 0" flat static>
       <v-expansion-panel>
         <v-expansion-panel-title class="edit-ctx-title break-title">
           <p class="text-subtitle-1 me-2">Context entries</p>
@@ -19,7 +19,7 @@
           <v-dialog height="90%">
             <template v-slot:activator="{ props }">
               <v-btn v-bind="props" class="ms-2 edit-ctx-btn" size="small" variant="text" density="comfortable"
-                ><v-icon class="me-2">mdi-pencil</v-icon>{{ this.context.length === 0 ? "add" : "edit" }}</v-btn
+                ><v-icon class="me-2">mdi-pencil</v-icon>{{ context.length === 0 ? "add" : "edit" }}</v-btn
               >
             </template>
             <template v-slot:default="{ isActive }">
@@ -56,107 +56,97 @@
   </v-card>
 </template>
 
-<script>
-import axios from "axios";
+<script setup lang="ts">
+import { ref } from "vue";
 import { VTreeview } from "vuetify/components";
 
-export default {
-  components: { VTreeview },
-  props: {
-    context: {
-      type: Object,
-      required: true
-    },
-    updateEndpoint: {
-      type: String,
-      required: true
-    }
-  },
-  data() {
-    return {
-      jsonContext: JSON.stringify(this.context, null, 2),
-      jsonError: "",
-      showCtxDetails: true
-    };
-  },
-  // watch: {
-  //   context: {
-  //     handler(newContext) {
-  //       this.jsonContext = JSON.stringify(newContext, null, 2);
-  //     },
-  //     deep: true
-  //   }
-  // },
-  methods: {
-    checkJson() {
-      try {
-        JSON.parse(this.jsonContext);
-        this.jsonError = "";
-      } catch (e) {
-        this.jsonError = e.message;
-      }
-      return this.jsonError;
-    },
-    updateContext(isActive) {
-      let contextPayload;
-      try {
-        contextPayload = JSON.parse(this.jsonContext);
-      } catch (e) {
-        return;
-      }
-      axios
-        .put(`/api/v2/${this.updateEndpoint}/context`, { context: contextPayload })
-        .then(response => {
-          this.$emit("update:context", response.data.context);
-          isActive.value = false;
-        })
-        .catch(error => {
-          console.log(error);
-        });
-    },
-    ContextTreeView() {
-      var items = [];
-      var id = 0;
+import * as objectsApi from "@/services/objects";
 
-      function treeify(root, data) {
-        if (Array.isArray(data)) {
-          var count = 0;
-          for (const item of data) {
-            var element = { id: id++, title: count.toString(), children: [] };
-            root.push(element);
-            count++;
-            treeify(element.children, item);
-          }
-        } else if (typeof data === "object") {
-          for (const [key, value] of Object.entries(data)) {
-            if (key === "source") {
-              continue;
-            }
-            if (value === null) {
-              var title = key + ": N/A";
-              var element = { id: id++, title: title };
-              root.push(element);
-            } else if (Array.isArray(value) || typeof value === "object") {
-              element = { id: id++, title: key, children: [] };
-              root.push(element);
-              treeify(element.children, value);
-            } else {
-              var title = key + ": " + value;
-              var element = { id: id++, title: title };
-              root.push(element);
-            }
-          }
+/** One context entry, keyed by the source that produced it. */
+type ContextEntry = Record<string, unknown> & { source?: string };
+
+const props = defineProps<{
+  /** The object's context. It is a list of entries, not a single object — the
+   * old `type: Object` prop declaration was wrong. */
+  context: ContextEntry[];
+  /** The "<endpoint>/<id>" segment to PUT the updated context to. */
+  updateEndpoint: string;
+}>();
+
+const emit = defineEmits<{ "update:context": [context: unknown[]] }>();
+
+const jsonContext = ref(JSON.stringify(props.context, null, 2));
+const jsonError = ref("");
+const showCtxDetails = ref(true);
+
+interface TreeItem {
+  id: number;
+  title: string;
+  children?: TreeItem[];
+  color?: string;
+}
+
+function checkJson(): string {
+  try {
+    JSON.parse(jsonContext.value);
+    jsonError.value = "";
+  } catch (e) {
+    jsonError.value = e instanceof Error ? e.message : String(e);
+  }
+  return jsonError.value;
+}
+
+async function updateContext(isActive: { value: boolean }) {
+  let contextPayload: unknown[];
+  try {
+    contextPayload = JSON.parse(jsonContext.value);
+  } catch {
+    return;
+  }
+  const updated = await objectsApi.replaceContextAtPath(props.updateEndpoint, contextPayload);
+  emit("update:context", updated.context);
+  isActive.value = false;
+}
+
+/** Flattens the context entries into the tree VTreeview renders. */
+function ContextTreeView(): TreeItem[] {
+  let id = 0;
+
+  function treeify(root: TreeItem[], data: unknown) {
+    if (Array.isArray(data)) {
+      data.forEach((item, index) => {
+        const element: TreeItem = { id: id++, title: String(index), children: [] };
+        root.push(element);
+        treeify(element.children!, item);
+      });
+      return;
+    }
+    if (data !== null && typeof data === "object") {
+      for (const [key, value] of Object.entries(data as Record<string, unknown>)) {
+        if (key === "source") {
+          continue;
+        }
+        if (value === null) {
+          root.push({ id: id++, title: `${key}: N/A` });
+        } else if (Array.isArray(value) || typeof value === "object") {
+          const element: TreeItem = { id: id++, title: key, children: [] };
+          root.push(element);
+          treeify(element.children!, value);
+        } else {
+          root.push({ id: id++, title: `${key}: ${value}` });
         }
       }
-      for (const ctx of this.context) {
-        var element = { id: id++, title: ctx.source, children: [], color: "warning" };
-        items.push(element);
-        treeify(element.children, ctx);
-      }
-      return items;
     }
   }
-};
+
+  const items: TreeItem[] = [];
+  for (const ctx of props.context) {
+    const element: TreeItem = { id: id++, title: String(ctx.source), children: [], color: "warning" };
+    items.push(element);
+    treeify(element.children!, ctx);
+  }
+  return items;
+}
 </script>
 
 <style>
