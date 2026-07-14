@@ -101,6 +101,36 @@ test.describe("Export List", () => {
     await expect(page.locator("tbody tr").first()).toContainText("hostname-export");
   });
 
+  // TaskList renders the rows; these cover its toggle/run actions.
+  test("toggles and runs a task from the row controls", async ({ page }) => {
+    const toggleRequests: string[] = [];
+    const runRequests: Array<Record<string, unknown>> = [];
+
+    await page.route("**/api/v2/tasks/hostname-export/toggle", async route => {
+      toggleRequests.push(route.request().method());
+      await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({}) });
+    });
+
+    await page.route("**/api/v2/tasks/hostname-export/run", async route => {
+      runRequests.push(route.request().postDataJSON());
+      await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({}) });
+    });
+
+    await page.goto("/exports");
+    await expect(page.locator("tbody tr")).toHaveCount(1);
+
+    // The "enabled" switch.
+    await page.locator("tbody tr").first().locator(".v-switch input").click();
+    await expect.poll(() => toggleRequests.length).toBe(1);
+    expect(toggleRequests[0]).toBe("POST");
+
+    // The refresh (run) button. The body must be a TaskParams envelope:
+    // {"params": {...}}, not the params object on its own.
+    await page.locator("tbody tr").first().locator("button:has(.mdi-refresh)").click();
+    await expect.poll(() => runRequests.length).toBe(1);
+    expect(runRequests[0]).toHaveProperty("params");
+  });
+
   test("creates a new export from the drawer", async ({ page }) => {
     await page.goto("/exports");
     await expect(page.locator("tbody tr")).toHaveCount(1);
