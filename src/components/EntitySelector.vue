@@ -48,101 +48,88 @@
   </v-autocomplete>
 </template>
 
-<script lang="ts" setup>
-import axios from "axios";
-
-import { ENTITY_TYPES } from "@/definitions/entityDefinitions";
-import { INDICATOR_TYPES } from "@/definitions/indicatorDefinitions";
-import { DFIQ_TYPES } from "@/definitions/dfiqDefinitions";
-
+<script setup lang="ts">
 import _ from "lodash";
+import { computed, onMounted, ref, watch } from "vue";
+
+import { getIconForType } from "@/definitions/typeIcons";
+import * as objectsApi from "@/services/objects";
+import type { LooseYetiObject } from "@/services/types";
+
+const props = withDefaults(
+  defineProps<{
+    object?: LooseYetiObject | null;
+    isActive?: { value: boolean };
+    inline?: boolean;
+    typeFilter?: string[];
+  }>(),
+  {
+    object: null,
+    inline: false,
+    typeFilter: () => []
+  }
+);
+
+/** The subset of an object this selector offers and emits. */
+interface SelectableObject {
+  id: string;
+  root_type: string;
+  name: string;
+  type: string;
+}
+
+const emit = defineEmits<{ "selected-object": [object: SelectableObject | null] }>();
+
+const items = ref<SelectableObject[]>([]);
+const selectedEntity = ref<LooseYetiObject | null>(props.object);
+
+const getHintForTypes = computed(() =>
+  props.typeFilter.length > 0
+    ? `Filtering for ${props.typeFilter.join(", ")}`
+    : "Filtering for all object types"
+);
+
+async function loadObjects(searchQuery = "") {
+  const request = { query: { name: searchQuery }, count: 20 };
+  // These were three sequential awaits; they are independent.
+  const [entities, indicators, dfiq] = await Promise.all([
+    objectsApi.searchByEndpoint("entities", request),
+    objectsApi.searchByEndpoint("indicators", request),
+    objectsApi.searchByEndpoint("dfiq", request)
+  ]);
+
+  let found = [...entities.items, ...indicators.items, ...dfiq.items].map(item => ({
+    id: item.id,
+    root_type: item.root_type,
+    name: item.name,
+    type: item.type
+  })) as SelectableObject[];
+
+  if (props.typeFilter.length > 0) {
+    found = found.filter(
+      item => props.typeFilter.includes(item.type) || props.typeFilter.includes(item.root_type)
+    );
+  }
+  items.value = found;
+}
+
+const updateItemsDebounced = _.debounce((searchQuery: string) => loadObjects(searchQuery), 200);
+
+function emitSelectedObject() {
+  emit("selected-object", selectedEntity.value as SelectableObject | null);
+}
+
+watch(
+  () => props.object,
+  value => {
+    selectedEntity.value = value;
+  },
+  { deep: true }
+);
+
+onMounted(() => loadObjects(""));
 </script>
 
-<script lang="ts">
-export default {
-  props: {
-    object: {
-      type: Object,
-      default: () => {}
-    },
-    isActive: {
-      type: Object,
-      default: () => {}
-    },
-    inline: {
-      type: Boolean,
-      default: false
-    },
-    typeFilter: {
-      type: Array,
-      default: () => []
-    }
-  },
-  data() {
-    return {
-      errors: [],
-      items: [],
-      selectedEntity: null
-    };
-  },
-  mounted() {
-    this.loadObjects("");
-  },
-  methods: {
-    async loadObjects(searchQuery: String = "") {
-      const params = { query: { name: searchQuery }, count: 20 };
-      const entities = (await axios.post("/api/v2/entities/search", params)).data.entities;
-      const indicators = (await axios.post("/api/v2/indicators/search", params)).data.indicators;
-      const dfiq = (await axios.post("/api/v2/dfiq/search", params)).data.dfiq;
-      let items = entities
-        .concat(indicators)
-        .concat(dfiq)
-        .map(item => {
-          return {
-            id: item.id,
-            root_type: item.root_type,
-            name: item.name,
-            type: item.type
-          };
-        });
-      if (this.typeFilter.length > 0) {
-        items = items.filter(item => this.typeFilter.includes(item.type) || this.typeFilter.includes(item.root_type));
-      }
-      this.items = items;
-    },
-    updateItemsDebounced: _.debounce(function (searchQuery) {
-      this.loadObjects(searchQuery);
-    }, 200),
-    emitSelectedObject() {
-      this.$emit("selected-object", this.selectedEntity);
-    },
-    getIconForType(type) {
-      return (
-        ENTITY_TYPES.find(t => t.type === type) ||
-        INDICATOR_TYPES.find(t => t.type === type) ||
-        DFIQ_TYPES.find(t => t.type === type)
-      ).icon;
-    }
-  },
-  computed: {
-    getHintForTypes() {
-      if (this.typeFilter.length > 0) {
-        return "Filtering for " + this.typeFilter.join(", ");
-      } else {
-        return "Filtering for all object types";
-      }
-    }
-  },
-  watch: {
-    object: {
-      handler: function (val) {
-        this.selectedEntity = val;
-      },
-      deep: true
-    }
-  }
-};
-</script>
 
 <style>
 .yeti-code textarea {
