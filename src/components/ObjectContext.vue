@@ -58,7 +58,7 @@
 
 <script>
 import axios from "axios";
-import { VTreeview } from "vuetify/labs/VTreeview";
+import { VTreeview } from "vuetify/components";
 
 export default {
   components: { VTreeview },

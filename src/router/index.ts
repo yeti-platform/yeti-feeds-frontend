@@ -243,7 +243,6 @@ const router = createRouter({
 
 import { useUserStore } from "../store/user";
 import GroupList from "@/components/GroupList.vue";
-import { metaProperty } from "@babel/types";
 
 router.beforeEach((to, _from, next) => {
   const userStore = useUserStore();
