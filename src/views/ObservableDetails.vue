@@ -38,14 +38,14 @@
         <object-context
           v-if="observable"
           :context="observable.context"
-          @update:context="ctx => (observable.context = ctx)"
+          @update:context="updateContext"
           :update-endpoint="`observables/${observable.id}`"
         />
         <v-table>
           <tbody>
             <tr v-for="field in getObservableDetailFields">
               <th>{{ field.label }}</th>
-              <td>{{ observable[field.field] }}</td>
+              <td>{{ observable?.[field.field] }}</td>
             </tr>
           </tbody>
         </v-table>
@@ -162,10 +162,7 @@
             class="ma-2"
           >
             <template v-slot:chip="tag">
-              <v-chip
-                :text="tag.item.value"
-                :color="observable?.tags.filter(t => t.name == tag.item.value)[0]?.fresh ? 'primary' : 'grey'"
-                size="default"
+              <v-chip :text="tag.item.value" :color="tagColor(tag.item.value)" size="default"
             /></template>
             <template v-slot:append>
               <v-btn variant="tonal" color="primary" class="me-2" @click="saveTags">Save</v-btn>
@@ -254,156 +251,117 @@
   </v-container>
 </template>
 
-<script lang="ts" setup>
-import axios from "axios";
+<script setup lang="ts">
+import moment from "moment";
+import { computed, onMounted, ref, watch } from "vue";
 
-import TaskList from "@/components/TaskList.vue";
-import RelatedObjects from "@/components/RelatedObjects.vue";
-import EditObject from "@/components/EditObject.vue";
 import ACLEdit from "@/components/ACLEdit.vue";
-import ObjectContext from "@/components/ObjectContext.vue";
 import DirectNeighbors from "@/components/DirectNeighbors.vue";
+import EditObject from "@/components/EditObject.vue";
 import GraphObjects from "@/components/GraphObjects.vue";
-
 import LinkObject from "@/components/LinkObject.vue";
 import LinkObservables from "@/components/LinkObservables.vue";
+import ObjectContext from "@/components/ObjectContext.vue";
+import RelatedObjects from "@/components/RelatedObjects.vue";
+import TaskList from "@/components/TaskList.vue";
+import Timeline from "@/components/Timeline.vue";
 
 import { ENTITY_TYPES } from "@/definitions/entityDefinitions";
 import { INDICATOR_TYPES } from "@/definitions/indicatorDefinitions";
 import { OBSERVABLE_TYPES } from "@/definitions/observableDefinitions";
-import moment from "moment";
 
-import Timeline from "@/components/Timeline.vue";
-
-import { useUserStore } from "@/store/user";
+import { eventBus } from "@/plugins/eventbus";
+import * as observablesApi from "@/services/observables";
+import type { LooseYetiObject } from "@/services/types";
 import { useAppStore } from "@/store/app";
-</script>
+import { useUserStore } from "@/store/user";
 
-<script lang="ts">
-export default {
-  props: {
-    id: {
-      type: String,
-      required: true
-    }
-  },
-  components: {
-    TaskList,
-    RelatedObjects,
-    EditObject,
-    LinkObject,
-    LinkObservables,
-    GraphObjects,
-    Timeline,
-    ACLEdit,
-    ObjectContext
-  },
-  data() {
-    return {
-      observable: null,
-      observableTags: [],
-      activeTab: 0,
-      observableTypes: OBSERVABLE_TYPES,
-      entityTypes: ENTITY_TYPES,
-      indicatorTypes: INDICATOR_TYPES,
-      totalRelatedObservables: 0,
-      totalTaggedRelationships: 0,
-      totalRelatedEntities: 0,
-      totalRelatedIndicators: 0,
-      editWidth: 600,
-      fullScreenEdit: false,
-      newLinkMenu: false,
-      userStore: useUserStore(),
-      appStore: useAppStore()
-    };
-  },
-  methods: {
-    emitRefreshGraph() {
-      console.log("Emitting refreshGraph");
-      let refreshGraphViewEvent = new Event("refreshGraphView");
-      window.dispatchEvent(refreshGraphViewEvent);
-    },
-    copyText(text) {
-      navigator.clipboard.writeText(text);
-      this.$eventBus.emit("displayMessage", {
-        status: "info",
-        message: "Observable value copied to clipboard!"
-      });
-    },
-    getObservableDetails() {
-      axios
-        .get(`/api/v2/observables/${this.id}`)
-        .then(response => {
-          let tagNames: string[] = [];
-          this.observable = response.data;
-          this.observableTags = this.observable.tags.map(tag => tag.name);
-          // Switch back to Context view when reloading the page.
-          this.activeTab = 0;
-          this.appStore.setPageTitleFromObject(this.observable);
-        })
-        .catch(error => {
-          console.log(error);
-        })
-        .finally();
-    },
-    saveTags() {
-      var params = {
-        ids: [this.id],
-        strict: true,
-        tags: this.observableTags
-      };
-      axios
-        .post(`/api/v2/observables/tag`, params)
-        .then(() => {
-          this.getObservableDetails();
-          this.$eventBus.emit("displayMessage", { message: "Tags saved successfully", status: "success" });
-        })
-        .catch(error => {
-          console.log(error);
-        })
-        .finally();
-    },
-    toggleFullscreen(fullscreen: boolean) {
-      this.fullScreenEdit = !this.fullScreenEdit;
-      this.editWidth = fullscreen ? "100%" : "75%";
-    }
-  },
+const props = defineProps<{ id: string }>();
 
-  computed: {
-    user() {
-      return this.userStore.user;
-    },
-    getObservableTypeDefinition() {
-      return this.observableTypes.find(typeDef => typeDef.type === this.observable?.type);
-    },
-    getObservableDetailFields() {
-      const hideFields = ["value", "tags", "description", "created", "modified"];
-      return this.getObservableTypeDefinition?.fields.filter(field => !hideFields.includes(field.field));
-    },
-    getObservableInfoFields() {
-      const fields = ["created", "modified"];
-      return this.getObservableTypeDefinition?.fields.filter(field => fields.includes(field.field));
-    },
-    hasEditPerms() {
-      return this.userStore.hasEditPerms(this.observable);
-    },
-    hasOwnerPerms() {
-      return this.userStore.hasOwnerPerms(this.observable);
-    },
-    RBACEnabled() {
-      return this.appStore.RBACEnabled;
-    }
-  },
-  mounted() {
-    this.getObservableDetails();
-  },
-  watch: {
-    id() {
-      this.getObservableDetails();
-    }
+const userStore = useUserStore();
+const appStore = useAppStore();
+
+const observableTypes = OBSERVABLE_TYPES;
+const entityTypes = ENTITY_TYPES;
+const indicatorTypes = INDICATOR_TYPES;
+
+// Typed loosely for the same reason as ObjectDetails: the template indexes
+// fields dynamically (observable[field.field]) off the type definitions.
+const observable = ref<LooseYetiObject | null>(null);
+const observableTags = ref<string[]>([]);
+const activeTab = ref(0);
+const totalRelatedObservables = ref(0);
+const totalTaggedRelationships = ref(0);
+const totalRelatedEntities = ref(0);
+const totalRelatedIndicators = ref(0);
+const editWidth = ref<string | number>(600);
+const fullScreenEdit = ref(false);
+const newLinkMenu = ref(false);
+
+const user = computed(() => userStore.user);
+const RBACEnabled = computed(() => appStore.RBACEnabled);
+const hasEditPerms = computed(() => (observable.value ? userStore.hasEditPerms(observable.value) : false));
+const hasOwnerPerms = computed(() => (observable.value ? userStore.hasOwnerPerms(observable.value) : false));
+
+const getObservableTypeDefinition = computed(() =>
+  observableTypes.find(typeDef => typeDef.type === observable.value?.type)
+);
+
+const getObservableDetailFields = computed(() => {
+  const hideFields = ["value", "tags", "description", "created", "modified"];
+  return getObservableTypeDefinition.value?.fields.filter(field => !hideFields.includes(field.field));
+});
+
+const getObservableInfoFields = computed(() => {
+  const fields = ["created", "modified"];
+  return getObservableTypeDefinition.value?.fields.filter(field => fields.includes(field.field));
+});
+
+function emitRefreshGraph() {
+  window.dispatchEvent(new Event("refreshGraphView"));
+}
+
+/** Stale tags are greyed out. */
+function tagColor(tagName: string): string {
+  const tag = observable.value?.tags?.find((t: { name: string }) => t.name === tagName);
+  return tag?.fresh ? "primary" : "grey";
+}
+
+function copyText(text: string) {
+  navigator.clipboard.writeText(text);
+  eventBus.emit("displayMessage", { status: "info", message: "Observable value copied to clipboard!" });
+}
+
+function updateContext(context: unknown[]) {
+  if (observable.value) {
+    observable.value.context = context;
   }
-};
+}
+
+async function getObservableDetails() {
+  // Errors surface via the http interceptor's snackbar.
+  observable.value = await observablesApi.details(props.id);
+  observableTags.value = observable.value.tags?.map((tag: { name: string }) => tag.name) ?? [];
+  // Switch back to the Context view when reloading the page.
+  activeTab.value = 0;
+  appStore.setPageTitleFromObject(observable.value);
+}
+
+async function saveTags() {
+  await observablesApi.tag({ ids: [props.id], strict: true, tags: observableTags.value });
+  await getObservableDetails();
+  eventBus.emit("displayMessage", { message: "Tags saved successfully", status: "success" });
+}
+
+function toggleFullscreen(fullscreen: boolean) {
+  fullScreenEdit.value = !fullScreenEdit.value;
+  editWidth.value = fullscreen ? "100%" : "75%";
+}
+
+watch(() => props.id, getObservableDetails);
+onMounted(getObservableDetails);
 </script>
+
 
 <style>
 .v-card-text.yeti-description {

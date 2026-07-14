@@ -100,6 +100,33 @@ test.describe("Observable Details", () => {
     });
   });
 
+  test("saves tags on the observable", async ({ page }) => {
+    const tagRequests: Array<Record<string, unknown>> = [];
+
+    await page.route("**/api/v2/observables/tag", async route => {
+      tagRequests.push(route.request().postDataJSON());
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ tagged: 1, tags: {} })
+      });
+    });
+
+    await page.goto("/observables/789");
+    await expect(page.getByText("evil.example.com").first()).toBeVisible();
+
+    const tagBox = page.locator(".v-combobox input").first();
+    await tagBox.fill("phishing");
+    await tagBox.press("Enter");
+    await page.getByRole("button", { name: "Save" }).click();
+
+    await expect.poll(() => tagRequests.length).toBe(1);
+    expect(tagRequests[0]).toMatchObject({ ids: ["789"], strict: true });
+    expect(tagRequests[0].tags).toContain("phishing");
+    // The existing tag is preserved (strict: true replaces the whole set).
+    expect(tagRequests[0].tags).toContain("malware");
+  });
+
   test("renders the observable and its tagged relationship chain", async ({ page }) => {
     await page.goto("/observables/789");
 
