@@ -10,11 +10,11 @@ import "vuetify/styles";
 import { md3 } from "vuetify/blueprints";
 import { aliases, mdi } from "vuetify/iconsets/mdi";
 import colors from "vuetify/util/colors";
-import { VTreeview, VTreeviewItem } from "vuetify/labs/VTreeview";
+// VTreeview graduated out of labs; it now ships as a stable component.
+import { VTreeview, VTreeviewItem } from "vuetify/components";
 
 // Composables
 import { createVuetify, type ThemeDefinition } from "vuetify";
-import { convertCompilerOptionsFromJson } from "typescript";
 
 const yetiDarkTheme: ThemeDefinition = {
   dark: true,

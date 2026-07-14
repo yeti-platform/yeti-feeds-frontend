@@ -8,6 +8,10 @@
     "module": "esnext",
     "moduleResolution": "node",
     "strict": true,
+    // Don't type-check library .d.ts files. Without this, vue-tsc reports
+    // hundreds of errors from inside node_modules/vuetify's own declarations
+    // (a GlobalComponents constraint mismatch), none of which are ours.
+    "skipLibCheck": true,
     "jsx": "preserve",
     "sourceMap": false,
     "resolveJsonModule": true,
