@@ -50,6 +50,23 @@ export type TagSearchRequest = Schemas["TagSearchRequest"];
 export type TagSearchResponse = Schemas["TagSearchResponse"];
 export type TagMultipleGetRequest = Schemas["TagMultipleGetRequest"];
 
+// Users
+export type User = Schemas["User"];
+export type UserDetailsResponse = Schemas["UserDetailsResponse"];
+export type SearchUserRequest = Schemas["SearchUserRequest"];
+export type SearchUserResponse = Schemas["SearchUserResponse"];
+export type NewUserRequest = Schemas["NewUserRequest"];
+export type ToggleUserRequest = Schemas["ToggleUserRequest"];
+export type ToggleableField = Schemas["ToggleableField"];
+export type PatchRoleRequest = Schemas["PatchRoleRequest"];
+export type ResetPasswordRequest = Schemas["ResetPasswordRequest"];
+export type NewApiKeyRequest = Schemas["NewApiKeyRequest"];
+export type NewApiKeyResponse = Schemas["NewAPIKeyResponse"];
+export type ToggleApiKeyRequest = Schemas["ToggleApiKeyRequest"];
+export type DeleteApiKeyRequest = Schemas["DeleteApiKeyRequest"];
+export type DeleteApiKeyResponse = Schemas["DeleteApiKeyResponse"];
+export type RegisteredApiKey = Schemas["RegisteredApiKey"];
+
 // Tasks / exports
 export type TaskType = Schemas["TaskType"];
 export type ExportTask = Schemas["ExportTask-Output"];
