@@ -38,6 +38,7 @@
   "devDependencies": {
     "@babel/types": "^7.21.4",
     "@playwright/test": "^1.58.2",
+    "@types/lodash": "^4.17.24",
     "@types/node": "^22.10.1",
     "@vitejs/plugin-vue": "^5.2.1",
     "@vue/eslint-config-typescript": "^14.1.4",

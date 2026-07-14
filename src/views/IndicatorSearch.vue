@@ -63,7 +63,7 @@
 </template>
 
 <script lang="ts" setup>
-import { INDICATOR_TYPES } from "@/definitions/indicatorDefinitions.js";
+import { INDICATOR_TYPES } from "@/definitions/indicatorDefinitions";
 import ObjectList from "@/components/ObjectList.vue";
 import NewObject from "@/components/NewObject.vue";
 

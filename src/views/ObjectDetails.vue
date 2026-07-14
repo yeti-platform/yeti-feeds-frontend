@@ -282,10 +282,10 @@ import LinkObservables from "@/components/LinkObservables.vue";
 import YetiMarkdown from "@/components/YetiMarkdown.vue";
 import ObjectContext from "@/components/ObjectContext.vue";
 
-import { ENTITY_TYPES } from "@/definitions/entityDefinitions.js";
-import { OBSERVABLE_TYPES } from "@/definitions/observableDefinitions.js";
-import { INDICATOR_TYPES } from "@/definitions/indicatorDefinitions.js";
-import { DFIQ_TYPES } from "@/definitions/dfiqDefinitions.js";
+import { ENTITY_TYPES } from "@/definitions/entityDefinitions";
+import { OBSERVABLE_TYPES } from "@/definitions/observableDefinitions";
+import { INDICATOR_TYPES } from "@/definitions/indicatorDefinitions";
+import { DFIQ_TYPES } from "@/definitions/dfiqDefinitions";
 
 import moment from "moment";
 import Timeline from "@/components/Timeline.vue";

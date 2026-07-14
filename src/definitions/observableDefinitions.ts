@@ -1,6 +1,7 @@
-import { PRIVATE_OBSERVABLE_TYPES } from "@/definitions/private/privateObservableDefinitions.js";
+import { PRIVATE_OBSERVABLE_TYPES } from "@/definitions/private/privateObservableDefinitions";
+import type { ObjectTypeDefinition } from "@/definitions/types";
 
-export const OBSERVABLE_TYPES = [
+export const OBSERVABLE_TYPES: ObjectTypeDefinition[] = [
   {
     name: "Generic observable",
     type: "generic",

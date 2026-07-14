@@ -413,7 +413,7 @@
 import axios from "axios";
 
 import ObjectFields from "@/components/ObjectFields.vue";
-import { DFIQ_TYPES, DFIQ_TEMPLATES, FORM_METADATA } from "@/definitions/dfiqDefinitions.js";
+import { DFIQ_TYPES, DFIQ_TEMPLATES, FORM_METADATA } from "@/definitions/dfiqDefinitions";
 import { useUserStore } from "@/store/user";
 
 import _ from "lodash";

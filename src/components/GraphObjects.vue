@@ -94,10 +94,10 @@ import noverlap from "graphology-layout-noverlap";
 // import ForceSupervisor from "graphology-layout-force/worker";
 import axios from "axios";
 
-import { ENTITY_TYPES } from "@/definitions/entityDefinitions.js";
-import { INDICATOR_TYPES } from "@/definitions/indicatorDefinitions.js";
-import { OBSERVABLE_TYPES } from "@/definitions/observableDefinitions.js";
-import { DFIQ_TYPES } from "@/definitions/dfiqDefinitions.js";
+import { ENTITY_TYPES } from "@/definitions/entityDefinitions";
+import { INDICATOR_TYPES } from "@/definitions/indicatorDefinitions";
+import { OBSERVABLE_TYPES } from "@/definitions/observableDefinitions";
+import { DFIQ_TYPES } from "@/definitions/dfiqDefinitions";
 
 import GraphTooltip from "@/components/GraphTooltip.vue";
 

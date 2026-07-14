@@ -1,6 +1,7 @@
-import { PRIVATE_ENTITY_TYPES } from "@/definitions/private/privateEntityDefinitions.js";
+import { PRIVATE_ENTITY_TYPES } from "@/definitions/private/privateEntityDefinitions";
+import type { ObjectTypeDefinition } from "@/definitions/types";
 
-export const ENTITY_TYPES = [
+export const ENTITY_TYPES: ObjectTypeDefinition[] = [
   {
     name: "Investigation",
     type: "investigation",

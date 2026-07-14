@@ -63,7 +63,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ENTITY_TYPES } from "@/definitions/entityDefinitions.js";
+import { ENTITY_TYPES } from "@/definitions/entityDefinitions";
 import ObjectList from "@/components/ObjectList.vue";
 import NewObject from "@/components/NewObject.vue";
 import _ from "lodash";

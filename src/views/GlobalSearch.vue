@@ -59,10 +59,10 @@
 <script setup lang="ts">
 import axios, { all } from "axios";
 import moment from "moment";
-import { OBSERVABLE_TYPES } from "@/definitions/observableDefinitions.js";
-import { ENTITY_TYPES } from "@/definitions/entityDefinitions.js";
-import { INDICATOR_TYPES } from "@/definitions/indicatorDefinitions.js";
-import { DFIQ_TYPES } from "@/definitions/dfiqDefinitions.js";
+import { OBSERVABLE_TYPES } from "@/definitions/observableDefinitions";
+import { ENTITY_TYPES } from "@/definitions/entityDefinitions";
+import { INDICATOR_TYPES } from "@/definitions/indicatorDefinitions";
+import { DFIQ_TYPES } from "@/definitions/dfiqDefinitions";
 import EntitySelector from "@/components/EntitySelector.vue";
 import router from "@/router";
 import _ from "lodash";

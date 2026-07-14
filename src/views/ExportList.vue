@@ -102,7 +102,7 @@
 </template>
 
 <script lang="ts" setup>
-import { OBSERVABLE_TYPES } from "@/definitions/observableDefinitions.js";
+import { OBSERVABLE_TYPES } from "@/definitions/observableDefinitions";
 import axios from "axios";
 import TaskList from "@/components/TaskList.vue";
 import moment from "moment";

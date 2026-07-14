@@ -252,8 +252,8 @@
 <script lang="ts">
 import axios from "axios";
 
-import { DFIQ_TYPES } from "@/definitions/dfiqDefinitions.js";
-import { INDICATOR_TYPES } from "@/definitions/indicatorDefinitions.js";
+import { DFIQ_TYPES } from "@/definitions/dfiqDefinitions";
+import { INDICATOR_TYPES } from "@/definitions/indicatorDefinitions";
 
 import EditDFIQObject from "@/components/DFIQ/EditDFIQObject.vue";
 import EditObject from "@/components/EditObject.vue";
