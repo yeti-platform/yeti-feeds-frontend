@@ -15,6 +15,11 @@ set -uo pipefail
 cd "$(dirname "$0")/.."
 baseline=$(tr -cd '0-9' < .typecheck-baseline)
 
+# tsconfig sets "composite": true, so vue-tsc checks incrementally against
+# tsconfig.tsbuildinfo and can under-report locally. CI always starts from a
+# fresh clone (the file is gitignored), so drop it to make the two agree.
+rm -f tsconfig.tsbuildinfo
+
 current=$(npx vue-tsc --noEmit 2>&1 | grep -cE 'error TS' || true)
 
 echo "vue-tsc type errors: current=${current}, baseline=${baseline}"
