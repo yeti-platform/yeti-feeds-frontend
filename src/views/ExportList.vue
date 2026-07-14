@@ -101,146 +101,111 @@
   </v-navigation-drawer>
 </template>
 
-<script lang="ts" setup>
-import { OBSERVABLE_TYPES } from "@/definitions/observableDefinitions";
-import axios from "axios";
-import TaskList from "@/components/TaskList.vue";
+<script setup lang="ts">
 import moment from "moment";
+import { onMounted, onUnmounted, ref } from "vue";
+
+import TaskList from "@/components/TaskList.vue";
+import { OBSERVABLE_TYPES } from "@/definitions/observableDefinitions";
+import { eventBus } from "@/plugins/eventbus";
+import * as tasksApi from "@/services/tasks";
+import * as templatesApi from "@/services/templates";
+import type { ExportTask } from "@/services/types";
 import { useAppStore } from "@/store/app";
-</script>
 
-<script lang="ts">
-export default {
-  name: "ExportList",
-  components: {
-    TaskList
-  },
-  data() {
-    return {
-      defaultTypes: OBSERVABLE_TYPES.map(type => {
-        return { value: type.type, title: type.name };
-      }),
-      exports: [],
-      exportTemplates: [],
-      selectedExport: {},
-      timerListTemplates: null,
-      frequencyUnit: "hours",
-      appStore: useAppStore()
-    };
-  },
-  mounted() {
-    this.listTemplates();
-    this.appStore.fetchSystemConfig();
-  },
-  created() {
-    this.timerListTemplates = setInterval(this.listTemplates, 5000);
-  },
-  unmounted() {
-    clearInterval(this.timerListTemplates);
-  },
-  methods: {
-    listTemplates() {
-      axios
-        .post("/api/v2/templates/search", { name: "" })
-        .then(response => (this.exportTemplates = response.data.templates.map(template => template.name)))
-        .catch(error => {
-          console.log(error);
-        })
-        .finally(() => {});
-    },
-    selectExport(task) {
-      this.selectedExport = task;
-      this.selectedExport.human_frequency = moment.duration(task.frequency).asHours();
-      this.frequencyUnit = "hours";
-    },
-    updateExport() {
-      let exportTask = {
-        id: this.selectedExport.id,
-        name: this.selectedExport.name,
-        description: this.selectedExport.description,
-        include_tags: this.selectedExport.include_tags,
-        ignore_tags: this.selectedExport.ignore_tags,
-        exclude_tags: this.selectedExport.exclude_tags,
-        acts_on: this.selectedExport.acts_on,
-        template_name: this.selectedExport.template_name,
-        frequency: moment.duration(this.selectedExport.human_frequency, this.frequencyUnit)
-      };
+/** The drawer form: an export task, plus the frequency in `frequencyUnit`s. */
+type ExportForm = Partial<ExportTask> & { human_frequency?: number | string };
 
-      axios
-        .patch(`/api/v2/tasks/export/${this.selectedExport.name}`, { export: exportTask })
-        .then(() => {
-          this.$eventBus.emit("displayMessage", {
-            status: "success",
-            message: `Export ${this.selectedExport.name} succesfully updated`
-          });
-          this.$eventBus.emit("taskUpdated", this.selectedExport);
-          this.selectedExport = {};
-        })
-        .catch(error => console.log(error))
-        .finally(() => {});
-    },
-    newExport() {
-      let exportTask = {
-        name: this.selectedExport.name,
-        acts_on: this.selectedExport.acts_on,
-        description: this.selectedExport.description,
-        template_name: this.selectedExport.template_name,
-        exclude_tags: this.selectedExport.exclude_tags,
-        ignore_tags: this.selectedExport.ignore_tags,
-        include_tags: this.selectedExport.include_tags,
-        frequency: moment.duration(this.selectedExport.human_frequency, this.frequencyUnit)
-      };
-      axios
-        .post(`/api/v2/tasks/export/new`, { export: exportTask })
-        .then(() => {
-          this.$eventBus.emit("displayMessage", {
-            status: "success",
-            message: `Export ${this.selectedExport.name} succesfully created`
-          });
-          this.$eventBus.emit("taskUpdated", this.selectedExport);
-          this.selectedExport = {};
-        })
-        .catch(error => console.log(error))
-        .finally(() => {});
-    },
-    confirmDeleteExport() {
-      if (confirm("Are you sure you want to delete this export?")) {
-        this.deleteExport();
-      }
-    },
-    deleteExport() {
-      axios
-        .delete(`/api/v2/tasks/export/${this.selectedExport.name}`)
-        .then(() => {
-          this.$eventBus.emit("displayMessage", {
-            status: "success",
-            message: `Export ${this.selectedExport.name} succesfully deleted`
-          });
-          this.$eventBus.emit("taskUpdated", this.selectedExport);
-          this.selectedExport = {};
-        })
-        .catch(error => console.log(error))
-        .finally(() => {});
-    },
-    downloadExport(singleExport) {
-      axios
-        .get(`/api/v2/tasks/export/${singleExport.id}/content`)
-        .then(response => {
-          var fileURL = window.URL.createObjectURL(new Blob([response.data]));
-          var fileLink = document.createElement("a");
-          let fileName = `${singleExport.name}_${singleExport.last_run}.txt`;
-          fileLink.href = fileURL;
-          fileLink.download = fileName;
-          document.body.appendChild(fileLink);
-          fileLink.click();
-        })
-        .catch(error => {
-          console.log(error);
-        });
-    },
-    formatTimestamp(timestamp, local) {
-      return utils.formatTimestamp(timestamp, local);
-    }
+const appStore = useAppStore();
+
+const defaultTypes = OBSERVABLE_TYPES.map(type => ({ value: type.type, title: type.name }));
+const exportTemplates = ref<string[]>([]);
+const selectedExport = ref<ExportForm>({});
+const frequencyUnit = ref<"hours" | "days" | "minutes" | "seconds">("hours");
+
+let templatesTimer: ReturnType<typeof setInterval> | undefined;
+
+async function listTemplates() {
+  const response = await templatesApi.search({ name: "" });
+  exportTemplates.value = response.templates.map(template => template.name);
+}
+
+/** The payload the API expects, built from the drawer form. */
+function exportPayload() {
+  const form = selectedExport.value;
+  return {
+    name: form.name,
+    description: form.description,
+    include_tags: form.include_tags,
+    ignore_tags: form.ignore_tags,
+    exclude_tags: form.exclude_tags,
+    acts_on: form.acts_on,
+    template_name: form.template_name,
+    frequency: moment.duration(Number(form.human_frequency), frequencyUnit.value)
+  } as Record<string, unknown>;
+}
+
+function announceAndReset(message: string) {
+  eventBus.emit("displayMessage", { status: "success", message });
+  eventBus.emit("taskUpdated", selectedExport.value);
+  selectedExport.value = {};
+}
+
+function selectExport(task: ExportTask) {
+  selectedExport.value = { ...task, human_frequency: moment.duration(task.frequency ?? 0).asHours() };
+  frequencyUnit.value = "hours";
+}
+
+async function updateExport() {
+  const name = selectedExport.value.name;
+  if (!name) {
+    return;
   }
-};
+  // The export is identified by `name` in the URL; `id` isn't part of the
+  // request schema (the old code sent it and the backend ignored it).
+  await tasksApi.updateExport(name, exportPayload());
+  announceAndReset(`Export ${name} succesfully updated`);
+}
+
+async function newExport() {
+  const name = selectedExport.value.name;
+  if (!name) {
+    return;
+  }
+  await tasksApi.newExport(exportPayload());
+  announceAndReset(`Export ${name} succesfully created`);
+}
+
+function confirmDeleteExport() {
+  if (confirm("Are you sure you want to delete this export?")) {
+    deleteExport();
+  }
+}
+
+async function deleteExport() {
+  const name = selectedExport.value.name;
+  if (!name) {
+    return;
+  }
+  await tasksApi.deleteExport(name);
+  announceAndReset(`Export ${name} succesfully deleted`);
+}
+
+async function downloadExport(singleExport: ExportTask) {
+  const response = await tasksApi.exportContent(String(singleExport.id));
+  const fileUrl = window.URL.createObjectURL(new Blob([response.data]));
+  const fileLink = document.createElement("a");
+  fileLink.href = fileUrl;
+  fileLink.download = `${singleExport.name}_${singleExport.last_run}.txt`;
+  document.body.appendChild(fileLink);
+  fileLink.click();
+}
+
+onMounted(() => {
+  listTemplates();
+  appStore.fetchSystemConfig();
+  templatesTimer = setInterval(listTemplates, 5000);
+});
+
+onUnmounted(() => clearInterval(templatesTimer));
 </script>
