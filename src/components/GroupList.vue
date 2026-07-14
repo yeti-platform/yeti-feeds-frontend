@@ -16,9 +16,9 @@
           <!-- delete -->
           <v-dialog max-width="420px" v-if="hasOwnerPerms(item)">
             <template v-slot:activator="{ props }">
-              <v-btn v-bind="props" class="ms-2" size="small" variant="outlined" color="error"
-                ><v-icon>mdi-delete</v-icon></v-btn
-              >
+              <v-btn v-bind="props" class="ms-2" size="small" variant="outlined" color="error">
+                <v-icon>mdi-delete</v-icon>
+              </v-btn>
             </template>
             <template v-slot:default="{ isActive }">
               <v-card>
@@ -27,7 +27,7 @@
                 <v-card-actions>
                   <v-spacer></v-spacer>
                   <v-btn color="light" variant="text" @click="isActive.value = false">Cancel</v-btn>
-                  <v-btn color="error" variant="flat" @click="deleteGroup(item)">Delete</v-btn>
+                  <v-btn color="error" variant="flat" @click="deleteGroup(item, isActive)">Delete</v-btn>
                   <v-spacer></v-spacer>
                 </v-card-actions>
               </v-card>
@@ -56,7 +56,7 @@
                 </v-card-text>
                 <v-card-actions>
                   <v-btn color="cancel" @click="isActive.value = false">Cancel</v-btn>
-                  <v-btn @click="patchGroup(editGroup.id, isActive)">Save changes</v-btn>
+                  <v-btn @click="patchGroup(item.id, isActive)">Save changes</v-btn>
                 </v-card-actions>
               </v-card>
             </template>
@@ -64,22 +64,21 @@
 
           <v-dialog width="75%" v-if="hasOwnerPerms(item)">
             <template v-slot:activator="{ props }">
-              <v-btn v-bind="props" class="ms-2" size="small" variant="outlined" color="primary"
-                ><v-icon>mdi-account-multiple-plus-outline</v-icon></v-btn
-              >
+              <v-btn v-bind="props" class="ms-2" size="small" variant="outlined" color="primary">
+                <v-icon>mdi-account-multiple-plus-outline</v-icon>
+              </v-btn>
             </template>
-            <template v-slot:default="{ isActive }"><ACL-edit :object="item" :is-active="isActive" /> </template>
+            <template v-slot:default="{ isActive }">
+              <ACL-edit :object="item" :is-active="isActive" @members-updated="getGroupData" />
+            </template>
           </v-dialog>
         </template>
         <template v-slot:item.acls="{ value }">
           <v-chip
             class="mr-2"
-            v-for="membership in Object.keys(value)
-              .map(key => ({ name: key, ...value[key] }))
-              .sort((a, b) => b.role - a.role)
-              .slice(0, maxMemberDisplay)"
+            v-for="membership in topMemberships(value)"
             :key="membership.name"
-            :color="getPermColor(membership)"
+            :color="getPermColor(membership.role)"
             label
             density="compact"
           >
@@ -87,9 +86,15 @@
             <v-icon v-if="membership.source.startsWith('groups')" icon="mdi-account-multiple-outline" start></v-icon>
             {{ membership.name }}
           </v-chip>
-          <v-chip v-if="Object.keys(value).length > maxMemberDisplay" class="mr-2" label color="grey" density="compact"
-            >+{{ Object.keys(value).length - maxMemberDisplay }} more</v-chip
+          <v-chip
+            v-if="Object.keys(value).length > MAX_MEMBER_DISPLAY"
+            class="mr-2"
+            label
+            color="grey"
+            density="compact"
           >
+            +{{ Object.keys(value).length - MAX_MEMBER_DISPLAY }} more
+          </v-chip>
         </template>
       </v-data-table>
     </v-card-text>
@@ -97,9 +102,9 @@
     <v-card-actions>
       <v-dialog width="50%">
         <template v-slot:activator="{ props }">
-          <v-btn color="primary" variant="tonal" v-bind="props" @click="editGroup = { name: null, description: null }"
-            ><v-icon>mdi-plus</v-icon>Create group</v-btn
-          >
+          <v-btn color="primary" variant="tonal" v-bind="props" @click="editGroup = { name: '', description: '' }">
+            <v-icon>mdi-plus</v-icon>Create group
+          </v-btn>
         </template>
         <template v-slot:default="{ isActive }">
           <v-card>
@@ -119,157 +124,106 @@
   </v-card>
 </template>
 
-<script lang="ts" setup>
-import axios from "axios";
-import { useUserStore } from "@/store/user";
+<script setup lang="ts">
+import { onMounted, ref, watch } from "vue";
+
 import ACLEdit from "@/components/ACLEdit.vue";
-</script>
+import { eventBus } from "@/plugins/eventbus";
+import * as groupsApi from "@/services/groups";
+import * as usersApi from "@/services/users";
+import type { Group, GroupInput, RoleRelationship } from "@/services/types";
+import { useUserStore } from "@/store/user";
 
-<script lang="ts">
-export default {
-  name: "GroupList",
-  components: {
-    ACLEdit
-  },
-  props: {
-    userId: {
-      type: String,
-      default: null
-    },
-    membershipsOnly: {
-      type: Boolean,
-      default: true
+const props = withDefaults(
+  defineProps<{
+    userId?: string;
+    /** Whose groups to show: this user's memberships, or every group in the system. */
+    membershipsOnly?: boolean;
+  }>(),
+  { userId: undefined, membershipsOnly: true }
+);
+
+const userStore = useUserStore();
+
+const MAX_MEMBER_DISPLAY = 5;
+
+const groups = ref<Group[]>([]);
+const groupSearch = ref("");
+const editGroup = ref<GroupInput>({ name: "", description: "" });
+
+const groupTableHeaders = [
+  { title: "Name", value: "name" },
+  { title: "Description", value: "description" },
+  { title: props.membershipsOnly ? "Membership type" : "Members", value: "acls" },
+  { title: "Actions", value: "actions" }
+];
+
+async function getGroupData() {
+  if (props.membershipsOnly) {
+    if (!props.userId) {
+      return;
     }
-  },
-  data() {
-    return {
-      groups: [],
-      groupTableHeaders: [
-        { title: "Name", value: "name" },
-        { title: "Description", value: "description" },
-        { title: this.membershipsOnly ? "Membership type" : "Members", value: "acls" },
-        { title: "Actions", value: "actions" }
-      ],
-      editGroup: {
-        name: null,
-        description: null
-      },
-      maxMemberDisplay: 5,
-      groupSearch: "",
-      userStore: useUserStore()
-    };
-  },
-  methods: {
-    getGroupData() {
-      if (this.membershipsOnly) {
-        axios
-          .get(`/api/v2/users/${this.userId}`)
-          .then(response => {
-            this.groups = response.data.groups;
-          })
-          .catch(error => {
-            console.log(error);
-          })
-          .finally(() => {});
-      } else {
-        axios
-          .post("/api/v2/groups/search", { name: this.groupSearch })
-          .then(response => {
-            this.groups = response.data.groups;
-          })
-          .catch(error => {
-            console.log(error);
-          })
-          .finally(() => {});
-      }
-    },
-    addGroup(isActive) {
-      axios
-        .post("/api/v2/groups", this.editGroup)
-        .then(response => {
-          this.getGroupData();
-          isActive.value = false;
-          this.editGroup = {
-            name: null,
-            description: null
-          };
-          this.$eventBus.emit("displayMessage", {
-            status: "success",
-            message: `Group ${response.data.name} created succesfully`
-          });
-        })
-        .catch(error => {
-          this.$eventBus.emit("displayMessage", {
-            status: "error",
-            message: error.response.data.detail
-          });
-        })
-        .finally(() => {});
-    },
-    patchGroup(groupId: number, isActive) {
-      axios
-        .patch(`/api/v2/groups/${groupId}`, { rbacgroup: this.editGroup })
-        .then(response => {
-          this.getGroupData();
-          isActive.value = false;
-          this.editGroup = {
-            name: null,
-            description: null
-          };
-        })
-        .catch(error => {
-          console.log(error);
-        })
-        .finally(() => {});
-    },
-    deleteGroup(group) {
-      axios
-        .delete(`/api/v2/groups/${group.id}`)
-        .then(() => {
-          this.getGroupData();
-        })
-        .catch(error => {
-          console.log(error);
-        })
-        .finally(() => {});
-    },
-    getPermColor(membership) {
-      if (membership.role == 7) {
-        return "orange";
-      }
-      if (membership.role == 3) {
-        return "blue";
-      }
-      if (membership.role == 1) {
-        return "green";
-      }
-      if (membership.role == 0) {
-        return "grey";
-      }
-    },
-    hasEditPerms(group) {
-      return this.userStore.hasEditPerms(group);
-    },
-    hasOwnerPerms(group) {
-      return this.userStore.hasOwnerPerms(group);
-    }
-  },
-  computed: {
-    user() {
-      return this.userStore.user;
-    }
-  },
-  mounted() {
-    this.getGroupData();
-  },
-  watch: {
-    id: function () {
-      this.getGroupData();
-    }
+    const response = await usersApi.details(props.userId);
+    groups.value = response.groups;
+  } else {
+    const response = await groupsApi.search();
+    groups.value = response.groups;
   }
-};
-</script>
+}
 
-<style scoped>
-/* Add custom styles here */
-</style>
+async function addGroup(isActive: { value: boolean }) {
+  const group = await groupsApi.create({ name: editGroup.value.name, description: editGroup.value.description });
+  isActive.value = false;
+  editGroup.value = { name: "", description: "" };
+  await getGroupData();
+  eventBus.emit("displayMessage", { status: "success", message: `Group ${group.name} created succesfully` });
+}
+
+async function patchGroup(groupId: string, isActive: { value: boolean }) {
+  await groupsApi.patch(groupId, editGroup.value);
+  isActive.value = false;
+  editGroup.value = { name: "", description: "" };
+  await getGroupData();
+}
+
+async function deleteGroup(group: Group, isActive: { value: boolean }) {
+  await groupsApi.remove(group.id);
+  isActive.value = false;
+  await getGroupData();
+}
+
+/** The highest-privileged memberships, as chips; the rest collapse into "+N more". */
+function topMemberships(acls: Record<string, RoleRelationship>): Array<RoleRelationship & { name: string }> {
+  return Object.entries(acls)
+    .map(([name, edge]) => ({ ...edge, name }))
+    .sort((a, b) => b.role - a.role)
+    .slice(0, MAX_MEMBER_DISPLAY);
+}
+
+function getPermColor(role: number): string {
+  switch (role) {
+    case 7:
+      return "orange";
+    case 3:
+      return "blue";
+    case 1:
+      return "green";
+    default:
+      return "grey";
+  }
+}
+
+function hasEditPerms(group: Group): boolean {
+  return userStore.hasEditPerms(group);
+}
+
+function hasOwnerPerms(group: Group): boolean {
+  return userStore.hasOwnerPerms(group);
+}
+
+// The profile page reuses this component across users, and the watcher used to
+// be keyed on `id` — a prop that does not exist — so the list never refreshed.
+watch(() => props.userId, getGroupData);
+
+onMounted(getGroupData);
+</script>
