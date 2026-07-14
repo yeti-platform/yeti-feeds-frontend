@@ -46,11 +46,11 @@
 <script lang="ts" setup>
 import axios from "axios";
 
-import { ENTITY_TYPES } from "@/definitions/entityDefinitions.js";
-import { INDICATOR_TYPES } from "@/definitions/indicatorDefinitions.js";
-import { OBSERVABLE_TYPES } from "@/definitions/observableDefinitions.js";
+import { ENTITY_TYPES } from "@/definitions/entityDefinitions";
+import { INDICATOR_TYPES } from "@/definitions/indicatorDefinitions";
+import { OBSERVABLE_TYPES } from "@/definitions/observableDefinitions";
 
-import { LINK_SUGGESTIONS } from "@/definitions/linkSuggestions.js";
+import { LINK_SUGGESTIONS } from "@/definitions/linkSuggestions";
 </script>
 
 <script lang="ts">

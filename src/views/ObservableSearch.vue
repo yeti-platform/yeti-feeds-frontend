@@ -119,7 +119,7 @@
 <script lang="ts" setup>
 import axios from "axios";
 import moment from "moment";
-import { OBSERVABLE_TYPES } from "@/definitions/observableDefinitions.js";
+import { OBSERVABLE_TYPES } from "@/definitions/observableDefinitions";
 import NewObject from "@/components/NewObject.vue";
 
 import _ from "lodash";

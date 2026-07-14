@@ -64,7 +64,7 @@
 </template>
 
 <script lang="ts" setup>
-import { DFIQ_TYPES } from "@/definitions/dfiqDefinitions.js";
+import { DFIQ_TYPES } from "@/definitions/dfiqDefinitions";
 
 import EditDFIQObject from "@/components/DFIQ/EditDFIQObject.vue";
 import ObjectList from "@/components/ObjectList.vue";

@@ -1,6 +1,6 @@
-import { placeholder } from "@babel/types";
+import type { ObjectTypeDefinition } from "@/definitions/types";
 
-export const DFIQ_TYPES = [
+export const DFIQ_TYPES: ObjectTypeDefinition[] = [
   {
     name: "Scenario",
     type: "scenario",
@@ -207,7 +207,7 @@ export const FORM_METADATA = {
       description: "Description of the scenario. What kind of investigation is it supposed to address?"
     },
     rules: {
-      name: [value => !!value || "Required"]
+      name: [(value: unknown) => !!value || "Required"]
     }
   },
   facet: {

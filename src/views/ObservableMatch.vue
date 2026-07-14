@@ -311,8 +311,8 @@
 <script setup lang="ts">
 import axios from "axios";
 import moment from "moment";
-import { OBSERVABLE_TYPES } from "@/definitions/observableDefinitions.js";
-import { ENTITY_TYPES } from "@/definitions/entityDefinitions.js";
+import { OBSERVABLE_TYPES } from "@/definitions/observableDefinitions";
+import { ENTITY_TYPES } from "@/definitions/entityDefinitions";
 import EntitySelector from "@/components/EntitySelector.vue";
 </script>
 

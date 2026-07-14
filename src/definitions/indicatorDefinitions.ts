@@ -1,9 +1,10 @@
-import { PRIVATE_INDICATOR_TYPES } from "@/definitions/private/privateIndicatorDefinitions.js";
+import { PRIVATE_INDICATOR_TYPES } from "@/definitions/private/privateIndicatorDefinitions";
+import type { ObjectTypeDefinition } from "@/definitions/types";
 
 export const DIAMOND_MODEL = ["adversary", "capability", "infrastructure", "victim"];
 export const QUERY_TYPES = ["opensearch", "osquery", "sql", "splunk", "censys", "shodan"];
 
-export const INDICATOR_TYPES = [
+export const INDICATOR_TYPES: ObjectTypeDefinition[] = [
   {
     name: "Forensic artifact",
     type: "forensicartifact",
@@ -187,7 +188,7 @@ export const INDICATOR_TYPES = [
         maxWidth: "500px"
       },
       { field: "pattern", type: "code", label: "Rule text", displayList: false, editable: true },
-      { field: "private", type: "nool", label: "Private", displayList: false, editable: false },
+      { field: "private", type: "bool", label: "Private", displayList: false, editable: false },
       { field: "dependencies", type: "yara", label: "Dependencies", displayList: false, editable: false },
       { field: "tags", type: "list", label: "Tags", displayList: true, editable: false },
       { field: "relevant_tags", type: "list", label: "Relevant tags", displayList: true, editable: true },

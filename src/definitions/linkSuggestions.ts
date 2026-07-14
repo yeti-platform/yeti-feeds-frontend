@@ -1,8 +1,9 @@
-import { PRIVATE_ENTITY_TYPES } from "@/definitions/private/privateEntityDefinitions.js";
-import { PRIVATE_INDICATOR_TYPES } from "@/definitions/private/privateIndicatorDefinitions.js";
-import { PRIVATE_OBSERVABLE_TYPES } from "@/definitions/private/privateObservableDefinitions.js";
+import { PRIVATE_ENTITY_TYPES } from "@/definitions/private/privateEntityDefinitions";
+import { PRIVATE_INDICATOR_TYPES } from "@/definitions/private/privateIndicatorDefinitions";
+import { PRIVATE_OBSERVABLE_TYPES } from "@/definitions/private/privateObservableDefinitions";
+import type { LinkSuggestion } from "@/definitions/types";
 
-export const LINK_SUGGESTIONS = {
+export const LINK_SUGGESTIONS: Record<string, LinkSuggestion[]> = {
   observable: [],
   "attack-pattern": [
     { verb: "delivers", targets: ["malware"] },
@@ -113,16 +114,13 @@ export const LINK_SUGGESTIONS = {
 };
 
 for (const entityType of PRIVATE_ENTITY_TYPES) {
-  console.log(entityType);
   LINK_SUGGESTIONS[entityType.type] = [];
 }
 
 for (const indicatorType of PRIVATE_INDICATOR_TYPES) {
-  console.log(indicatorType);
   LINK_SUGGESTIONS[indicatorType.type] = [];
 }
 
 for (const observableType of PRIVATE_OBSERVABLE_TYPES) {
-  console.log(observableType);
   LINK_SUGGESTIONS[observableType.type] = [];
 }

@@ -166,10 +166,10 @@
 import axios from "axios";
 import moment from "moment";
 
-import { ENTITY_TYPES } from "@/definitions/entityDefinitions.js";
-import { INDICATOR_TYPES } from "@/definitions/indicatorDefinitions.js";
-import { DFIQ_TYPES } from "@/definitions/dfiqDefinitions.js";
-import { OBSERVABLE_TYPES } from "@/definitions/observableDefinitions.js";
+import { ENTITY_TYPES } from "@/definitions/entityDefinitions";
+import { INDICATOR_TYPES } from "@/definitions/indicatorDefinitions";
+import { DFIQ_TYPES } from "@/definitions/dfiqDefinitions";
+import { OBSERVABLE_TYPES } from "@/definitions/observableDefinitions";
 import EditLink from "@/components/EditLink.vue";
 import YetiMarkdown from "@/components/YetiMarkdown.vue";
 

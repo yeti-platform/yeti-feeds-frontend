@@ -125,12 +125,12 @@
 <script lang="ts" setup>
 import axios from "axios";
 
-import { ENTITY_TYPES } from "@/definitions/entityDefinitions.js";
-import { INDICATOR_TYPES } from "@/definitions/indicatorDefinitions.js";
-import { OBSERVABLE_TYPES } from "@/definitions/observableDefinitions.js";
-import { DFIQ_TYPES } from "@/definitions/dfiqDefinitions.js";
+import { ENTITY_TYPES } from "@/definitions/entityDefinitions";
+import { INDICATOR_TYPES } from "@/definitions/indicatorDefinitions";
+import { OBSERVABLE_TYPES } from "@/definitions/observableDefinitions";
+import { DFIQ_TYPES } from "@/definitions/dfiqDefinitions";
 
-import { LINK_SUGGESTIONS } from "@/definitions/linkSuggestions.js";
+import { LINK_SUGGESTIONS } from "@/definitions/linkSuggestions";
 import EntitySelector from "@/components/EntitySelector.vue";
 import NewObject from "@/components/NewObject.vue";
 

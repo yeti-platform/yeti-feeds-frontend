@@ -51,9 +51,9 @@
 <script lang="ts" setup>
 import axios from "axios";
 
-import { ENTITY_TYPES } from "@/definitions/entityDefinitions.js";
-import { INDICATOR_TYPES } from "@/definitions/indicatorDefinitions.js";
-import { DFIQ_TYPES } from "@/definitions/dfiqDefinitions.js";
+import { ENTITY_TYPES } from "@/definitions/entityDefinitions";
+import { INDICATOR_TYPES } from "@/definitions/indicatorDefinitions";
+import { DFIQ_TYPES } from "@/definitions/dfiqDefinitions";
 
 import _ from "lodash";
 </script>
