@@ -179,6 +179,61 @@ test.describe("Observable Details", () => {
     expect(contextPuts[0].context).toEqual([{ source: "VirusTotal", malicious: 9 }]);
   });
 
+  test("links the observable to an entity via the new-link dialog", async ({ page }) => {
+    const graphAdds: Array<Record<string, unknown>> = [];
+
+    // EntitySelector searches all three families.
+    for (const family of ["entities", "indicators", "dfiq"]) {
+      await page.route(`**/api/v2/${family}/search`, async route => {
+        // LinkObject filters the selector to types it suggests for a hostname.
+        // "malware" is one (it communicates-with hostnames); "intrusion-set" is not.
+        const results =
+          family === "entities"
+            ? [{ id: "999", name: "EvilCorp", type: "malware", root_type: "entity" }]
+            : [];
+        await route.fulfill({
+          status: 200,
+          contentType: "application/json",
+          body: JSON.stringify({ [family]: results, total: results.length })
+        });
+      });
+    }
+
+    await page.route("**/api/v2/graph/add", async route => {
+      graphAdds.push(route.request().postDataJSON());
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ id: "newedge" })
+      });
+    });
+
+    await page.goto("/observables/789");
+    await expect(page.getByText("evil.example.com").first()).toBeVisible();
+
+    await page.getByRole("button", { name: "new link..." }).click();
+    // Vuetify renders the menu content twice; only one copy is visible.
+    await page.locator("button:visible", { hasText: "entities / indicators" }).click();
+
+    // Pick the entity in the EntitySelector autocomplete.
+    const dialog = page.locator(".v-overlay--active").last();
+    // The dialog's first input is the "filter on suggested types" checkbox, so
+    // target the text inputs; the EntitySelector autocomplete is the first.
+    await dialog.locator('input[type="text"]').first().click();
+    await page.getByRole("button", { name: "EvilCorp" }).first().click();
+
+    await dialog.getByRole("button", { name: "Save" }).click();
+
+    await expect.poll(() => graphAdds.length).toBe(1);
+    // The direction follows the suggested link type: malware
+    // --communicates-with--> hostname, so the entity is the source.
+    expect(graphAdds[0]).toMatchObject({
+      source: "entity/999",
+      target: "observable/789",
+      link_type: "communicates-with"
+    });
+  });
+
   test("saves tags on the observable", async ({ page }) => {
     const tagRequests: Array<Record<string, unknown>> = [];
 

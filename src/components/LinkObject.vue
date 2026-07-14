@@ -110,191 +110,154 @@
       <v-btn text="Cancel" color="cancel" @click="isActive.value = false"></v-btn>
       <v-btn text="Save" :disabled="linkTarget === null" @click="createLink"></v-btn>
     </v-card-actions>
-    <v-alert v-if="errors.length > 0" type="error">
-      Error saving {{ typeDefinition.name }}:
-      <ul>
-        <li v-for="error in errors">
-          <strong>{{ error.field }}</strong
-          >: {{ error.message }}
-        </li>
-      </ul>
-    </v-alert>
   </v-card>
 </template>
 
-<script lang="ts" setup>
-import axios from "axios";
+<script setup lang="ts">
+import { computed, ref } from "vue";
 
-import { ENTITY_TYPES } from "@/definitions/entityDefinitions";
-import { INDICATOR_TYPES } from "@/definitions/indicatorDefinitions";
-import { OBSERVABLE_TYPES } from "@/definitions/observableDefinitions";
-import { DFIQ_TYPES } from "@/definitions/dfiqDefinitions";
-
-import { LINK_SUGGESTIONS } from "@/definitions/linkSuggestions";
 import EntitySelector from "@/components/EntitySelector.vue";
 import NewObject from "@/components/NewObject.vue";
+import { ENTITY_TYPES } from "@/definitions/entityDefinitions";
+import { INDICATOR_TYPES } from "@/definitions/indicatorDefinitions";
+import { LINK_SUGGESTIONS } from "@/definitions/linkSuggestions";
+import type { LinkSuggestion } from "@/definitions/types";
+import { getIconForType } from "@/definitions/typeIcons";
+import { eventBus } from "@/plugins/eventbus";
+import * as graphApi from "@/services/graph";
+import type { LooseYetiObject } from "@/services/types";
 
-import _ from "lodash";
-</script>
+const props = defineProps<{
+  object: LooseYetiObject;
+  isActive: { value: boolean };
+}>();
 
-<script lang="ts">
-export default {
-  props: {
-    object: {
-      type: Object,
-      default: () => {}
-    },
-    isActive: {
-      type: Object,
-      default: () => {}
-    }
-  },
-  components: {
-    EntitySelector,
-    NewObject
-  },
-  data() {
-    return {
-      errors: [],
-      items: [],
-      linkTarget: null,
-      linkType: "",
-      linkDescription: "",
-      autocompleteLoading: false,
-      filterRecommended: true,
-      linkDirectionOutgoing: true,
-      entityTypes: ENTITY_TYPES,
-      indicatorTypes: INDICATOR_TYPES,
-      fullScreenEdit: false,
-      editWidth: "75%",
-      newEntityMenu: false,
-      newIndicatorMenu: false
-    };
-  },
-  methods: {
-    createLink() {
-      let source = this.linkDirectionOutgoing ? this.object : this.linkTarget;
-      let target = this.linkDirectionOutgoing ? this.linkTarget : this.object;
+const entityTypes = ENTITY_TYPES;
+const indicatorTypes = INDICATOR_TYPES;
 
-      axios
-        .post("/api/v2/graph/add", {
-          source: `${source.root_type}/${source.id}`,
-          target: `${target.root_type}/${target.id}`,
-          link_type: this.linkType,
-          description: this.linkDescription
-        })
-        .then(response => {
-          this.isActive.value = false;
-          this.$eventBus.emit("displayMessage", {
-            message: `Link succesfully created`,
-            status: "success"
-          });
-          const linkData = {
-            source: {
-              id: source.id,
-              root_type: source.root_type,
-              type: source.type,
-              name: source.name
-            },
-            target: {
-              id: target.id,
-              root_type: target.root_type,
-              type: target.type,
-              name: target.name
-            },
-            link_type: this.linkType,
-            description: this.linkDescription,
-            id: response.data.id
-          };
-          this.$eventBus.emit("linkCreated", linkData);
-        })
-        .catch(error => {
-          this.errors = error.response.data.errors;
-        });
-    },
-    targetSelected(target) {
-      this.linkTarget = target;
-      this.linkType = this.getLinkTypeSuggestions.length ? this.getLinkTypeSuggestions[0] : "";
-      this.checkLinkDirection(this.linkType);
-    },
-    checkLinkDirection(linkType) {
-      if (this.getOutgoingLinkTypeSuggestions.includes(linkType)) {
-        this.linkDirectionOutgoing = true;
-      } else if (this.getIncomingLinkTypeSuggestions.includes(linkType)) {
-        this.linkDirectionOutgoing = false;
-      } else {
-        this.linkDirectionOutgoing = true;
-      }
-    },
-    getIconForType(type) {
-      return (
-        ENTITY_TYPES.find(t => t.type === type) ||
-        INDICATOR_TYPES.find(t => t.type === type) ||
-        OBSERVABLE_TYPES.find(t => t.type === type) ||
-        DFIQ_TYPES.find(t => t.type === type)
-      ).icon;
-    },
-    toggleNewObjectFullscreen(fullscreen: boolean) {
-      this.fullScreenEdit = !this.fullScreenEdit;
-      this.editWidth = fullscreen ? "100%" : "75%";
-    },
-    assignLinkTarget(target) {
-      this.linkTarget = target;
-      this.newEntityMenu = false;
-      this.newIndicatorMenu = false;
-    }
-  },
-  computed: {
-    getSuggestedTypes() {
-      let outgoingTypes = [
-        ...new Set(
-          (LINK_SUGGESTIONS[this.object.type] || LINK_SUGGESTIONS[this.object.root_type]).flatMap(
-            entry => entry.targets
-          )
-        )
-      ];
-      let incomingTypes = [
-        ...new Set(
-          Object.keys(LINK_SUGGESTIONS).filter(key =>
-            LINK_SUGGESTIONS[key].some(
-              entry => entry.targets.includes(this.object.type) || entry.targets.includes(this.object.root_type)
-            )
-          )
-        )
-      ];
-      return [...new Set(outgoingTypes.concat(incomingTypes))];
-    },
-    getOutgoingLinkTypeSuggestions() {
-      return (LINK_SUGGESTIONS[this.object.type] || LINK_SUGGESTIONS[this.object.root_type])
-        .filter(
-          suggestion =>
-            suggestion.targets.includes(this.linkTarget.type) || suggestion.targets.includes(this.linkTarget.root_type)
-        )
-        .map(suggestion => suggestion.verb);
-    },
-    getIncomingLinkTypeSuggestions() {
-      return (LINK_SUGGESTIONS[this.linkTarget.type] || LINK_SUGGESTIONS[this.linkTarget.root_type])
-        .filter(
-          suggestion =>
-            suggestion.targets.includes(this.object.type) || suggestion.targets.includes(this.object.root_type)
-        )
-        .map(suggestion => suggestion.verb);
-    },
-    getLinkTypeSuggestions() {
-      if (!this.object || !this.linkTarget) {
-        return [];
-      }
-      return [...new Set(this.getOutgoingLinkTypeSuggestions.concat(this.getIncomingLinkTypeSuggestions))];
-    },
-    getLinkTypeLabel() {
-      if (this.getLinkTypeSuggestions.length === 0 || this.linkTarget === null) {
-        return "Link type";
-      } else {
-        return `Link type (suggestions for ${this.object.type} → ${this.linkTarget.type} links)`;
-      }
-    }
+const linkTarget = ref<LooseYetiObject | null>(null);
+const linkType = ref("");
+const linkDescription = ref("");
+const autocompleteLoading = ref(false);
+const filterRecommended = ref(true);
+const linkDirectionOutgoing = ref(true);
+const fullScreenEdit = ref(false);
+const editWidth = ref("75%");
+const newEntityMenu = ref(false);
+const newIndicatorMenu = ref(false);
+
+/**
+ * The link suggestions for an object, looked up by its type and falling back to
+ * its root type. An object with neither returns none — the old code did
+ * `(LINK_SUGGESTIONS[a] || LINK_SUGGESTIONS[b]).filter(...)` and threw a
+ * TypeError when both were missing.
+ */
+function suggestionsFor(object: LooseYetiObject | null): LinkSuggestion[] {
+  if (!object) {
+    return [];
   }
-};
+  return LINK_SUGGESTIONS[object.type] ?? LINK_SUGGESTIONS[object.root_type] ?? [];
+}
+
+/** Link verbs that go from `object` to `linkTarget`. */
+const getOutgoingLinkTypeSuggestions = computed(() =>
+  suggestionsFor(props.object)
+    .filter(
+      suggestion =>
+        suggestion.targets.includes(linkTarget.value?.type) ||
+        suggestion.targets.includes(linkTarget.value?.root_type)
+    )
+    .map(suggestion => suggestion.verb)
+);
+
+/** Link verbs that go from `linkTarget` back to `object`. */
+const getIncomingLinkTypeSuggestions = computed(() =>
+  suggestionsFor(linkTarget.value)
+    .filter(
+      suggestion =>
+        suggestion.targets.includes(props.object?.type) ||
+        suggestion.targets.includes(props.object?.root_type)
+    )
+    .map(suggestion => suggestion.verb)
+);
+
+const getLinkTypeSuggestions = computed(() => {
+  if (!props.object || !linkTarget.value) {
+    return [];
+  }
+  return [...new Set(getOutgoingLinkTypeSuggestions.value.concat(getIncomingLinkTypeSuggestions.value))];
+});
+
+/** Object types it makes sense to link this object to, in either direction. */
+const getSuggestedTypes = computed(() => {
+  const outgoing = suggestionsFor(props.object).flatMap(entry => entry.targets);
+  const incoming = Object.keys(LINK_SUGGESTIONS).filter(key =>
+    LINK_SUGGESTIONS[key].some(
+      entry => entry.targets.includes(props.object?.type) || entry.targets.includes(props.object?.root_type)
+    )
+  );
+  return [...new Set([...outgoing, ...incoming])];
+});
+
+const getLinkTypeLabel = computed(() => {
+  if (getLinkTypeSuggestions.value.length === 0 || linkTarget.value === null) {
+    return "Link type";
+  }
+  return `Link type (suggestions for ${props.object.type} \u2192 ${linkTarget.value.type} links)`;
+});
+
+function checkLinkDirection(type: string) {
+  if (getOutgoingLinkTypeSuggestions.value.includes(type)) {
+    linkDirectionOutgoing.value = true;
+  } else if (getIncomingLinkTypeSuggestions.value.includes(type)) {
+    linkDirectionOutgoing.value = false;
+  } else {
+    linkDirectionOutgoing.value = true;
+  }
+}
+
+function targetSelected(target: LooseYetiObject | null) {
+  linkTarget.value = target;
+  linkType.value = getLinkTypeSuggestions.value.length ? getLinkTypeSuggestions.value[0] : "";
+  checkLinkDirection(linkType.value);
+}
+
+function assignLinkTarget(target: LooseYetiObject) {
+  linkTarget.value = target;
+  newEntityMenu.value = false;
+  newIndicatorMenu.value = false;
+}
+
+function toggleNewObjectFullscreen(fullscreen: boolean) {
+  fullScreenEdit.value = !fullScreenEdit.value;
+  editWidth.value = fullscreen ? "100%" : "75%";
+}
+
+async function createLink() {
+  if (!linkTarget.value) {
+    return;
+  }
+  const source = linkDirectionOutgoing.value ? props.object : linkTarget.value;
+  const target = linkDirectionOutgoing.value ? linkTarget.value : props.object;
+
+  const created = (await graphApi.add({
+    source: `${source.root_type}/${source.id}`,
+    target: `${target.root_type}/${target.id}`,
+    link_type: linkType.value,
+    description: linkDescription.value
+  } as Parameters<typeof graphApi.add>[0])) as LooseYetiObject;
+
+  props.isActive.value = false;
+  eventBus.emit("displayMessage", { message: "Link succesfully created", status: "success" });
+
+  eventBus.emit("linkCreated", {
+    source: { id: source.id, root_type: source.root_type, type: source.type, name: source.name },
+    target: { id: target.id, root_type: target.root_type, type: target.type, name: target.name },
+    link_type: linkType.value,
+    description: linkDescription.value,
+    id: created?.id
+  });
+}
 </script>
 
 <style>
