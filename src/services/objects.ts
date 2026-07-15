@@ -47,6 +47,20 @@ export async function create(rootType: CreatableRootType, body: LooseYetiObject)
 }
 
 /**
+ * Patches an object from the generic EditObject form. Like create(), the body
+ * is built dynamically from field definitions (LooseYetiObject) and wrapped
+ * under the root_type key.
+ */
+export async function patch(rootType: RootType, id: string, body: LooseYetiObject): Promise<LooseYetiObject> {
+  const { data } = await http.patch<LooseYetiObject>(`/${ENDPOINTS[rootType]}/${id}`, { [rootType]: body });
+  return data;
+}
+
+export async function remove(rootType: RootType, id: string): Promise<void> {
+  await http.delete(`/${ENDPOINTS[rootType]}/${id}`);
+}
+
+/**
  * Searches one object family by its endpoint segment ("entities", "indicators",
  * "dfiq", ...), for the generic ObjectList.
  *

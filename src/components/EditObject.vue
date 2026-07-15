@@ -1,7 +1,7 @@
 <template>
   <v-card>
     <v-card-title>{{ object.name || object.value }}</v-card-title>
-    <v-card-subtitle>Editing {{ typeDefinition.name }}</v-card-subtitle>
+    <v-card-subtitle>Editing {{ typeDefinition?.name }}</v-card-subtitle>
     <v-card-text>
       <object-fields :fields="editableFields" :object="localObject" />
     </v-card-text>
@@ -20,7 +20,7 @@
       <v-btn text="Save" color="primary" @click="saveObject" variant="tonal"></v-btn>
     </v-card-actions>
     <v-alert v-if="errors.length > 0" type="error">
-      Error saving {{ typeDefinition.name }}:
+      Error saving {{ typeDefinition?.name }}:
       <ul>
         <li v-for="error in errors">
           <strong>{{ error.field }}</strong
@@ -43,125 +43,122 @@
 </template>
 
 <script lang="ts" setup>
-import axios from "axios";
+import { AxiosError } from "axios";
+import { computed, ref } from "vue";
+import { useRouter } from "vue-router";
 
+import ObjectFields from "@/components/ObjectFields.vue";
+import { DFIQ_TYPES } from "@/definitions/dfiqDefinitions";
 import { ENTITY_TYPES } from "@/definitions/entityDefinitions";
 import { INDICATOR_TYPES } from "@/definitions/indicatorDefinitions";
 import { OBSERVABLE_TYPES } from "@/definitions/observableDefinitions";
-import { DFIQ_TYPES } from "@/definitions/dfiqDefinitions";
-import ObjectFields from "@/components/ObjectFields.vue";
+import type { FieldDefinition, ObjectTypeDefinition } from "@/definitions/types";
+import { eventBus } from "@/plugins/eventbus";
+import * as objectsApi from "@/services/objects";
+import type { LooseYetiObject, RootType } from "@/services/types";
 import { useUserStore } from "@/store/user";
-</script>
 
-<script lang="ts">
-export default {
-  components: { ObjectFields },
-  props: {
-    object: {
-      type: Object,
-      default: () => {}
-    },
-    isActive: {
-      type: Object,
-      default: () => {}
-    }
-  },
-  data() {
-    return {
-      localObject: { ...this.object },
-      errors: [],
-      fullScreen: false,
-      typeToEndpointMapping: {
-        entity: "entities",
-        observable: "observables",
-        indicator: "indicators",
-        dfiq: "dfiq"
-      },
-      dialogDelete: false,
-      userStore: useUserStore()
-    };
-  },
-  mounted() {},
-  methods: {
-    saveObject() {
-      let patchRequest = {
-        type: this.object.type,
-        id: this.object.id
-      };
-      this.editableFields.forEach(field => {
-        patchRequest[field.field] = this.localObject[field.field];
-      });
-
-      axios
-        .patch(`/api/v2/${this.typeToEndpointMapping[this.object.root_type]}/${this.object.id}`, {
-          [this.object.root_type]: patchRequest
-        })
-        .then(response => {
-          this.$eventBus.emit("displayMessage", {
-            message: `${this.object.name || "Observable"} succesfully updated`,
-            status: "success"
-          });
-          this.$emit("success", response.data);
-          this.isActive.value = false;
-        })
-        .catch(error => {
-          if (error.response.status === 422) {
-            this.errors = error.response.data.detail.map(detail => {
-              return { field: detail.loc[3], message: detail.msg };
-            });
-          } else {
-            this.errors = [{ field: "details", message: error.response.data.detail }];
-            return;
-          }
-        })
-        .finally();
-    },
-    deleteObject() {
-      axios
-        .delete(`/api/v2/${this.typeToEndpointMapping[this.object.root_type]}/${this.object.id}`)
-        .then(response => {
-          this.$eventBus.emit("displayMessage", {
-            message: `${this.object.name || "Observable"} succesfully deleted`,
-            status: "success"
-          });
-          this.$emit("success", response.data);
-          this.isActive.value = false;
-          this.$router.replace({ path: `/${this.typeToEndpointMapping[this.object.root_type]}` });
-        })
-        .catch(error => {
-          this.errors = [{ field: "details", message: error.response.data.detail }];
-          return;
-        })
-        .finally();
-    },
-    toggleFullScreen() {
-      this.fullScreen = !this.fullScreen;
-      this.$emit("toggle-fullscreen", this.fullScreen);
-    }
-  },
-  computed: {
-    user() {
-      return this.userStore.user;
-    },
-    typeDefinition() {
-      return (
-        ENTITY_TYPES.find(t => t.type === this.object.type) ||
-        INDICATOR_TYPES.find(t => t.type === this.object.type) ||
-        OBSERVABLE_TYPES.find(t => t.type === this.object.type) ||
-        DFIQ_TYPES.find(t => t.type === this.object.type)
-      );
-    },
-    editableFields() {
-      return this.typeDefinition.fields.filter(field => field.editable);
-    },
-    hasEditPerms() {
-      return this.userStore.hasEditPerms(this.object);
-    },
-    hasOwnerPerms() {
-      return this.userStore.hasOwnerPerms(this.object);
-    }
+const props = withDefaults(
+  defineProps<{
+    object?: LooseYetiObject;
+    /** Vuetify's dialog activator ref; set .value = false to close. */
+    isActive?: { value: boolean };
+  }>(),
+  {
+    object: () => ({}),
+    isActive: () => ({ value: false })
   }
-};
+);
+
+const emit = defineEmits<{
+  success: [object: LooseYetiObject];
+  "toggle-fullscreen": [fullScreen: boolean];
+}>();
+
+const router = useRouter();
+const userStore = useUserStore();
+
+interface FieldError {
+  field: string;
+  message: string;
+}
+
+/** FastAPI 422 body: {detail: [{loc, msg, type}, ...]}. */
+interface ValidationErrorDetail {
+  loc: (string | number)[];
+  msg: string;
+}
+
+const localObject = ref<LooseYetiObject>({ ...props.object });
+const errors = ref<FieldError[]>([]);
+const fullScreen = ref(false);
+const dialogDelete = ref(false);
+
+const typeDefinition = computed<ObjectTypeDefinition | undefined>(
+  () =>
+    ENTITY_TYPES.find(t => t.type === props.object.type) ||
+    INDICATOR_TYPES.find(t => t.type === props.object.type) ||
+    OBSERVABLE_TYPES.find(t => t.type === props.object.type) ||
+    DFIQ_TYPES.find(t => t.type === props.object.type)
+);
+
+const editableFields = computed<FieldDefinition[]>(() => typeDefinition.value?.fields.filter(f => f.editable) ?? []);
+
+const hasOwnerPerms = computed(() => userStore.hasOwnerPerms(props.object));
+
+function applyError(error: unknown) {
+  if (!(error instanceof AxiosError) || !error.response) {
+    throw error;
+  }
+  if (error.response.status === 422) {
+    const details = error.response.data.detail as ValidationErrorDetail[];
+    errors.value = details.map(detail => ({ field: String(detail.loc[3]), message: detail.msg }));
+  } else {
+    errors.value = [{ field: "details", message: String(error.response.data.detail) }];
+  }
+}
+
+async function saveObject() {
+  const rootType = props.object.root_type as RootType;
+  const patchRequest: LooseYetiObject = { type: props.object.type, id: props.object.id };
+  editableFields.value.forEach(field => {
+    patchRequest[field.field] = localObject.value[field.field];
+  });
+
+  errors.value = [];
+  try {
+    const saved = await objectsApi.patch(rootType, props.object.id, patchRequest);
+    eventBus.emit("displayMessage", {
+      message: `${props.object.name || "Observable"} succesfully updated`,
+      status: "success"
+    });
+    emit("success", saved);
+    props.isActive.value = false;
+  } catch (error) {
+    applyError(error);
+  }
+}
+
+async function deleteObject() {
+  const rootType = props.object.root_type as RootType;
+  try {
+    await objectsApi.remove(rootType, props.object.id);
+    eventBus.emit("displayMessage", {
+      message: `${props.object.name || "Observable"} succesfully deleted`,
+      status: "success"
+    });
+    emit("success", props.object);
+    props.isActive.value = false;
+    router.replace({ path: `/${objectsApi.ENDPOINTS[rootType]}` });
+  } catch (error) {
+    applyError(error);
+  }
+}
+
+function toggleFullScreen() {
+  fullScreen.value = !fullScreen.value;
+  emit("toggle-fullscreen", fullScreen.value);
+}
 </script>
 
 <style>
