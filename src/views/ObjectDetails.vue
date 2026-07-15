@@ -363,7 +363,7 @@ function navigateToFirstPopulatedTab() {
   }
   const tabKeys = objectTypes.entity
     .map(entityType => entityType.type)
-    .concat(["indicators", "observables", "tagged", "dfiq"]);
+    .concat(["indicators", "observables", "dfiq"]);
 
   for (const key of tabKeys) {
     if (relatedObjectTabCount.value[key] > 0) {

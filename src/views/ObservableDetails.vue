@@ -195,7 +195,7 @@
             >
             <v-tab value="related-entities"
               ><v-icon size="x-large" start>mdi-brain</v-icon>Related entities
-              <v-chip class="ml-3" density="comfortable">{{ totalRelatedEntities + totalTaggedRelationships }}</v-chip>
+              <v-chip class="ml-3" density="comfortable">{{ totalRelatedEntities }}</v-chip>
             </v-tab>
             <v-tab value="related-indicators"
               ><v-icon size="x-large" start>mdi-magnify</v-icon>Related indicators
@@ -217,24 +217,12 @@
             </v-window-item>
 
             <v-window-item value="related-entities" eager>
-              <v-card title="Direct links">
-                <direct-neighbors
-                  :id="id"
-                  source-type="observables"
-                  :target-types="entityTypes.map(def => def.type)"
-                  @totalUpdated="value => (totalRelatedEntities = value)"
-                />
-              </v-card>
-              <v-card title="Tagged">
-                <related-objects
-                  :id="id"
-                  source-type="observables"
-                  :hops="2"
-                  graph="tagged"
-                  :target-types="entityTypes.map(def => def.type)"
-                  @totalUpdated="value => (totalTaggedRelationships = value)"
-                ></related-objects>
-              </v-card>
+              <direct-neighbors
+                :id="id"
+                source-type="observables"
+                :target-types="entityTypes.map(def => def.type)"
+                @totalUpdated="value => (totalRelatedEntities = value)"
+              />
             </v-window-item>
             <v-window-item value="related-indicators" eager>
               <direct-neighbors
@@ -262,7 +250,6 @@ import GraphObjects from "@/components/GraphObjects.vue";
 import LinkObject from "@/components/LinkObject.vue";
 import LinkObservables from "@/components/LinkObservables.vue";
 import ObjectContext from "@/components/ObjectContext.vue";
-import RelatedObjects from "@/components/RelatedObjects.vue";
 import TaskList from "@/components/TaskList.vue";
 import Timeline from "@/components/Timeline.vue";
 
@@ -291,7 +278,6 @@ const observable = ref<LooseYetiObject | null>(null);
 const observableTags = ref<string[]>([]);
 const activeTab = ref(0);
 const totalRelatedObservables = ref(0);
-const totalTaggedRelationships = ref(0);
 const totalRelatedEntities = ref(0);
 const totalRelatedIndicators = ref(0);
 const editWidth = ref<string | number>(600);
