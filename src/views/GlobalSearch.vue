@@ -6,7 +6,7 @@
           prepend-inner-icon="mdi-magnify"
           v-model="textSearch"
           label="Search for anything..."
-          @keyup.enter="loadOjects({ page: page, itemsPerPage: perPage, sortBy: [] })"
+          @keyup.enter="searchNow"
         />
         <v-progress-linear v-show="loading" class="mt-3" color="primary" indeterminate></v-progress-linear>
       </v-col>
@@ -33,9 +33,7 @@
             :sort-by="sortBy"
           >
             <template v-slot:item.name="{ item }">
-              <router-link :to="`${typeToEndpointMapping[item.root_type]}/${item.id}`">{{
-                item.name || item.value
-              }}</router-link>
+              <router-link :to="`${endpointFor(item.root_type)}/${item.id}`">{{ item.name || item.value }}</router-link>
             </template>
 
             <template v-slot:item.type="{ item }">
@@ -57,99 +55,91 @@
 </template>
 
 <script setup lang="ts">
-import axios, { all } from "axios";
+import _ from "lodash";
 import moment from "moment";
-import { OBSERVABLE_TYPES } from "@/definitions/observableDefinitions";
+import { onMounted, ref, watch } from "vue";
+import { useRoute, useRouter } from "vue-router";
+
+import { DFIQ_TYPES } from "@/definitions/dfiqDefinitions";
 import { ENTITY_TYPES } from "@/definitions/entityDefinitions";
 import { INDICATOR_TYPES } from "@/definitions/indicatorDefinitions";
-import { DFIQ_TYPES } from "@/definitions/dfiqDefinitions";
-import EntitySelector from "@/components/EntitySelector.vue";
-import router from "@/router";
-import _ from "lodash";
-</script>
+import { OBSERVABLE_TYPES } from "@/definitions/observableDefinitions";
+import { ENDPOINTS } from "@/services/objects";
+import * as searchApi from "@/services/search";
+import type { LooseYetiObject, RootType } from "@/services/types";
 
-<script lang="ts">
-export default {
-  name: "ObservableMatch",
-  components: {
-    EntitySelector
-  },
-  data() {
-    return {
-      textSearch: this.$route.query.q,
-      searchResults: null,
-      loading: false,
-      page: 1,
-      perPage: 50,
-      sortBy: [{ key: "name", order: "asc" }],
-      total: 1000,
-      headers: {
-        type: Array,
-        default: () => [
-          { title: "Name", key: "name" },
-          { title: "Type", key: "type" },
-          { title: "Tags", key: "tags" },
-          { title: "Created on", key: "created", width: "200px" }
-        ]
-      },
-      typeToEndpointMapping: {
-        entity: "entities",
-        observable: "observables",
-        indicator: "indicators",
-        dfiq: "dfiq"
-      }
-    };
-  },
-  methods: {
-    loadOjects({ page, itemsPerPage, sortBy }) {
-      let params = {
-        query: { name: this.textSearch },
-        filter_aliases: [
-          ["value", "text"],
-          ["tags", ""],
-          ["dfiq_tags", "list"]
-        ],
-        page: page - 1,
-        count: itemsPerPage,
-        sorting: sortBy.map(sort => [sort.key, sort.order === "asc"])
-      };
-      this.loading = true;
-      axios
-        .post("/api/v2/search/", params)
-        .then(response => {
-          this.searchResults = response.data.results;
-          this.total = response.data.total;
-        })
-        .catch(error => {
-          console.error("Error loading objects:", error);
-        })
-        .finally(() => {
-          this.loading = false;
-        });
-    },
-    loadObjectDebounced: _.debounce(function (params) {
-      this.loadOjects(params);
-    }, 200),
-    getIconForType(type) {
-      return (
-        ENTITY_TYPES.find(t => t.type === type)?.icon ||
-        OBSERVABLE_TYPES.find(t => t.type === type)?.icon ||
-        INDICATOR_TYPES.find(t => t.type === type)?.icon ||
-        DFIQ_TYPES.find(t => t.type === type)?.icon ||
-        "mdi-help-circle"
-      );
-    }
-  },
-  mounted() {
-    this.textSearch = this.$route.query.q || "";
-    this.loadOjects({ page: this.page, itemsPerPage: this.perPage, sortBy: this.sortBy });
-  },
-  watch: {
-    textSearch() {
-      router.replace({ query: { q: this.textSearch } });
-    }
+/** Vuetify's v-data-table-server emits these on @update:options. */
+interface SortItem {
+  key: string;
+  order?: boolean | "asc" | "desc";
+}
+interface TableOptions {
+  page: number;
+  itemsPerPage: number;
+  sortBy: SortItem[];
+}
+
+const route = useRoute();
+const router = useRouter();
+
+/** Maps a result's root_type to its details-route endpoint segment. */
+function endpointFor(rootType: string): string {
+  return ENDPOINTS[rootType as RootType] ?? "";
+}
+
+const textSearch = ref(typeof route.query.q === "string" ? route.query.q : "");
+const searchResults = ref<LooseYetiObject[] | null>(null);
+const loading = ref(false);
+const page = ref(1);
+const perPage = ref(50);
+const sortBy = ref<SortItem[]>([{ key: "name", order: "asc" }]);
+const total = ref(1000);
+
+async function loadObjects({ page: requestedPage, itemsPerPage, sortBy: requestedSort }: TableOptions) {
+  loading.value = true;
+  try {
+    const response = await searchApi.search({
+      query: { name: textSearch.value },
+      filter_aliases: [
+        ["value", "text"],
+        ["tags", ""],
+        ["dfiq_tags", "list"]
+      ],
+      page: requestedPage - 1,
+      count: itemsPerPage,
+      sorting: requestedSort.map(sort => [sort.key, sort.order === "asc"])
+    });
+    searchResults.value = response.results;
+    total.value = response.total;
+  } finally {
+    // Errors already surfaced by the http interceptor's snackbar.
+    loading.value = false;
   }
-};
-</script>
+}
 
-<style lang="scss"></style>
+const loadObjectDebounced = _.debounce((options: TableOptions) => {
+  loadObjects(options);
+}, 200);
+
+function searchNow() {
+  loadObjects({ page: page.value, itemsPerPage: perPage.value, sortBy: sortBy.value });
+}
+
+function getIconForType(type: string): string {
+  return (
+    ENTITY_TYPES.find(t => t.type === type)?.icon ||
+    OBSERVABLE_TYPES.find(t => t.type === type)?.icon ||
+    INDICATOR_TYPES.find(t => t.type === type)?.icon ||
+    DFIQ_TYPES.find(t => t.type === type)?.icon ||
+    "mdi-help-circle"
+  );
+}
+
+onMounted(() => {
+  searchNow();
+});
+
+watch(textSearch, () => {
+  router.replace({ query: { q: textSearch.value } });
+});
+</script>

@@ -110,6 +110,10 @@ export type GraphMatchIndicator = GraphMatchResponse["matches"][number][1];
 export type BloomSearchRequest = Schemas["BloomSearchRequest"];
 export type BloomHit = Schemas["BloomHit"];
 
+// Global search
+export type SearchRequest = Schemas["SearchRequest"];
+export type SearchResponse = Schemas["SearchResponse"];
+
 // Context (shared across observable/entity/indicator)
 export type AddContextRequest = Schemas["AddContextRequest"];
 export type ReplaceContextRequest = Schemas["ReplaceContextRequest"];
