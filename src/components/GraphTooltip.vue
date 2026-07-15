@@ -1,23 +1,19 @@
-
 <template>
-  <v-container style="border-style: solid; border-radius: 10px; margin: 0px; padding: 0;">
-    <v-card v-if="model" variant="flat" borde="xs"
-    :title="model.label"
-    :prepend-icon=getIconForType(model?.object_type)
-    >
-    <v-divider> </v-divider>
-    <v-table>      
+  <v-container style="border-style: solid; border-radius: 10px; margin: 0px; padding: 0">
+    <v-card v-if="model" variant="flat" :title="model.label" :prepend-icon="getIconForType(model?.object_type)">
+      <v-divider> </v-divider>
+      <v-table>
         <tbody>
           <tr>
             <td>Type</td>
             <td>{{ model.object_type }}</td>
           </tr>
-          <tr v-for="[key, value], i of Object.entries(model)">
-            <template v-if="!skipped_keys.includes(key)">
+          <template v-for="[key, value] in Object.entries(model)" :key="key">
+            <tr v-if="!skippedKeys.includes(key)">
               <td>{{ key }}</td>
               <td>{{ value }}</td>
-            </template>
-          </tr>
+            </tr>
+          </template>
         </tbody>
       </v-table>
     </v-card>
@@ -25,45 +21,19 @@
 </template>
 
 <script lang="ts" setup>
-
-const model = defineModel()
-
+import { DFIQ_TYPES } from "@/definitions/dfiqDefinitions";
 import { ENTITY_TYPES } from "@/definitions/entityDefinitions";
 import { INDICATOR_TYPES } from "@/definitions/indicatorDefinitions";
 import { OBSERVABLE_TYPES } from "@/definitions/observableDefinitions";
-import { DFIQ_TYPES } from "@/definitions/dfiqDefinitions";
+import type { ObjectTypeDefinition } from "@/definitions/types";
+import type { LooseYetiObject } from "@/services/types";
 
-</script>
+const model = defineModel<LooseYetiObject | null>();
 
-<script lang="ts">
+const objectTypes: ObjectTypeDefinition[] = ENTITY_TYPES.concat(INDICATOR_TYPES, DFIQ_TYPES, OBSERVABLE_TYPES);
+const skippedKeys = ["object_type", "id", "yeti_object_id", "label", "last_analysis", "aliases", "description"];
 
-export default {
-  name: "GraphTooltip",
-
-
-  data() {
-    return {
-      hops: [1, 2],
-      graph_layout: "circular",
-      skipped_keys: ['object_type', 'id', 'yeti_object_id', 'label', 'last_analysis', 'aliases', 'description'],
-      objectTypes: ENTITY_TYPES.concat(INDICATOR_TYPES).concat(DFIQ_TYPES).concat(OBSERVABLE_TYPES),
-    };
-  },
-
-  mounted() {
-    console.log("GraphTooltip mounted");
-  },
-
-  methods: {
-    getIconForType(type: string) {
-      return this.objectTypes.find(objectType => objectType.type === type)?.icon;
-    },
-  },
-
-  renderKey(key: string)
-  {
-    return !this.dont_render.includes(key);
-  }
-};
-
+function getIconForType(type?: string): string | undefined {
+  return objectTypes.find(objectType => objectType.type === type)?.icon;
+}
 </script>
