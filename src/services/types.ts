@@ -49,6 +49,10 @@ export type Tag = Schemas["Tag"];
 export type TagSearchRequest = Schemas["TagSearchRequest"];
 export type TagSearchResponse = Schemas["TagSearchResponse"];
 export type TagMultipleGetRequest = Schemas["TagMultipleGetRequest"];
+/** Body of PUT /tags/{id} — a full replacement, not a partial patch. */
+export type TagUpdateRequest = Schemas["UpdateRequest"];
+export type MergeTagRequest = Schemas["MergeTagRequest"];
+export type MergeTagResult = Schemas["MergeTagResult"];
 
 // Users
 export type User = Schemas["User"];
