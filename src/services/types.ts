@@ -101,6 +101,14 @@ export type GraphSearchRequest = Schemas["GraphSearchRequest"];
 export type GraphSearchResponse = Schemas["GraphSearchResponse"];
 export type GraphAddRequest = Schemas["GraphAddRequest"];
 export type GraphPatchRequest = Schemas["GraphPatchRequest"];
+export type GraphMatchRequest = Schemas["AnalysisRequest"];
+export type GraphMatchResponse = Schemas["AnalysisResponse"];
+export type GraphMatchEntity = GraphMatchResponse["entities"][number][1];
+export type GraphMatchIndicator = GraphMatchResponse["matches"][number][1];
+
+// Bloom filter
+export type BloomSearchRequest = Schemas["BloomSearchRequest"];
+export type BloomHit = Schemas["BloomHit"];
 
 // Context (shared across observable/entity/indicator)
 export type AddContextRequest = Schemas["AddContextRequest"];
