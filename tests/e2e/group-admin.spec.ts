@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 /**
  * Covers views/GroupAdmin.vue -> GroupList (memberships-only: false) and the

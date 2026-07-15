@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 /** Covers views/Login.vue and the auth flow through the user store. */
 
