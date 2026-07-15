@@ -101,6 +101,8 @@ export type GraphSearchRequest = Schemas["GraphSearchRequest"];
 export type GraphSearchResponse = Schemas["GraphSearchResponse"];
 export type GraphAddRequest = Schemas["GraphAddRequest"];
 export type GraphPatchRequest = Schemas["GraphPatchRequest"];
+/** An edge between two Yeti objects (source/target/type/description). */
+export type Relationship = Schemas["Relationship"];
 export type GraphMatchRequest = Schemas["AnalysisRequest"];
 export type GraphMatchResponse = Schemas["AnalysisResponse"];
 export type GraphMatchEntity = GraphMatchResponse["entities"][number][1];

@@ -5,7 +5,8 @@ import type {
   GraphMatchResponse,
   GraphPatchRequest,
   GraphSearchRequest,
-  GraphSearchResponse
+  GraphSearchResponse,
+  Relationship
 } from "@/services/types";
 
 export async function search(request: GraphSearchRequest): Promise<GraphSearchResponse> {
@@ -18,8 +19,8 @@ export async function add(request: GraphAddRequest): Promise<unknown> {
   return data;
 }
 
-export async function patch(relationshipId: string, request: GraphPatchRequest): Promise<unknown> {
-  const { data } = await http.patch(`/graph/${relationshipId}`, request);
+export async function patch(relationshipId: string, request: GraphPatchRequest): Promise<Relationship> {
+  const { data } = await http.patch<Relationship>(`/graph/${relationshipId}`, request);
   return data;
 }
 
@@ -28,8 +29,8 @@ export async function remove(relationshipId: string): Promise<void> {
 }
 
 /** Swaps the source and target of a relationship. (POST, not PATCH.) */
-export async function swap(relationshipId: string): Promise<unknown> {
-  const { data } = await http.post(`/graph/${relationshipId}/swap`);
+export async function swap(relationshipId: string): Promise<Relationship> {
+  const { data } = await http.post<Relationship>(`/graph/${relationshipId}/swap`);
   return data;
 }
 
