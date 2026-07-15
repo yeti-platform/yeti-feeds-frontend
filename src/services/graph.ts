@@ -1,5 +1,12 @@
 import http from "@/services/http";
-import type { GraphAddRequest, GraphPatchRequest, GraphSearchRequest, GraphSearchResponse } from "@/services/types";
+import type {
+  GraphAddRequest,
+  GraphMatchRequest,
+  GraphMatchResponse,
+  GraphPatchRequest,
+  GraphSearchRequest,
+  GraphSearchResponse
+} from "@/services/types";
 
 export async function search(request: GraphSearchRequest): Promise<GraphSearchResponse> {
   const { data } = await http.post<GraphSearchResponse>("/graph/search", request);
@@ -27,7 +34,7 @@ export async function swap(relationshipId: string): Promise<unknown> {
 }
 
 /** Matches raw observable strings against known objects and indicators. */
-export async function match(observables: string[], addUnknown = false): Promise<unknown> {
-  const { data } = await http.post("/graph/match", { observables, add_unknown: addUnknown });
+export async function match(request: GraphMatchRequest): Promise<GraphMatchResponse> {
+  const { data } = await http.post<GraphMatchResponse>("/graph/match", request);
   return data;
 }

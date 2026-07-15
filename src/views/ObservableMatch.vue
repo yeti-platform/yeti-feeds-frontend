@@ -85,20 +85,8 @@
                   <template v-slot:item.observableValue="{ item }">
                     <code>{{ item.observableValue }}</code>
                   </template>
-                  <template v-slot:item.tags="{ item }">
-                    <v-chip
-                      v-for="tag in item.tags"
-                      :color="tag.fresh ? 'blue' : 'grey'"
-                      :text="tag.name"
-                      class="me-1"
-                      size="small"
-                    ></v-chip>
-                  </template>
                   <template v-slot:item.relevantTags="{ item }">
                     <v-chip v-for="tag in item.relevantTags" color="grey" class="me-1" size="small">{{ tag }}</v-chip>
-                  </template>
-                  <template v-slot:item.created="{ item }">
-                    {{ moment(item.created).format("YYYY-MM-DD HH:mm:ss") }}
                   </template>
                 </v-data-table>
               </v-card-text>
@@ -309,250 +297,181 @@
 </template>
 
 <script setup lang="ts">
-import axios from "axios";
 import moment from "moment";
-import { OBSERVABLE_TYPES } from "@/definitions/observableDefinitions";
-import { ENTITY_TYPES } from "@/definitions/entityDefinitions";
+import { computed, ref, watch } from "vue";
+
 import EntitySelector from "@/components/EntitySelector.vue";
-</script>
+import { ENTITY_TYPES } from "@/definitions/entityDefinitions";
+import { OBSERVABLE_TYPES } from "@/definitions/observableDefinitions";
+import { eventBus } from "@/plugins/eventbus";
+import * as bloomApi from "@/services/bloom";
+import * as graphApi from "@/services/graph";
+import * as observablesApi from "@/services/observables";
+import type { BloomHit, GraphMatchResponse, LooseYetiObject, ObservableType } from "@/services/types";
 
-<script lang="ts">
-export default {
-  name: "ObservableMatch",
-  components: {
-    EntitySelector
-  },
-  data() {
-    return {
-      // search field
-      textSearch: "",
-      searchResults: null,
-      bloomResults: [],
-      selectedBloom: [],
-      regexMatch: false,
-      addAndTag: false,
-      addTypeSearch: "guess",
-      addTagsSearch: [],
-      // add / tag known / unknown observables
-      addTagsKnown: [],
-      knownLinkTarget: null,
-      addTagsUnknown: [],
-      addTypeUnknown: "guess",
-      addTagsBloom: [],
-      addTypeBloom: "guess",
-      selectedUnknown: [],
-      selectedKnown: [],
-      loading: false
-    };
-  },
-  methods: {
-    bloomSearch() {
-      let params = {
-        values: this.observableList
-      };
-      axios
-        .post("/api/v2/bloom/search", params)
-        .then(response => {
-          this.bloomResults = response.data;
-        })
-        .catch(error => {
-          return console.log(error);
-        })
-        .finally(() => {});
-    },
-    matchObservables() {
-      this.loading = true;
-      this.selectedKnown = [];
-      this.selectedUnknown = [];
+// search field
+const textSearch = ref("");
+const searchResults = ref<GraphMatchResponse | null>(null);
+const bloomResults = ref<BloomHit[]>([]);
+const selectedBloom = ref<string[]>([]);
+const regexMatch = ref(false);
+const addAndTag = ref(false);
+const addTypeSearch = ref<ObservableType>("guess");
+const addTagsSearch = ref<string[]>([]);
+// add / tag known / unknown observables
+const addTagsKnown = ref<string[]>([]);
+const knownLinkTarget = ref<LooseYetiObject | null>(null);
+const addTagsUnknown = ref<string[]>([]);
+const addTypeUnknown = ref<ObservableType>("guess");
+const addTagsBloom = ref<string[]>([]);
+const addTypeBloom = ref<ObservableType>("guess");
+const selectedUnknown = ref<string[]>([]);
+const selectedKnown = ref<LooseYetiObject[]>([]);
+const loading = ref(false);
 
-      if (this.observableList.length === 0) {
-        this.loading = false;
-        return;
-      }
+const entityMatches = computed(
+  () =>
+    searchResults.value?.entities.map(entity => ({
+      name: entity[1].name,
+      type: entity[1].type,
+      id: entity[1].id,
+      link: entity[0].type
+    })) ?? []
+);
 
-      var params = {
-        // split newlines, trim whitespace, remove empty lines
-        observables: this.observableList,
-        add_unknown: this.addAndTag,
-        add_tags: this.addTagsSearch,
-        add_type: this.addTypeSearch,
-        regex_match: this.regexMatch
-      };
-      this.bloomSearch();
-      axios
-        .post("/api/v2/graph/match", params)
-        .then(response => {
-          this.loading = false;
-          this.searchResults = response.data;
-        })
-        .catch(error => {
-          return console.log(error);
-        })
-        .finally(() => {});
-    },
-    tagKnown() {
-      const params = {
-        ids: this.selectedKnown.map(obs => obs.id),
-        tags: this.addTagsKnown
-      };
+const indicatorMatches = computed(
+  () =>
+    searchResults.value?.matches.map(match => ({
+      observableValue: match[0],
+      name: match[1].name,
+      id: match[1].id,
+      diamond: match[1].diamond,
+      relevantTags: match[1].relevant_tags
+    })) ?? []
+);
 
-      axios
-        .post("/api/v2/observables/tag", params)
-        .then(response => {
-          let message = `${response.data.tagged} observables tagged`;
-          this.$eventBus.emit("displayMessage", {
-            status: "success",
-            message: message
-          });
-          this.selectedKnown = [];
-          this.addTagsKnown = [];
-          this.matchObservables();
-        })
-        .catch(error => {
-          this.$eventBus.emit("displayMessage", {
-            status: "error",
-            message: error.response.data.detail
-          });
-        })
-        .finally(() => {});
-    },
-    linkKnown() {
-      this.selectedKnown.forEach(observable => {
-        this.linkKnownObservable(observable, this.knownLinkTarget);
-      });
-      this.$eventBus.emit("displayMessage", {
-        status: "success",
-        message: `${this.selectedKnown.length} link requests sent`
-      });
-    },
-    linkKnownObservable(observable, linkTarget) {
-      let params = {
-        source: `${observable.root_type}/${observable.id}`,
-        target: `${linkTarget.root_type}/${linkTarget.id}`,
-        link_type: "match",
-        description: "match"
-      };
-      axios.post("/api/v2/graph/add", params);
-    },
-    addBloom() {
-      const observables = this.selectedBloom.map(obs => {
-        return {
-          value: obs,
-          tags: this.addTagsBloom,
-          type: this.addTypeBloom
-        };
-      });
-      axios
-        .post("/api/v2/observables/bulk", { observables })
-        .then(response => {
-          console.log(response.data);
-          let message = `${response.data.added.length} observables added`;
-          if (response.data.failed.length > 0) {
-            message += `, ${response.data.failed.length} failed`;
-          }
-          this.$eventBus.emit("displayMessage", {
-            status: "success",
-            message: message
-          });
-          this.selectedBloom = [];
-          this.addTypeBloom = "guess";
-          this.addTagsBloom = [];
-          this.matchObservables();
-        })
-        .catch(error => {
-          this.$eventBus.emit("displayMessage", {
-            status: "error",
-            message: error.response.data.detail
-          });
-        })
-        .finally(() => {});
-    },
-    addUnknown() {
-      const observables = this.selectedUnknown.map(obs => {
-        return {
-          value: obs,
-          tags: this.addTagsUnknown,
-          type: this.addTypeUnknown
-        };
-      });
-      axios
-        .post("/api/v2/observables/bulk", { observables })
-        .then(response => {
-          console.log(response.data);
-          let message = `${response.data.added.length} observables added`;
-          if (response.data.failed.length > 0) {
-            message += `, ${response.data.failed.length} failed`;
-          }
-          this.$eventBus.emit("displayMessage", {
-            status: "success",
-            message: message
-          });
-          this.selectedUnknown = [];
-          this.addTypeUnknown = "guess";
-          this.addTagsUnknown = [];
-          this.matchObservables();
-        })
-        .catch(error => {
-          this.$eventBus.emit("displayMessage", {
-            status: "error",
-            message: error.response.data.detail
-          });
-        })
-        .finally(() => {});
-    },
-    getIconForEntityType(type) {
-      return ENTITY_TYPES.find(t => t.type === type).icon;
-    }
-  },
-  computed: {
-    entityMatches() {
-      return this.searchResults?.entities.map(entity => {
-        return {
-          name: entity[1].name,
-          type: entity[1].type,
-          id: entity[1].id,
-          link: entity[0].type
-        };
-      });
-    },
-    indicatorMatches() {
-      return this.searchResults?.matches.map(match => {
-        return {
-          observableValue: match[0],
-          name: match[1].name,
-          id: match[1].id,
-          diamond: match[1].diamond,
-          relevantTags: match[1].relevant_tags
-        };
-      });
-    },
-    observableTypes() {
-      let guess = {
-        value: "guess",
-        title: "Guess type"
-      };
-      return [guess, ...OBSERVABLE_TYPES.map(t => ({ value: t.type, title: t.name }))];
-    },
-    observableList() {
-      return this.textSearch
-        .split("\n")
-        .map(line => line.trim())
-        .filter(line => line.length > 0);
-    }
-  },
-  watch: {
-    regexMatch() {
-      if (this.addAndTag && this.regexMatch) {
-        this.addAndTag = false;
-      }
-    },
-    addAndTag() {
-      if (this.addAndTag && this.regexMatch) {
-        this.regexMatch = false;
-      }
-    }
+const observableTypes = computed(() => [
+  { value: "guess", title: "Guess type" },
+  ...OBSERVABLE_TYPES.map(t => ({ value: t.type, title: t.name }))
+]);
+
+const observableList = computed(() =>
+  textSearch.value
+    .split("\n")
+    .map(line => line.trim())
+    .filter(line => line.length > 0)
+);
+
+async function bloomSearch() {
+  bloomResults.value = await bloomApi.search({ values: observableList.value });
+}
+
+async function matchObservables() {
+  loading.value = true;
+  selectedKnown.value = [];
+  selectedUnknown.value = [];
+
+  if (observableList.value.length === 0) {
+    loading.value = false;
+    return;
   }
-};
+
+  bloomSearch();
+  searchResults.value = await graphApi.match({
+    // split newlines, trim whitespace, remove empty lines
+    observables: observableList.value,
+    add_unknown: addAndTag.value,
+    add_tags: addTagsSearch.value,
+    add_type: addTypeSearch.value,
+    regex_match: regexMatch.value,
+    fetch_neighbors: true
+  });
+  loading.value = false;
+}
+
+async function tagKnown() {
+  const response = await observablesApi.tag({
+    ids: selectedKnown.value.map(obs => obs.id),
+    tags: addTagsKnown.value,
+    strict: false
+  });
+  eventBus.emit("displayMessage", { status: "success", message: `${response.tagged} observables tagged` });
+  selectedKnown.value = [];
+  addTagsKnown.value = [];
+  matchObservables();
+}
+
+async function linkKnown() {
+  if (!knownLinkTarget.value) {
+    return;
+  }
+  await Promise.all(selectedKnown.value.map(observable => linkKnownObservable(observable, knownLinkTarget.value!)));
+  eventBus.emit("displayMessage", {
+    status: "success",
+    message: `${selectedKnown.value.length} link requests sent`
+  });
+}
+
+async function linkKnownObservable(observable: LooseYetiObject, linkTarget: LooseYetiObject) {
+  await graphApi.add({
+    source: `${observable.root_type}/${observable.id}`,
+    target: `${linkTarget.root_type}/${linkTarget.id}`,
+    link_type: "match",
+    description: "match"
+  });
+}
+
+async function addBloom() {
+  const observables = selectedBloom.value.map(obs => ({
+    value: obs,
+    tags: addTagsBloom.value,
+    type: addTypeBloom.value
+  }));
+  const response = await observablesApi.bulkAdd({ observables });
+  let message = `${response.added.length} observables added`;
+  if (response.failed.length > 0) {
+    message += `, ${response.failed.length} failed`;
+  }
+  eventBus.emit("displayMessage", { status: "success", message });
+  selectedBloom.value = [];
+  addTypeBloom.value = "guess";
+  addTagsBloom.value = [];
+  matchObservables();
+}
+
+async function addUnknown() {
+  const observables = selectedUnknown.value.map(obs => ({
+    value: obs,
+    tags: addTagsUnknown.value,
+    type: addTypeUnknown.value
+  }));
+  const response = await observablesApi.bulkAdd({ observables });
+  let message = `${response.added.length} observables added`;
+  if (response.failed.length > 0) {
+    message += `, ${response.failed.length} failed`;
+  }
+  eventBus.emit("displayMessage", { status: "success", message });
+  selectedUnknown.value = [];
+  addTypeUnknown.value = "guess";
+  addTagsUnknown.value = [];
+  matchObservables();
+}
+
+function getIconForEntityType(type: string): string | undefined {
+  return ENTITY_TYPES.find(t => t.type === type)?.icon;
+}
+
+watch(regexMatch, () => {
+  if (addAndTag.value && regexMatch.value) {
+    addAndTag.value = false;
+  }
+});
+
+watch(addAndTag, () => {
+  if (addAndTag.value && regexMatch.value) {
+    regexMatch.value = false;
+  }
+});
 </script>
 
 <style lang="scss">
