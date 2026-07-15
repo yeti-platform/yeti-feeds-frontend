@@ -228,4 +228,67 @@ test.describe('Entity Details', () => {
     // The pre-existing tags are preserved (strict: true replaces the whole set).
     expect(tagRequests[0].tags).toContain('apt28');
   });
+
+  test('edits a link through the EditLink dialog', async ({ page }) => {
+    const patchRequests: Array<Record<string, unknown>> = [];
+
+    await page.route('**/api/v2/graph/search', async route => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          vertices: {
+            'entities/123': { id: '123', name: 'Fancy Bear', type: 'intrusion-set', root_type: 'entity', tags: [] },
+            'observables/456': { id: '456', value: '10.0.0.1', type: 'ipv4', root_type: 'observable', tags: [] }
+          },
+          paths: [
+            [
+              {
+                id: 'edge1',
+                source: 'entities/123',
+                target: 'observables/456',
+                type: 'resolves',
+                description: 'a link',
+                created: '2026-03-23T10:00:00Z',
+                modified: '2026-03-23T10:00:00Z',
+                count: 1
+              }
+            ]
+          ],
+          total: 1
+        })
+      });
+    });
+
+    // EditLink patches the edge (link_type + description) via PATCH /graph/{id}.
+    await page.route('**/api/v2/graph/edge1', async route => {
+      if (route.request().method() !== 'PATCH') {
+        await route.fallback();
+        return;
+      }
+      patchRequests.push(route.request().postDataJSON());
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ id: 'edge1', source: 'entities/123', target: 'observables/456', type: 'related-to' })
+      });
+    });
+
+    await page.goto('/entities/123');
+    const neighborRow = page.locator('tbody tr:visible').filter({ hasText: '10.0.0.1' }).first();
+    await expect(neighborRow).toBeVisible();
+
+    // Open the EditLink dialog from the neighbor row's pencil (not the entity's
+    // own Edit button, which also uses mdi-pencil).
+    await neighborRow.locator('button:has(.mdi-pencil)').click();
+
+    // Scope to the EditLink card (its title starts with "Edit:").
+    const dialog = page.locator('.v-card').filter({ hasText: 'Edit:' });
+    await expect(dialog).toBeVisible();
+    await dialog.getByLabel('Description').fill('now related');
+    await dialog.getByRole('button', { name: 'Save' }).click();
+
+    await expect.poll(() => patchRequests.length).toBe(1);
+    expect(patchRequests[0]).toEqual({ description: 'now related', link_type: 'resolves' });
+  });
 });

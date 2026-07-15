@@ -44,101 +44,78 @@
 </template>
 
 <script lang="ts" setup>
-import axios from "axios";
+import { computed, ref } from "vue";
 
 import { ENTITY_TYPES } from "@/definitions/entityDefinitions";
 import { INDICATOR_TYPES } from "@/definitions/indicatorDefinitions";
-import { OBSERVABLE_TYPES } from "@/definitions/observableDefinitions";
-
 import { LINK_SUGGESTIONS } from "@/definitions/linkSuggestions";
-</script>
+import { OBSERVABLE_TYPES } from "@/definitions/observableDefinitions";
+import { eventBus } from "@/plugins/eventbus";
+import * as graphApi from "@/services/graph";
+import type { LooseYetiObject } from "@/services/types";
 
-<script lang="ts">
-export default {
-  components: {},
-  props: {
-    vertices: {
-      type: Object,
-      default: () => {}
-    },
-    edge: {
-      type: Object,
-      default: () => {}
-    },
-    isActive: {
-      type: Object,
-      default: () => {}
-    }
-  },
-  data() {
-    return {
-      localEdge: { ...this.edge },
-      error: null
-    };
-  },
-  mounted() {},
-  methods: {
-    saveLink() {
-      axios
-        .patch(`/api/v2/graph/${this.edge.id}`, {
-          description: this.localEdge.description,
-          link_type: this.localEdge.type
-        })
-        .then(response => {
-          this.$eventBus.emit("displayMessage", { message: "Link updated succesfully!", status: "success" });
-          this.isActive.value = false;
-          this.$emit("success", response.data);
-        })
-        .catch(error => {
-          this.error = error;
-          console.log(error);
-        })
-        .finally();
-    },
-    swapLink() {
-      axios
-        .post(`/api/v2/graph/${this.edge.id}/swap`)
-        .then(response => {
-          this.edge["source"] = response.data["source"];
-          this.edge["target"] = response.data["target"];
-          this.localEdge = { ...this.edge };
-          this.$eventBus.emit("displayMessage", { message: "Link direction swapped succesfully!", status: "success" });
-          this.$emit("success", response.data);
-        })
-        .catch(error => {
-          this.error = error;
-          console.log(error);
-        });
-    },
-    getIconForType(type) {
-      return (
-        ENTITY_TYPES.find(t => t.type === type) ||
-        INDICATOR_TYPES.find(t => t.type === type) ||
-        OBSERVABLE_TYPES.find(t => t.type === type)
-      ).icon;
-    }
-  },
-  computed: {
-    objectType() {
-      return this.objectTypes.find(type => type.type === this.objectTypeName);
-    },
-    getOutgoingLinkTypeSuggestions() {
-      let source = this.vertices[this.edge.source];
-      let target = this.vertices[this.edge.target];
-      return (LINK_SUGGESTIONS[source.type] || LINK_SUGGESTIONS[source.root_type])
-        .filter(suggestion => suggestion.targets.includes(target.type) || suggestion.targets.includes(target.type))
-        .map(suggestion => suggestion.verb);
-    },
-    getIncomingLinkTypeSuggestions() {
-      let source = this.vertices[this.edge.source];
-      let target = this.vertices[this.edge.target];
-      return (LINK_SUGGESTIONS[target.type] || LINK_SUGGESTIONS[target.root_type])
-        .filter(suggestion => suggestion.targets.includes(source.type) || suggestion.targets.includes(source.type))
-        .map(suggestion => suggestion.verb);
-    },
-    getLinkTypeSuggestions() {
-      return [...new Set(this.getOutgoingLinkTypeSuggestions.concat(this.getIncomingLinkTypeSuggestions))];
-    }
+const props = withDefaults(
+  defineProps<{
+    vertices?: Record<string, LooseYetiObject>;
+    edge?: LooseYetiObject;
+    /** Vuetify's dialog activator ref; set .value = false to close. */
+    isActive?: { value: boolean };
+  }>(),
+  {
+    vertices: () => ({}),
+    edge: () => ({}),
+    isActive: () => ({ value: false })
   }
-};
+);
+
+const emit = defineEmits<{ success: [relationship: LooseYetiObject] }>();
+
+const localEdge = ref<LooseYetiObject>({ ...props.edge });
+const error = ref<unknown>(null);
+
+/** Link-type verbs suggested for either direction between the two objects. */
+const getLinkTypeSuggestions = computed<string[]>(() => {
+  const source = props.vertices[props.edge.source];
+  const target = props.vertices[props.edge.target];
+  const suggestionsFor = (from: LooseYetiObject, to: LooseYetiObject): string[] =>
+    (LINK_SUGGESTIONS[from.type] || LINK_SUGGESTIONS[from.root_type] || [])
+      .filter(suggestion => suggestion.targets.includes(to.type))
+      .map(suggestion => suggestion.verb);
+  return [...new Set(suggestionsFor(source, target).concat(suggestionsFor(target, source)))];
+});
+
+async function saveLink() {
+  try {
+    const updated = await graphApi.patch(props.edge.id, {
+      description: localEdge.value.description,
+      link_type: localEdge.value.type
+    });
+    eventBus.emit("displayMessage", { message: "Link updated succesfully!", status: "success" });
+    props.isActive.value = false;
+    emit("success", updated);
+  } catch (e) {
+    error.value = e;
+  }
+}
+
+async function swapLink() {
+  try {
+    const swapped = await graphApi.swap(props.edge.id);
+    props.edge.source = swapped.source;
+    props.edge.target = swapped.target;
+    localEdge.value = { ...props.edge };
+    eventBus.emit("displayMessage", { message: "Link direction swapped succesfully!", status: "success" });
+    emit("success", swapped);
+  } catch (e) {
+    error.value = e;
+  }
+}
+
+function getIconForType(type: string): string | undefined {
+  return (
+    ENTITY_TYPES.find(t => t.type === type) ||
+    INDICATOR_TYPES.find(t => t.type === type) ||
+    OBSERVABLE_TYPES.find(t => t.type === type)
+  )?.icon;
+}
 </script>
