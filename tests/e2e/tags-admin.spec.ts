@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 /**
  * Covers views/TagsAdmin.vue: the tags data table (v-data-table-server via

@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 /** Covers views/UserProfile.vue, both for your own profile and as an admin. */
 

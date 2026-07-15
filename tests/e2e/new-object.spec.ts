@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 /**
  * Covers components/NewObject.vue via the EntitySearch view (/entities): opening
