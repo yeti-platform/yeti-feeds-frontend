@@ -1,5 +1,6 @@
 // Composables
 import { createRouter, createWebHistory } from "vue-router";
+import type { RouteRecordRaw } from "vue-router";
 
 import Default from "@/layouts/default/Default.vue";
 import Login from "@/views/Login.vue";
@@ -20,7 +21,7 @@ import GroupAdmin from "@/views/GroupAdmin.vue";
 import TagsAdmin from "@/views/TagsAdmin.vue";
 import System from "@/views/System.vue";
 
-const routes = [
+const routes: RouteRecordRaw[] = [
   {
     path: "/login",
     name: "Login",
@@ -28,9 +29,9 @@ const routes = [
   },
   {
     path: "/",
-    redirect: to => {
-      if (localStorage.getItem("next") !== null) {
-        let redirect_uri = localStorage.getItem("next");
+    redirect: () => {
+      const redirect_uri = localStorage.getItem("next");
+      if (redirect_uri !== null) {
         localStorage.removeItem("next");
         return { path: redirect_uri };
       } else {
@@ -250,7 +251,7 @@ router.beforeEach((to, _from, next) => {
   if (to.meta.title) {
     document.title = `${to.meta.title} - Yeti`;
   } else {
-    document.title = `${to.name} - Yeti`;
+    document.title = `${String(to.name)} - Yeti`;
   }
   if (to.name === "Login") {
     next();

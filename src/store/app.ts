@@ -7,17 +7,23 @@ export const useAppStore = defineStore("app", {
     systemConfig: null as any
   }),
   getters: {
-    RBACEnabled: state => {
-      if (!state.systemConfig) {
-        state.fetchSystemConfig();
+    // These lazily kick off the config fetch if nothing has loaded it yet.
+    // Pinia doesn't type actions onto a getter's `this`, so reach the action
+    // through the store singleton (already instantiated by the time a getter
+    // runs).
+    RBACEnabled(): boolean {
+      const store = useAppStore();
+      if (!store.systemConfig) {
+        store.fetchSystemConfig();
       }
-      return state.systemConfig?.rbac_enabled;
+      return store.systemConfig?.rbac_enabled;
     },
-    agentsEnabled: state => {
-      if (!state.systemConfig) {
-        state.fetchSystemConfig();
+    agentsEnabled(): boolean {
+      const store = useAppStore();
+      if (!store.systemConfig) {
+        store.fetchSystemConfig();
       }
-      return state.systemConfig?.agents_enabled;
+      return store.systemConfig?.agents_enabled;
     }
   },
   actions: {

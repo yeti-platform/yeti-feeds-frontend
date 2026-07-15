@@ -57,7 +57,8 @@ export default {
   name: "System",
   data() {
     return {
-      info: null,
+      // /system/workers returns a free-form {registered, active, ...} blob.
+      info: null as Record<string, any> | null,
       infoLoading: true,
       appStore: useAppStore(),
       restartDisabled: false
@@ -82,13 +83,13 @@ export default {
           console.log(error);
         });
     },
-    restartWorker(workerName) {
+    restartWorker(workerName: string) {
       this.restartDisabled = true;
       axios
         .post(`/api/v2/system/restartworker/${workerName}`)
         .then(response => {
           if (response.data.failures.length > 0) {
-            this.$eventBus.emit("displayMesasge", {
+            this.$eventBus.emit("displayMessage", {
               message: "Some workers could not be restarted:\n" + response.data.failures.join("\n"),
               status: "error"
             });

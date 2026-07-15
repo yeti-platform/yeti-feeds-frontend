@@ -21,7 +21,8 @@ export default {
   },
   computed: {
     renderedMarkdown() {
-      const sanitizedHTML = DOMPurify.sanitize(marked(this.text));
+      // marked is used synchronously here; async:false pins the string overload.
+      const sanitizedHTML = DOMPurify.sanitize(marked.parse(this.text, { async: false }));
       return sanitizedHTML;
     }
   }

@@ -4,8 +4,8 @@
     downloadable-tasks
     task-type="export"
     ref="exportList"
-    @taskSelected="task => selectExport(task)"
-    @taskDownload="task => downloadExport(task)"
+    @task-selected="task => selectExport(task as ExportTask)"
+    @taskDownload="task => downloadExport(task as ExportTask)"
     :display-columns="[
       'name',
       'template_name',

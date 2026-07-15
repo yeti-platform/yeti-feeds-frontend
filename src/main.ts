@@ -15,7 +15,6 @@ import { createApp } from "vue";
 
 // Eventbus
 import eventBus from "./plugins/eventbus";
-import { addHook } from "isomorphic-dompurify";
 
 const app = createApp(App);
 
