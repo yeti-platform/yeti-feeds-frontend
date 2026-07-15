@@ -82,7 +82,7 @@
               </template>
               <template v-slot:default="{ isActive }">
                 <v-sheet>
-                  <ACL-edit v-if="object" :object="object" :allow-groups="true" />
+                  <ACL-edit v-if="object" :object="object" :is-active="isActive" :allow-groups="true" />
                 </v-sheet>
               </template>
             </v-dialog>
@@ -135,7 +135,7 @@
 
                     <template v-slot:default="{ isActive }">
                       <v-sheet>
-                        <link-object :object="object ?? undefined" :is-active="isActive" />
+                        <link-object v-if="object" :object="object" :is-active="isActive" />
                       </v-sheet>
                     </template>
                   </v-dialog>
@@ -147,7 +147,7 @@
                     </template>
 
                     <template v-slot:default="{ isActive }">
-                      <link-observables :linkTarget="object ?? undefined" :is-active="isActive" />
+                      <link-observables v-if="object" :linkTarget="object" :is-active="isActive" />
                     </template>
                   </v-dialog>
                 </v-list-item>
@@ -421,7 +421,6 @@ onMounted(() => {
   }
 });
 </script>
-
 
 <style>
 .v-card-text.yeti-description,

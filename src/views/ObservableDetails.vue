@@ -88,7 +88,7 @@
               </template>
               <template v-slot:default="{ isActive }">
                 <v-sheet>
-                  <ACL-edit v-if="observable" :object="observable" :allow-groups="true" />
+                  <ACL-edit v-if="observable" :object="observable" :is-active="isActive" :allow-groups="true" />
                 </v-sheet>
               </template>
             </v-dialog>
@@ -361,7 +361,6 @@ function toggleFullscreen(fullscreen: boolean) {
 watch(() => props.id, getObservableDetails);
 onMounted(getObservableDetails);
 </script>
-
 
 <style>
 .v-card-text.yeti-description {

@@ -37,7 +37,7 @@
 
         <v-menu activator="parent">
           <v-list>
-            <v-list-item :to="{ name: 'UserAdmin' }" prepend-icon="mdi-account-circle" v-if="user.admin">
+            <v-list-item :to="{ name: 'UserAdmin' }" prepend-icon="mdi-account-circle" v-if="user?.admin">
               Users
             </v-list-item>
             <v-list-item v-if="RBACEnabled" :to="{ name: 'GroupAdmin' }" prepend-icon="mdi-account-multiple-outline">

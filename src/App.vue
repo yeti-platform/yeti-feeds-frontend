@@ -11,6 +11,8 @@
 <script lang="ts" setup></script>
 
 <script lang="ts">
+import type { DisplayMessage } from "@/plugins/eventbus";
+
 export default {
   data() {
     return {
@@ -20,7 +22,7 @@ export default {
     };
   },
   methods: {
-    displayMessage(event) {
+    displayMessage(event: DisplayMessage) {
       this.snackBarMessage = event.message;
       this.snackBarStatus = event.status;
       this.displaySnackBar = true;

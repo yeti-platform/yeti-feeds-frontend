@@ -44,7 +44,7 @@
             :class="['message-wrapper', msg.sender === 'user' ? 'user-message' : 'agent-message']"
           >
             <v-card v-if="msg.sender === 'user'" color="primary" variant="flat" rounded="lg" class="agent-card d-inline-block">
-              <v-card-text class="pre-wrap">{{ msg.parts[0]?.text }}</v-card-text>
+              <v-card-text class="pre-wrap">{{ msg.parts[0]?.type === "text" ? msg.parts[0].text : "" }}</v-card-text>
             </v-card>
             <div v-else class="agent-message-layout">
               <div v-if="msg.parts.length > 0" class="message-parts-container">
