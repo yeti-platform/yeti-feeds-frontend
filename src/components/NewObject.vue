@@ -1,6 +1,6 @@
 <template>
   <v-card>
-    <v-card-title>New {{ typeDefinition.name }}</v-card-title>
+    <v-card-title>New {{ typeDefinition?.name }}</v-card-title>
     <v-card-text>
       <object-fields :fields="editableFields" :object="newObject" />
     </v-card-text>
@@ -8,11 +8,11 @@
     <v-card-actions>
       <v-btn text="Toggle full screen" color="primary" @click="toggleFullScreen"></v-btn>
       <v-spacer></v-spacer>
-      <v-btn text="Cancel" color="cancel" @click="$emit('close')"></v-btn>
+      <v-btn text="Cancel" color="cancel" @click="emit('close')"></v-btn>
       <v-btn text="Save" @click="saveObject" variant="tonal"></v-btn>
     </v-card-actions>
     <v-alert v-if="errors.length > 0" type="error">
-      Error saving {{ typeDefinition.name }}:
+      Error saving {{ typeDefinition?.name }}:
       <ul>
         <li v-for="error in errors">
           <strong>{{ error.field }}</strong
@@ -24,113 +24,108 @@
 </template>
 
 <script lang="ts" setup>
-import axios from "axios";
+import { AxiosError } from "axios";
+import { computed, ref } from "vue";
+import { useRouter } from "vue-router";
 
+import ObjectFields from "@/components/ObjectFields.vue";
 import { ENTITY_TYPES } from "@/definitions/entityDefinitions";
 import { INDICATOR_TYPES } from "@/definitions/indicatorDefinitions";
 import { OBSERVABLE_TYPES } from "@/definitions/observableDefinitions";
-import ObjectFields from "@/components/ObjectFields.vue";
-</script>
+import type { FieldDefinition, ObjectTypeDefinition } from "@/definitions/types";
+import { eventBus } from "@/plugins/eventbus";
+import * as objectsApi from "@/services/objects";
+import type { CreatableRootType, LooseYetiObject } from "@/services/types";
 
-<script lang="ts">
-export default {
-  components: { ObjectFields },
-  props: {
-    objectType: {
-      type: String,
-      default: () => ""
-    },
-    redirect: {
-      type: Boolean,
-      default: true
-    }
-  },
-  data() {
-    return {
-      newObject: {},
-      errors: [],
-      fullScreen: false,
-      typeToEndpointMapping: {
-        entity: "entities/",
-        observable: "observables/extended",
-        indicator: "indicators/"
-      },
-      typeToSavedObjectPath: {
-        entity: "entities",
-        observable: "observables",
-        indicator: "indicators"
-      }
-    };
-  },
-  mounted() {
-    this.newObject = {
-      type: this.objectType,
-      root_type: this.objectRootType
-    };
-  },
-  methods: {
-    saveObject() {
-      let request = {
-        type: this.objectType
-      };
-      this.editableFields.forEach(field => {
-        request[field.field] = this.newObject[field.field];
-      });
+const props = withDefaults(defineProps<{ objectType?: string; redirect?: boolean }>(), {
+  objectType: "",
+  redirect: true
+});
 
-      axios
-        .post(`/api/v2/${this.typeToEndpointMapping[this.newObject.root_type]}`, {
-          [this.newObject.root_type]: request
-        })
-        .then(response => {
-          this.$eventBus.emit("displayMessage", { message: `New ${this.objectType} created`, status: "success" });
-          if (this.redirect) {
-            this.$router.push({ path: `/${this.typeToSavedObjectPath[this.newObject.root_type]}/${response.data.id}` });
-          } else {
-            this.$emit("close");
-          }
-          this.$emit("success", response.data);
-        })
-        .catch(error => {
-          if (error.response.status === 422) {
-            this.errors = error.response.data.detail.map(detail => {
-              return { field: detail.loc[3], message: detail.msg };
-            });
-          } else {
-            this.errors = [{ field: "details", message: error.response.data.detail }];
-            return;
-          }
-        })
-        .finally();
-    },
-    toggleFullScreen() {
-      this.fullScreen = !this.fullScreen;
-      this.$emit("toggle-fullscreen", this.fullScreen);
+const emit = defineEmits<{
+  close: [];
+  success: [object: LooseYetiObject];
+  "toggle-fullscreen": [fullScreen: boolean];
+}>();
+
+const router = useRouter();
+
+interface FieldError {
+  field: string;
+  message: string;
+}
+
+/** FastAPI 422 body: {detail: [{loc, msg, type}, ...]}. */
+interface ValidationErrorDetail {
+  loc: (string | number)[];
+  msg: string;
+}
+
+const newObject = ref<LooseYetiObject>({});
+const errors = ref<FieldError[]>([]);
+const fullScreen = ref(false);
+
+const typeDefinition = computed<ObjectTypeDefinition | undefined>(
+  () =>
+    ENTITY_TYPES.find(t => t.type === props.objectType) ||
+    INDICATOR_TYPES.find(t => t.type === props.objectType) ||
+    OBSERVABLE_TYPES.find(t => t.type === props.objectType)
+);
+
+const editableFields = computed<FieldDefinition[]>(() => typeDefinition.value?.fields.filter(f => f.editable) ?? []);
+
+/** The family this object belongs to, used for the create endpoint + redirect. */
+const objectRootType = computed<CreatableRootType | "unknown">(() => {
+  if (ENTITY_TYPES.find(t => t.type === props.objectType)) {
+    return "entity";
+  } else if (INDICATOR_TYPES.find(t => t.type === props.objectType)) {
+    return "indicator";
+  } else if (OBSERVABLE_TYPES.find(t => t.type === props.objectType)) {
+    return "observable";
+  }
+  return "unknown";
+});
+
+newObject.value = { type: props.objectType, root_type: objectRootType.value };
+
+async function saveObject() {
+  const rootType = objectRootType.value;
+  if (rootType === "unknown") {
+    return;
+  }
+
+  const request: LooseYetiObject = { type: props.objectType };
+  editableFields.value.forEach(field => {
+    request[field.field] = newObject.value[field.field];
+  });
+
+  errors.value = [];
+  try {
+    const saved = await objectsApi.create(rootType, request);
+    eventBus.emit("displayMessage", { message: `New ${props.objectType} created`, status: "success" });
+    if (props.redirect) {
+      router.push({ path: `/${objectsApi.ENDPOINTS[rootType]}/${saved.id}` });
+    } else {
+      emit("close");
     }
-  },
-  computed: {
-    typeDefinition() {
-      return (
-        ENTITY_TYPES.find(t => t.type === this.objectType) ||
-        INDICATOR_TYPES.find(t => t.type === this.objectType) ||
-        OBSERVABLE_TYPES.find(t => t.type === this.objectType)
-      );
-    },
-    editableFields() {
-      return this.typeDefinition.fields.filter(field => field.editable);
-    },
-    objectRootType() {
-      if (ENTITY_TYPES.find(t => t.type === this.objectType)) {
-        return "entity";
-      } else if (INDICATOR_TYPES.find(t => t.type === this.objectType)) {
-        return "indicator";
-      } else if (OBSERVABLE_TYPES.find(t => t.type === this.objectType)) {
-        return "observable";
-      } else {
-        return "unknown";
-      }
+    emit("success", saved);
+  } catch (error) {
+    if (!(error instanceof AxiosError) || !error.response) {
+      throw error;
+    }
+    if (error.response.status === 422) {
+      const details = error.response.data.detail as ValidationErrorDetail[];
+      errors.value = details.map(detail => ({ field: String(detail.loc[3]), message: detail.msg }));
+    } else {
+      errors.value = [{ field: "details", message: String(error.response.data.detail) }];
     }
   }
-};
+}
+
+function toggleFullScreen() {
+  fullScreen.value = !fullScreen.value;
+  emit("toggle-fullscreen", fullScreen.value);
+}
 </script>
 
 <style>

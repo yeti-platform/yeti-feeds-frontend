@@ -138,6 +138,9 @@ export type ObjectDetail = Entity | Indicator | DFIQObject;
 /** Root types with a /tag endpoint — notably, DFIQ has none. */
 export type TaggableRootType = Extract<RootType, "observable" | "entity" | "indicator">;
 
+/** Root types the generic NewObject form can create (DFIQ has its own flow). */
+export type CreatableRootType = Extract<RootType, "observable" | "entity" | "indicator">;
+
 /**
  * A Yeti object viewed through one of the *generic* components (ObjectDetails,
  * ObjectList, EditObject...). Those render several object families with a single
