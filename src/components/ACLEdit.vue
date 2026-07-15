@@ -1,13 +1,12 @@
 <template>
   <v-card>
-    <v-card-title
-      >ACL for <code>{{ object.name || object.value }}</code></v-card-title
-    >
+    <v-card-title>
+      ACL for <code>{{ object.name || object.value }}</code>
+    </v-card-title>
     <v-card-text>
       <v-container fluid>
         <v-row>
           <v-col>
-            <!-- input filter -->
             <v-text-field
               v-model="memberFilter"
               prepend-inner-icon="mdi-magnify"
@@ -18,23 +17,25 @@
               density="compact"
             />
             <v-data-table
-              :items="ACLTableData"
+              :items="aclTableData"
               :search="memberFilter"
               density="compact"
               :headers="headers"
               show-select
-              @update:model-value="addToSelectedUsers"
+              @update:model-value="selectMembers"
               return-object
             >
               <template v-slot:item.name="{ item }">
                 <router-link
-                  v-if="item.source.includes('users/')"
-                  :to="{ name: 'UserProfileAdmin', params: { id: item.source.replace('users/', '') } }"
-                  >{{ item.name }}</router-link
+                  v-if="item.source.startsWith('users/')"
+                  :to="{ name: 'UserProfileAdmin', params: { id: identityId(item) } }"
                 >
-                <router-link v-if="item.source.includes('groups/')" :to="{ name: 'GroupAdmin' }">{{
-                  item.name
-                }}</router-link>
+                  {{ item.name }}
+                </router-link>
+                <router-link v-else-if="item.source.startsWith('groups/')" :to="{ name: 'GroupAdmin' }">
+                  {{ item.name }}
+                </router-link>
+                <span v-else>{{ item.name }}</span>
               </template>
               <template v-slot:item.role="{ item }">
                 {{ roleToHumanReadable(item.role) }}
@@ -55,26 +56,26 @@
         <v-row>
           <v-col>
             <v-combobox
-              v-model="selectedUsers"
-              :items="systemUsersFiltered"
+              v-model="selectedIdentities"
+              :items="allIdentities"
               label="Select identities"
               item-title="name"
               item-value="id"
               density="compact"
               multiple
               chips
-              @update:search="listUsersDebounced"
-              :loading="userListLoading"
-              @update:modelValue="validateUsers"
+              @update:search="listIdentitiesDebounced"
+              :loading="identityListLoading"
+              @update:modelValue="dropUnknownIdentities"
             >
             </v-combobox>
-            <v-btn :disabled="selectedUsers.length < 1" @click="updateMembers" color="primary"
-              >Update memberships</v-btn
-            >
+            <v-btn :disabled="selectedIdentities.length < 1" @click="updateMembers" color="primary">
+              Update memberships
+            </v-btn>
           </v-col>
           <v-col>
             <v-select
-              :disabled="selectedUsers.length < 1"
+              :disabled="selectedIdentities.length < 1"
               v-model="selectedRole"
               :items="roleItems"
               label="Role"
@@ -90,238 +91,170 @@
   </v-card>
 </template>
 
-<script lang="ts" setup>
-import axios from "axios";
+<script setup lang="ts">
 import _ from "lodash";
-</script>
+import { computed, onMounted, ref, watch } from "vue";
 
-<script lang="ts">
-export default {
-  name: "ACLEdit",
-  props: {
-    object: {
-      type: Object,
-      default: null
-    },
-    isActive: {
-      type: Object,
-      default: null
-    },
-    allowGroups: {
-      type: Boolean,
-      default: false
-    }
-  },
-  data() {
-    return {
-      ACLTableData: [],
-      memberFilter: "",
-      userFilter: "",
-      headers: [
-        { title: "Name", value: "name", sortable: true },
-        { title: "Role", value: "role", sortable: true },
-        { title: "", value: "remove", sortable: false }
-      ],
-      systemUsers: [],
-      systemGroups: [],
-      selectedUsers: [],
-      userListLoading: false,
-      selectedRole: 1,
-      roleItems: [
-        { title: "Owner", value: 7 },
-        { title: "Writer", value: 3 },
-        { title: "Reader", value: 1 }
-      ]
-    };
-  },
-  methods: {
-    getMembershipData() {
-      axios
-        .get(`/api/v2/rbac/${this.object.root_type}/${this.object.id}`)
-        .then(response => {
-          this.ACLTableData = this.generateAclTable(response.data);
-        })
-        .catch(error => {
-          console.log(error);
-        });
-    },
-    roleToHumanReadable(role: number) {
-      switch (role) {
-        case 7:
-          return "Owner";
-        case 3:
-          return "Writer";
-        case 1:
-          return "Reader";
-        case 0:
-          return "No access";
-      }
-    },
-    listUsers(searchQuery: string = "") {
-      this.userFilter = searchQuery;
-      this.userListLoading = true;
-      axios
-        .post("/api/v2/users/search", {
-          page: 0,
-          count: 1000,
-          username: searchQuery
-        })
-        .then(response => {
-          this.systemUsers = response.data.users.map((user: any) => {
-            return { id: user.id, name: user.username, type: "user" };
-          });
-        })
-        .catch(error => {
-          console.log(error);
-        })
-        .finally(() => {
-          this.userListLoading = false;
-        });
+import { eventBus } from "@/plugins/eventbus";
+import * as groupsApi from "@/services/groups";
+import * as rbacApi from "@/services/rbac";
+import type { AclRootType, LooseYetiObject, RoleRelationship } from "@/services/types";
+import * as usersApi from "@/services/users";
 
-      if (this.allowGroups) {
-        axios
-          .post("/api/v2/groups/search", {
-            page: 0,
-            count: 1000,
-            name: searchQuery
-          })
-          .then(response => {
-            this.systemGroups = response.data.groups.map((group: any) => {
-              return { id: group.id, name: group.name, type: "group" };
-            });
-          })
-          .catch(error => {
-            console.log(error);
-          })
-          .finally(() => {
-            this.userListLoading = false;
-          });
-      }
-    },
-    validateUsers(model: any) {
-      let validUsernames = this.systemUsers.concat(this.systemGroups).map((user: any) => user.name);
-      this.selectedUsers = model.filter((user: any) => {
-        return user.name && validUsernames.includes(user.name);
-      });
-    },
-    addToSelectedUsers(selectedItems: Array<Object>) {
-      console.log(selectedItems);
-      const existingIds = this.selectedUsers.map(user => user.id);
-      selectedItems.forEach(item => {
-        let id = item.source.split("/")[1];
-        if (!existingIds.includes(id)) {
-          let type = item.source.includes("user") ? "user" : "group";
-          this.selectedUsers.push({ id: id, name: item.name, type: type });
-        }
-      });
+const props = withDefaults(
+  defineProps<{
+    object: LooseYetiObject;
+    isActive: { value: boolean };
+    allowGroups?: boolean;
+  }>(),
+  { allowGroups: false }
+);
 
-      this.selectedUsers = this.selectedUsers.filter(user => {
-        return selectedItems.map(item => item.source.split("/")[1]).includes(user.id);
-      });
-    },
-    removeMember(membership) {
-      let sourceType = membership.source.includes("users") ? "user" : "group";
-      const request = {
-        ids: [{ id: membership.id, type: sourceType }],
-        role: 0
-      };
-      axios
-        .delete(`/api/v2/rbac/${membership.id}`)
-        .then(response => {
-          this.$eventBus.emit("displayMessage", {
-            status: "success",
-            message: "Members removed."
-          });
-          this.getMembershipData();
-          this.$emit("members-updated");
-        })
-        .catch(error => {
-          this.$eventBus.emit("displayMessage", {
-            status: "error",
-            message: error.response.data.detail
-          });
-        });
-    },
-    updateMembers() {
-      let request = {
-        ids: this.selectedUsers.map((user: any) => ({ id: user.id, type: user.type })),
-        role: this.selectedRole
-      };
-      axios
-        .post(`/api/v2/rbac/${this.object.root_type}/${this.object.id}/update-members`, request)
-        .then(response => {
-          let msg = "";
-          let status = "success";
-          if (response.data.updated > 0) {
-            msg += `Members updated: ${response.data.updated}`;
-          }
-          if (response.data.failed > 0) {
-            status = "warning";
-            msg += ` Failed: ${response.data.failed}`;
-          }
-          this.$eventBus.emit("displayMessage", {
-            status: status,
-            message: msg
-          });
-          this.getMembershipData();
-          this.$emit("members-updated");
-        })
-        .catch(error => {
-          this.$eventBus.emit("displayMessage", {
-            status: "error",
-            message: error.response.data.detail
-          });
-        });
-    },
-    generateAclTable(obj) {
-      let memberList = [];
-      console.log(obj);
-      for (let key in obj.acls) {
-        if (obj.acls[key].role != 0) {
-          let id = obj.acls[key].source.replace("users/", "");
-          memberList.push({ name: key, id, ...obj.acls[key] });
-        }
-      }
-      return memberList;
-    },
-    listUsersDebounced: _.debounce(function (searchQuery) {
-      this.listUsers(searchQuery);
-    }, 200)
-  },
-  computed: {
-    systemUsersFiltered() {
-      return this.systemUsers.concat(this.systemGroups);
-    },
-    endpointForType() {
-      const endpointMap = {
-        rbacgroup: "groups",
-        entity: "entities",
-        indicator: "indicators",
-        observable: "observables",
-        dfiq: "dfiq",
-        user: "users"
-      };
-      return endpointMap[this.object.root_type];
-    },
-    allIdentities() {
-      return this.systemUsers.concat(this.systemGroups);
-    }
-  },
-  mounted() {
-    this.listUsers();
-    this.getMembershipData();
-  },
-  watch: {
-    group: {
-      handler: function (val) {
-        this.getMembershipData();
-      },
-      deep: true
-    }
+const emit = defineEmits<{ "members-updated": [] }>();
+
+/** An ACL row: the edge, plus the display name it is keyed by in `acls`. */
+type AclRow = RoleRelationship & { name: string };
+
+/** A user or group that can be granted a role. */
+interface Identity {
+  id: string;
+  name: string;
+  type: "user" | "group";
+}
+
+const headers = [
+  { title: "Name", value: "name", sortable: true },
+  { title: "Role", value: "role", sortable: true },
+  { title: "", value: "remove", sortable: false }
+];
+
+const roleItems = [
+  { title: "Owner", value: 7 },
+  { title: "Writer", value: 3 },
+  { title: "Reader", value: 1 }
+];
+
+const aclTableData = ref<AclRow[]>([]);
+const memberFilter = ref("");
+const systemUsers = ref<Identity[]>([]);
+const systemGroups = ref<Identity[]>([]);
+const selectedIdentities = ref<Identity[]>([]);
+const identityListLoading = ref(false);
+const selectedRole = ref(1);
+
+const allIdentities = computed(() => [...systemUsers.value, ...systemGroups.value]);
+
+/** The ACL's own root_type is what /rbac/{type}/{id} keys on. */
+const rootType = computed(() => props.object.root_type as AclRootType);
+
+/** `source` is an extended id — "users/123" or "groups/456". */
+function identityId(row: AclRow): string {
+  return row.source.split("/")[1];
+}
+
+function roleToHumanReadable(role: number): string {
+  switch (role) {
+    case 7:
+      return "Owner";
+    case 3:
+      return "Writer";
+    case 1:
+      return "Reader";
+    case 0:
+      return "No access";
+    default:
+      return `Unknown (${role})`;
   }
-};
-</script>
+}
 
-<style scoped>
-/* Add custom styles here */
-</style>
+async function getMembershipData() {
+  const object = await rbacApi.acls(rootType.value, props.object.id);
+  const acls: Record<string, RoleRelationship> = object.acls ?? {};
+  aclTableData.value = Object.entries(acls)
+    // role is a Permission IntFlag; 0 ("no access") is a real value the
+    // generated `1 | 2 | 4` type can't express, so compare as a number.
+    .filter(([, edge]) => (edge.role as number) !== 0)
+    .map(([name, edge]) => ({ ...edge, name }));
+}
+
+async function listIdentities(searchQuery: string = "") {
+  identityListLoading.value = true;
+  try {
+    const [users, groups] = await Promise.all([
+      usersApi.search({ page: 0, count: 1000, username: searchQuery }),
+      props.allowGroups ? groupsApi.search({ page: 0, count: 1000, name: searchQuery }) : Promise.resolve(null)
+    ]);
+    systemUsers.value = users.users.map(user => ({ id: user.id, name: user.username, type: "user" as const }));
+    systemGroups.value = (groups?.groups ?? []).map(group => ({
+      id: group.id,
+      name: group.name,
+      type: "group" as const
+    }));
+  } finally {
+    // Both lookups clear this together: they used to each clear it in their own
+    // `finally`, so the groups call could switch the spinner off while the users
+    // call was still in flight.
+    identityListLoading.value = false;
+  }
+}
+
+const listIdentitiesDebounced = _.debounce(listIdentities, 200);
+
+/**
+ * The combobox is free-text, so it hands back whatever was typed. Keep only the
+ * entries that correspond to a real user or group.
+ */
+function dropUnknownIdentities(model: (Identity | string)[]) {
+  const known = new Map(allIdentities.value.map(identity => [identity.name, identity]));
+  selectedIdentities.value = model
+    .map(entry => (typeof entry === "string" ? known.get(entry) : known.get(entry?.name)))
+    .filter((identity): identity is Identity => identity !== undefined);
+}
+
+/** Mirrors the data-table's checkbox selection into the combobox. */
+function selectMembers(selectedRows: unknown) {
+  selectedIdentities.value = (selectedRows as AclRow[]).map(row => ({
+    id: identityId(row),
+    name: row.name,
+    type: row.source.startsWith("users/") ? "user" : "group"
+  }));
+}
+
+async function removeMember(membership: AclRow) {
+  // The endpoint takes the ACL *edge* id, which is what `acls` is keyed on.
+  await rbacApi.removeMember(membership.id);
+  eventBus.emit("displayMessage", { status: "success", message: "Members removed." });
+  await getMembershipData();
+  emit("members-updated");
+}
+
+async function updateMembers() {
+  const response = await rbacApi.updateMembers(rootType.value, props.object.id, {
+    ids: selectedIdentities.value.map(identity => ({ id: identity.id, type: identity.type })),
+    role: selectedRole.value
+  });
+
+  const messages: string[] = [];
+  if (response.updated > 0) {
+    messages.push(`Members updated: ${response.updated}`);
+  }
+  if (response.failed > 0) {
+    messages.push(`Failed: ${response.failed}`);
+  }
+  eventBus.emit("displayMessage", {
+    status: response.failed > 0 ? "warning" : "success",
+    message: messages.join(" ")
+  });
+
+  await getMembershipData();
+  emit("members-updated");
+}
+
+// The dialog keeps this component alive across objects, so refresh when it changes.
+watch(() => props.object.id, getMembershipData);
+
+onMounted(() => {
+  listIdentities();
+  getMembershipData();
+});
+</script>

@@ -67,6 +67,19 @@ export type DeleteApiKeyRequest = Schemas["DeleteApiKeyRequest"];
 export type DeleteApiKeyResponse = Schemas["DeleteApiKeyResponse"];
 export type RegisteredApiKey = Schemas["RegisteredApiKey"];
 
+// Groups / RBAC
+export type Group = Schemas["Group-Output"];
+export type GroupInput = Schemas["Group-Input"];
+export type GroupSearchRequest = Schemas["GroupSearchRequest"];
+export type GroupSearchResponse = Schemas["GroupSearchResponse"];
+export type NewGroupRequest = Schemas["NewGroupRequest"];
+export type RBACIdentity = Schemas["RBACIdentity"];
+export type UpdateMembersResponse = Schemas["UpdateMembersResponse"];
+/** One ACL edge: who (`source`) has what `role` on what (`target`). `id` is the edge's. */
+export type RoleRelationship = Schemas["RoleRelationship-Output"];
+/** The object families that carry an ACL — i.e. the `{type}` in /rbac/{type}/{id}. */
+export type AclRootType = "observable" | "entity" | "indicator" | "dfiq" | "rbacgroup" | "user";
+
 // Tasks / exports
 export type TaskType = Schemas["TaskType"];
 export type ExportTask = Schemas["ExportTask-Output"];
