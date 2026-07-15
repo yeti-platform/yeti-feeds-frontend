@@ -1,5 +1,12 @@
 import http from "@/services/http";
-import type { DetailRootType, LooseYetiObject, ObjectDetail, RootType, TaggableRootType } from "@/services/types";
+import type {
+  CreatableRootType,
+  DetailRootType,
+  LooseYetiObject,
+  ObjectDetail,
+  RootType,
+  TaggableRootType
+} from "@/services/types";
 
 /**
  * Generic access to the object endpoints, for the components that work across
@@ -15,6 +22,27 @@ export const ENDPOINTS: Record<RootType, string> = {
 
 export async function details(rootType: DetailRootType, id: string): Promise<ObjectDetail> {
   const { data } = await http.get<ObjectDetail>(`/${ENDPOINTS[rootType]}/${id}`);
+  return data;
+}
+
+/**
+ * Create-endpoint segment per family. Observables go through /extended (which
+ * accepts the full observable body + tags), unlike entities/indicators.
+ */
+const CREATE_ENDPOINTS: Record<CreatableRootType, string> = {
+  entity: "entities/",
+  observable: "observables/extended",
+  indicator: "indicators/"
+};
+
+/**
+ * Creates an object from the generic NewObject form. The body is built
+ * dynamically from the type's field definitions, so it's a LooseYetiObject
+ * rather than one of the per-family union request types. The backend wraps it
+ * under the root_type key (`{entity: {...}}`, `{observable: {...}}`, ...).
+ */
+export async function create(rootType: CreatableRootType, body: LooseYetiObject): Promise<LooseYetiObject> {
+  const { data } = await http.post<LooseYetiObject>(`/${CREATE_ENDPOINTS[rootType]}`, { [rootType]: body });
   return data;
 }
 
