@@ -103,15 +103,15 @@
                   :object="dfiqTree.object"
                   :is-active="isActive"
                   :redirect="false"
-                  @success="obj => emitDFIQUpdate(obj)"
-                  @deleteSuccess="obj => emitDFIQUpdate(obj)"
+                  @success="(obj: LooseYetiObject) => emitDFIQUpdate(obj)"
+                  @deleteSuccess="(obj: LooseYetiObject) => emitDFIQUpdate(obj)"
                   @toggle-fullscreen="toggleFullscreen"
                 />
                 <edit-object
                   v-else
                   :object="dfiqTree.object"
                   :is-active="isActive"
-                  @success="obj => (dfiqTree.object = obj)"
+                  @success="(obj: LooseYetiObject) => (dfiqTree.object = obj)"
                   @toggle-fullscreen="toggleFullscreen"
                 />
               </template>
@@ -136,7 +136,7 @@
                   :parent="dfiqTree.object"
                   @toggle-fullscreen="toggleFullscreen"
                   @close="isActive.value = false"
-                  @success="obj => emitDFIQUpdate(obj)"
+                  @success="(obj: LooseYetiObject) => emitDFIQUpdate(obj)"
                 />
               </template>
             </v-dialog>
@@ -162,7 +162,9 @@
         <ul class="ml-2 dfiq-tree">
           <li
             class="my-2"
-            v-for="(approach, index) in dfiqTree.object.approaches.filter(a => shouldDisplayApproach(a))"
+            v-for="(approach, index) in dfiqTree.object.approaches.filter((a: LooseYetiObject) =>
+              shouldDisplayApproach(a)
+            )"
           >
             <span @click="approach.expanded = !approach.expanded">
               <v-icon color="grey-darken-2" class="me-1">{{
@@ -205,10 +207,10 @@
                       :object="dfiqTree.object"
                       :is-active="isActive"
                       :redirect="false"
-                      @success="obj => emitDFIQUpdate(obj)"
-                      @deleteSuccess="obj => emitDFIQUpdate(obj)"
+                      @success="(obj: LooseYetiObject) => emitDFIQUpdate(obj)"
+                      @deleteSuccess="(obj: LooseYetiObject) => emitDFIQUpdate(obj)"
                       @toggle-fullscreen="toggleFullscreen"
-                      :approach="index + 1"
+                      :approach="Number(index) + 1"
                     />
                   </template>
                 </v-dialog>
@@ -218,7 +220,7 @@
               class="ml-4 dfiq-tree"
               v-show="approach.expanded || (dfiqTreeFilter !== '' && shouldDisplayApproach(approach))"
             >
-              <li class="mt-2 ml-6" v-for="step in approach.steps.filter(s => shouldDisplayStep(s))">
+              <li class="mt-2 ml-6" v-for="step in approach.steps.filter((s: LooseYetiObject) => shouldDisplayStep(s))">
                 <v-icon color="grey-darken-2" size="x-small" class="me-2">{{ getDFIQStepIcon(step) }}</v-icon>
                 <span v-if="step.type?.match(/artifact/gi)">
                   <code class="me-2">{{ step.value }}</code>
@@ -257,6 +259,15 @@ import { INDICATOR_TYPES } from "@/definitions/indicatorDefinitions";
 
 import EditDFIQObject from "@/components/DFIQ/EditDFIQObject.vue";
 import EditObject from "@/components/EditObject.vue";
+import type { LooseYetiObject } from "@/services/types";
+
+/** A node in the rendered DFIQ tree (built from graph paths). */
+interface TreeNode {
+  id: string;
+  title: string;
+  object: LooseYetiObject;
+  children?: TreeNode[];
+}
 
 export default {
   components: {
@@ -290,7 +301,7 @@ export default {
   },
   data() {
     return {
-      dfiqGraph: {},
+      dfiqGraph: {} as LooseYetiObject,
       expanded: true,
       expandAll: true,
       editWidth: "75%",
@@ -298,7 +309,7 @@ export default {
       DFIQHierarchy: {
         scenario: ["facet", "question"],
         facet: ["question"]
-      },
+      } as Record<string, string[]>,
       dfiqTreeFilterControl: ""
     };
   },
@@ -318,16 +329,16 @@ export default {
         this.dfiqGraph = response.data;
       });
     },
-    getDFIQIcon(treeItem) {
+    getDFIQIcon(treeItem: LooseYetiObject) {
       if (!treeItem?.object?.type) {
         return null;
       }
       return (
         DFIQ_TYPES.find(type => type.type === treeItem.object.type) ||
         INDICATOR_TYPES.find(type => type.type === treeItem.object.type)
-      ).icon;
+      )?.icon;
     },
-    getDFIQStepIcon(step) {
+    getDFIQStepIcon(step: LooseYetiObject) {
       if (step.type === null) {
         return "mdi-cog";
       }
@@ -339,20 +350,20 @@ export default {
       }
       return "mdi-cog";
     },
-    getDetailsLink(treeItem) {
+    getDetailsLink(treeItem: LooseYetiObject) {
       return {
         name: treeItem.object?.root_type === "dfiq" ? "DFIQDetails" : "IndicatorDetails",
         params: { id: treeItem.object?.id }
       };
     },
-    copyText(text) {
+    copyText(text: string) {
       navigator.clipboard.writeText(text);
       this.$eventBus.emit("displayMessage", {
         status: "info",
         message: "Query copied to clipboard!"
       });
     },
-    shouldDisplay(treeItem) {
+    shouldDisplay(treeItem: LooseYetiObject) {
       if (this.dfiqTreeFilter === "") {
         return true;
       }
@@ -360,27 +371,27 @@ export default {
         return true;
       }
       if (treeItem.object.type === "question") {
-        return treeItem.object.approaches?.some(approach => this.shouldDisplayApproach(approach));
+        return treeItem.object.approaches?.some((approach: LooseYetiObject) => this.shouldDisplayApproach(approach));
       }
       if (treeItem.children?.length > 0) {
-        return treeItem.children?.some(child => this.shouldDisplay(child));
+        return treeItem.children?.some((child: LooseYetiObject) => this.shouldDisplay(child));
       }
 
       return false;
     },
-    shouldDisplayApproach(approach) {
-      if (approach?.steps?.some(step => this.shouldDisplayStep(step))) {
+    shouldDisplayApproach(approach: LooseYetiObject) {
+      if (approach?.steps?.some((step: LooseYetiObject) => this.shouldDisplayStep(step))) {
         return true;
       }
       if (approach?.name.toLowerCase().includes(this.dfiqTreeFilter.toLowerCase())) {
         return true;
       }
     },
-    shouldDisplayStep(step) {
+    shouldDisplayStep(step: LooseYetiObject) {
       const fields = ["name", "value", "type", "stage"];
       return fields.some(f => step[f]?.toLowerCase().includes(this.dfiqTreeFilter.toLowerCase()));
     },
-    sanitizeTitle(dfiqItem) {
+    sanitizeTitle(dfiqItem: LooseYetiObject) {
       if (dfiqItem.object.type !== "query") {
         return dfiqItem.title;
       }
@@ -390,25 +401,25 @@ export default {
       this.fullScreenEdit = !this.fullScreenEdit;
       this.editWidth = fullscreen ? "100%" : "75%";
     },
-    DFIQUpdated(obj) {
+    DFIQUpdated() {
       if (this.topLevel) {
         this.getDFIQData();
       }
     },
-    emitDFIQUpdate(obj) {
+    emitDFIQUpdate(obj: LooseYetiObject) {
       this.$eventBus.emit("DFIQupdated", obj);
     },
-    expandCheck(expansion) {
+    expandCheck(expansion: boolean) {
       this.expanded = expansion;
       if (this.dfiqTree.object.type === "question") {
-        this.dfiqTree.object.approaches.forEach(approach => {
+        this.dfiqTree.object.approaches.forEach((approach: LooseYetiObject) => {
           approach.expanded = expansion;
         });
       }
     }
   },
   computed: {
-    dfiqTree() {
+    dfiqTree(): LooseYetiObject {
       if (this.treeRoot !== null) {
         return this.treeRoot;
       }
@@ -424,16 +435,16 @@ export default {
           return [];
         }
       }
-      let root = {
+      const root: TreeNode = {
         id: this.dfiqGraph.paths[0][0].source,
         title: this.dfiqGraph.vertices[this.dfiqGraph.paths[0][0].source].name,
         object: this.dfiqGraph.vertices[this.dfiqGraph.paths[0][0].source],
         children: []
       };
-      this.dfiqGraph.paths.forEach(path => {
-        let currentNode = root;
-        path.forEach(edge => {
-          let child = currentNode.children?.find(child => child.id === edge.target);
+      this.dfiqGraph.paths.forEach((path: LooseYetiObject[]) => {
+        let currentNode: TreeNode = root;
+        path.forEach((edge: LooseYetiObject) => {
+          let child = currentNode.children?.find((c: TreeNode) => c.id === edge.target);
           if (!child) {
             child = {
               id: edge.target,
@@ -450,15 +461,6 @@ export default {
       });
 
       return root;
-    },
-    availableIndicatorTypes() {
-      if (this.dfiqGraph === null) {
-        return [];
-      }
-      const queryTypes = Object.values(this.dfiqGraph.vertices || {})
-        .filter(vertex => vertex.root_type === "indicator")
-        .map(vertex => vertex.query_type || vertex.type);
-      return [...new Set(queryTypes)];
     }
   },
   mounted() {
