@@ -99,7 +99,7 @@
                   v-if="object?.root_type === 'dfiq'"
                   :object="object ?? undefined"
                   :is-active="isActive"
-                  @success="obj => (object = obj)"
+                  @success="(obj: LooseYetiObject) => (object = obj)"
                   @toggle-fullscreen="toggleFullscreen"
                 />
                 <edit-object

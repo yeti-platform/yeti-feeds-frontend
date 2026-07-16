@@ -20,21 +20,21 @@
     </template>
     <template v-slot:chip="{ props, item }">
       <v-chip
-        v-if="item.raw.type"
+        v-if="item.type"
         v-bind="props"
-        :text="item.raw.name"
-        :prepend-icon="getIconForType(item.raw.type)"
+        :text="item.name"
+        :prepend-icon="getIconForType(item.type)"
       ></v-chip>
     </template>
 
     <template v-slot:item="{ props, item }">
-      <v-list-item :prepend-icon="getIconForType(item.raw.type)">
+      <v-list-item :prepend-icon="getIconForType(item.type)">
         <div class="d-flex">
-          <v-btn variant="text" v-bind="props">{{ item.raw.name }}</v-btn>
+          <v-btn variant="text" v-bind="props">{{ item.name }}</v-btn>
           <v-spacer></v-spacer>
           <v-btn
             variant="text"
-            :to="{ name: 'EntityDetails', params: { id: item.raw.id } }"
+            :to="{ name: 'EntityDetails', params: { id: item.id } }"
             target="_blank"
             prepend-icon="mdi-open-in-new"
             size="x-small"
@@ -81,7 +81,7 @@ interface SelectableObject {
 const emit = defineEmits<{ "selected-object": [object: SelectableObject | null] }>();
 
 const items = ref<SelectableObject[]>([]);
-const selectedEntity = ref<LooseYetiObject | null>(props.object);
+const selectedEntity = ref<SelectableObject | null>(props.object as SelectableObject | null);
 
 const getHintForTypes = computed(() =>
   props.typeFilter.length > 0
@@ -122,7 +122,7 @@ function emitSelectedObject() {
 watch(
   () => props.object,
   value => {
-    selectedEntity.value = value;
+    selectedEntity.value = value as SelectableObject | null;
   },
   { deep: true }
 );
