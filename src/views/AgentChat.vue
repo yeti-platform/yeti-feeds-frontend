@@ -18,14 +18,14 @@
           >
             <template v-slot:item="{ item, props }">
               <v-list-item v-bind="props" class="session-label">
-                <template v-if="item.raw.isNew" v-slot:append>
+                <template v-if="item.isNew" v-slot:append>
                   <v-chip size="x-small" color="primary" variant="tonal">New</v-chip>
                 </template>
               </v-list-item>
             </template>
             <template v-slot:selection="{ item }">
-              <span class="session-label text-truncate">{{ item.title }}</span>
-              <v-chip v-if="item.raw.isNew" size="x-small" color="primary" variant="tonal" class="ml-2">New</v-chip>
+              <span class="session-label text-truncate">{{ item.label }}</span>
+              <v-chip v-if="item.isNew" size="x-small" color="primary" variant="tonal" class="ml-2">New</v-chip>
             </template>
           </v-combobox>
           <v-btn
