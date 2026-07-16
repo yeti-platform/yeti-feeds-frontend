@@ -1,6 +1,6 @@
 <template>
   <v-expansion-panels multiple flat static>
-    <v-expansion-panel v-for="(approach, index) in question.approaches">
+    <v-expansion-panel v-for="(approach, index) in approaches" :key="approach.name">
       <v-expansion-panel-title class="approach-title d-flex justify-end">
         <span class="me-4">{{ approach.name }}</span>
         <v-icon class="me-2" v-if="approach.tags.map(tag => tag.toLowerCase()).includes('windows')"
@@ -38,8 +38,8 @@
               :object="question"
               :is-active="isActive"
               :redirect="false"
-              @success="obj => emitDFIQUpdate(obj)"
-              @deleteSuccess="obj => emitDFIQUpdate(obj)"
+              @success="(obj: LooseYetiObject) => emitDFIQUpdate(obj)"
+              @deleteSuccess="(obj: LooseYetiObject) => emitDFIQUpdate(obj)"
               @toggle-fullscreen="toggleFullscreen"
               :approach="index + 1"
             />
@@ -53,32 +53,22 @@
   </v-expansion-panels>
 </template>
 
-<script lang="ts">
-import YetiDFIQApproachTemplate from "./YetiDFIQApproachTemplate.vue";
-import EditDFIQObject from "./EditDFIQObject.vue";
+<script lang="ts" setup>
+import { computed, ref } from "vue";
 
-export default {
-  props: {
-    question: {
-      type: Object,
-      required: true
-    }
-  },
-  components: {
-    YetiDFIQApproachTemplate,
-    EditDFIQObject
-  },
-  methods: {
-    emitDFIQUpdate(obj) {
-      this.$eventBus.emit("DFIQupdated", obj);
-    }
-  },
-  data() {
-    return {
-      toggleFullscreen: false
-    };
-  }
-};
+import EditDFIQObject from "./EditDFIQObject.vue";
+import YetiDFIQApproachTemplate from "./YetiDFIQApproachTemplate.vue";
+import { eventBus } from "@/plugins/eventbus";
+import type { DFIQApproach, LooseYetiObject } from "@/services/types";
+
+const props = defineProps<{ question: LooseYetiObject }>();
+
+const approaches = computed<DFIQApproach[]>(() => props.question.approaches ?? []);
+const toggleFullscreen = ref(false);
+
+function emitDFIQUpdate(obj: LooseYetiObject) {
+  eventBus.emit("DFIQupdated", obj);
+}
 </script>
 
 <style>

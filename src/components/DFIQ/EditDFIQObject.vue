@@ -251,7 +251,7 @@
                 <div v-for="(step, index) in approach.steps" class="my-2 ml-4">
                   <v-row align="center">
                     <v-col cols="1"
-                      ><span class="font-weight-bold">Step {{ index + 1 }}</span></v-col
+                      ><span class="font-weight-bold">Step {{ Number(index) + 1 }}</span></v-col
                     >
                     <v-col>
                       <v-text-field
@@ -421,6 +421,14 @@ import { parse, stringify } from "yaml";
 </script>
 
 <script lang="ts">
+import type { LooseYetiObject } from "@/services/types";
+
+/** A per-field save error shown in the alert list. */
+interface FieldError {
+  field: string;
+  message: string;
+}
+
 export default {
   components: { ObjectFields },
   props: {
@@ -451,8 +459,8 @@ export default {
   },
   data() {
     return {
-      localObject: { ...this.object },
-      errors: [],
+      localObject: { ...this.object } as LooseYetiObject,
+      errors: [] as FieldError[],
       fullScreen: false,
       typeToEndpointMapping: {
         entity: "entities",
@@ -460,27 +468,27 @@ export default {
         indicator: "indicators",
         dfiq: "dfiq"
       },
-      validatingYaml: false,
-      yamlValidationError: { valid: true },
+      validatingYaml: false as boolean | string,
+      yamlValidationError: { valid: true } as LooseYetiObject,
       updateApproachIndicators: false,
       dialogDelete: false,
       activeTab: "user-form",
-      parsedYaml: {},
+      parsedYaml: {} as LooseYetiObject,
       dfiqYaml: "",
-      stageTypes: [],
-      stepTypes: [],
-      possibleParents: [],
+      stageTypes: [] as string[],
+      stepTypes: [] as string[],
+      possibleParents: [] as LooseYetiObject[],
       expandedPanel: -1,
       DFIQParentHierarchy: {
         facet: ["scenario"],
         question: ["facet", "scenario"]
-      },
+      } as Record<string, string[]>,
       userStore: useUserStore()
     };
   },
   mounted() {
     if (this.newType !== "") {
-      let template = DFIQ_TEMPLATES[this.newType];
+      let template = DFIQ_TEMPLATES[this.newType as keyof typeof DFIQ_TEMPLATES];
       if (this.parent !== null) {
         template = template.replace("PARENT_UUID_PLACEHOLDER", this.parent.uuid);
       } else {
@@ -525,8 +533,9 @@ export default {
         value: ""
       };
     },
-    parentSearchFilter(itemTitle, queryText, item) {
-      const inId = item.raw.dfiq_id.toLowerCase().includes(queryText.toLowerCase());
+    // Matches Vuetify's FilterFunction signature: (value, query, item?).
+    parentSearchFilter(itemTitle: string, queryText: string, item?: { raw: LooseYetiObject }): boolean {
+      const inId = !!item?.raw.dfiq_id.toLowerCase().includes(queryText.toLowerCase());
       const inTitle = itemTitle.toLowerCase().includes(queryText.toLowerCase());
       return inId || inTitle;
     },
@@ -547,7 +556,7 @@ export default {
           count: 0
         })
         .then(response => {
-          this.possibleParents = response.data.dfiq.filter(dfiq => {
+          this.possibleParents = response.data.dfiq.filter((dfiq: LooseYetiObject) => {
             return this.DFIQParentHierarchy[this.localObject.type].includes(dfiq.type);
           });
         });
@@ -598,7 +607,7 @@ export default {
         .catch(error => {
           console.log(error);
           if (error.response.status === 422) {
-            this.errors = error.response.data.detail.map(detail => {
+            this.errors = error.response.data.detail.map((detail: LooseYetiObject) => {
               return { field: detail.loc[3], message: detail.msg };
             });
           } else {
@@ -636,7 +645,7 @@ export default {
         })
         .catch(error => {
           if (error.response.status === 422) {
-            this.errors = error.response.data.detail.map(detail => {
+            this.errors = error.response.data.detail.map((detail: LooseYetiObject) => {
               return { field: detail.loc[3], message: detail.msg };
             });
           } else {
@@ -681,24 +690,26 @@ export default {
     renderedYaml() {
       return stringify(this.parsedYaml);
     },
-    placeholders() {
+    // Placeholders/rules vary by DFIQ type; the template indexes them freely,
+    // so expose them loosely rather than as the heterogeneous FORM_METADATA union.
+    placeholders(): LooseYetiObject {
       if (this.localObject.type === undefined) {
         return {};
       }
-      return FORM_METADATA[this.localObject.type].placeholders;
+      return FORM_METADATA[this.localObject.type as keyof typeof FORM_METADATA].placeholders;
     },
-    rules() {
+    rules(): LooseYetiObject {
       if (this.localObject.type === undefined) {
         return [];
       }
-      return FORM_METADATA[this.localObject.type].rules;
+      return (FORM_METADATA[this.localObject.type as keyof typeof FORM_METADATA] as LooseYetiObject).rules ?? [];
     },
     hasOwnerPerms() {
       return this.userStore.hasOwnerPerms(this.localObject);
     }
   },
   watch: {
-    "localObject.dfiq_yaml": _.debounce(function () {
+    "localObject.dfiq_yaml": _.debounce(function (this: any) {
       this.validateDFIQYaml();
     }, 500),
     dfiqYaml() {

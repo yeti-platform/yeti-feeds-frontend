@@ -125,6 +125,9 @@ export type DeleteContextRequest = Schemas["DeleteContextRequest"];
 export type DFIQSearchResponse = Schemas["DFIQSearchResponse"];
 /** Scenario | Facet | Question. */
 export type DFIQObject = DFIQSearchResponse["dfiq"][number];
+export type DFIQQuestion = Schemas["DFIQQuestion-Output"];
+export type DFIQApproach = Schemas["DFIQApproach"];
+export type DFIQApproachStep = Schemas["DFIQApproachStep"];
 
 /**
  * The object families that share the generic /{root_type}/... endpoint shape.

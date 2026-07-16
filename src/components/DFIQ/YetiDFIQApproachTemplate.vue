@@ -82,68 +82,25 @@
 <script lang="ts" setup>
 import DOMPurify from "dompurify";
 import { marked } from "marked";
-</script>
+import { computed } from "vue";
 
-<script lang="ts">
-export default {
-  props: {
-    approach: {
-      type: Object,
-      required: true
-    }
-  },
-  data() {
-    return {
-      dfiqTab: "one"
-    };
-  },
-  methods: {
-    markdownifyText(text) {
-      return DOMPurify.sanitize(marked(text));
-    },
-    copyText(text) {
-      navigator.clipboard.writeText(text);
-      this.$eventBus.emit("displayMessage", {
-        status: "info",
-        message: "Query copied to clipboard!"
-      });
-    }
-  },
-  computed: {
-    hasCoverage() {
-      return this.approach.notes.covered.length + this.approach.notes.not_covered.length > 0;
-    },
-    viewCoverageMarkdown() {
-      let text = `### Notes \n\n`;
-      if (this.view.notes.covered.length > 0) {
-        text += "\n\n**Covered**\n\n";
-        this.view.notes.covered.forEach(ref => {
-          text += `- ${ref}\n`;
-        });
-      }
+import { eventBus } from "@/plugins/eventbus";
+import type { LooseYetiObject } from "@/services/types";
 
-      if (this.view.notes.not_covered.length > 0) {
-        text += "\n\n**Not Covered**\n\n";
-        this.view.notes.not_covered.forEach(ref => {
-          text += `- ${ref}\n`;
-        });
-      }
+const props = defineProps<{ approach: LooseYetiObject }>();
 
-      return DOMPurify.sanitize(marked(text));
-    },
-    viewDataMarkdown() {
-      let text = `### Data \n\n`;
-      if (this.view.data.length > 0) {
-        text += "\n\n**Data**\n\n";
-        this.view.data.forEach(ref => {
-          text += `- ${ref.type} : ${ref.value}\n`;
-        });
-      }
+const hasCoverage = computed<boolean>(
+  () => props.approach.notes.covered.length + props.approach.notes.not_covered.length > 0
+);
 
-      return DOMPurify.sanitize(marked(text));
-    }
-  }
-};
+function markdownifyText(text: string): string {
+  return DOMPurify.sanitize(marked.parse(text, { async: false }));
+}
+
+function copyText(text: string) {
+  navigator.clipboard.writeText(text);
+  eventBus.emit("displayMessage", { status: "info", message: "Query copied to clipboard!" });
+}
 </script>
 
 <style>
@@ -165,7 +122,9 @@ export default {
 }
 
 .yeti-markdown pre {
-  font-family: Roboto Mono, monospace;
+  font-family:
+    Roboto Mono,
+    monospace;
   border: 1px solid #e0e0e0;
   margin: 0.5rem 0 0.5rem 0;
   padding: 0.5rem;
