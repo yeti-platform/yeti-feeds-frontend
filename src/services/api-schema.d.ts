@@ -6620,9 +6620,9 @@ export interface components {
              */
             type: "package";
             /** Version */
-            version?: string;
-            /** Regitry Type */
-            regitry_type?: string;
+            version?: string | null;
+            /** Registry Type */
+            registry_type?: string | null;
         };
         /** Package */
         "Package-Output": {
@@ -6662,9 +6662,9 @@ export interface components {
              */
             type: "package";
             /** Version */
-            version?: string;
-            /** Regitry Type */
-            regitry_type?: string;
+            version?: string | null;
+            /** Registry Type */
+            registry_type?: string | null;
             /** Id */
             readonly id: string;
             /** Acls */
