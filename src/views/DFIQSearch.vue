@@ -42,7 +42,7 @@
     <v-list-item>
       <v-btn prepend-icon="mdi-plus">
         New DFIQ object
-        <v-menu activator="parent" v-model="newMenuOpen">
+        <v-menu activator="parent" v-model="newMenuOpen" eager>
           <v-list>
             <v-dialog v-for="typeDef in DFIQTypes" :width="editWidth" :fullscreen="fullScreenEdit">
               <template v-slot:activator="{ props }">

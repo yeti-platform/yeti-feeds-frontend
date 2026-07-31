@@ -63,7 +63,7 @@
     <v-list-item class="mb-4">
       <v-btn prepend-icon="mdi-plus">
         New Observable
-        <v-menu activator="parent" v-model="newMenuOpen">
+        <v-menu activator="parent" v-model="newMenuOpen" eager>
           <v-list>
             <v-dialog v-for="typeDef in observableTypes" :key="typeDef.type" :width="editWidth" :fullscreen="fullScreenEdit">
               <template v-slot:activator="{ props }">
