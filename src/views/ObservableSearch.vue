@@ -63,11 +63,11 @@
     <v-list-item class="mb-4">
       <v-btn prepend-icon="mdi-plus">
         New Observable
-        <v-menu activator="parent">
+        <v-menu activator="parent" v-model="newMenuOpen" eager>
           <v-list>
             <v-dialog v-for="typeDef in observableTypes" :key="typeDef.type" :width="editWidth" :fullscreen="fullScreenEdit">
               <template v-slot:activator="{ props }">
-                <v-list-item v-bind="props"> {{ typeDef.name }} </v-list-item>
+                <v-list-item v-bind="props" @click="newMenuOpen = false"> {{ typeDef.name }} </v-list-item>
               </template>
               <template v-slot:default="{ isActive }">
                 <new-object
@@ -152,6 +152,7 @@ const exportTemplates = ref<Template[]>([]);
 const selectedExportTemplate = ref<string | null>(null);
 const fullScreenEdit = ref(false);
 const editWidth = ref("50%");
+const newMenuOpen = ref(false);
 const sortBy = ref<SortItem[]>([{ key: "created", order: "desc" }]);
 
 /** The distinct context sources on an observable, for the chips column. */

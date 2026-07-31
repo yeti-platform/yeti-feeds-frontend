@@ -17,6 +17,7 @@
           searchType="indicators"
           :search-subtype="typeDef.type"
           :search-query="searchQuery"
+          :search-trigger="searchTrigger"
           :headers="getFieldForType(typeDef.type)"
           :filter-aliases="getAliasesForType(typeDef.type)"
           @totalUpdated="countIndicators(typeDef.type, $event)"
@@ -34,18 +35,20 @@
         density="compact"
         class="mt-2"
         hint="e.g. created>2024-01-01, supported_os=windows"
-        @click:prepend-inner="() => (searchQuery = searchQueryLocal)"
-        @keyup.enter="() => (searchQuery = searchQueryLocal)"
+        @click:prepend-inner="() => { searchQuery = searchQueryLocal; searchTrigger++; }"
+        @keyup.enter="() => { searchQuery = searchQueryLocal; searchTrigger++; }"
       />
     </v-list-item>
     <v-list-item>
       <v-btn prepend-icon="mdi-plus">
         New Indicator
-        <v-menu activator="parent">
+        <v-menu activator="parent" v-model="newMenuOpen" eager>
           <v-list>
             <v-dialog v-for="typeDef in indicatorTypes" :width="editWidth" :fullscreen="fullScreenEdit">
               <template v-slot:activator="{ props }">
-                <v-list-item v-bind="props" :prepend-icon="typeDef.icon"> {{ typeDef.name }} </v-list-item>
+                <v-list-item v-bind="props" @click="newMenuOpen = false" :prepend-icon="typeDef.icon">
+                  {{ typeDef.name }}
+                </v-list-item>
               </template>
               <template v-slot:default="{ isActive }">
                 <new-object
@@ -73,6 +76,8 @@ const indicatorTypes = INDICATOR_TYPES;
 
 const searchQuery = ref("");
 const searchQueryLocal = ref("");
+const searchTrigger = ref(0);
+const newMenuOpen = ref(false);
 
 const {
   counts: indicatorCount,

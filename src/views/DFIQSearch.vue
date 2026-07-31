@@ -17,6 +17,7 @@
           searchType="dfiq"
           :search-subtype="typeDef.type"
           :search-query="searchQuery"
+          :search-trigger="searchTrigger"
           :headers="getFieldForType(typeDef.type)"
           :filter-aliases="getAliasesForType(typeDef.type)"
           @totalUpdated="countDFIQ(typeDef.type, $event)"
@@ -34,18 +35,20 @@
         density="compact"
         class="mt-2"
         hint="s1007, dfiq_tags=malware, created>2024-01-01"
-        @click:prepend-innder="() => (searchQuery = searchQueryLocal)"
-        @keyup.enter="() => (searchQuery = searchQueryLocal)"
+        @click:prepend-inner="() => { searchQuery = searchQueryLocal; searchTrigger++; }"
+        @keyup.enter="() => { searchQuery = searchQueryLocal; searchTrigger++; }"
       />
     </v-list-item>
     <v-list-item>
       <v-btn prepend-icon="mdi-plus">
         New DFIQ object
-        <v-menu activator="parent">
+        <v-menu activator="parent" v-model="newMenuOpen" eager>
           <v-list>
             <v-dialog v-for="typeDef in DFIQTypes" :width="editWidth" :fullscreen="fullScreenEdit">
               <template v-slot:activator="{ props }">
-                <v-list-item v-bind="props" :prepend-icon="typeDef.icon"> {{ typeDef.name }} </v-list-item>
+                <v-list-item v-bind="props" @click="newMenuOpen = false" :prepend-icon="typeDef.icon">
+                  {{ typeDef.name }}
+                </v-list-item>
               </template>
               <template v-slot:default="{ isActive }">
                 <edit-DFIQ-object
@@ -74,6 +77,8 @@ const DFIQTypes = DFIQ_TYPES;
 
 const searchQuery = ref("");
 const searchQueryLocal = ref("");
+const searchTrigger = ref(0);
+const newMenuOpen = ref(false);
 
 const {
   counts: DFIQCount,

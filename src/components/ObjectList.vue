@@ -14,7 +14,6 @@
       density="compact"
       :items="items"
       @update:options="loadObjects"
-      :search="searchQuery"
       :item-value="item => item.id"
       hover
       :sort-by="sortBy"
@@ -80,7 +79,7 @@
 
 <script setup lang="ts">
 import moment from "moment";
-import { ref } from "vue";
+import { ref, watch } from "vue";
 
 import * as objectsApi from "@/services/objects";
 import type { LooseYetiObject } from "@/services/types";
@@ -95,6 +94,13 @@ const props = withDefaults(
     /** [alias, fieldType] pairs the backend widens the search with. */
     filterAliases?: Array<[string, string]>;
     checkable?: boolean;
+    /**
+     * Bump this (e.g. a counter) to force a reload with the current
+     * searchQuery. Needed because re-submitting the *same* search text is a
+     * no-op as far as Vue's reactivity is concerned -- nothing here would
+     * otherwise notice and re-fetch.
+     */
+    searchTrigger?: number;
   }>(),
   {
     searchQuery: "",
@@ -106,7 +112,8 @@ const props = withDefaults(
       { title: "Created on", key: "created", width: "200px" }
     ],
     filterAliases: () => [],
-    checkable: false
+    checkable: false,
+    searchTrigger: 0
   }
 );
 
@@ -181,6 +188,14 @@ async function loadObjects({ page: requestedPage, itemsPerPage, sortBy: requeste
     loading.value = false;
   }
 }
+
+watch(
+  () => props.searchTrigger,
+  () => {
+    page.value = 1;
+    loadObjects({ page: 1, itemsPerPage: perPage.value, sortBy: sortBy.value });
+  }
+);
 </script>
 
 
