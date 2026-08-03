@@ -399,11 +399,9 @@ async function saveTags() {
 function countObjects(key: string, value: number) {
   relatedObjectTabCount.value[key] = value;
   // Entity-type tabs are conditionally rendered (displayedEntityTypes only
-  // includes types with count > 0), so a hash-targeted entity-type tab
-  // doesn't exist yet at mount time -- v-tabs/v-window silently fall back
-  // to another tab for a v-model value with no matching, currently-rendered
-  // tab. Once this key's count arrives and matches the hash, the tab now
-  // exists: re-assert the selection to recover from that fallback.
+  // includes types with count > 0), so a hash-targeted entity-type tab may
+  // not exist yet when this count arrives -- (re-)assert the selection now
+  // that it does.
   if (route.hash === `#${key}` && value > 0) {
     activeTab.value = `related-${key}`;
     return;

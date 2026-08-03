@@ -103,11 +103,6 @@ const DETAILS_ROUTE_BY_ROOT_TYPE: Record<string, string> = {
   dfiq: "DFIQDetails"
 };
 
-/**
- * The "details" link always pointed at EntityDetails regardless of the
- * result's actual root_type (this selector lists entities, indicators, and
- * dfiq objects together) -- route by the real type instead.
- */
 function detailsRouteName(rootType: string): string {
   return DETAILS_ROUTE_BY_ROOT_TYPE[rootType] ?? "EntityDetails";
 }
