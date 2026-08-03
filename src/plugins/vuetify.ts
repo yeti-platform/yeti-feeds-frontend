@@ -84,15 +84,8 @@ export default createVuetify({
       variant: "outlined"
     },
     VBtn: {
-      // null (not omitted) cancels the md3 blueprint's own rounded: "xl"
-      // default -- same pattern the blueprint itself uses internally (see
-      // its VBtnGroup > VBtn override). VTab renders an actual VBtn
-      // under the hood, so this covers tab labels too.
       rounded: null,
       class: "text-uppercase",
-      // Vuetify derives $button-text-letter-spacing from the "label-large"
-      // MD3 typography token (~0.1px) instead of the older "button" token
-      // (~1.25px) used pre-v4 -- restore the wider tracking to match.
       style: "letter-spacing: 1.25px;"
     },
     VCard: {
