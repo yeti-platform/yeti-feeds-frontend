@@ -89,7 +89,11 @@ export default createVuetify({
       // its VBtnGroup > VBtn override). VTab renders an actual VBtn
       // under the hood, so this covers tab labels too.
       rounded: null,
-      class: "text-uppercase"
+      class: "text-uppercase",
+      // Vuetify derives $button-text-letter-spacing from the "label-large"
+      // MD3 typography token (~0.1px) instead of the older "button" token
+      // (~1.25px) used pre-v4 -- restore the wider tracking to match.
+      style: "letter-spacing: 1.25px;"
     },
     VCard: {
       elevation: 0
