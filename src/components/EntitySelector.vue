@@ -28,21 +28,29 @@
     </template>
 
     <template v-slot:item="{ props, item }">
-      <v-list-item :prepend-icon="getIconForType(item.type)">
-        <div class="d-flex">
-          <v-btn variant="text" v-bind="props">{{ item.name }}</v-btn>
-          <v-spacer></v-spacer>
+      <!--
+        v-bind="props" goes on this v-list-item itself, not a button nested
+        inside it: Vuetify assigns role="option" to this element regardless
+        of where the click/selection props are bound, so binding them here
+        keeps the whole option's accessible role and its actual click
+        behavior on the same element instead of splitting them across a
+        wrapper + an inner button (which also meant two separately
+        focusable controls -- name and "details" -- inside a single
+        announced option).
+      -->
+      <v-list-item v-bind="props" :prepend-icon="getIconForType(item.type)">
+        <template v-slot:append>
           <v-btn
             variant="text"
-            :to="{ name: 'EntityDetails', params: { id: item.id } }"
+            :to="{ name: detailsRouteName(item.root_type), params: { id: item.id } }"
             target="_blank"
             prepend-icon="mdi-open-in-new"
             size="x-small"
             rounded="sm"
-            class="mt-2"
+            @click.stop
             >details</v-btn
           >
-        </div>
+        </template>
       </v-list-item>
     </template>
   </v-autocomplete>
@@ -88,6 +96,16 @@ const getHintForTypes = computed(() =>
     ? `Filtering for ${props.typeFilter.join(", ")}`
     : "Filtering for all object types"
 );
+
+const DETAILS_ROUTE_BY_ROOT_TYPE: Record<string, string> = {
+  entity: "EntityDetails",
+  indicator: "IndicatorDetails",
+  dfiq: "DFIQDetails"
+};
+
+function detailsRouteName(rootType: string): string {
+  return DETAILS_ROUTE_BY_ROOT_TYPE[rootType] ?? "EntityDetails";
+}
 
 async function loadObjects(searchQuery = "") {
   const request = { query: { name: searchQuery }, count: 20 };

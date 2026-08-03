@@ -398,6 +398,14 @@ async function saveTags() {
 
 function countObjects(key: string, value: number) {
   relatedObjectTabCount.value[key] = value;
+  // Entity-type tabs are conditionally rendered (displayedEntityTypes only
+  // includes types with count > 0), so a hash-targeted entity-type tab may
+  // not exist yet when this count arrives -- (re-)assert the selection now
+  // that it does.
+  if (route.hash === `#${key}` && value > 0) {
+    activeTab.value = `related-${key}`;
+    return;
+  }
   if (!route.hash && autoTab.value) {
     navigateToFirstPopulatedTab();
   }

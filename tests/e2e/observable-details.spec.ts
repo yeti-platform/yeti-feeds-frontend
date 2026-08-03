@@ -179,7 +179,7 @@ test.describe("Observable Details", () => {
     // The dialog's first input is the "filter on suggested types" checkbox, so
     // target the text inputs; the EntitySelector autocomplete is the first.
     await dialog.locator('input[type="text"]').first().click();
-    await page.getByRole("button", { name: "EvilCorp" }).first().click();
+    await page.getByRole("option", { name: "EvilCorp" }).click();
 
     await dialog.getByRole("button", { name: "Save" }).click();
 
