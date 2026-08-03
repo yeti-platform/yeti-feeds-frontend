@@ -67,7 +67,7 @@
 </template>
 
 <script setup lang="ts">
-import NewObject from "@/components/NewObject.vue";
+import EditDFIQObject from "@/components/DFIQ/EditDFIQObject.vue";
 import ObjectList from "@/components/ObjectList.vue";
 import { useTypeTabs } from "@/composables/useTypeTabs";
 import { DFIQ_TYPES } from "@/definitions/dfiqDefinitions";

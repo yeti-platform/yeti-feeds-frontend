@@ -535,7 +535,7 @@ export default {
     },
     // Matches Vuetify's FilterFunction signature: (value, query, item?).
     parentSearchFilter(itemTitle: string, queryText: string, item?: { raw: LooseYetiObject }): boolean {
-      const inId = !!item?.raw.dfiq_id.toLowerCase().includes(queryText.toLowerCase());
+      const inId = !!item?.raw.dfiq_id?.toLowerCase().includes(queryText.toLowerCase());
       const inTitle = itemTitle.toLowerCase().includes(queryText.toLowerCase());
       return inId || inTitle;
     },
