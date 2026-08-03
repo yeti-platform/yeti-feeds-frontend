@@ -84,12 +84,9 @@ export default createVuetify({
       variant: "outlined"
     },
     VBtn: {
-      rounded: 1
-    },
-    VTab: {
-      VChip: {
-        rounded: 1
-      }
+      rounded: null,
+      class: "text-uppercase",
+      style: "letter-spacing: 1.25px;"
     },
     VCard: {
       elevation: 0
