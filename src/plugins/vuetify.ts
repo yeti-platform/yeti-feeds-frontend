@@ -83,14 +83,6 @@ export default createVuetify({
     VTextarea: {
       variant: "outlined"
     },
-    VBtn: {
-      rounded: 1
-    },
-    VTab: {
-      VChip: {
-        rounded: 1
-      }
-    },
     VCard: {
       elevation: 0
     }
