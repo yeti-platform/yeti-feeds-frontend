@@ -83,6 +83,14 @@ export default createVuetify({
     VTextarea: {
       variant: "outlined"
     },
+    VBtn: {
+      // null (not omitted) cancels the md3 blueprint's own rounded: "xl"
+      // default -- same pattern the blueprint itself uses internally (see
+      // its VBtnGroup > VBtn override). VTab renders an actual VBtn
+      // under the hood, so this covers tab labels too.
+      rounded: null,
+      class: "text-uppercase"
+    },
     VCard: {
       elevation: 0
     }
