@@ -30,6 +30,7 @@ fi
 
 if [[ "$current" -lt "$baseline" ]]; then
   printf 'ESLint errors decreased (%s -> %s). Update .lint-baseline in this change.\n' "$baseline" "$current"
+  exit 1
 fi
 
 printf 'OK: no new ESLint errors.\n'
