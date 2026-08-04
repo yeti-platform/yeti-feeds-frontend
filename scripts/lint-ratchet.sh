@@ -9,6 +9,12 @@ baseline="$(tr -cd '0-9' < .lint-baseline)"
 output="$(npx eslint . --no-color 2>&1)"
 eslint_status=$?
 
+if [[ "$eslint_status" -gt 1 ]]; then
+  printf '%s\n' "$output"
+  printf '\nESLint failed before reporting a result.\n'
+  exit "$eslint_status"
+fi
+
 if [[ "$eslint_status" -eq 0 ]]; then
   current=0
 else
