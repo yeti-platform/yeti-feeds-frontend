@@ -580,7 +580,7 @@ export default {
         });
     },
     createObject() {
-      let createRequest = {
+      const createRequest = {
         dfiq_type: this.localObject.type,
         dfiq_yaml: this.localObject.dfiq_yaml,
         update_indicators: false
@@ -623,7 +623,7 @@ export default {
         return;
       }
 
-      let patchRequest = {
+      const patchRequest = {
         dfiq_type: this.localObject.type,
         dfiq_yaml: this.localObject.dfiq_yaml,
         update_indicators: false
