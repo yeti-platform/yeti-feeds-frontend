@@ -53,6 +53,18 @@ const routes: RouteRecordRaw[] = [
     ]
   },
   {
+    path: "/graph",
+    component: Default,
+    children: [
+      {
+        path: "",
+        name: "GraphInvestigation",
+        component: () => import("@/views/GraphWorkspace.vue"),
+        meta: { title: "Graph investigation" }
+      }
+    ]
+  },
+  {
     path: "/match",
     component: Default,
     children: [

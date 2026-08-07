@@ -78,13 +78,13 @@
 </template>
 
 <script lang="ts" setup>
-import EdgeCurveProgram from "@sigma/edge-curve";
 import { MultiGraph } from "graphology";
 import { circlepack, circular, random } from "graphology-layout";
 import noverlap from "graphology-layout-noverlap";
 import { Sigma } from "sigma";
 import type { MouseCoords } from "sigma/types";
-import { EdgeArrowProgram } from "sigma/rendering";
+import { extremityArrow, pathCurved, pathLine } from "sigma/rendering";
+import { DEFAULT_STYLES } from "sigma/types";
 import { animateNodes } from "sigma/utils";
 import { onMounted, onUnmounted, ref } from "vue";
 
@@ -407,17 +407,18 @@ onMounted(() => {
 
   try {
     renderer = new Sigma(graph, shadowContainer, {
-      allowInvalidContainer: true,
-      defaultEdgeType: "straight",
-      enableEdgeEvents: true,
-      renderEdgeLabels: true,
-      edgeProgramClasses: {
-        straight: EdgeArrowProgram,
-        curved: EdgeCurveProgram
-      }
+      primitives: {
+        edges: {
+          paths: [pathLine(), pathCurved()],
+          extremities: [extremityArrow()]
+        }
+      },
+      styles: {
+        nodes: DEFAULT_STYLES.nodes,
+        edges: [DEFAULT_STYLES.edges, { path: { attribute: "type" }, head: "arrow" }]
+      },
+      settings: { enableEdgeEvents: true, renderEdgeLabels: true }
     });
-    // Put the mouse canvas on top, so events can be catched even if the logs container is in front
-    renderer.getCanvases().mouse.style.cssText = "z-index: 100; position: absolute";
 
     // bind sigma events
     renderer.on("enterNode", ({ event, node }) => displayTooltip(event, node));
