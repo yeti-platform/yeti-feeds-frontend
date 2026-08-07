@@ -29,6 +29,7 @@ import { computed, ref } from "vue";
 import { useRouter } from "vue-router";
 
 import ObjectFields from "@/components/ObjectFields.vue";
+import { DFIQ_TYPES } from "@/definitions/dfiqDefinitions";
 import { ENTITY_TYPES } from "@/definitions/entityDefinitions";
 import { INDICATOR_TYPES } from "@/definitions/indicatorDefinitions";
 import { OBSERVABLE_TYPES } from "@/definitions/observableDefinitions";
@@ -36,6 +37,9 @@ import type { FieldDefinition, ObjectTypeDefinition } from "@/definitions/types"
 import { eventBus } from "@/plugins/eventbus";
 import * as objectsApi from "@/services/objects";
 import type { CreatableRootType, LooseYetiObject } from "@/services/types";
+import { useAppStore } from "@/store/app";
+
+const appStore = useAppStore();
 
 const props = withDefaults(defineProps<{ objectType?: string; redirect?: boolean }>(), {
   objectType: "",
@@ -69,22 +73,38 @@ const typeDefinition = computed<ObjectTypeDefinition | undefined>(
   () =>
     ENTITY_TYPES.find(t => t.type === props.objectType) ||
     INDICATOR_TYPES.find(t => t.type === props.objectType) ||
-    OBSERVABLE_TYPES.find(t => t.type === props.objectType)
+    OBSERVABLE_TYPES.find(t => t.type === props.objectType) ||
+    DFIQ_TYPES.find(t => t.type === props.objectType) ||
+    (appStore.observableTypes.some(t => t.type === props.objectType)
+      ? {
+          name: appStore.observableTypes.find(t => t.type === props.objectType)?.name || props.objectType,
+          type: props.objectType,
+          fields: [{ field: "value", type: "text", label: "Value", displayList: true, editable: true }]
+        }
+      : undefined)
 );
 
-const editableFields = computed<FieldDefinition[]>(() => typeDefinition.value?.fields.filter(f => f.editable) ?? []);
-
-/** The family this object belongs to, used for the create endpoint + redirect. */
 const objectRootType = computed<CreatableRootType | "unknown">(() => {
-  if (ENTITY_TYPES.find(t => t.type === props.objectType)) {
+  if (
+    ENTITY_TYPES.find(t => t.type === props.objectType) ||
+    appStore.entityTypes.some(t => t.type === props.objectType)
+  ) {
     return "entity";
-  } else if (INDICATOR_TYPES.find(t => t.type === props.objectType)) {
+  } else if (
+    INDICATOR_TYPES.find(t => t.type === props.objectType) ||
+    appStore.indicatorTypes.some(t => t.type === props.objectType)
+  ) {
     return "indicator";
-  } else if (OBSERVABLE_TYPES.find(t => t.type === props.objectType)) {
+  } else if (
+    OBSERVABLE_TYPES.find(t => t.type === props.objectType) ||
+    appStore.observableTypes.some(t => t.type === props.objectType)
+  ) {
     return "observable";
   }
   return "unknown";
 });
+
+const editableFields = computed<FieldDefinition[]>(() => typeDefinition.value?.fields.filter(f => f.editable) ?? []);
 
 newObject.value = { type: props.objectType, root_type: objectRootType.value };
 
