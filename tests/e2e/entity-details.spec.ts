@@ -126,6 +126,34 @@ test.describe('Entity Details', () => {
     await expect(page.locator('tbody tr').filter({ hasText: '10.0.0.1' })).toBeVisible();
   });
 
+  test('opens the dedicated graph workspace without embedding object data', async ({ page }) => {
+    await page.route('**/api/v2/graph/search', route =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ vertices: {}, paths: [], total: 0 }) })
+    );
+    await page.route('**/api/v2/graph/explore', route =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          schema_version: 1,
+          scope: { kind: 'items', anchor_ids: ['entities/123'], accessible_match_count: 1, ranking: null },
+          nodes: [{ id: 'entities/123', label: 'Fancy Bear', root_type: 'entity', object_type: 'intrusion-set', role: 'anchor', origin_ids: ['entities/123'] }],
+          edges: [],
+          budget: { node_limit: 2000, edge_limit: 10000, returned_nodes: 1, returned_edges: 0, is_truncated: false, reasons: [] }
+        })
+      })
+    );
+    await page.goto('/entities/123');
+
+    await expect(page.getByText('Graph (Beta)')).toHaveCount(0);
+    const graphLink = page.getByRole('link', { name: 'Explore in graph' });
+    expect(decodeURIComponent((await graphLink.getAttribute('href')) ?? '')).toContain('entities/123');
+    await expect(graphLink).not.toHaveAttribute('href', /Fancy Bear|description/);
+    await graphLink.click();
+    await expect.poll(() => decodeURIComponent(new URL(page.url()).hash)).toContain('entities/123');
+    await expect(page.getByRole('heading', { name: 'Evidence' })).toBeVisible();
+  });
+
   test('swaps and removes a link from the related-objects table', async ({ page }) => {
     const swapRequests: Array<{ method: string; url: string }> = [];
     const deleteRequests: Array<{ method: string; url: string }> = [];

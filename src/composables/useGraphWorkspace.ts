@@ -53,6 +53,10 @@ function serializeWorkspaceHash(state: SerializedGraphWorkspace): string {
   return `#${parameters.toString()}`;
 }
 
+export function graphWorkspaceHash(scope: GraphScope): string {
+  return `#state=${JSON.stringify({ version: 1, scope, direction: "any", link_types: [], target_types: [] })}`;
+}
+
 export function itemScope(items: string[]): GraphExploreItemScope {
   return { kind: "items", items: [...new Set(items.map(item => item.trim()).filter(Boolean))].slice(0, 100) };
 }

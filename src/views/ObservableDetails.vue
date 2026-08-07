@@ -79,6 +79,15 @@
             </tbody>
           </v-table>
           <v-card-actions>
+            <v-btn
+              variant="tonal"
+              color="primary"
+              size="small"
+              prepend-icon="mdi-graph-outline"
+              :to="{ path: '/graph', hash: graphWorkspaceHash(itemScope([`observables/${observable.id}`])) }"
+            >
+              Explore in graph
+            </v-btn>
             <!-- share -->
             <v-dialog v-if="hasOwnerPerms && RBACEnabled">
               <template v-slot:activator="{ props }">
@@ -186,9 +195,6 @@
       <v-container fluid>
         <v-sheet v-if="observable">
           <v-tabs v-model="activeTab" color="primary">
-            <v-tab value="graph" @click="emitRefreshGraph"
-              ><v-icon @click="emitRefreshGraph" size="x-large" start>mdi-graph</v-icon>Graph (Beta)
-            </v-tab>
             <v-tab value="related-observables"
               ><v-icon size="x-large" start>mdi-graph</v-icon>Related observables
               <v-chip class="ml-3" density="comfortable">{{ totalRelatedObservables }}</v-chip></v-tab
@@ -204,9 +210,6 @@
           </v-tabs>
 
           <v-window v-model="activeTab" class="pa-5" v-if="observable">
-            <v-window-item value="graph">
-              <graph-objects :object="observable" source-type="observables" />
-            </v-window-item>
             <v-window-item value="related-observables" eager>
               <direct-neighbors
                 :id="id"
@@ -246,7 +249,6 @@ import { computed, onMounted, ref, watch } from "vue";
 import ACLEdit from "@/components/ACLEdit.vue";
 import DirectNeighbors from "@/components/DirectNeighbors.vue";
 import EditObject from "@/components/EditObject.vue";
-import GraphObjects from "@/components/GraphObjects.vue";
 import LinkObject from "@/components/LinkObject.vue";
 import LinkObservables from "@/components/LinkObservables.vue";
 import ObjectContext from "@/components/ObjectContext.vue";
@@ -258,6 +260,7 @@ import { INDICATOR_TYPES } from "@/definitions/indicatorDefinitions";
 import { OBSERVABLE_TYPES } from "@/definitions/observableDefinitions";
 
 import { eventBus } from "@/plugins/eventbus";
+import { graphWorkspaceHash, itemScope } from "@/composables/useGraphWorkspace";
 import * as observablesApi from "@/services/observables";
 import type { LooseYetiObject } from "@/services/types";
 import { useAppStore } from "@/store/app";
@@ -302,10 +305,6 @@ const getObservableInfoFields = computed(() => {
   const fields = ["created", "modified"];
   return getObservableTypeDefinition.value?.fields.filter(field => fields.includes(field.field));
 });
-
-function emitRefreshGraph() {
-  window.dispatchEvent(new Event("refreshGraphView"));
-}
 
 /** Stale tags are greyed out. */
 function tagColor(tagName: string): string {

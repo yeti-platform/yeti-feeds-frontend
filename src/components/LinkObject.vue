@@ -89,18 +89,20 @@
       <br />
       <div class="d-flex justify-center">
         <table>
-          <tr>
-            <td><v-chip :text="object.name || object.value" :prepend-icon="getIconForType(object.type)" /></td>
-            <td>{{ linkDirectionOutgoing ? "→" : "←" }}</td>
-            <td>
-              <code>{{ linkType || "?" }}</code>
-            </td>
-            <td>{{ linkDirectionOutgoing ? "→" : "←" }}</td>
-            <td>
-              <v-chip v-if="linkTarget" :text="linkTarget.name" :prepend-icon="getIconForType(linkTarget.type)" />
-              <span v-else>Select target</span>
-            </td>
-          </tr>
+          <tbody>
+            <tr>
+              <td><v-chip :text="object.name || object.value" :prepend-icon="getIconForType(object.type)" /></td>
+              <td>{{ linkDirectionOutgoing ? "→" : "←" }}</td>
+              <td>
+                <code>{{ linkType || "?" }}</code>
+              </td>
+              <td>{{ linkDirectionOutgoing ? "→" : "←" }}</td>
+              <td>
+                <v-chip v-if="linkTarget" :text="linkTarget.name" :prepend-icon="getIconForType(linkTarget.type)" />
+                <span v-else>Select target</span>
+              </td>
+            </tr>
+          </tbody>
         </table>
       </div>
     </v-card-text>

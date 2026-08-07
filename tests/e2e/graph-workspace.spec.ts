@@ -1,4 +1,5 @@
 import { expect, test } from "./fixtures";
+import { boundedGraphFixture } from "./graph-fixtures";
 
 const graphResponse = {
   schema_version: 1,
@@ -74,6 +75,7 @@ test.describe("Graph investigation workspace", () => {
     await page.goto("/graph");
 
     await expect(page).toHaveTitle("Graph investigation - Yeti");
+    await expect(page.getByRole("link", { name: "Graph investigation" })).toBeVisible();
     await expect(page.getByRole("heading", { name: "Graph investigation" })).toBeVisible();
     await expect(page.getByText("Choose one or more objects or define a broader scope to begin.")).toBeVisible();
   });
@@ -362,5 +364,49 @@ test.describe("Graph investigation workspace", () => {
     await page.goto("/graph?renderer=spike");
     await expect(page.getByTestId("graph-canvas").locator("canvas")).toHaveCount(1);
     await context.tracing.stop({ path: testInfo.outputPath("sigma-v4-trace.zip") });
+  });
+
+  test("bounds a 5,000-node/25,000-edge candidate graph before rendering", async ({ page, context }, testInfo) => {
+    test.skip(testInfo.project.name !== "chromium", "The repeatable scale trace targets the documented Chrome profile.");
+    test.setTimeout(60_000);
+    const consoleErrors: string[] = [];
+    page.on("console", message => {
+      if (message.type() === "error") consoleErrors.push(message.text());
+    });
+    const fixture = boundedGraphFixture(5_000, 25_000);
+    let requestLimits: Record<string, number> | undefined;
+    await page.route("**/api/v2/graph/explore", async route => {
+      requestLimits = (route.request().postDataJSON() as { requested_limits: Record<string, number> }).requested_limits;
+      await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(fixture) });
+    });
+    await context.tracing.start({ screenshots: true, snapshots: true });
+    const startedAt = performance.now();
+
+    await page.goto(
+      graphUrl({ kind: "query", query: { tags: ["scale"] }, sorting: [], filter_aliases: [] })
+    );
+
+    await expect(page.getByText("Truncated: node_limit, edge_limit")).toBeVisible({ timeout: 30_000 });
+    await expect(page.getByText("Showing objects 1–100 of 2000")).toBeVisible();
+    await expect(page.getByText("Showing relationships 1–100 of 10000")).toBeVisible();
+    await expect(page.getByTestId("graph-canvas").locator("canvas")).toHaveCount(1);
+    expect(requestLimits).toEqual({ nodes: 2_000, edges: 10_000 });
+    expect(consoleErrors).toEqual([]);
+    await testInfo.attach("workspace-scale-measurements.json", {
+      body: JSON.stringify(
+        {
+          candidateNodes: 5_000,
+          candidateEdges: 25_000,
+          returnedNodes: fixture.nodes.length,
+          returnedEdges: fixture.edges.length,
+          serializedResponseBytes: new Blob([JSON.stringify(fixture)]).size,
+          loadMs: performance.now() - startedAt
+        },
+        null,
+        2
+      ),
+      contentType: "application/json"
+    });
+    await context.tracing.stop({ path: testInfo.outputPath("graph-workspace-scale-trace.zip") });
   });
 });

@@ -19,7 +19,7 @@
             <tr><th>Object</th><th>Type</th><th>Role</th><th>Origins</th><th>Actions</th></tr>
           </thead>
           <tbody>
-            <tr v-for="node in nodes" :key="node.id">
+            <tr v-for="node in visibleNodes" :key="node.id">
               <td>
                 <button type="button" class="evidence-select" @click="emit('selectNode', node.id)">{{ node.label }}</button>
                 <small class="d-block">{{ node.id }}</small>
@@ -36,6 +36,15 @@
             </tr>
           </tbody>
         </table>
+        <div v-if="nodePages > 1" class="d-flex align-center ga-2 pa-2" role="navigation" aria-label="Object evidence pages">
+          <v-btn size="x-small" variant="text" :disabled="nodePage === 1" @click="nodePage -= 1">
+            Previous objects
+          </v-btn>
+          <span class="text-caption">Showing objects {{ nodeStart + 1 }}–{{ nodeEnd }} of {{ nodes.length }}</span>
+          <v-btn size="x-small" variant="text" :disabled="nodePage === nodePages" @click="nodePage += 1">
+            Next objects
+          </v-btn>
+        </div>
       </div>
 
       <div class="evidence-table" tabindex="0" aria-label="Visible graph relationships">
@@ -45,7 +54,7 @@
             <tr><th>ID</th><th>Direction</th><th>Type</th><th>Description</th><th>Count</th></tr>
           </thead>
           <tbody>
-            <tr v-for="edge in edges" :key="edge.id">
+            <tr v-for="edge in visibleEdges" :key="edge.id">
               <td>
                 <button
                   type="button"
@@ -63,13 +72,22 @@
             </tr>
           </tbody>
         </table>
+        <div v-if="edgePages > 1" class="d-flex align-center ga-2 pa-2" role="navigation" aria-label="Relationship evidence pages">
+          <v-btn size="x-small" variant="text" :disabled="edgePage === 1" @click="edgePage -= 1">
+            Previous relationships
+          </v-btn>
+          <span class="text-caption">Showing relationships {{ edgeStart + 1 }}–{{ edgeEnd }} of {{ edges.length }}</span>
+          <v-btn size="x-small" variant="text" :disabled="edgePage === edgePages" @click="edgePage += 1">
+            Next relationships
+          </v-btn>
+        </div>
       </div>
     </v-card-text>
   </v-card>
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, ref, watch } from "vue";
 
 import type { GraphExploreEdge, GraphExploreNode } from "@/services/types";
 
@@ -84,6 +102,27 @@ const emit = defineEmits<{
   selectEdge: [id: string | null];
   expand: [id: string];
 }>();
+
+const PAGE_SIZE = 100;
+const nodePage = ref(1);
+const edgePage = ref(1);
+const nodePages = computed(() => Math.max(1, Math.ceil(props.nodes.length / PAGE_SIZE)));
+const edgePages = computed(() => Math.max(1, Math.ceil(props.edges.length / PAGE_SIZE)));
+const nodeStart = computed(() => (nodePage.value - 1) * PAGE_SIZE);
+const edgeStart = computed(() => (edgePage.value - 1) * PAGE_SIZE);
+const nodeEnd = computed(() => Math.min(nodeStart.value + PAGE_SIZE, props.nodes.length));
+const edgeEnd = computed(() => Math.min(edgeStart.value + PAGE_SIZE, props.edges.length));
+const visibleNodes = computed(() => props.nodes.slice(nodeStart.value, nodeEnd.value));
+const visibleEdges = computed(() => props.edges.slice(edgeStart.value, edgeEnd.value));
+
+watch(
+  () => props.nodes,
+  () => (nodePage.value = Math.min(nodePage.value, nodePages.value))
+);
+watch(
+  () => props.edges,
+  () => (edgePage.value = Math.min(edgePage.value, edgePages.value))
+);
 
 const selectedNode = computed(() => props.nodes.find(node => node.id === props.selectedNodeId));
 const selectedEdge = computed(() => props.edges.find(edge => edge.id === props.selectedEdgeId));
