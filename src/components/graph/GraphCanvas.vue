@@ -1,5 +1,11 @@
 <template>
-  <div ref="container" class="graph-canvas" data-testid="graph-canvas" aria-label="Graph visualization"></div>
+  <div class="graph-canvas" data-testid="graph-canvas" aria-label="Graph visualization">
+    <p v-if="rendererUnavailable" class="graph-canvas__fallback text-body-2 pa-4" role="status">
+      Interactive graph rendering is unavailable in this browser. Use the evidence tables below to continue the
+      investigation.
+    </p>
+    <div v-else ref="container" class="graph-canvas__renderer"></div>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -30,19 +36,44 @@ const props = withDefaults(
   defineProps<{
     nodes: GraphCanvasNode[];
     edges: GraphCanvasEdge[];
+    layout?: boolean;
     selectedEdgeId?: string | null;
     selectedNodeId?: string | null;
   }>(),
-  { selectedEdgeId: null, selectedNodeId: null }
+  { layout: true, selectedEdgeId: null, selectedNodeId: null }
 );
 
 const emit = defineEmits<{ selectEdge: [id: string | null]; selectNode: [id: string | null] }>();
 const container = ref<HTMLElement | null>(null);
+const rendererUnavailable = ref(false);
 const graph = new MultiDirectedGraph();
+const layoutWorker = new Worker(new URL("../../workers/graph-layout.worker.ts", import.meta.url), { type: "module" });
 let renderer: Sigma | null = null;
 let highlightedEdgeId: string | null = null;
 let highlightedNodeId: string | null = null;
+let layoutGeneration = 0;
 const savedPositions = new Map<string, { x: number; y: number }>();
+
+layoutWorker.onmessage = (
+  event: MessageEvent<{ generation: number; positions: Record<string, { x: number; y: number }> }>
+) => {
+  if (event.data.generation !== layoutGeneration) return;
+  graph.updateEachNodeAttributes((nodeId, attributes) => {
+    const position = event.data.positions[nodeId];
+    if (!position || attributes.pinned) return attributes;
+    return { ...attributes, ...position };
+  });
+  renderer?.refresh();
+};
+
+function requestLayout() {
+  layoutGeneration += 1;
+  layoutWorker.postMessage({
+    generation: layoutGeneration,
+    nodes: graph.mapNodes((id, attributes) => ({ id, x: attributes.x, y: attributes.y })),
+    edges: graph.mapEdges((id, _attributes, source, target) => ({ id, source, target }))
+  });
+}
 
 function syncGraph() {
   const nextEdges = new Set(props.edges.map(edge => edge.id));
@@ -82,6 +113,7 @@ function syncGraph() {
   renderer?.refresh();
   updateHighlightedEdge(props.selectedEdgeId);
   updateHighlightedNode(props.selectedNodeId);
+  if (props.layout) requestLayout();
 }
 
 function updateHighlightedNode(nodeId: string | null | undefined) {
@@ -121,26 +153,31 @@ function setNodePinned(nodeId: string, pinned: boolean) {
 onMounted(() => {
   if (!container.value) return;
   syncGraph();
-  renderer = new Sigma(graph, container.value, {
-    primitives: {
-      edges: {
-        paths: [pathLine(), pathCurved()],
-        extremities: [extremityArrow()]
-      }
-    },
-    styles: {
-      nodes: [
-        DEFAULT_STYLES.nodes,
-        { whenState: "isHighlighted", then: { color: "#f57c00", size: 10, depth: "topNodes" } }
-      ],
-      edges: [
-        DEFAULT_STYLES.edges,
-        { path: "straight", parallelPath: "curved", head: "arrow", color: { attribute: "color" } },
-        { whenState: "isHighlighted", then: { color: "#1976d2", size: 3, depth: "topEdges" } }
-      ]
-    },
-    settings: { enableEdgeEvents: true, renderEdgeLabels: false, autoRescale: "once" }
-  });
+  try {
+    renderer = new Sigma(graph, container.value, {
+      primitives: {
+        edges: {
+          paths: [pathLine(), pathCurved()],
+          extremities: [extremityArrow()]
+        }
+      },
+      styles: {
+        nodes: [
+          DEFAULT_STYLES.nodes,
+          { whenState: "isHighlighted", then: { color: "#f57c00", size: 10, depth: "topNodes" } }
+        ],
+        edges: [
+          DEFAULT_STYLES.edges,
+          { path: "straight", parallelPath: "curved", head: "arrow", color: { attribute: "color" } },
+          { whenState: "isHighlighted", then: { color: "#1976d2", size: 3, depth: "topEdges" } }
+        ]
+      },
+      settings: { enableEdgeEvents: true, renderEdgeLabels: false, autoRescale: "once" }
+    });
+  } catch {
+    rendererUnavailable.value = true;
+    return;
+  }
   renderer.on("clickEdge", ({ edge }) => emit("selectEdge", edge));
   renderer.on("clickNode", ({ node }) => emit("selectNode", node));
   renderer.on("clickStage", () => {
@@ -156,6 +193,8 @@ watch(() => props.selectedEdgeId, updateHighlightedEdge);
 watch(() => props.selectedNodeId, updateHighlightedNode);
 
 onBeforeUnmount(() => {
+  layoutGeneration += 1;
+  layoutWorker.terminate();
   renderer?.kill();
   renderer = null;
   graph.clear();
@@ -171,5 +210,14 @@ defineExpose({ focusNode, fit, setEdgesHidden, setNodePinned });
   width: 100%;
   background: rgb(var(--v-theme-surface));
   border: thin solid rgba(var(--v-border-color), var(--v-border-opacity));
+}
+
+.graph-canvas__renderer {
+  min-height: 32rem;
+  width: 100%;
+}
+
+.graph-canvas__fallback {
+  max-width: 36rem;
 }
 </style>

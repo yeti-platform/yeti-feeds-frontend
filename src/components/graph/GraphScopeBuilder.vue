@@ -22,7 +22,7 @@
         </v-window-item>
 
         <v-window-item value="query">
-          <v-row dense>
+          <v-row density="compact">
             <v-col cols="12">
               <v-text-field v-model="tags" label="Tags" hint="Comma-separated" persistent-hint />
             </v-col>
@@ -62,12 +62,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, watch } from "vue";
 
 import { itemScope } from "@/composables/useGraphWorkspace";
 import type { GraphScope } from "@/composables/useGraphWorkspace";
 
-defineProps<{ loading: boolean }>();
+const props = defineProps<{ loading: boolean; scope: GraphScope | null }>();
 const emit = defineEmits<{ submit: [scope: GraphScope] }>();
 
 const mode = ref<"items" | "query">("items");
@@ -80,6 +80,31 @@ const modifiedFrom = ref("");
 const modifiedTo = ref("");
 const additionalCriteria = ref("");
 const queryError = ref("");
+
+watch(
+  () => props.scope,
+  scope => {
+    if (!scope) return;
+    mode.value = scope.kind;
+    if (scope.kind === "items") {
+      itemIds.value = scope.items.join("\n");
+      return;
+    }
+    const query = { ...scope.query };
+    tags.value = Array.isArray(query.tags) ? query.tags.join(", ") : String(query.tags ?? "");
+    rootType.value = typeof query.root_type === "string" ? query.root_type : null;
+    objectType.value = typeof query.type === "string" ? query.type : "";
+    modifiedFrom.value = typeof query.modified__gte === "string" ? query.modified__gte : "";
+    modifiedTo.value = typeof query.modified__lte === "string" ? query.modified__lte : "";
+    delete query.tags;
+    delete query.root_type;
+    delete query.type;
+    delete query.modified__gte;
+    delete query.modified__lte;
+    additionalCriteria.value = Object.keys(query).length ? JSON.stringify(query) : "";
+  },
+  { immediate: true }
+);
 
 function submitItems() {
   const scope = itemScope(itemIds.value.split(/[\n,]/));

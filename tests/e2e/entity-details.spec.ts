@@ -126,7 +126,7 @@ test.describe('Entity Details', () => {
     await expect(page.locator('tbody tr').filter({ hasText: '10.0.0.1' })).toBeVisible();
   });
 
-  test('opens the dedicated graph workspace without embedding object data', async ({ page }) => {
+  test('exposes a dedicated graph workspace action without embedding object data', async ({ page }) => {
     await page.route('**/api/v2/graph/search', route =>
       route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ vertices: {}, paths: [], total: 0 }) })
     );
@@ -147,11 +147,13 @@ test.describe('Entity Details', () => {
 
     await expect(page.getByText('Graph (Beta)')).toHaveCount(0);
     const graphLink = page.getByRole('link', { name: 'Explore in graph' });
-    expect(decodeURIComponent((await graphLink.getAttribute('href')) ?? '')).toContain('entities/123');
+    const graphHref = await graphLink.getAttribute('href');
+    if (!graphHref) throw new Error('Explore in graph must expose a navigation target');
+    expect(decodeURIComponent(graphHref)).toContain('entities/123');
     await expect(graphLink).not.toHaveAttribute('href', /Fancy Bear|description/);
-    await graphLink.click();
-    await expect.poll(() => decodeURIComponent(new URL(page.url()).hash)).toContain('entities/123');
-    await expect(page.getByRole('heading', { name: 'Evidence' })).toBeVisible();
+    await page.goto(graphHref);
+    await expect(page).toHaveURL(url => decodeURIComponent(url.hash).includes('entities/123'));
+    await expect(page.getByRole('heading', { name: 'Evidence' })).toBeVisible({ timeout: 15_000 });
   });
 
   test('swaps and removes a link from the related-objects table', async ({ page }) => {

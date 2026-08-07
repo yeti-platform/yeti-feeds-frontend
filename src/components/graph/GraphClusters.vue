@@ -7,7 +7,8 @@
         <v-list-item v-for="cluster in visibleClusters" :key="cluster.id">
           <v-list-item-title>{{ cluster.label }}</v-list-item-title>
           <v-list-item-subtitle>
-            {{ cluster.memberIds.length }} objects · dominant type {{ cluster.dominantType }}
+            {{ cluster.memberIds.length }} objects · dominant object {{ cluster.dominantObjectType }} · dominant relationship
+            {{ cluster.dominantRelationshipType }}
           </v-list-item-subtitle>
           <details class="mt-1">
             <summary>Members</summary>

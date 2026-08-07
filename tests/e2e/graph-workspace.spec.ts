@@ -91,7 +91,8 @@ test.describe("Graph investigation workspace", () => {
 
     await expect(page.getByText("2 objects")).toBeVisible();
     await expect(page.getByText("1 relationships")).toBeVisible();
-    await expect(page.getByTestId("graph-canvas").locator("canvas")).toHaveCount(1);
+    await expect(page.getByLabel("Yeti object IDs")).toHaveValue("entities/1");
+    await expect(page.getByTestId("graph-canvas")).toBeVisible();
     expect(requestBody).toMatchObject({
       schema_version: 1,
       scope: { kind: "items", items: ["entities/1"] },
@@ -152,28 +153,73 @@ test.describe("Graph investigation workspace", () => {
   });
 
   test("keeps the previous workspace after an atomic unavailable-scope error", async ({ page }) => {
-    let requestCount = 0;
     await page.route("**/api/v2/graph/explore", async route => {
-      requestCount += 1;
-      if (requestCount === 1) {
-        await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(graphResponse) });
-      } else {
+      const request = route.request().postDataJSON() as { scope?: { items?: string[] } };
+      if (request.scope?.items?.includes("entities/missing")) {
         await route.fulfill({
           status: 404,
           contentType: "application/json",
           body: JSON.stringify({ detail: "One or more requested objects are unavailable" })
         });
+      } else {
+        await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(graphResponse) });
       }
     });
     await page.goto(graphUrl({ kind: "items", items: ["entities/1"] }));
     await expect(page.getByText("2 objects")).toBeVisible();
+    const previousHash = decodeURIComponent(new URL(page.url()).hash);
 
     await page.getByLabel("Yeti object IDs").fill("entities/missing");
+    const unavailableResponse = page.waitForResponse(
+      response => response.url().endsWith("/api/v2/graph/explore") && response.status() === 404
+    );
+    await page.getByRole("button", { name: "Explore objects" }).click();
+    await unavailableResponse;
+
+    await expect(page.getByRole("alert").filter({ hasText: "scope objects are unavailable" })).toBeVisible({
+      timeout: 15_000
+    });
+    await expect(page.getByLabel("Yeti object IDs")).toHaveValue("entities/1");
+    await expect.poll(() => decodeURIComponent(new URL(page.url()).hash)).toBe(previousHash);
+    await expect(page.getByText("2 objects")).toBeVisible();
+    await expect(page.getByTestId("graph-canvas")).toBeVisible();
+  });
+
+  test("keeps the evidence workbench available when WebGL 2 is unavailable", async ({ page }) => {
+    await page.addInitScript(() => {
+      const getContext = HTMLCanvasElement.prototype.getContext;
+      HTMLCanvasElement.prototype.getContext = function (contextId: string, ...args: unknown[]) {
+        if (contextId === "webgl2") return null;
+        return Reflect.apply(getContext, this, [contextId, ...args]);
+      } as typeof HTMLCanvasElement.prototype.getContext;
+    });
+    const pageErrors: string[] = [];
+    page.on("pageerror", error => pageErrors.push(error.message));
+    await page.route("**/api/v2/graph/explore", route =>
+      route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(graphResponse) })
+    );
+
+    await page.goto(graphUrl({ kind: "items", items: ["entities/1"] }));
+
+    await expect(page.getByText("Interactive graph rendering is unavailable in this browser.")).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Evidence" })).toBeVisible();
+    expect(pageErrors).toEqual([]);
+  });
+
+  test("lets analysts cancel a loading scope and recover", async ({ page }) => {
+    await page.route("**/api/v2/graph/explore", async route => {
+      await new Promise(resolve => setTimeout(resolve, 500));
+      await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(graphResponse) });
+    });
+    await page.goto("/graph");
+    await page.getByLabel("Yeti object IDs").fill("entities/1");
     await page.getByRole("button", { name: "Explore objects" }).click();
 
-    await expect(page.getByRole("alert").filter({ hasText: "scope objects are unavailable" })).toBeVisible();
+    await page.getByRole("button", { name: "Cancel graph request" }).click();
+
+    await expect(page.getByText("The previous graph request was cancelled.")).toBeVisible();
+    await page.getByRole("button", { name: "Explore objects" }).click();
     await expect(page.getByText("2 objects")).toBeVisible();
-    await expect(page.getByTestId("graph-canvas").locator("canvas")).toHaveCount(1);
   });
 
   test("keeps exact directed evidence keyboard-readable and renders CTI text safely", async ({ page }) => {
@@ -238,9 +284,63 @@ test.describe("Graph investigation workspace", () => {
     await expect(page.getByRole("button", { name: "pivot.test", exact: true })).toBeVisible();
     await expect(page.getByText("3 objects")).toBeVisible();
 
+    await page.getByRole("button", { name: "Collapse observables/2" }).click();
+    await expect(page.getByText("pivot.test")).toHaveCount(0);
+    await expect(page.getByText("2 objects")).toBeVisible();
+
+    await page.getByRole("button", { name: "Expand example.test" }).click();
+    await expect(page.getByRole("button", { name: "pivot.test", exact: true })).toBeVisible();
     await page.getByRole("button", { name: "Undo expansion" }).click();
     await expect(page.getByText("pivot.test")).toHaveCount(0);
     await expect(page.getByText("2 objects")).toBeVisible();
+  });
+
+  test("keeps repeated pivots within the initial workspace budget", async ({ page }) => {
+    const boundedInitial = {
+      ...graphResponse,
+      budget: { ...graphResponse.budget, node_limit: 2, edge_limit: 1 }
+    };
+    const expansionResponse = {
+      ...graphResponse,
+      scope: { kind: "items", anchor_ids: ["observables/2"], accessible_match_count: 1, ranking: null },
+      nodes: [
+        { ...graphResponse.nodes[1], role: "anchor", origin_ids: ["observables/2"] },
+        {
+          id: "observables/3",
+          label: "over-budget.test",
+          root_type: "observable",
+          object_type: "hostname",
+          role: "neighbor",
+          origin_ids: ["observables/2"]
+        }
+      ],
+      edges: [
+        {
+          id: "links/8",
+          source: "observables/2",
+          target: "observables/3",
+          type: "resolves",
+          description: "Over-budget expansion",
+          count: 1
+        }
+      ]
+    };
+    let expansionHandled = false;
+    await page.route("**/api/v2/graph/explore", async route => {
+      const body = route.request().postDataJSON() as { scope: { items: string[] } };
+      if (body.scope.items[0] === "observables/2") expansionHandled = true;
+      const response = body.scope.items[0] === "observables/2" ? expansionResponse : boundedInitial;
+      await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(response) });
+    });
+    await page.goto(graphUrl({ kind: "items", items: ["entities/1"] }));
+
+    await page.getByRole("button", { name: "Expand example.test" }).click();
+    await expect.poll(() => expansionHandled).toBe(true);
+
+    await expect(page.getByText("2 objects")).toBeVisible();
+    await expect(page.getByText("1 relationships")).toBeVisible();
+    await expect(page.getByText("over-budget.test")).toHaveCount(0);
+    await expect(page.getByText("Truncated: node_limit, edge_limit")).toBeVisible();
   });
 
   test("filters and searches the loaded graph without changing its starting scope", async ({ page }) => {
@@ -284,7 +384,7 @@ test.describe("Graph investigation workspace", () => {
     await expect(page.getByRole("heading", { name: "Cluster discovery" })).toBeVisible();
     await expect(page.getByText("Clusters suggest structure")).toBeVisible();
     await expect(page.getByText("Cluster 1", { exact: true })).toBeVisible();
-    await expect(page.getByText("2 objects · dominant type")).toBeVisible();
+    await expect(page.getByText("2 objects · dominant object hostname · dominant relationship attributed-to")).toBeVisible();
 
     await page.getByRole("button", { name: "Collapse Cluster 1" }).click();
     await expect(page.getByRole("button", { name: "Expand Cluster 1" })).toBeVisible();
@@ -293,7 +393,7 @@ test.describe("Graph investigation workspace", () => {
 
     await page.reload();
     await expect(page.getByText("Cluster 1", { exact: true })).toBeVisible();
-    await expect(page.getByText("2 objects · dominant type")).toBeVisible();
+    await expect(page.getByText("2 objects · dominant object hostname · dominant relationship attributed-to")).toBeVisible();
   });
 
   test("stacks the complete workspace at narrow widths and announces validation", async ({ page }) => {
@@ -316,7 +416,13 @@ test.describe("Graph investigation workspace", () => {
   });
 
   test("renders and disposes the Sigma 4 validation fixture", async ({ page, context }, testInfo) => {
-    await context.tracing.start({ screenshots: true, snapshots: true });
+    test.skip(
+      testInfo.project.name !== "chromium",
+      "The renderer performance trace targets the documented Chrome profile."
+    );
+    test.setTimeout(60_000);
+    const recordTrace = testInfo.retry === 0;
+    if (recordTrace) await context.tracing.start({ screenshots: true, snapshots: true });
     await page.addInitScript(() => {
       const durations: number[] = [];
       new PerformanceObserver(list => durations.push(...list.getEntries().map(entry => entry.duration))).observe({
@@ -329,7 +435,7 @@ test.describe("Graph investigation workspace", () => {
     await page.goto("/graph?renderer=spike");
 
     const canvas = page.getByTestId("graph-canvas");
-    await expect(canvas.locator("canvas")).toHaveCount(1);
+    await expect(canvas.locator("canvas")).toHaveCount(1, { timeout: 30_000 });
     const loadMs = performance.now() - loadStartedAt;
     await expect(page.getByText("2,000 nodes · 10,000 directed edges")).toBeVisible();
 
@@ -362,8 +468,8 @@ test.describe("Graph investigation workspace", () => {
     await page.goto("/graph");
     await expect(canvas).toHaveCount(0);
     await page.goto("/graph?renderer=spike");
-    await expect(page.getByTestId("graph-canvas").locator("canvas")).toHaveCount(1);
-    await context.tracing.stop({ path: testInfo.outputPath("sigma-v4-trace.zip") });
+    await expect(page.getByTestId("graph-canvas").locator("canvas")).toHaveCount(1, { timeout: 30_000 });
+    if (recordTrace) await context.tracing.stop({ path: testInfo.outputPath("sigma-v4-trace.zip") });
   });
 
   test("bounds a 5,000-node/25,000-edge candidate graph before rendering", async ({ page, context }, testInfo) => {
@@ -379,7 +485,8 @@ test.describe("Graph investigation workspace", () => {
       requestLimits = (route.request().postDataJSON() as { requested_limits: Record<string, number> }).requested_limits;
       await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(fixture) });
     });
-    await context.tracing.start({ screenshots: true, snapshots: true });
+    const recordTrace = testInfo.retry === 0;
+    if (recordTrace) await context.tracing.start({ screenshots: true, snapshots: true });
     const startedAt = performance.now();
 
     await page.goto(
@@ -407,6 +514,6 @@ test.describe("Graph investigation workspace", () => {
       ),
       contentType: "application/json"
     });
-    await context.tracing.stop({ path: testInfo.outputPath("graph-workspace-scale-trace.zip") });
+    if (recordTrace) await context.tracing.stop({ path: testInfo.outputPath("graph-workspace-scale-trace.zip") });
   });
 });

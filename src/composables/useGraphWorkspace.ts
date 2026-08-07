@@ -150,6 +150,8 @@ export function useGraphWorkspace() {
     const controller = new AbortController();
     activeRequest = controller;
     const generation = ++requestGeneration;
+    const previousScope = scope.value;
+    const previousHash = route.hash;
     scope.value = nextScope;
     status.value = "loading";
     error.value = "";
@@ -176,6 +178,10 @@ export function useGraphWorkspace() {
       status.value = result.nodes.length === 0 ? "empty" : "ready";
     } catch (loadError) {
       if (generation !== requestGeneration) return;
+      scope.value = previousScope;
+      if (updateUrl && route.hash !== previousHash) {
+        await router.replace({ hash: previousHash });
+      }
       if (controller.signal.aborted) {
         status.value = "cancelled";
         return;
@@ -186,6 +192,8 @@ export function useGraphWorkspace() {
         apiError.response?.status === 404
           ? "One or more scope objects are unavailable. Edit the scope and try again."
           : "The graph could not be loaded. Try again or narrow the scope.";
+    } finally {
+      if (activeRequest === controller) activeRequest = null;
     }
   }
 
@@ -195,6 +203,8 @@ export function useGraphWorkspace() {
     const nodes = new Map(base.nodes.map(node => [node.id, node]));
     const edges = new Map(base.edges.map(edge => [edge.id, edge]));
     const reasons = new Set(base.budget.reasons);
+    const nodeLimit = base.budget.node_limit;
+    const edgeLimit = base.budget.edge_limit;
     let truncated = base.budget.is_truncated;
 
     for (const expansion of expansions.value) {
@@ -204,11 +214,22 @@ export function useGraphWorkspace() {
         const existing = nodes.get(node.id);
         if (existing) {
           existing.origin_ids = [...new Set([...existing.origin_ids, ...node.origin_ids])];
-        } else {
+        } else if (nodes.size < nodeLimit) {
           nodes.set(node.id, { ...node, role: "neighbor" });
+        } else {
+          truncated = true;
+          reasons.add("node_limit");
         }
       }
-      expansion.response.edges.forEach(edge => edges.set(edge.id, edge));
+      for (const edge of expansion.response.edges) {
+        if (edges.has(edge.id)) continue;
+        if (edges.size >= edgeLimit) {
+          truncated = true;
+          reasons.add("edge_limit");
+        } else if (nodes.has(edge.source) && nodes.has(edge.target)) {
+          edges.set(edge.id, edge);
+        }
+      }
     }
     base.nodes = [...nodes.values()];
     base.edges = [...edges.values()];
@@ -220,6 +241,8 @@ export function useGraphWorkspace() {
       reasons: [...reasons]
     };
     response.value = base;
+    if (selectedNodeId.value && !nodes.has(selectedNodeId.value)) selectedNodeId.value = null;
+    if (selectedEdgeId.value && !edges.has(selectedEdgeId.value)) selectedEdgeId.value = null;
   }
 
   async function expand(nodeId: string) {
@@ -247,6 +270,23 @@ export function useGraphWorkspace() {
     if (expansions.value.length === 0) return;
     expansions.value = expansions.value.slice(0, -1);
     mergeGraph();
+  }
+
+  function collapseExpansion(index: number) {
+    if (!initialResponse.value || index < 0 || index >= expansions.value.length) return;
+    const availableNodes = new Set(initialResponse.value.nodes.map(node => node.id));
+    const kept: GraphExpansion[] = [];
+    expansions.value.forEach((expansion, expansionIndex) => {
+      if (expansionIndex === index || !availableNodes.has(expansion.originId)) return;
+      kept.push(expansion);
+      expansion.response.nodes.forEach(node => availableNodes.add(node.id));
+    });
+    expansions.value = kept;
+    mergeGraph();
+  }
+
+  function cancelLoad() {
+    activeRequest?.abort();
   }
 
   function reset() {
@@ -323,8 +363,10 @@ export function useGraphWorkspace() {
     canvasNodes,
     canvasEdges,
     load,
+    cancelLoad,
     expand,
     undoExpansion,
+    collapseExpansion,
     reset,
     selectNode,
     selectEdge,

@@ -21,6 +21,7 @@
         ref="canvas"
         :nodes="rendererFixture.nodes"
         :edges="rendererFixture.edges"
+        :layout="false"
         :selected-edge-id="selectedEdgeId"
         @select-edge="selectEdge"
       />
@@ -28,7 +29,11 @@
 
     <v-row v-else>
       <v-col cols="12" lg="4">
-        <graph-scope-builder :loading="workspace.status.value === 'loading'" @submit="workspace.load" />
+        <graph-scope-builder
+          :loading="workspace.status.value === 'loading'"
+          :scope="workspace.scope.value"
+          @submit="workspace.load"
+        />
       </v-col>
       <v-col cols="12" lg="8">
         <v-alert v-if="workspace.error.value" type="error" variant="tonal" class="mb-3" role="alert">
@@ -38,6 +43,7 @@
         <div v-if="workspace.status.value === 'loading'" class="py-8" role="status" aria-live="polite">
           <v-progress-linear indeterminate color="primary" />
           <p class="text-body-2 mt-3">Loading the authorized graph…</p>
+          <v-btn size="small" variant="text" @click="workspace.cancelLoad">Cancel graph request</v-btn>
         </div>
 
         <v-empty-state
@@ -78,6 +84,22 @@
               >
                 Undo expansion
               </v-btn>
+              <div
+                v-if="workspace.expansions.value.length"
+                class="d-flex flex-wrap align-center ga-2"
+                aria-label="Expansion history"
+              >
+                <span class="text-caption">Expanded pivots:</span>
+                <v-btn
+                  v-for="(expansion, index) in workspace.expansions.value"
+                  :key="`${expansion.originId}-${index}`"
+                  size="x-small"
+                  variant="text"
+                  @click="workspace.collapseExpansion(index)"
+                >
+                  Collapse {{ expansion.originId }}
+                </v-btn>
+              </div>
               <v-spacer />
               <v-btn size="small" variant="text" @click="workspace.clear">Clear workspace</v-btn>
             </v-card-text>

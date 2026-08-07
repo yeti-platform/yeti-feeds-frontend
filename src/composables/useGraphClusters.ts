@@ -8,7 +8,17 @@ export interface GraphCluster {
   id: string;
   label: string;
   memberIds: string[];
-  dominantType: string;
+  dominantObjectType: string;
+  dominantRelationshipType: string;
+}
+
+function dominant(counts: Map<string, number>, fallback: string) {
+  return (
+    [...counts].sort(
+      ([leftType, leftCount], [rightType, rightCount]) =>
+        rightCount - leftCount || leftType.localeCompare(rightType)
+    )[0]?.[0] ?? fallback
+  );
 }
 
 export function useGraphClusters(
@@ -54,16 +64,21 @@ export function useGraphClusters(
       .map(members => members.sort((left, right) => left.id.localeCompare(right.id)))
       .sort((left, right) => left[0].id.localeCompare(right[0].id))
       .map((members, index) => {
-        const counts = new Map<string, number>();
-        members.forEach(member => counts.set(member.object_type, (counts.get(member.object_type) ?? 0) + 1));
-        const dominantType = [...counts].sort(
-          ([leftType, leftCount], [rightType, rightCount]) => rightCount - leftCount || leftType.localeCompare(rightType)
-        )[0]?.[0] ?? "unknown";
+        const objectCounts = new Map<string, number>();
+        members.forEach(member =>
+          objectCounts.set(member.object_type, (objectCounts.get(member.object_type) ?? 0) + 1)
+        );
+        const memberIds = new Set(members.map(member => member.id));
+        const relationshipCounts = new Map<string, number>();
+        edges.value
+          .filter(edge => memberIds.has(edge.source) && memberIds.has(edge.target))
+          .forEach(edge => relationshipCounts.set(edge.type, (relationshipCounts.get(edge.type) ?? 0) + 1));
         return {
           id: `cluster-${index + 1}`,
           label: `Cluster ${index + 1}`,
-          memberIds: members.map(member => member.id),
-          dominantType
+          memberIds: [...memberIds],
+          dominantObjectType: dominant(objectCounts, "unknown"),
+          dominantRelationshipType: dominant(relationshipCounts, "none")
         };
       });
   });
@@ -101,7 +116,7 @@ export function useGraphClusters(
       const source = sourceCluster && collapsed.value.has(sourceCluster) ? sourceCluster : edge.source;
       const target = targetCluster && collapsed.value.has(targetCluster) ? targetCluster : edge.target;
       if (source === target) return [];
-      return [{ ...edge, id: `${edge.id}:${source}:${target}`, source, target }];
+      return [{ ...edge, source, target }];
     });
   });
 
