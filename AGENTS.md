@@ -1,7 +1,8 @@
 # Frontend agent instructions
 
-These instructions extend the workspace-level `../AGENTS.md` for the
-`yeti-feeds-frontend` repository.
+These instructions are self-contained for a standalone `yeti-feeds-frontend`
+checkout. When the repository is part of the optional sibling Yeti workspace
+and `../AGENTS.md` exists, follow it as well for cross-repository coordination.
 
 ## Project map
 
@@ -43,6 +44,10 @@ Use `lint:check` for validation. The plain `lint` command changes files.
 - Type checking and linting are ratchets. Lower `.typecheck-baseline` or
   `.lint-baseline` when errors are removed; never increase either baseline to
   admit new errors.
+- The nonzero lint baseline deliberately fails validation when its error count
+  decreases, forcing the same change to lower `.lint-baseline` so removed debt
+  cannot return. The type-check baseline is already zero, so its legacy
+  warning-on-decrease path cannot currently run.
 - Playwright tests in this repository mock the backend. For contract, auth, or
   persistence behavior, also run the real-stack suite in `yeti-docker`.
 - Ask before adding dependencies or making broad changes to shared styles,

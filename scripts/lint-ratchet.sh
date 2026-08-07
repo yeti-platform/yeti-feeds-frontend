@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+# A lower error count deliberately fails until .lint-baseline is updated in the
+# same change. Otherwise the stale allowance would permit removed errors to
+# return in a later change.
 set -uo pipefail
 
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
