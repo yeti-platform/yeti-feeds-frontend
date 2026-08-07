@@ -173,6 +173,90 @@ test.describe("Graph investigation workspace", () => {
     await expect(page.getByTestId("graph-canvas").locator("canvas")).toHaveCount(1);
   });
 
+  test("keeps exact directed evidence keyboard-readable and renders CTI text safely", async ({ page }) => {
+    const unsafeResponse = {
+      ...graphResponse,
+      nodes: graphResponse.nodes.map((node, index) =>
+        index === 1 ? { ...node, label: '<img src=x onerror="window.__unsafe=true">' } : node
+      ),
+      edges: graphResponse.edges.map(edge => ({ ...edge, description: "<script>window.__unsafe=true</script>" }))
+    };
+    await page.route("**/api/v2/graph/explore", route =>
+      route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(unsafeResponse) })
+    );
+
+    await page.goto(graphUrl({ kind: "items", items: ["entities/1"] }));
+
+    await expect(page.getByRole("heading", { name: "Evidence" })).toBeVisible();
+    await expect(page.getByText('<img src=x onerror="window.__unsafe=true">')).toBeVisible();
+    await expect(page.getByText("<script>window.__unsafe=true</script>")).toBeVisible();
+    await expect(page.locator("script", { hasText: "window.__unsafe" })).toHaveCount(0);
+    expect(await page.evaluate(() => (window as typeof window & { __unsafe?: boolean }).__unsafe)).toBeUndefined();
+    await page.getByRole("button", { name: "Select relationship links/7" }).focus();
+    await page.keyboard.press("Enter");
+    await expect(page.getByText("Selected relationship links/7")).toBeVisible();
+    await expect(page.getByRole("cell", { name: "entities/1 → observables/2" })).toBeVisible();
+  });
+
+  test("expands one hop and replays the workspace when undoing", async ({ page }) => {
+    const expansionResponse = {
+      ...graphResponse,
+      scope: { kind: "items", anchor_ids: ["observables/2"], accessible_match_count: 1, ranking: null },
+      nodes: [
+        { ...graphResponse.nodes[1], role: "anchor", origin_ids: ["observables/2"] },
+        {
+          id: "observables/3",
+          label: "pivot.test",
+          root_type: "observable",
+          object_type: "hostname",
+          role: "neighbor",
+          origin_ids: ["observables/2"]
+        }
+      ],
+      edges: [
+        {
+          id: "links/8",
+          source: "observables/2",
+          target: "observables/3",
+          type: "resolves",
+          description: "Expansion evidence",
+          count: 1
+        }
+      ]
+    };
+    await page.route("**/api/v2/graph/explore", async route => {
+      const body = route.request().postDataJSON() as { scope: { items: string[] } };
+      const response = body.scope.items[0] === "observables/2" ? expansionResponse : graphResponse;
+      await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(response) });
+    });
+    await page.goto(graphUrl({ kind: "items", items: ["entities/1"] }));
+
+    await page.getByRole("button", { name: "Expand example.test" }).click();
+    await expect(page.getByText("pivot.test")).toBeVisible();
+    await expect(page.getByText("3 objects")).toBeVisible();
+
+    await page.getByRole("button", { name: "Undo expansion" }).click();
+    await expect(page.getByText("pivot.test")).toHaveCount(0);
+    await expect(page.getByText("2 objects")).toBeVisible();
+  });
+
+  test("filters and searches the loaded graph without changing its starting scope", async ({ page }) => {
+    await page.route("**/api/v2/graph/explore", route =>
+      route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(graphResponse) })
+    );
+    await page.goto(graphUrl({ kind: "items", items: ["entities/1"] }));
+
+    await page.getByRole("textbox", { name: "Search loaded graph" }).fill("example.test");
+    await page.getByRole("button", { name: "Focus search result" }).click();
+    await expect(page.getByText("Focused object: example.test")).toBeVisible();
+
+    await page.getByRole("textbox", { name: "Relationship type filter" }).fill("resolves");
+    await expect(page.getByText("0 visible relationships")).toBeVisible();
+    await page.getByRole("button", { name: "Reset investigation" }).click();
+    await expect(page.getByText("1 visible relationships")).toBeVisible();
+    await expect(page).toHaveURL(/entities%2F1/);
+  });
+
   test("renders and disposes the Sigma 4 validation fixture", async ({ page, context }, testInfo) => {
     await context.tracing.start({ screenshots: true, snapshots: true });
     await page.addInitScript(() => {

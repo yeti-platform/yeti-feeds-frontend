@@ -31,37 +31,65 @@ const props = withDefaults(
     nodes: GraphCanvasNode[];
     edges: GraphCanvasEdge[];
     selectedEdgeId?: string | null;
+    selectedNodeId?: string | null;
   }>(),
-  { selectedEdgeId: null }
+  { selectedEdgeId: null, selectedNodeId: null }
 );
 
-const emit = defineEmits<{ selectEdge: [id: string | null] }>();
+const emit = defineEmits<{ selectEdge: [id: string | null]; selectNode: [id: string | null] }>();
 const container = ref<HTMLElement | null>(null);
 const graph = new MultiDirectedGraph();
 let renderer: Sigma | null = null;
 let highlightedEdgeId: string | null = null;
+let highlightedNodeId: string | null = null;
+const savedPositions = new Map<string, { x: number; y: number }>();
 
 function syncGraph() {
-  graph.clear();
+  const nextEdges = new Set(props.edges.map(edge => edge.id));
+  const nextNodes = new Set(props.nodes.map(node => node.id));
+  for (const edgeId of graph.edges()) {
+    if (!nextEdges.has(edgeId)) graph.dropEdge(edgeId);
+  }
+  for (const nodeId of graph.nodes()) {
+    if (!nextNodes.has(nodeId)) {
+      const attributes = graph.getNodeAttributes(nodeId);
+      savedPositions.set(nodeId, { x: attributes.x, y: attributes.y });
+      graph.dropNode(nodeId);
+    }
+  }
   for (const node of props.nodes) {
-    graph.addNode(node.id, {
+    const attributes = {
       label: node.label,
-      x: node.x,
-      y: node.y,
       color: node.color ?? "#607d8b",
       size: node.size ?? 5
-    });
+    };
+    if (graph.hasNode(node.id)) graph.mergeNodeAttributes(node.id, attributes);
+    else {
+      const position = savedPositions.get(node.id) ?? { x: node.x, y: node.y };
+      graph.addNode(node.id, { ...attributes, ...position });
+    }
   }
   for (const edge of props.edges) {
     if (!graph.hasNode(edge.source) || !graph.hasNode(edge.target)) continue;
-    graph.addDirectedEdgeWithKey(edge.id, edge.source, edge.target, {
+    const attributes = {
       label: edge.label,
       color: edge.color ?? "#90a4ae",
       size: 1
-    });
+    };
+    if (graph.hasEdge(edge.id)) graph.mergeEdgeAttributes(edge.id, attributes);
+    else graph.addDirectedEdgeWithKey(edge.id, edge.source, edge.target, attributes);
   }
   renderer?.refresh();
   updateHighlightedEdge(props.selectedEdgeId);
+  updateHighlightedNode(props.selectedNodeId);
+}
+
+function updateHighlightedNode(nodeId: string | null | undefined) {
+  if (highlightedNodeId && graph.hasNode(highlightedNodeId)) {
+    renderer?.setNodeState(highlightedNodeId, { isHighlighted: false });
+  }
+  highlightedNodeId = nodeId && graph.hasNode(nodeId) ? nodeId : null;
+  if (highlightedNodeId) renderer?.setNodeState(highlightedNodeId, { isHighlighted: true });
 }
 
 function updateHighlightedEdge(edgeId: string | null | undefined) {
@@ -82,6 +110,14 @@ function setEdgesHidden(hidden: boolean) {
   renderer?.setEdgesState(graph.edges(), { isHidden: hidden });
 }
 
+function fit() {
+  renderer?.getCamera().setState({ x: 0.5, y: 0.5, ratio: 1, angle: 0 });
+}
+
+function setNodePinned(nodeId: string, pinned: boolean) {
+  if (graph.hasNode(nodeId)) graph.setNodeAttribute(nodeId, "pinned", pinned);
+}
+
 onMounted(() => {
   if (!container.value) return;
   syncGraph();
@@ -93,7 +129,10 @@ onMounted(() => {
       }
     },
     styles: {
-      nodes: DEFAULT_STYLES.nodes,
+      nodes: [
+        DEFAULT_STYLES.nodes,
+        { whenState: "isHighlighted", then: { color: "#f57c00", size: 10, depth: "topNodes" } }
+      ],
       edges: [
         DEFAULT_STYLES.edges,
         { path: "straight", parallelPath: "curved", head: "arrow", color: { attribute: "color" } },
@@ -103,20 +142,27 @@ onMounted(() => {
     settings: { enableEdgeEvents: true, renderEdgeLabels: false, autoRescale: "once" }
   });
   renderer.on("clickEdge", ({ edge }) => emit("selectEdge", edge));
-  renderer.on("clickStage", () => emit("selectEdge", null));
+  renderer.on("clickNode", ({ node }) => emit("selectNode", node));
+  renderer.on("clickStage", () => {
+    emit("selectEdge", null);
+    emit("selectNode", null);
+  });
   updateHighlightedEdge(props.selectedEdgeId);
+  updateHighlightedNode(props.selectedNodeId);
 });
 
 watch(() => [props.nodes, props.edges], syncGraph);
 watch(() => props.selectedEdgeId, updateHighlightedEdge);
+watch(() => props.selectedNodeId, updateHighlightedNode);
 
 onBeforeUnmount(() => {
   renderer?.kill();
   renderer = null;
   graph.clear();
+  savedPositions.clear();
 });
 
-defineExpose({ focusNode, setEdgesHidden });
+defineExpose({ focusNode, fit, setEdgesHidden, setNodePinned });
 </script>
 
 <style scoped>

@@ -65,6 +65,15 @@
               <v-chip v-if="workspace.response.value.budget.is_truncated" color="warning" size="small">
                 Truncated: {{ workspace.response.value.budget.reasons.join(", ") }}
               </v-chip>
+              <v-btn
+                v-if="workspace.expansions.value.length"
+                size="small"
+                variant="tonal"
+                :loading="workspace.expanding.value"
+                @click="workspace.undoExpansion"
+              >
+                Undo expansion
+              </v-btn>
               <v-spacer />
               <v-btn size="small" variant="text" @click="workspace.clear">Clear workspace</v-btn>
             </v-card-text>
@@ -72,7 +81,43 @@
               Ranking: {{ formatRanking(workspace.response.value.scope.ranking) }}
             </v-card-text>
           </v-card>
-          <graph-canvas :nodes="workspace.canvasNodes.value" :edges="workspace.canvasEdges.value" />
+          <graph-controls
+            class="mb-3"
+            :object-type-filter="workspace.objectTypeFilter.value"
+            :relationship-type-filter="workspace.relationshipTypeFilter.value"
+            :direction="workspace.direction.value"
+            :search="workspace.loadedSearch.value"
+            :search-result-label="workspace.searchResult.value?.label ?? ''"
+            :selected-node-id="workspace.selectedNodeId.value"
+            :visible-edge-count="workspace.visibleEdges.value.length"
+            @update:object-type-filter="workspace.objectTypeFilter.value = $event"
+            @update:relationship-type-filter="workspace.relationshipTypeFilter.value = $event"
+            @update:direction="changeDirection"
+            @update:search="workspace.loadedSearch.value = $event"
+            @focus-search-result="focusSearchResult"
+            @fit="canvas?.fit()"
+            @toggle-pin="togglePin"
+            @reset="resetInvestigation"
+          />
+          <graph-canvas
+            ref="canvas"
+            :nodes="workspace.canvasNodes.value"
+            :edges="workspace.canvasEdges.value"
+            :selected-node-id="workspace.selectedNodeId.value"
+            :selected-edge-id="workspace.selectedEdgeId.value"
+            @select-node="workspace.selectNode"
+            @select-edge="workspace.selectEdge"
+          />
+          <graph-evidence-panel
+            class="mt-3"
+            :nodes="workspace.visibleNodes.value"
+            :edges="workspace.visibleEdges.value"
+            :selected-node-id="workspace.selectedNodeId.value"
+            :selected-edge-id="workspace.selectedEdgeId.value"
+            @select-node="workspace.selectNode"
+            @select-edge="workspace.selectEdge"
+            @expand="workspace.expand"
+          />
         </template>
       </v-col>
     </v-row>
@@ -85,8 +130,11 @@ import { useRoute } from "vue-router";
 
 import GraphCanvas from "@/components/graph/GraphCanvas.vue";
 import type { GraphCanvasEdge, GraphCanvasNode } from "@/components/graph/GraphCanvas.vue";
+import GraphControls from "@/components/graph/GraphControls.vue";
+import GraphEvidencePanel from "@/components/graph/GraphEvidencePanel.vue";
 import GraphScopeBuilder from "@/components/graph/GraphScopeBuilder.vue";
 import { useGraphWorkspace } from "@/composables/useGraphWorkspace";
+import type { GraphExploreRequest } from "@/services/types";
 
 const route = useRoute();
 const canvas = ref<InstanceType<typeof GraphCanvas> | null>(null);
@@ -94,6 +142,7 @@ const selectedEdgeId = ref<string | null>(null);
 const lastInteractionMs = ref(0);
 const edgesHidden = ref(false);
 const workspace = useGraphWorkspace();
+const pinnedNodes = new Set<string>();
 
 const showRendererSpike = computed(() => import.meta.env.DEV && route.query.renderer === "spike");
 
@@ -146,6 +195,32 @@ function toggleEdges() {
 
 function formatRanking(ranking: [string, boolean][]) {
   return ranking.map(([field, ascending]) => `${field} ${ascending ? "ascending" : "descending"}`).join(", ");
+}
+
+function focusSearchResult() {
+  const result = workspace.searchResult.value;
+  if (!result) return;
+  workspace.selectNode(result.id);
+  canvas.value?.focusNode(result.id);
+}
+
+function togglePin() {
+  const nodeId = workspace.selectedNodeId.value;
+  if (!nodeId) return;
+  const pinned = !pinnedNodes.has(nodeId);
+  if (pinned) pinnedNodes.add(nodeId);
+  else pinnedNodes.delete(nodeId);
+  canvas.value?.setNodePinned(nodeId, pinned);
+}
+
+function resetInvestigation() {
+  workspace.reset();
+  canvas.value?.fit();
+}
+
+function changeDirection(direction: GraphExploreRequest["direction"]) {
+  workspace.direction.value = direction;
+  if (workspace.scope.value) void workspace.load(workspace.scope.value);
 }
 </script>
 
