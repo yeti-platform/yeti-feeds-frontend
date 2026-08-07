@@ -51,6 +51,7 @@ function graphUrl(scope: object) {
 }
 
 test.describe("Graph investigation workspace", () => {
+  test.describe.configure({ mode: "serial" });
   test.beforeEach(async ({ page }) => {
     await page.route("**/api/v2/auth/me", async route => {
       await route.fulfill({
@@ -188,7 +189,7 @@ test.describe("Graph investigation workspace", () => {
     await page.goto(graphUrl({ kind: "items", items: ["entities/1"] }));
 
     await expect(page.getByRole("heading", { name: "Evidence" })).toBeVisible();
-    await expect(page.getByText('<img src=x onerror="window.__unsafe=true">')).toBeVisible();
+    await expect(page.getByRole("button", { name: '<img src=x onerror="window.__unsafe=true">', exact: true })).toBeVisible();
     await expect(page.getByText("<script>window.__unsafe=true</script>")).toBeVisible();
     await expect(page.locator("script", { hasText: "window.__unsafe" })).toHaveCount(0);
     expect(await page.evaluate(() => (window as typeof window & { __unsafe?: boolean }).__unsafe)).toBeUndefined();
@@ -232,7 +233,7 @@ test.describe("Graph investigation workspace", () => {
     await page.goto(graphUrl({ kind: "items", items: ["entities/1"] }));
 
     await page.getByRole("button", { name: "Expand example.test" }).click();
-    await expect(page.getByText("pivot.test")).toBeVisible();
+    await expect(page.getByRole("button", { name: "pivot.test", exact: true })).toBeVisible();
     await expect(page.getByText("3 objects")).toBeVisible();
 
     await page.getByRole("button", { name: "Undo expansion" }).click();
@@ -255,6 +256,61 @@ test.describe("Graph investigation workspace", () => {
     await page.getByRole("button", { name: "Reset investigation" }).click();
     await expect(page.getByText("1 visible relationships")).toBeVisible();
     await expect(page).toHaveURL(/entities%2F1/);
+  });
+
+  test("detects deterministic clusters off-thread and keeps exact evidence when collapsed", async ({ page }) => {
+    const clusterResponse = {
+      ...graphResponse,
+      edges: [
+        ...graphResponse.edges,
+        {
+          id: "links/9",
+          source: "observables/2",
+          target: "entities/1",
+          type: "attributed-to",
+          description: "Synthetic reverse evidence",
+          count: 1
+        }
+      ],
+      budget: { ...graphResponse.budget, returned_edges: 2 }
+    };
+    await page.route("**/api/v2/graph/explore", route =>
+      route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(clusterResponse) })
+    );
+    await page.goto(graphUrl({ kind: "items", items: ["entities/1"] }));
+
+    await expect(page.getByRole("heading", { name: "Cluster discovery" })).toBeVisible();
+    await expect(page.getByText("Clusters suggest structure")).toBeVisible();
+    await expect(page.getByText("Cluster 1", { exact: true })).toBeVisible();
+    await expect(page.getByText("2 objects · dominant type")).toBeVisible();
+
+    await page.getByRole("button", { name: "Collapse Cluster 1" }).click();
+    await expect(page.getByRole("button", { name: "Expand Cluster 1" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "APT Example", exact: true })).toBeVisible();
+    await expect(page.getByRole("button", { name: "example.test", exact: true })).toBeVisible();
+
+    await page.reload();
+    await expect(page.getByText("Cluster 1", { exact: true })).toBeVisible();
+    await expect(page.getByText("2 objects · dominant type")).toBeVisible();
+  });
+
+  test("stacks the complete workspace at narrow widths and announces validation", async ({ page }) => {
+    await page.setViewportSize({ width: 320, height: 900 });
+    await page.goto("/graph");
+    await page.getByRole("button", { name: "Explore objects" }).click();
+    await expect(page.getByText("Enter at least one Yeti object ID.")).toBeVisible();
+
+    await page.route("**/api/v2/graph/explore", route =>
+      route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(graphResponse) })
+    );
+    await page.getByLabel("Yeti object IDs").fill("entities/1");
+    await page.getByRole("button", { name: "Explore objects" }).click();
+    for (const width of [320, 768, 1024, 1440]) {
+      await page.setViewportSize({ width, height: 900 });
+      await expect(page.getByTestId("graph-canvas")).toBeVisible();
+      await expect(page.getByRole("heading", { name: "Evidence" })).toBeVisible();
+      await expect(page.getByRole("heading", { name: "Cluster discovery" })).toBeVisible();
+    }
   });
 
   test("renders and disposes the Sigma 4 validation fixture", async ({ page, context }, testInfo) => {

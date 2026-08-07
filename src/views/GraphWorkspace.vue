@@ -54,6 +54,10 @@
           text="Try a different or broader starting scope."
         />
 
+        <v-alert v-else-if="workspace.status.value === 'cancelled'" type="info" variant="tonal" role="status">
+          The previous graph request was cancelled. Submit the scope again when ready.
+        </v-alert>
+
         <template v-if="workspace.response.value">
           <v-card variant="outlined" class="mb-3">
             <v-card-text class="d-flex flex-wrap align-center ga-4">
@@ -99,15 +103,33 @@
             @toggle-pin="togglePin"
             @reset="resetInvestigation"
           />
-          <graph-canvas
-            ref="canvas"
-            :nodes="workspace.canvasNodes.value"
-            :edges="workspace.canvasEdges.value"
-            :selected-node-id="workspace.selectedNodeId.value"
-            :selected-edge-id="workspace.selectedEdgeId.value"
-            @select-node="workspace.selectNode"
-            @select-edge="workspace.selectEdge"
-          />
+          <div class="d-flex flex-wrap ga-2 mb-3" aria-label="Graph role legend">
+            <v-chip prepend-icon="mdi-bullseye-arrow" size="small">Anchor</v-chip>
+            <v-chip prepend-icon="mdi-filter-check" size="small">Scope match</v-chip>
+            <v-chip prepend-icon="mdi-source-branch" size="small">Discovered neighbor</v-chip>
+            <v-chip prepend-icon="mdi-group" size="small">Collapsed cluster</v-chip>
+          </div>
+          <v-row>
+            <v-col cols="12" xl="8">
+              <graph-canvas
+                ref="canvas"
+                :nodes="clusters.displayNodes.value"
+                :edges="clusters.displayEdges.value"
+                :selected-node-id="workspace.selectedNodeId.value"
+                :selected-edge-id="workspace.selectedEdgeId.value"
+                @select-node="workspace.selectNode"
+                @select-edge="workspace.selectEdge"
+              />
+            </v-col>
+            <v-col cols="12" xl="4">
+              <graph-clusters
+                :clusters="clusters.clusters.value"
+                :collapsed="clusters.collapsed.value"
+                :nodes="workspace.response.value.nodes"
+                @toggle="clusters.toggle"
+              />
+            </v-col>
+          </v-row>
           <graph-evidence-panel
             class="mt-3"
             :nodes="workspace.visibleNodes.value"
@@ -130,10 +152,12 @@ import { useRoute } from "vue-router";
 
 import GraphCanvas from "@/components/graph/GraphCanvas.vue";
 import type { GraphCanvasEdge, GraphCanvasNode } from "@/components/graph/GraphCanvas.vue";
+import GraphClusters from "@/components/graph/GraphClusters.vue";
 import GraphControls from "@/components/graph/GraphControls.vue";
 import GraphEvidencePanel from "@/components/graph/GraphEvidencePanel.vue";
 import GraphScopeBuilder from "@/components/graph/GraphScopeBuilder.vue";
 import { useGraphWorkspace } from "@/composables/useGraphWorkspace";
+import { useGraphClusters } from "@/composables/useGraphClusters";
 import type { GraphExploreRequest } from "@/services/types";
 
 const route = useRoute();
@@ -142,6 +166,9 @@ const selectedEdgeId = ref<string | null>(null);
 const lastInteractionMs = ref(0);
 const edgesHidden = ref(false);
 const workspace = useGraphWorkspace();
+const loadedNodes = computed(() => workspace.response.value?.nodes ?? []);
+const loadedEdges = computed(() => workspace.response.value?.edges ?? []);
+const clusters = useGraphClusters(loadedNodes, loadedEdges, workspace.canvasNodes, workspace.canvasEdges);
 const pinnedNodes = new Set<string>();
 
 const showRendererSpike = computed(() => import.meta.env.DEV && route.query.renderer === "spike");

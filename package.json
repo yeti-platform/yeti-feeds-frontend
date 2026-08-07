@@ -21,6 +21,7 @@
     "core-js": "^3.49.0",
     "dompurify": "^3.4.12",
     "graphology": "^0.25.4",
+    "graphology-communities-louvain": "2.0.2",
     "graphology-layout": "^0.6.1",
     "graphology-layout-force": "^0.2.4",
     "graphology-layout-forceatlas2": "^0.10.1",
