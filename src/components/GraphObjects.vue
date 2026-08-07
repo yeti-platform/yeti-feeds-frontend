@@ -360,7 +360,11 @@ function updateGraph(neighbors: GraphSearchResponse, update: boolean) {
       if (graph.hasEdge(edge.source, edge.target)) {
         continue;
       }
-      graph.addEdge(edge.source, edge.target, { type: "curved", label: edge.type, size: 5 });
+      graph.addEdge(edge.source, edge.target, {
+        type: "curved",
+        label: "type" in edge ? edge.type : `ACL ${edge.role}`,
+        size: 5
+      });
     }
   }
   // force random layout

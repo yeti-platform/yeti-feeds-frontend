@@ -26,12 +26,56 @@
       />
     </template>
 
-    <v-empty-state
-      v-else
-      icon="mdi-graph-outline"
-      title="Start an investigation"
-      text="Choose one or more objects or define a broader scope to begin."
-    />
+    <v-row v-else>
+      <v-col cols="12" lg="4">
+        <graph-scope-builder :loading="workspace.status.value === 'loading'" @submit="workspace.load" />
+      </v-col>
+      <v-col cols="12" lg="8">
+        <v-alert v-if="workspace.error.value" type="error" variant="tonal" class="mb-3" role="alert">
+          {{ workspace.error.value }}
+        </v-alert>
+
+        <div v-if="workspace.status.value === 'loading'" class="py-8" role="status" aria-live="polite">
+          <v-progress-linear indeterminate color="primary" />
+          <p class="text-body-2 mt-3">Loading the authorized graph…</p>
+        </div>
+
+        <v-empty-state
+          v-else-if="workspace.status.value === 'idle'"
+          icon="mdi-graph-outline"
+          title="Start an investigation"
+          text="Choose one or more objects or define a broader scope to begin."
+        />
+
+        <v-empty-state
+          v-else-if="workspace.status.value === 'empty'"
+          icon="mdi-graph-outline"
+          title="No accessible matches"
+          text="Try a different or broader starting scope."
+        />
+
+        <template v-if="workspace.response.value">
+          <v-card variant="outlined" class="mb-3">
+            <v-card-text class="d-flex flex-wrap align-center ga-4">
+              <span><strong>{{ workspace.response.value.nodes.length }}</strong> objects</span>
+              <span><strong>{{ workspace.response.value.edges.length }}</strong> relationships</span>
+              <span v-if="workspace.response.value.scope.kind === 'query'">
+                {{ workspace.response.value.scope.accessible_match_count }} accessible matches
+              </span>
+              <v-chip v-if="workspace.response.value.budget.is_truncated" color="warning" size="small">
+                Truncated: {{ workspace.response.value.budget.reasons.join(", ") }}
+              </v-chip>
+              <v-spacer />
+              <v-btn size="small" variant="text" @click="workspace.clear">Clear workspace</v-btn>
+            </v-card-text>
+            <v-card-text v-if="workspace.response.value.scope.ranking" class="pt-0 text-body-2">
+              Ranking: {{ formatRanking(workspace.response.value.scope.ranking) }}
+            </v-card-text>
+          </v-card>
+          <graph-canvas :nodes="workspace.canvasNodes.value" :edges="workspace.canvasEdges.value" />
+        </template>
+      </v-col>
+    </v-row>
   </v-container>
 </template>
 
@@ -41,12 +85,15 @@ import { useRoute } from "vue-router";
 
 import GraphCanvas from "@/components/graph/GraphCanvas.vue";
 import type { GraphCanvasEdge, GraphCanvasNode } from "@/components/graph/GraphCanvas.vue";
+import GraphScopeBuilder from "@/components/graph/GraphScopeBuilder.vue";
+import { useGraphWorkspace } from "@/composables/useGraphWorkspace";
 
 const route = useRoute();
 const canvas = ref<InstanceType<typeof GraphCanvas> | null>(null);
 const selectedEdgeId = ref<string | null>(null);
 const lastInteractionMs = ref(0);
 const edgesHidden = ref(false);
+const workspace = useGraphWorkspace();
 
 const showRendererSpike = computed(() => import.meta.env.DEV && route.query.renderer === "spike");
 
@@ -95,6 +142,10 @@ function toggleEdges() {
     edgesHidden.value = !edgesHidden.value;
     canvas.value?.setEdgesHidden(edgesHidden.value);
   });
+}
+
+function formatRanking(ranking: [string, boolean][]) {
+  return ranking.map(([field, ascending]) => `${field} ${ascending ? "ascending" : "descending"}`).join(", ");
 }
 </script>
 

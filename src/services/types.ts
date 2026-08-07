@@ -97,6 +97,12 @@ export type TemplateSearchRequest = Schemas["TemplateSearchRequest"];
 export type TemplateSearchResponse = Schemas["TemplateSearchResponse"];
 
 // Graph
+export type GraphExploreRequest = Schemas["GraphExploreRequest"];
+export type GraphExploreResponse = Schemas["GraphExploreResponse"];
+export type GraphExploreItemScope = Schemas["GraphExploreItemScope"];
+export type GraphExploreQueryScope = Schemas["GraphExploreQueryScope"];
+export type GraphExploreNode = Schemas["GraphExploreNode"];
+export type GraphExploreEdge = Schemas["GraphExploreEdge"];
 export type GraphSearchRequest = Schemas["GraphSearchRequest"];
 export type GraphSearchResponse = Schemas["GraphSearchResponse"];
 export type GraphAddRequest = Schemas["GraphAddRequest"];
