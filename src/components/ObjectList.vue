@@ -23,7 +23,7 @@
       <template v-slot:item.name="{ item }">
         <span class="short-links">
           <v-tooltip activator="parent" location="top" :open-delay="200">{{ item.name }}</v-tooltip>
-          <router-link :to="`${searchType}/${item.id}`">{{ item.name }}</router-link>
+          <router-link :to="`/${searchType}/${item.id}`">{{ item.name }}</router-link>
         </span>
       </template>
       <template v-slot:item.tags="{ item }">
