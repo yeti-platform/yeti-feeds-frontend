@@ -44,15 +44,7 @@ export async function toggle(request: ToggleUserRequest): Promise<User> {
   return data;
 }
 
-/**
- * `role` is a `Permission` IntFlag on the backend. OpenAPI can only describe the
- * individual flags, so the generated type comes out as `1 | 2 | 4` — which
- * rejects the composite values the UI actually sends (0 = no access,
- * 3 = read/write, 7 = admin). Widen it back to the number it really is.
- */
-export type SetRoleRequest = Omit<PatchRoleRequest, "role"> & { role: number };
-
-export async function setRole(request: SetRoleRequest): Promise<unknown> {
+export async function setRole(request: PatchRoleRequest): Promise<unknown> {
   const { data } = await http.patch("/users/role", request);
   return data;
 }

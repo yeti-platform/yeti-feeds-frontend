@@ -4639,7 +4639,7 @@ export interface components {
              * @default
              */
             name: string;
-            permissions?: components["schemas"]["Permission"] | null;
+            permissions?: components["schemas"]["Role"] | null;
             /**
              * Count
              * @default 50
@@ -6719,7 +6719,7 @@ export interface components {
         PatchRoleRequest: {
             /** User Id */
             user_id: string;
-            role: components["schemas"]["Permission"];
+            role: components["schemas"]["Role"];
         };
         /** Path */
         "Path-Input": {
@@ -6809,11 +6809,6 @@ export interface components {
             /** Is Valid */
             readonly is_valid: boolean;
         };
-        /**
-         * Permission
-         * @enum {integer}
-         */
-        Permission: 1 | 2 | 4;
         /** Phone */
         "Phone-Input": {
             /**
@@ -7413,13 +7408,25 @@ export interface components {
             /** New Password */
             new_password: string;
         };
+        /**
+         * Role
+         * @description The Permission combinations actually granted over the API.
+         *
+         *     A plain int/enum (not Permission itself) so FastAPI's OpenAPI generation
+         *     -- and hence generated client types -- list exactly these four values
+         *     instead of Permission's individual flags (1, 2, 4), which don't include
+         *     the composite values (0, 3, 7) every role-granting endpoint actually
+         *     accepts.
+         * @enum {integer}
+         */
+        Role: 0 | 1 | 3 | 7;
         /** RoleRelationship */
         "RoleRelationship-Input": {
             /** Source */
             source: string;
             /** Target */
             target: string;
-            role: components["schemas"]["Permission"];
+            role: components["schemas"]["Role"];
             /**
              * Created
              * Format: date-time
@@ -7437,7 +7444,7 @@ export interface components {
             source: string;
             /** Target */
             target: string;
-            role: components["schemas"]["Permission"];
+            role: components["schemas"]["Role"];
             /**
              * Created
              * Format: date-time
@@ -8674,7 +8681,7 @@ export interface components {
             /** Ids */
             ids: components["schemas"]["RBACIdentity"][];
             /** @default 1 */
-            role: components["schemas"]["Permission"];
+            role: components["schemas"]["Role"];
         };
         /** UpdateMembersResponse */
         UpdateMembersResponse: {

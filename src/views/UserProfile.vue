@@ -73,7 +73,7 @@ import { computed, onMounted, ref, watch } from "vue";
 import ApiKeyManagement from "@/components/ApiKeyManagement.vue";
 import GroupList from "@/components/GroupList.vue";
 import { eventBus } from "@/plugins/eventbus";
-import type { User } from "@/services/types";
+import type { Role, User } from "@/services/types";
 import * as usersApi from "@/services/users";
 import { useAppStore } from "@/store/app";
 import { useUserStore } from "@/store/user";
@@ -130,7 +130,10 @@ async function updateUserRole() {
   if (!profile.value) {
     return;
   }
-  await usersApi.setRole({ user_id: profile.value.id, role: profile.value.global_role });
+  // global_role is stored as a plain int server-side (it can theoretically hold
+  // any composite Permission value), but roleMapping only ever offers one of
+  // Role's four -- safe to narrow here.
+  await usersApi.setRole({ user_id: profile.value.id, role: profile.value.global_role as Role });
   eventBus.emit("displayMessage", { message: "Settings successfully updated.", status: "success" });
 }
 
