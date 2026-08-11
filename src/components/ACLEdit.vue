@@ -98,7 +98,7 @@ import { computed, onMounted, ref, watch } from "vue";
 import { eventBus } from "@/plugins/eventbus";
 import * as groupsApi from "@/services/groups";
 import * as rbacApi from "@/services/rbac";
-import type { AclRootType, LooseYetiObject, RoleRelationship } from "@/services/types";
+import type { AclRootType, LooseYetiObject, Role, RoleRelationship } from "@/services/types";
 import * as usersApi from "@/services/users";
 
 const props = withDefaults(
@@ -140,7 +140,7 @@ const systemUsers = ref<Identity[]>([]);
 const systemGroups = ref<Identity[]>([]);
 const selectedIdentities = ref<Identity[]>([]);
 const identityListLoading = ref(false);
-const selectedRole = ref(1);
+const selectedRole = ref<Role>(1);
 
 const allIdentities = computed(() => [...systemUsers.value, ...systemGroups.value]);
 
@@ -171,9 +171,7 @@ async function getMembershipData() {
   const object = await rbacApi.acls(rootType.value, props.object.id);
   const acls: Record<string, RoleRelationship> = object.acls ?? {};
   aclTableData.value = Object.entries(acls)
-    // role is a Permission IntFlag; 0 ("no access") is a real value the
-    // generated `1 | 2 | 4` type can't express, so compare as a number.
-    .filter(([, edge]) => (edge.role as number) !== 0)
+    .filter(([, edge]) => edge.role !== 0)
     .map(([name, edge]) => ({ ...edge, name }));
 }
 

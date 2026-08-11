@@ -1,16 +1,5 @@
 import http from "@/services/http";
-import type { AclRootType, LooseYetiObject, RBACIdentity, UpdateMembersResponse } from "@/services/types";
-
-/**
- * `role` is a `Permission` IntFlag backend-side, so the generated type comes out
- * as `1 | 2 | 4` — which rejects the composite values the UI actually sends
- * (0 = no access, 1 = reader, 3 = writer, 7 = owner). Widened back to number;
- * same story as SetRoleRequest in services/users.ts.
- */
-export interface UpdateMembersRequest {
-  ids: RBACIdentity[];
-  role: number;
-}
+import type { AclRootType, LooseYetiObject, UpdateMembersRequest, UpdateMembersResponse } from "@/services/types";
 
 /**
  * The object with its ACLs resolved. The endpoint returns the object itself

@@ -72,12 +72,15 @@ export type DeleteApiKeyResponse = Schemas["DeleteApiKeyResponse"];
 export type RegisteredApiKey = Schemas["RegisteredApiKey"];
 
 // Groups / RBAC
+/** The only role values the API accepts: 0 = no access, 1 = read, 3 = read/write, 7 = admin. */
+export type Role = Schemas["Role"];
 export type Group = Schemas["Group-Output"];
 export type GroupInput = Schemas["Group-Input"];
 export type GroupSearchRequest = Schemas["GroupSearchRequest"];
 export type GroupSearchResponse = Schemas["GroupSearchResponse"];
 export type NewGroupRequest = Schemas["NewGroupRequest"];
 export type RBACIdentity = Schemas["RBACIdentity"];
+export type UpdateMembersRequest = Schemas["UpdateACLRequest"];
 export type UpdateMembersResponse = Schemas["UpdateMembersResponse"];
 /** One ACL edge: who (`source`) has what `role` on what (`target`). `id` is the edge's. */
 export type RoleRelationship = Schemas["RoleRelationship-Output"];
