@@ -2,10 +2,22 @@
 import { defineStore } from "pinia";
 import axios from "axios";
 
+interface SystemTypeEntry {
+  type: string;
+  label: string;
+}
+
+interface SystemTypes {
+  observables: SystemTypeEntry[];
+  entities: SystemTypeEntry[];
+  indicators: SystemTypeEntry[];
+  dfiq: SystemTypeEntry[];
+}
+
 export const useAppStore = defineStore("app", {
   state: () => ({
     systemConfig: null as any,
-    systemTypes: null as any
+    systemTypes: null as SystemTypes | null
   }),
   getters: {
     // These lazily kick off the config fetch if nothing has loaded it yet.
