@@ -1,13 +1,13 @@
 <template>
   <v-card>
     <v-card-title>{{ localObject.name }}</v-card-title>
-    <v-card-subtitle>{{ newType !== "" ? "Creating" : "Editing" }} DFIQ {{ localObject.type }}</v-card-subtitle>
+    <v-card-subtitle>{{ newType !== "" ? "Creating" : "Editing" }} DFIQ {{ parsedYaml.type }}</v-card-subtitle>
     <v-card-subtitle v-if="parent !== null"
       >Parent ID {{ parent.dfiq_id }} pre-populated from {{ parent.type }} "{{ parent.name }}""</v-card-subtitle
     >
     <v-card-text>
       <v-tabs v-model="activeTab" color="primary">
-        <v-tab value="user-form">{{ localObject.type }}</v-tab>
+        <v-tab value="user-form">{{ parsedYaml.type }}</v-tab>
         <v-tab v-if="parsedYaml.type === 'question'" value="approaches">Approaches</v-tab>
         <v-tab value="yaml">YAML</v-tab>
       </v-tabs>
@@ -28,7 +28,7 @@
             density="compact"
           ></v-text-field>
           <v-autocomplete
-            v-if="['question', 'facet'].includes(localObject.type)"
+            v-if="['question', 'facet'].includes(parsedYaml.type)"
             label="Parents"
             v-model="parsedYaml.parent_ids"
             :items="possibleParents"
@@ -40,7 +40,7 @@
             dense
             chips
             :custom-filter="parentSearchFilter"
-            :placeholder="`Add parents to this ${localObject.type}`"
+            :placeholder="`Add parents to this ${parsedYaml.type}`"
             persistent-placeholder
           >
             <template v-slot:item="{ props, item }">
@@ -565,7 +565,6 @@ export default {
       this.validatingYaml = "primary";
       axios
         .post(`/api/v2/dfiq/validate`, {
-          dfiq_type: this.localObject.type,
           dfiq_yaml: this.localObject.dfiq_yaml,
           check_id: this.newType !== ""
         })
@@ -580,8 +579,7 @@ export default {
         });
     },
     createObject() {
-      let createRequest = {
-        dfiq_type: this.localObject.type,
+      const createRequest = {
         dfiq_yaml: this.localObject.dfiq_yaml,
         update_indicators: false
       };
@@ -623,8 +621,7 @@ export default {
         return;
       }
 
-      let patchRequest = {
-        dfiq_type: this.localObject.type,
+      const patchRequest = {
         dfiq_yaml: this.localObject.dfiq_yaml,
         update_indicators: false
       };

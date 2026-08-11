@@ -315,7 +315,7 @@ export default {
   },
   methods: {
     getDFIQData() {
-      let params = {
+      const params = {
         count: 0,
         source: `dfiq/${this.dfiqObjectId}`,
         graph: "links",

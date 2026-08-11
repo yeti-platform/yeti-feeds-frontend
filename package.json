@@ -7,7 +7,8 @@
     "build": "vite build",
     "build-check": "vue-tsc --noEmit && vite build",
     "preview": "vite preview",
-    "lint": "eslint . --fix --ignore-path .gitignore",
+    "lint": "eslint . --fix",
+    "lint:check": "bash scripts/lint-ratchet.sh",
     "typecheck": "bash scripts/typecheck-ratchet.sh",
     "generate-api": "openapi-typescript http://localhost:8000/openapi.json -o src/services/api-schema.d.ts",
     "test:e2e": "playwright test",
@@ -38,6 +39,7 @@
     "yaml": "^2.9.0"
   },
   "devDependencies": {
+    "@eslint/js": "^9.39.5",
     "@playwright/test": "^1.61.1",
     "@types/lodash": "^4.17.24",
     "@types/node": "^22.20.1",
