@@ -112,13 +112,13 @@
 
 <script setup lang="ts">
 import moment from "moment";
-import { onMounted, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 
 import NewObject from "@/components/NewObject.vue";
-import { OBSERVABLE_TYPES } from "@/definitions/observableDefinitions";
 import * as observablesApi from "@/services/observables";
 import * as templatesApi from "@/services/templates";
 import type { Observable, ObservableSearchRequest, Template } from "@/services/types";
+import { useAppStore } from "@/store/app";
 
 /** Vuetify's v-data-table-server emits these on @update:options. */
 interface SortItem {
@@ -131,7 +131,8 @@ interface TableOptions {
   sortBy: SortItem[];
 }
 
-const observableTypes = OBSERVABLE_TYPES;
+const appStore = useAppStore();
+const observableTypes = computed(() => appStore.observableTypes);
 const headers = [
   { title: "Created on", key: "created", width: "200px", sortable: true },
   { title: "Value", key: "value", sortable: true },
