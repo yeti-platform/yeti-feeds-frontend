@@ -2,12 +2,7 @@
   <v-container fluid class="mx-10 mt-3">
     <v-row>
       <v-col>
-        <v-text-field
-          prepend-inner-icon="mdi-magnify"
-          v-model="textSearch"
-          label="Search for anything..."
-          @keyup.enter="searchNow"
-        />
+        <v-text-field prepend-inner-icon="mdi-magnify" v-model="textSearch" label="Search for anything..." />
         <v-progress-linear v-show="loading" class="mt-3" color="primary" indeterminate></v-progress-linear>
       </v-col>
     </v-row>
@@ -67,6 +62,7 @@
 </template>
 
 <script setup lang="ts">
+import _ from "lodash";
 import moment from "moment";
 import { computed, onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
@@ -110,23 +106,27 @@ const countPerType = ref(5);
 const hasAnyResults = computed(() => (sections.value ?? []).some(section => section.results.length > 0));
 
 async function loadObjects() {
-  if (!textSearch.value) {
+  const term = textSearch.value;
+  if (!term) {
     sections.value = null;
     return;
   }
   loading.value = true;
   try {
-    const response = await searchApi.search({ query: textSearch.value, count_per_type: countPerType.value });
-    sections.value = response.sections;
+    const response = await searchApi.search({ query: term, count_per_type: countPerType.value });
+    // Discard results for a term that's no longer current -- guards against
+    // a slower earlier response arriving after a faster later one.
+    if (term === textSearch.value) {
+      sections.value = response.sections;
+    }
   } finally {
-    // Errors already surfaced by the http interceptor's snackbar.
-    loading.value = false;
+    if (term === textSearch.value) {
+      loading.value = false;
+    }
   }
 }
 
-function searchNow() {
-  loadObjects();
-}
+const loadObjectsDebounced = _.debounce(loadObjects, 300);
 
 function getIconForType(type: string): string {
   return (
@@ -140,11 +140,12 @@ function getIconForType(type: string): string {
 
 onMounted(() => {
   if (textSearch.value) {
-    searchNow();
+    loadObjects();
   }
 });
 
 watch(textSearch, () => {
   router.replace({ query: { q: textSearch.value } });
+  loadObjectsDebounced();
 });
 </script>

@@ -80,10 +80,9 @@ test.describe("Global Search", () => {
     await page.goto("/");
     await expect(page).toHaveURL(/\/search/);
 
-    // Enter a search query
+    // Typing triggers a debounced live search -- no need to press Enter.
     const searchInput = page.getByLabel("Search for anything...");
     await searchInput.fill("evil");
-    await searchInput.press("Enter");
 
     // Only sections with results render a card -- empty Indicator/DFIQ
     // sections are skipped entirely, not shown as empty cards. The count is
@@ -133,5 +132,20 @@ test.describe("Global Search", () => {
 
     const seeAll = page.getByRole("link", { name: /See all 8 in Observables/ });
     await expect(seeAll).toHaveAttribute("href", "/observables");
+  });
+
+  test("debounces live search instead of firing on every keystroke", async ({ page }) => {
+    await page.goto("/search");
+    const searchInput = page.getByLabel("Search for anything...");
+
+    // Typing character-by-character should coalesce into a single request
+    // for the final term, not one request per keystroke.
+    await searchInput.pressSequentially("evil", { delay: 30 });
+    await expect.poll(() => searchRequests.length).toBeGreaterThan(0);
+
+    // Give any (incorrect) per-keystroke requests a chance to have fired too.
+    await page.waitForTimeout(500);
+    expect(searchRequests).toHaveLength(1);
+    expect(searchRequests[0]).toMatchObject({ query: "evil" });
   });
 });
