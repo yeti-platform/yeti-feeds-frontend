@@ -160,7 +160,11 @@ export interface paths {
         put?: never;
         /**
          * Search
-         * @description Gets the system config.
+         * @description Searches across all object types, bucketed by type.
+         *
+         *     Each type gets its own bounded slice of results, so a substring match
+         *     in one type's field (e.g. an observable hash) can't drown out matches
+         *     from another type (e.g. an entity name).
          */
         post: operations["search_api_v2_search__post"];
         delete?: never;
@@ -7641,48 +7645,42 @@ export interface components {
         };
         /**
          * SearchRequest
-         * @description Search request message.
+         * @description Global search request message.
          */
         SearchRequest: {
+            /** Query */
+            query: string;
             /**
-             * Query
-             * @default {}
+             * Count Per Type
+             * @default 5
              */
-            query: {
-                [key: string]: string | number | unknown[];
-            };
+            count_per_type: number;
+        };
+        /** SearchResultSection */
+        SearchResultSection: {
+            /** Type */
+            type: string;
+            /** Results */
+            results: Record<string, never>[];
             /**
-             * Sorting
-             * @default []
-             */
-            sorting: [
-                string,
-                boolean
-            ][];
-            /**
-             * Filter Aliases
-             * @default []
-             */
-            filter_aliases: [
-                string,
-                string
-            ][];
-            /**
-             * Count
-             * @default 50
-             */
-            count: number;
-            /**
-             * Page
+             * Total
              * @default 0
              */
-            page: number;
+            total: number;
         };
         /**
          * SearchResponse
-         * @description Search response message.
+         * @description Global search response message.
          */
         SearchResponse: {
+            /** Sections */
+            sections: components["schemas"]["SearchResultSection"][];
+        };
+        /**
+         * SemanticSearchResponse
+         * @description Semantic Search Response.
+         */
+        SemanticSearchResponse: {
             /** Results */
             results: Record<string, never>[];
             /**
@@ -9885,7 +9883,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SearchResponse"];
+                    "application/json": components["schemas"]["SemanticSearchResponse"];
                 };
             };
             /** @description Validation Error */
