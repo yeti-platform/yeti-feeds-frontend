@@ -15,11 +15,10 @@
     <template v-if="sections && textSearch">
       <v-row v-for="section in sections" :key="section.type" class="mb-2">
         <v-col>
-          <v-card v-if="section.results.length" variant="outlined">
+          <v-card v-if="section.results.length" class="ma-2" variant="flat">
             <v-card-title class="d-flex align-center">
-              <v-icon :icon="getIconForSectionType(section.type)" class="mr-2"></v-icon>
               {{ labelFor(section.type) }}
-              <span class="text-medium-emphasis ml-2">({{ section.total }})</span>
+              <v-chip class="ml-2" size="small" :text="String(section.total)"></v-chip>
             </v-card-title>
             <v-data-table
               :items="section.results"
@@ -87,13 +86,6 @@ const SECTION_LABELS: Record<string, string> = {
   observable: "Observables"
 };
 
-const SECTION_ICONS: Record<string, string> = {
-  entity: "mdi-atom-variant",
-  indicator: "mdi-magnify-scan",
-  dfiq: "mdi-file-question-outline",
-  observable: "mdi-flask-outline"
-};
-
 const route = useRoute();
 const router = useRouter();
 
@@ -108,10 +100,6 @@ function routeFor(sectionType: string): string {
 
 function labelFor(sectionType: string): string {
   return SECTION_LABELS[sectionType] ?? sectionType;
-}
-
-function getIconForSectionType(sectionType: string): string {
-  return SECTION_ICONS[sectionType] ?? "mdi-help-circle";
 }
 
 const textSearch = ref(typeof route.query.q === "string" ? route.query.q : "");

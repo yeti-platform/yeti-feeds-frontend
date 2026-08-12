@@ -86,9 +86,16 @@ test.describe("Global Search", () => {
     await searchInput.press("Enter");
 
     // Only sections with results render a card -- empty Indicator/DFIQ
-    // sections are skipped entirely, not shown as empty cards.
-    await expect(page.getByText("Entities (1)")).toBeVisible();
-    await expect(page.getByText("Observables (8)")).toBeVisible();
+    // sections are skipped entirely, not shown as empty cards. The count is
+    // a chip alongside the title, not appended text.
+    const entityTitle = page.locator(".v-card-title", { hasText: "Entities" });
+    await expect(entityTitle).toBeVisible();
+    await expect(entityTitle.getByText("1", { exact: true })).toBeVisible();
+
+    const observableTitle = page.locator(".v-card-title", { hasText: "Observables" });
+    await expect(observableTitle).toBeVisible();
+    await expect(observableTitle.getByText("8", { exact: true })).toBeVisible();
+
     await expect(page.locator(".v-card-title")).toHaveCount(2);
 
     await expect(page.getByRole("link", { name: "EvilCorp" })).toBeVisible();
