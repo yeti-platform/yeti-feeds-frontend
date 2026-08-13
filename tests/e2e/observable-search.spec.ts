@@ -112,6 +112,16 @@ test.describe("Observable Search", () => {
     expect(lastRequest.query).toEqual({ value: "evil.com" });
   });
 
+  test("prefills the search box from a ?q= URL param and searches on load", async ({ page }) => {
+    await page.goto("/observables?q=evil.com");
+
+    await expect.poll(() => searchRequests.length).toBeGreaterThan(0);
+    expect(searchRequests[0].query).toEqual({ value: "evil.com" });
+
+    const searchInput = page.getByRole("textbox", { name: /Search observables/ });
+    await expect(searchInput).toHaveValue("evil.com");
+  });
+
   test("bulk-tags the selected observables", async ({ page }) => {
     await page.goto("/observables");
     await expect(page.locator("tbody tr")).toHaveCount(2);

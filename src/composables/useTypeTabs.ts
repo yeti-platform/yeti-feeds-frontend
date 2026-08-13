@@ -25,6 +25,19 @@ export function useTypeTabs(types: ObjectTypeDefinition[]) {
   const fullScreenEdit = ref(false);
   const editWidth = ref("75%");
 
+  // A `?q=` in the URL (e.g. from GlobalSearch's "see all" links) prefills
+  // the search box and drives the initial load.
+  const initialQuery = typeof route.query.q === "string" ? route.query.q : "";
+  const searchQuery = ref(initialQuery);
+  const searchQueryLocal = ref(initialQuery);
+  const searchTrigger = ref(0);
+
+  /** Commits the drawer's local input as the active search and forces a reload. */
+  function submitSearch() {
+    searchQuery.value = searchQueryLocal.value;
+    searchTrigger.value++;
+  }
+
   const activeHash = computed(() => route.hash);
   const displayedTypes = computed(() => types.filter(type => counts.value[type.type] > 0));
 
@@ -107,6 +120,10 @@ export function useTypeTabs(types: ObjectTypeDefinition[]) {
     navigateToFirstPopulatedTab,
     getFieldForType,
     getAliasesForType,
-    toggleNewObjectFullscreen
+    toggleNewObjectFullscreen,
+    searchQuery,
+    searchQueryLocal,
+    searchTrigger,
+    submitSearch
   };
 }

@@ -44,7 +44,7 @@
             </v-data-table>
             <v-card-actions v-if="section.total > section.results.length">
               <v-spacer></v-spacer>
-              <v-btn variant="text" :to="routeFor(section.type)" size="small">
+              <v-btn variant="text" :to="{ path: routeFor(section.type), query: { q: textSearch } }" size="small">
                 See all {{ section.total }} in {{ labelFor(section.type) }}
               </v-btn>
             </v-card-actions>

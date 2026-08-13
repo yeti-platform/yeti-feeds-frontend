@@ -35,8 +35,8 @@
         density="compact"
         class="mt-2"
         hint="e.g. created>2024-01-01, family=miner, tags=malware"
-        @click:prepend-inner="() => { searchQuery = searchQueryLocal; searchTrigger++; }"
-        @keyup.enter="() => { searchQuery = searchQueryLocal; searchTrigger++; }"
+        @click:prepend-inner="submitSearch"
+        @keyup.enter="submitSearch"
       />
     </v-list-item>
     <v-list-item>
@@ -74,9 +74,6 @@ import { ref } from "vue";
 
 const entityTypes = ENTITY_TYPES;
 
-const searchQuery = ref("");
-const searchQueryLocal = ref("");
-const searchTrigger = ref(0);
 const newMenuOpen = ref(false);
 
 const {
@@ -89,6 +86,10 @@ const {
   countObjects: countEntities,
   getFieldForType,
   getAliasesForType,
-  toggleNewObjectFullscreen
+  toggleNewObjectFullscreen,
+  searchQuery,
+  searchQueryLocal,
+  searchTrigger,
+  submitSearch
 } = useTypeTabs(entityTypes);
 </script>

@@ -126,12 +126,12 @@ test.describe("Global Search", () => {
     await expect(observableLink).toHaveAttribute("href", "/observables/456");
   });
 
-  test("'See all' link points at the per-family search page", async ({ page }) => {
+  test("'See all' link points at the per-family search page, prefilled with the query", async ({ page }) => {
     await page.goto("/search?q=evil");
     await expect.poll(() => searchRequests.length).toBeGreaterThan(0);
 
     const seeAll = page.getByRole("link", { name: /See all 8 in Observables/ });
-    await expect(seeAll).toHaveAttribute("href", "/observables");
+    await expect(seeAll).toHaveAttribute("href", "/observables?q=evil");
   });
 
   test("debounces live search instead of firing on every keystroke", async ({ page }) => {
