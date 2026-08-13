@@ -118,6 +118,7 @@ export type BloomHit = Schemas["BloomHit"];
 // Global search
 export type SearchRequest = Schemas["SearchRequest"];
 export type SearchResponse = Schemas["SearchResponse"];
+export type SearchResultSection = Schemas["SearchResultSection"];
 
 // Context (shared across observable/entity/indicator)
 export type AddContextRequest = Schemas["AddContextRequest"];

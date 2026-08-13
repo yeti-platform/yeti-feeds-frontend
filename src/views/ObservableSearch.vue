@@ -113,12 +113,15 @@
 <script setup lang="ts">
 import moment from "moment";
 import { computed, onMounted, ref } from "vue";
+import { useRoute } from "vue-router";
 
 import NewObject from "@/components/NewObject.vue";
 import * as observablesApi from "@/services/observables";
 import * as templatesApi from "@/services/templates";
 import type { Observable, ObservableSearchRequest, Template } from "@/services/types";
 import { useAppStore } from "@/store/app";
+
+const route = useRoute();
 
 /** Vuetify's v-data-table-server emits these on @update:options. */
 interface SortItem {
@@ -145,7 +148,9 @@ const total = ref(0);
 const page = ref(1);
 const perPage = ref(25);
 const loading = ref(false);
-const searchQuery = ref("");
+// A `?q=` in the URL (e.g. from GlobalSearch's "see all" links) prefills
+// the search box and drives the initial load.
+const searchQuery = ref(typeof route.query.q === "string" ? route.query.q : "");
 const showSelect = ref(false);
 const selectedObservables = ref<string[]>([]);
 const bulkTags = ref<string[]>([]);

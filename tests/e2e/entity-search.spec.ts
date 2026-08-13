@@ -82,4 +82,17 @@ test.describe("Entity Search", () => {
       expect.arrayContaining([expect.arrayContaining(["aliases"])])
     );
   });
+
+  // IndicatorSearch/DFIQSearch get this for free via the shared useTypeTabs
+  // composable, so one coverage point here is enough.
+  test("prefills the search box from a ?q= URL param and searches on load", async ({ page }) => {
+    await page.goto("/entities?q=Emotet");
+
+    await expect.poll(() => searchRequests.some(request => request.query)).toBe(true);
+    const requestWithQuery = searchRequests.find(request => request.query);
+    expect(requestWithQuery?.query).toEqual({ name: "Emotet" });
+
+    const searchInput = page.getByRole("textbox", { name: /Search entities/ });
+    await expect(searchInput).toHaveValue("Emotet");
+  });
 });
