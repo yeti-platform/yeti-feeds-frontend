@@ -253,6 +253,7 @@ interface ADKSession {
   userId: string;
   events: AgentEvent[];
   createTime?: number;
+  title?: string;
 }
 
 interface SessionSummary {
@@ -291,11 +292,13 @@ export default {
     }
   },
   methods: {
-    makeSessionSummary(id: string, createTime?: number): SessionSummary {
+    makeSessionSummary(id: string, createTime?: number, title?: string): SessionSummary {
       const time = createTime || Date.now() / 1000;
-      const label = createTime
-        ? `${new Date(createTime * 1000).toISOString().slice(0, 19).replace('T', ' ')} — ${id}`
-        : id;
+      const label =
+        title ||
+        (createTime
+          ? `${new Date(createTime * 1000).toISOString().slice(0, 19).replace('T', ' ')} — ${id}`
+          : id);
       return { id, createTime: time, label, isNew: !createTime };
     },
     async fetchSessions() {
@@ -305,7 +308,7 @@ export default {
         const items = Array.isArray(data) ? data : (Array.isArray(data.sessions) ? data.sessions : []);
         this.availableSessions = items
           .map((s: string | ADKSession) =>
-            typeof s === 'string' ? this.makeSessionSummary(s) : this.makeSessionSummary(s.id, s.createTime)
+            typeof s === 'string' ? this.makeSessionSummary(s) : this.makeSessionSummary(s.id, s.createTime, s.title)
           )
           .sort((a: SessionSummary, b: SessionSummary) => a.createTime - b.createTime);
       } catch (err) {
