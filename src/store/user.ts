@@ -1,6 +1,7 @@
 import { defineStore } from "pinia";
 
 import * as authApi from "@/services/auth";
+import { useAppStore } from "@/store/app";
 import type { LooseYetiObject, User } from "@/services/types";
 
 /**
@@ -67,7 +68,12 @@ export const useUserStore = defineStore("user", {
       if (this.user.admin) {
         return true;
       }
-      // Objects outside RBAC (and DFIQ) carry no acls at all.
+      // Mirrors the backend's permission_on_target()/global_permission()
+      // decorators: with RBAC disabled, every authenticated user has full
+      // read/write/delete on every object, regardless of ACLs.
+      if (!useAppStore().RBACEnabled) {
+        return true;
+      }
       const granted = object?.acls?.[this.user.username]?.role ?? 0;
       return (granted & role) === role;
     }
