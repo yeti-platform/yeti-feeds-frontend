@@ -107,7 +107,10 @@ test.describe("Graph investigation workspace", () => {
     await page.goto(graphUrl({ kind: "items", items: ["entities/1"] }));
 
     const canvas = page.getByTestId("graph-canvas");
-    await canvas.locator("canvas").waitFor();
+    const renderedCanvas = canvas.locator("canvas").first();
+    const rendererFallback = canvas.getByRole("status");
+    await expect(renderedCanvas.or(rendererFallback)).toBeVisible();
+    test.skip(await rendererFallback.isVisible(), "WebGL 2 is unavailable in this browser");
     await page.waitForTimeout(750);
     const screenshot = await canvas.screenshot();
     const paintedRows = await page.evaluate(async imageBase64 => {
@@ -401,6 +404,43 @@ test.describe("Graph investigation workspace", () => {
     await page.getByRole("button", { name: "Reset investigation" }).click();
     await expect(page.getByText("1 visible relationships")).toBeVisible();
     await expect(page).toHaveURL(/entities%2F1/);
+  });
+
+  test("drags and pins a node until the analyst unpins or resets it", async ({ page }) => {
+    await page.route("**/api/v2/graph/explore", route =>
+      route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(graphResponse) })
+    );
+    await page.goto(graphUrl({ kind: "items", items: ["entities/1"] }));
+
+    await page.getByRole("textbox", { name: "Search loaded graph" }).fill("APT Example");
+    await page.getByRole("button", { name: "Focus search result" }).click();
+    await page.evaluate(() => new Promise(requestAnimationFrame));
+    const canvas = page.getByTestId("graph-canvas");
+    await canvas.scrollIntoViewIfNeeded();
+    const bounds = await canvas.boundingBox();
+    expect(bounds).not.toBeNull();
+    const beforeDrag = await canvas.screenshot();
+
+    await page.mouse.move(bounds!.x + bounds!.width / 2, bounds!.y + bounds!.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(bounds!.x + bounds!.width / 2 + 100, bounds!.y + bounds!.height / 2 + 60, { steps: 5 });
+    await page.mouse.up();
+    await page.getByRole("button", { name: "APT Example", exact: true }).click();
+
+    await expect(page.getByRole("button", { name: "Unpin selected object" })).toBeVisible();
+    expect((await canvas.screenshot()).equals(beforeDrag)).toBe(false);
+
+    await page.getByRole("textbox", { name: "Relationship type filter" }).fill("resolves");
+    await expect(page.getByText("0 visible relationships")).toBeVisible();
+    await expect(page.getByRole("button", { name: "Unpin selected object" })).toBeVisible();
+
+    await page.getByRole("button", { name: "Unpin selected object" }).click();
+    await expect(page.getByRole("button", { name: "Pin selected object" })).toBeVisible();
+    await page.getByRole("button", { name: "Pin selected object" }).click();
+    await page.getByRole("button", { name: "Reset investigation" }).click();
+    await page.getByRole("textbox", { name: "Search loaded graph" }).fill("APT Example");
+    await page.getByRole("button", { name: "Focus search result" }).click();
+    await expect(page.getByRole("button", { name: "Pin selected object" })).toBeVisible();
   });
 
   test("detects deterministic clusters off-thread and keeps exact evidence when collapsed", async ({ page }) => {

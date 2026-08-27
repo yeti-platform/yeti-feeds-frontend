@@ -39,7 +39,9 @@
       <div class="d-flex flex-wrap align-center ga-2">
         <v-btn size="small" :disabled="!searchResultLabel" @click="emit('focusSearchResult')">Focus search result</v-btn>
         <v-btn size="small" @click="emit('fit')">Fit graph</v-btn>
-        <v-btn size="small" :disabled="!selectedNodeId" @click="emit('togglePin')">Pin selected object</v-btn>
+        <v-btn size="small" :disabled="!selectedNodeId" @click="emit('togglePin')">
+          {{ selectedNodePinned ? "Unpin selected object" : "Pin selected object" }}
+        </v-btn>
         <v-btn size="small" variant="text" @click="emit('reset')">Reset investigation</v-btn>
         <span v-if="searchResultLabel" role="status">Focused object: {{ searchResultLabel }}</span>
         <v-spacer />
@@ -59,6 +61,7 @@ defineProps<{
   search: string;
   searchResultLabel: string;
   selectedNodeId: string | null;
+  selectedNodePinned: boolean;
   visibleEdgeCount: number;
 }>();
 

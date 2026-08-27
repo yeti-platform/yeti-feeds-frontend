@@ -37,13 +37,18 @@ const props = withDefaults(
     nodes: GraphCanvasNode[];
     edges: GraphCanvasEdge[];
     layout?: boolean;
+    pinnedNodeIds?: ReadonlySet<string>;
     selectedEdgeId?: string | null;
     selectedNodeId?: string | null;
   }>(),
   { layout: true, selectedEdgeId: null, selectedNodeId: null }
 );
 
-const emit = defineEmits<{ selectEdge: [id: string | null]; selectNode: [id: string | null] }>();
+const emit = defineEmits<{
+  pinNode: [id: string, pinned: boolean];
+  selectEdge: [id: string | null];
+  selectNode: [id: string | null];
+}>();
 const container = ref<HTMLElement | null>(null);
 const rendererUnavailable = ref(false);
 const graph = new MultiDirectedGraph();
@@ -92,7 +97,8 @@ function syncGraph() {
     const attributes = {
       label: node.label,
       color: node.color ?? "#607d8b",
-      size: node.size ?? 5
+      size: node.size ?? 5,
+      pinned: props.pinnedNodeIds?.has(node.id) ?? false
     };
     if (graph.hasNode(node.id)) graph.mergeNodeAttributes(node.id, attributes);
     else {
@@ -147,7 +153,19 @@ function fit() {
 }
 
 function setNodePinned(nodeId: string, pinned: boolean) {
-  if (graph.hasNode(nodeId)) graph.setNodeAttribute(nodeId, "pinned", pinned);
+  if (!graph.hasNode(nodeId)) return;
+  graph.setNodeAttribute(nodeId, "pinned", pinned);
+  emit("pinNode", nodeId, pinned);
+  if (!pinned && props.layout) requestLayout();
+}
+
+function resetLayout() {
+  savedPositions.clear();
+  for (const node of props.nodes) {
+    if (graph.hasNode(node.id)) graph.mergeNodeAttributes(node.id, { x: node.x, y: node.y, pinned: false });
+  }
+  if (props.layout) requestLayout();
+  else renderer?.refresh();
 }
 
 onMounted(() => {
@@ -174,6 +192,7 @@ onMounted(() => {
       },
       settings: {
         enableEdgeEvents: true,
+        enableNodeDrag: true,
         renderEdgeLabels: false,
         itemSizesReference: "screen"
       }
@@ -184,6 +203,9 @@ onMounted(() => {
   }
   renderer.on("clickEdge", ({ edge }) => emit("selectEdge", edge));
   renderer.on("clickNode", ({ node }) => emit("selectNode", node));
+  renderer.on("nodeDragStart", ({ allDraggedNodes }) => {
+    allDraggedNodes.forEach(nodeId => setNodePinned(nodeId, true));
+  });
   renderer.on("clickStage", () => {
     emit("selectEdge", null);
     emit("selectNode", null);
@@ -205,7 +227,7 @@ onBeforeUnmount(() => {
   savedPositions.clear();
 });
 
-defineExpose({ focusNode, fit, setEdgesHidden, setNodePinned });
+defineExpose({ focusNode, fit, resetLayout, setEdgesHidden, setNodePinned });
 </script>
 
 <style scoped>

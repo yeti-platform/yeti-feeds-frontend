@@ -101,7 +101,7 @@
                 </v-btn>
               </div>
               <v-spacer />
-              <v-btn size="small" variant="text" @click="workspace.clear">Clear workspace</v-btn>
+              <v-btn size="small" variant="text" @click="clearWorkspace">Clear workspace</v-btn>
             </v-card-text>
             <v-card-text v-if="workspace.response.value.scope.ranking" class="pt-0 text-body-2">
               Ranking: {{ formatRanking(workspace.response.value.scope.ranking) }}
@@ -115,6 +115,7 @@
             :search="workspace.loadedSearch.value"
             :search-result-label="workspace.searchResult.value?.label ?? ''"
             :selected-node-id="workspace.selectedNodeId.value"
+            :selected-node-pinned="selectedNodePinned"
             :visible-edge-count="workspace.visibleEdges.value.length"
             @update:object-type-filter="workspace.objectTypeFilter.value = $event"
             @update:relationship-type-filter="workspace.relationshipTypeFilter.value = $event"
@@ -137,8 +138,10 @@
                 ref="canvas"
                 :nodes="clusters.displayNodes.value"
                 :edges="clusters.displayEdges.value"
+                :pinned-node-ids="pinnedNodes"
                 :selected-node-id="workspace.selectedNodeId.value"
                 :selected-edge-id="workspace.selectedEdgeId.value"
+                @pin-node="updatePinnedNode"
                 @select-node="workspace.selectNode"
                 @select-edge="workspace.selectEdge"
               />
@@ -191,7 +194,11 @@ const workspace = useGraphWorkspace();
 const loadedNodes = computed(() => workspace.response.value?.nodes ?? []);
 const loadedEdges = computed(() => workspace.response.value?.edges ?? []);
 const clusters = useGraphClusters(loadedNodes, loadedEdges, workspace.canvasNodes, workspace.canvasEdges);
-const pinnedNodes = new Set<string>();
+const pinnedNodes = ref(new Set<string>());
+const selectedNodePinned = computed(() => {
+  const nodeId = workspace.selectedNodeId.value;
+  return nodeId ? pinnedNodes.value.has(nodeId) : false;
+});
 
 const showRendererSpike = computed(() => import.meta.env.DEV && route.query.renderer === "spike");
 
@@ -256,15 +263,26 @@ function focusSearchResult() {
 function togglePin() {
   const nodeId = workspace.selectedNodeId.value;
   if (!nodeId) return;
-  const pinned = !pinnedNodes.has(nodeId);
-  if (pinned) pinnedNodes.add(nodeId);
-  else pinnedNodes.delete(nodeId);
-  canvas.value?.setNodePinned(nodeId, pinned);
+  canvas.value?.setNodePinned(nodeId, !pinnedNodes.value.has(nodeId));
+}
+
+function updatePinnedNode(nodeId: string, pinned: boolean) {
+  const next = new Set(pinnedNodes.value);
+  if (pinned) next.add(nodeId);
+  else next.delete(nodeId);
+  pinnedNodes.value = next;
 }
 
 function resetInvestigation() {
+  pinnedNodes.value = new Set();
   workspace.reset();
+  canvas.value?.resetLayout();
   canvas.value?.fit();
+}
+
+function clearWorkspace() {
+  pinnedNodes.value = new Set();
+  workspace.clear();
 }
 
 function changeDirection(direction: GraphExploreRequest["direction"]) {
