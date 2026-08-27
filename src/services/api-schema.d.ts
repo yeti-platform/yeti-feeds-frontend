@@ -1231,6 +1231,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v2/graph/explore": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Explore
+         * @description Return a bounded, read-only graph for an investigation scope.
+         */
+        post: operations["explore_api_v2_graph_explore_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v2/graph/add": {
         parameters: {
             query?: never;
@@ -1775,11 +1795,6 @@ export interface components {
              * @default 0
              */
             lastUpdateTime: number;
-            /**
-             * Createtime
-             * @default 0
-             */
-            createTime: number;
         };
         /** ASN */
         "ASN-Input": {
@@ -4530,6 +4545,174 @@ export interface components {
          * @enum {string}
          */
         GraphDirection: "outbound" | "inbound" | "any";
+        /** GraphExploreBudget */
+        GraphExploreBudget: {
+            /** Node Limit */
+            node_limit: number;
+            /** Edge Limit */
+            edge_limit: number;
+            /** Returned Nodes */
+            returned_nodes: number;
+            /** Returned Edges */
+            returned_edges: number;
+            /** Is Truncated */
+            is_truncated: boolean;
+            /** Reasons */
+            reasons: ("node_limit" | "edge_limit")[];
+        };
+        /** GraphExploreEdge */
+        GraphExploreEdge: {
+            /** Id */
+            id: string;
+            /** Source */
+            source: string;
+            /** Target */
+            target: string;
+            /** Type */
+            type: string;
+            /** Description */
+            description: string;
+            /** Count */
+            count: number;
+        };
+        /** GraphExploreFilter */
+        GraphExploreFilter: {
+            /** Key */
+            key: string;
+            /** Value */
+            value: string;
+            /**
+             * Operator
+             * @default ==
+             * @enum {string}
+             */
+            operator: "=~" | "==" | "in";
+            /**
+             * Pathcompare
+             * @default ANY
+             * @enum {string}
+             */
+            pathcompare: "ANY" | "ALL" | "NONE";
+        };
+        /** GraphExploreItemScope */
+        GraphExploreItemScope: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            kind: "items";
+            /** Items */
+            items: string[];
+        };
+        /** GraphExploreLimits */
+        GraphExploreLimits: {
+            /**
+             * Nodes
+             * @default 2000
+             */
+            nodes: number;
+            /**
+             * Edges
+             * @default 10000
+             */
+            edges: number;
+        };
+        /** GraphExploreNode */
+        GraphExploreNode: {
+            /** Id */
+            id: string;
+            /** Label */
+            label: string;
+            /** Root Type */
+            root_type: string;
+            /** Object Type */
+            object_type: string;
+            /**
+             * Role
+             * @enum {string}
+             */
+            role: "anchor" | "scope_match" | "neighbor";
+            /** Origin Ids */
+            origin_ids: string[];
+        };
+        /** GraphExploreQueryScope */
+        GraphExploreQueryScope: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            kind: "query";
+            /** Query */
+            query?: {
+                [key: string]: string | number | (string | number)[];
+            };
+            /** Sorting */
+            sorting?: [
+                string,
+                boolean
+            ][];
+            /** Filter Aliases */
+            filter_aliases?: [
+                string,
+                "text" | "option" | "list"
+            ][];
+        };
+        /** GraphExploreRequest */
+        GraphExploreRequest: {
+            /**
+             * Schema Version
+             * @default 1
+             * @constant
+             */
+            schema_version: 1;
+            /** Scope */
+            scope: components["schemas"]["GraphExploreItemScope"] | components["schemas"]["GraphExploreQueryScope"];
+            /**
+             * Direction
+             * @default any
+             * @enum {string}
+             */
+            direction: "any" | "inbound" | "outbound";
+            /** Link Types */
+            link_types?: string[];
+            /** Target Types */
+            target_types?: string[];
+            /** Filters */
+            filters?: components["schemas"]["GraphExploreFilter"][];
+            requested_limits?: components["schemas"]["GraphExploreLimits"];
+        };
+        /** GraphExploreResponse */
+        GraphExploreResponse: {
+            /**
+             * Schema Version
+             * @default 1
+             * @constant
+             */
+            schema_version: 1;
+            scope: components["schemas"]["GraphExploreScopeResult"];
+            /** Nodes */
+            nodes: components["schemas"]["GraphExploreNode"][];
+            /** Edges */
+            edges: components["schemas"]["GraphExploreEdge"][];
+            budget: components["schemas"]["GraphExploreBudget"];
+        };
+        /** GraphExploreScopeResult */
+        GraphExploreScopeResult: {
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "items" | "query";
+            /** Anchor Ids */
+            anchor_ids: string[];
+            /** Accessible Match Count */
+            accessible_match_count: number;
+            /** Ranking */
+            ranking?: [
+                string,
+                boolean
+            ][] | null;
+        };
         /** GraphFilter */
         GraphFilter: {
             /** Key */
@@ -4604,10 +4787,10 @@ export interface components {
         GraphSearchResponse: {
             /** Vertices */
             vertices: {
-                [key: string]: components["schemas"]["ASN-Output"] | components["schemas"]["AuthSecret-Output"] | components["schemas"]["BIC-Output"] | components["schemas"]["Certificate-Output"] | components["schemas"]["CIDR-Output"] | components["schemas"]["CommandLine-Output"] | components["schemas"]["ContainerImage-Output"] | components["schemas"]["DockerImage-Output"] | components["schemas"]["Email-Output"] | components["schemas"]["File-Output"] | components["schemas"]["Generic-Output"] | components["schemas"]["Hostname-Output"] | components["schemas"]["IBAN-Output"] | components["schemas"]["Imphash-Output"] | components["schemas"]["IPv4-Output"] | components["schemas"]["IPv6-Output"] | components["schemas"]["JA3-Output"] | components["schemas"]["JARM-Output"] | components["schemas"]["MacAddress-Output"] | components["schemas"]["MD5-Output"] | components["schemas"]["Mutex-Output"] | components["schemas"]["NamedPipe-Output"] | components["schemas"]["Package-Output"] | components["schemas"]["Path-Output"] | components["schemas"]["RegistryKey-Output"] | components["schemas"]["SHA1-Output"] | components["schemas"]["SHA256-Output"] | components["schemas"]["Ssdeep-Output"] | components["schemas"]["TLSH-Output"] | components["schemas"]["Url-Output"] | components["schemas"]["UserAccount-Output"] | components["schemas"]["UserAgent-Output"] | components["schemas"]["Wallet-Output"] | components["schemas"]["AttackPattern-Output"] | components["schemas"]["Campaign-Output"] | components["schemas"]["Company-Output"] | components["schemas"]["CourseOfAction-Output"] | components["schemas"]["Identity-Output"] | components["schemas"]["IntrusionSet-Output"] | components["schemas"]["Investigation-Output"] | components["schemas"]["Malware-Output"] | components["schemas"]["Note-Output"] | components["schemas"]["Phone-Output"] | components["schemas"]["ThreatActor-Output"] | components["schemas"]["Tool-Output"] | components["schemas"]["Vulnerability-Output"] | components["schemas"]["ForensicArtifact-Output"] | components["schemas"]["Query-Output"] | components["schemas"]["Regex-Output"] | components["schemas"]["Sigma-Output"] | components["schemas"]["Suricata-Output"] | components["schemas"]["Yara-Output"] | components["schemas"]["Tag"] | (components["schemas"]["DFIQScenario-Output"] | components["schemas"]["DFIQFacet-Output"] | components["schemas"]["DFIQQuestion-Output"]);
+                [key: string]: components["schemas"]["ASN-Output"] | components["schemas"]["AuthSecret-Output"] | components["schemas"]["BIC-Output"] | components["schemas"]["Certificate-Output"] | components["schemas"]["CIDR-Output"] | components["schemas"]["CommandLine-Output"] | components["schemas"]["ContainerImage-Output"] | components["schemas"]["DockerImage-Output"] | components["schemas"]["Email-Output"] | components["schemas"]["File-Output"] | components["schemas"]["Generic-Output"] | components["schemas"]["Hostname-Output"] | components["schemas"]["IBAN-Output"] | components["schemas"]["Imphash-Output"] | components["schemas"]["IPv4-Output"] | components["schemas"]["IPv6-Output"] | components["schemas"]["JA3-Output"] | components["schemas"]["JARM-Output"] | components["schemas"]["MacAddress-Output"] | components["schemas"]["MD5-Output"] | components["schemas"]["Mutex-Output"] | components["schemas"]["NamedPipe-Output"] | components["schemas"]["Package-Output"] | components["schemas"]["Path-Output"] | components["schemas"]["RegistryKey-Output"] | components["schemas"]["SHA1-Output"] | components["schemas"]["SHA256-Output"] | components["schemas"]["Ssdeep-Output"] | components["schemas"]["TLSH-Output"] | components["schemas"]["Url-Output"] | components["schemas"]["UserAccount-Output"] | components["schemas"]["UserAgent-Output"] | components["schemas"]["Wallet-Output"] | components["schemas"]["AttackPattern-Output"] | components["schemas"]["Campaign-Output"] | components["schemas"]["Company-Output"] | components["schemas"]["CourseOfAction-Output"] | components["schemas"]["Identity-Output"] | components["schemas"]["IntrusionSet-Output"] | components["schemas"]["Investigation-Output"] | components["schemas"]["Malware-Output"] | components["schemas"]["Note-Output"] | components["schemas"]["Phone-Output"] | components["schemas"]["ThreatActor-Output"] | components["schemas"]["Tool-Output"] | components["schemas"]["Vulnerability-Output"] | components["schemas"]["ForensicArtifact-Output"] | components["schemas"]["Query-Output"] | components["schemas"]["Regex-Output"] | components["schemas"]["Sigma-Output"] | components["schemas"]["Suricata-Output"] | components["schemas"]["Yara-Output"] | components["schemas"]["Tag"] | (components["schemas"]["DFIQScenario-Output"] | components["schemas"]["DFIQFacet-Output"] | components["schemas"]["DFIQQuestion-Output"]) | components["schemas"]["User"] | components["schemas"]["Group-Output"];
             };
             /** Paths */
-            paths: components["schemas"]["Relationship"][][];
+            paths: (components["schemas"]["Relationship"] | components["schemas"]["RoleRelationship-Output"])[][];
             /** Total */
             total: number;
         };
@@ -12024,6 +12207,39 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["GraphSearchResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    explore_api_v2_graph_explore_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GraphExploreRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GraphExploreResponse"];
                 };
             };
             /** @description Validation Error */

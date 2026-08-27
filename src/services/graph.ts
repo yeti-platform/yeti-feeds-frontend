@@ -1,6 +1,8 @@
 import http from "@/services/http";
 import type {
   GraphAddRequest,
+  GraphExploreRequest,
+  GraphExploreResponse,
   GraphMatchRequest,
   GraphMatchResponse,
   GraphPatchRequest,
@@ -8,6 +10,11 @@ import type {
   GraphSearchResponse,
   Relationship
 } from "@/services/types";
+
+export async function explore(request: GraphExploreRequest, signal?: AbortSignal): Promise<GraphExploreResponse> {
+  const { data } = await http.post<GraphExploreResponse>("/graph/explore", request, { signal });
+  return data;
+}
 
 export async function search(request: GraphSearchRequest): Promise<GraphSearchResponse> {
   const { data } = await http.post<GraphSearchResponse>("/graph/search", request);

@@ -73,6 +73,19 @@
             </tbody>
           </v-table>
           <v-card-actions>
+            <v-btn
+              v-if="object"
+              variant="tonal"
+              color="primary"
+              size="small"
+              prepend-icon="mdi-graph-outline"
+              :to="{
+                path: '/graph',
+                hash: graphWorkspaceHash(itemScope([`${typeToEndpointMapping[objectType]}/${object.id}`]))
+              }"
+            >
+              Explore in graph
+            </v-btn>
             <!-- share -->
             <v-dialog v-if="hasOwnerPerms && RBACEnabled">
               <template v-slot:activator="{ props }">
@@ -196,9 +209,6 @@
               ><v-icon size="x-large" start>mdi-flash</v-icon>Related indicators
               <v-chip class="ml-3" density="comfortable"> {{ relatedObjectTabCount["indicators"] }}</v-chip></v-tab
             >
-            <v-tab value="related-graph" @click="emitRefreshGraph" href="#graph"
-              ><v-icon @click="emitRefreshGraph" size="x-large" start>mdi-graph</v-icon>Graph (Beta)
-            </v-tab>
             <v-tab value="related-observables" href="#observables"
               ><v-icon size="x-large" start>mdi-text-search</v-icon>Related observables
               <v-chip class="ml-3" density="comfortable">{{ relatedObjectTabCount["observables"] }}</v-chip></v-tab
@@ -239,10 +249,6 @@
               />
             </v-window-item>
 
-            <v-window-item value="related-graph" eager>
-              <graph-objects :object="object" :source-type="typeToEndpointMapping[objectType]" />
-            </v-window-item>
-
             <v-window-item value="related-observables" eager class="my-4">
               <direct-neighbors
                 :id="id"
@@ -278,7 +284,6 @@ import DFIQTree from "@/components/DFIQ/DFIQTree.vue";
 import EditDFIQObject from "@/components/DFIQ/EditDFIQObject.vue";
 import DirectNeighbors from "@/components/DirectNeighbors.vue";
 import EditObject from "@/components/EditObject.vue";
-import GraphObjects from "@/components/GraphObjects.vue";
 import LinkObject from "@/components/LinkObject.vue";
 import LinkObservables from "@/components/LinkObservables.vue";
 import ObjectContext from "@/components/ObjectContext.vue";
@@ -292,6 +297,7 @@ import { OBSERVABLE_TYPES } from "@/definitions/observableDefinitions";
 import type { ObjectTypeDefinition } from "@/definitions/types";
 
 import { eventBus } from "@/plugins/eventbus";
+import { graphWorkspaceHash, itemScope } from "@/composables/useGraphWorkspace";
 import * as objectsApi from "@/services/objects";
 import type { DetailRootType, LooseYetiObject, TaggableRootType } from "@/services/types";
 import { useAppStore } from "@/store/app";
@@ -350,10 +356,6 @@ function updateContext(context: unknown[]) {
   if (object.value) {
     object.value.context = context;
   }
-}
-
-function emitRefreshGraph() {
-  window.dispatchEvent(new Event("refreshGraphView"));
 }
 
 function navigateToFirstPopulatedTab() {

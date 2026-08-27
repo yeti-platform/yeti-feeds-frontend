@@ -224,4 +224,29 @@ test.describe("Observable Details", () => {
     await page.goto("/observables/789");
     await expect(page.getByText("evil.example.com").first()).toBeVisible();
   });
+
+  test("opens the dedicated graph workspace without embedding object data", async ({ page }) => {
+    await page.route("**/api/v2/graph/explore", route =>
+      route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          schema_version: 1,
+          scope: { kind: "items", anchor_ids: ["observables/789"], accessible_match_count: 1, ranking: null },
+          nodes: [{ id: "observables/789", label: "evil.example.com", root_type: "observable", object_type: "hostname", role: "anchor", origin_ids: ["observables/789"] }],
+          edges: [],
+          budget: { node_limit: 2000, edge_limit: 10000, returned_nodes: 1, returned_edges: 0, is_truncated: false, reasons: [] }
+        })
+      })
+    );
+    await page.goto("/observables/789");
+
+    await expect(page.getByText("Graph (Beta)")).toHaveCount(0);
+    const graphLink = page.getByRole("link", { name: "Explore in graph" });
+    expect(decodeURIComponent((await graphLink.getAttribute("href")) ?? "")).toContain("observables/789");
+    await expect(graphLink).not.toHaveAttribute("href", /evil\.example\.com/);
+    await graphLink.click();
+    await expect.poll(() => decodeURIComponent(new URL(page.url()).hash)).toContain("observables/789");
+    await expect(page.getByRole("heading", { name: "Evidence" })).toBeVisible();
+  });
 });

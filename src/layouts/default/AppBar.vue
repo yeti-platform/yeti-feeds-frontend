@@ -8,6 +8,7 @@
     <template v-slot:append>
       <v-btn v-if="agentsEnabled" :to="{ path: '/chat' }">Agent chat</v-btn>
       <v-btn :to="{ path: '/search' }">Global search</v-btn>
+      <v-btn :to="{ path: '/graph' }">Graph investigation</v-btn>
       <v-btn :to="{ path: '/match' }">Observable matching</v-btn>
       <v-btn
         >Objects
