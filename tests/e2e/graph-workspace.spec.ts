@@ -417,6 +417,10 @@ test.describe("Graph investigation workspace", () => {
     await page.evaluate(() => new Promise(requestAnimationFrame));
     const canvas = page.getByTestId("graph-canvas");
     await canvas.scrollIntoViewIfNeeded();
+    const renderedCanvas = canvas.locator("canvas").first();
+    const rendererFallback = canvas.getByRole("status");
+    await expect(renderedCanvas.or(rendererFallback)).toBeVisible();
+    test.skip(await rendererFallback.isVisible(), "WebGL 2 is unavailable in this browser");
     const bounds = await canvas.boundingBox();
     expect(bounds).not.toBeNull();
     const beforeDrag = await canvas.screenshot();
