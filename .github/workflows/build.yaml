@@ -6,8 +6,11 @@ jobs:
   build:
     runs-on: ubuntu-latest
     strategy:
+      # 24 is what docker/prod/Dockerfile builds with. 26 is tested so the
+      # image can be moved onto it deliberately, rather than discovering the
+      # jump only after a floating base image has already shipped it.
       matrix:
-        node: [22, 24]
+        node: [22, 24, 26]
     name: Node ${{ matrix.node }} sample
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
