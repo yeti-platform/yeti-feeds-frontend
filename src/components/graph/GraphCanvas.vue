@@ -172,7 +172,11 @@ onMounted(() => {
           { whenState: "isHighlighted", then: { color: "#1976d2", size: 3, depth: "topEdges" } }
         ]
       },
-      settings: { enableEdgeEvents: true, renderEdgeLabels: false, autoRescale: "once" }
+      settings: {
+        enableEdgeEvents: true,
+        renderEdgeLabels: false,
+        itemSizesReference: "screen"
+      }
     });
   } catch {
     rendererUnavailable.value = true;

@@ -100,6 +100,49 @@ test.describe("Graph investigation workspace", () => {
     });
   });
 
+  test("keeps relationships visible after the asynchronous layout", async ({ page }) => {
+    await page.route("**/api/v2/graph/explore", route =>
+      route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(graphResponse) })
+    );
+    await page.goto(graphUrl({ kind: "items", items: ["entities/1"] }));
+
+    const canvas = page.getByTestId("graph-canvas");
+    await canvas.locator("canvas").waitFor();
+    await page.waitForTimeout(750);
+    const screenshot = await canvas.screenshot();
+    const paintedRows = await page.evaluate(async imageBase64 => {
+      const image = new Image();
+      image.src = `data:image/png;base64,${imageBase64}`;
+      await image.decode();
+      const copy = document.createElement("canvas");
+      copy.width = image.width;
+      copy.height = image.height;
+      const context = copy.getContext("2d");
+      if (!context) return 0;
+      context.drawImage(image, 0, 0);
+      const pixels = context.getImageData(0, 0, copy.width, copy.height).data;
+      const backgroundOffset = (8 * copy.width + 8) * 4;
+      const background = pixels.slice(backgroundOffset, backgroundOffset + 3);
+      let paintedRows = 0;
+      for (let y = 8; y < copy.height - 8; y += 1) {
+        for (let x = 8; x < copy.width - 8; x += 1) {
+          const offset = (y * copy.width + x) * 4;
+          const difference =
+            Math.abs(pixels[offset] - background[0]) +
+            Math.abs(pixels[offset + 1] - background[1]) +
+            Math.abs(pixels[offset + 2] - background[2]);
+          if (difference > 24) {
+            paintedRows += 1;
+            break;
+          }
+        }
+      }
+      return paintedRows;
+    }, screenshot.toString("base64"));
+
+    expect(paintedRows).toBeGreaterThan(10);
+  });
+
   test("deduplicates multiple explicit anchors", async ({ page }) => {
     let requestBody: { scope?: { items?: string[] } } = {};
     await page.route("**/api/v2/graph/explore", async route => {
@@ -452,7 +495,11 @@ test.describe("Graph investigation workspace", () => {
     const focusMs = Number((await interactionStatus.textContent())?.match(/([\d.]+) ms/)?.[1]);
     expect(focusMs).toBeLessThanOrEqual(200);
 
+    const visibleRelationships = await canvas.screenshot();
     await page.getByRole("button", { name: "Toggle relationship visibility" }).click();
+    await page.evaluate(() => new Promise(requestAnimationFrame));
+    const hiddenRelationships = await canvas.screenshot();
+    expect(hiddenRelationships.equals(visibleRelationships)).toBe(false);
     const filterMs = Number((await interactionStatus.textContent())?.match(/([\d.]+) ms/)?.[1]);
     expect(filterMs).toBeLessThanOrEqual(200);
 
