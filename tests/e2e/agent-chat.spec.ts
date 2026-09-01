@@ -180,8 +180,9 @@ test.describe("Agent Chat", () => {
     const selector = page.getByLabel("Model");
     await expect(selector).toBeVisible();
     // The service's default is preselected, so sending without touching the
-    // selector uses what the deployment configured.
-    await expect(selector).toHaveText(/model-a/);
+    // selector uses what the deployment configured. Asserted on the value: the
+    // label resolves to the input, whose text content is empty.
+    await expect(selector).toHaveValue("model-a");
 
     await selector.click();
     await expect(page.locator(".v-list-item", { hasText: "model-b" })).toBeVisible();
