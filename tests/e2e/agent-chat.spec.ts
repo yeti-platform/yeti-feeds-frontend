@@ -184,7 +184,10 @@ test.describe("Agent Chat", () => {
     // label resolves to the input, whose text content is empty.
     await expect(selector).toHaveValue("model-a");
 
-    await selector.click();
+    // Opened by its field rather than by the input: a v-select's input is a
+    // 1px non-editable element behind the field overlay, so it never becomes
+    // actionable and clicking it times out.
+    await page.locator(".model-select .v-field").click();
     await expect(page.locator(".v-list-item", { hasText: "model-b" })).toBeVisible();
     await expect(page.locator(".v-list-item", { hasText: "model-c" })).toBeVisible();
   });
