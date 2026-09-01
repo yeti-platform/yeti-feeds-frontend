@@ -18,8 +18,18 @@
           >
             <template v-slot:item="{ item, props }">
               <v-list-item v-bind="props" class="session-label">
-                <template v-if="item.isNew" v-slot:append>
-                  <v-chip size="x-small" color="primary" variant="tonal">New</v-chip>
+                <template v-slot:append>
+                  <v-chip v-if="item.isNew" size="x-small" color="primary" variant="tonal">New</v-chip>
+                  <v-btn
+                    v-else
+                    icon="mdi-delete-outline"
+                    size="x-small"
+                    variant="text"
+                    density="comfortable"
+                    :loading="deletingSessionId === item.id"
+                    :title="`Delete session ${item.label}`"
+                    @click.stop="confirmDeleteSession(item)"
+                  />
                 </template>
               </v-list-item>
             </template>
@@ -28,6 +38,16 @@
               <v-chip v-if="item.isNew" size="x-small" color="primary" variant="tonal" class="ml-2">New</v-chip>
             </template>
           </v-combobox>
+          <v-select
+            v-if="availableModels.length > 1"
+            v-model="selectedModel"
+            :items="availableModels"
+            label="Model"
+            density="compact"
+            variant="outlined"
+            hide-details
+            class="ml-2 model-select"
+          />
           <v-btn
             color="primary"
             class="ml-2"
@@ -165,6 +185,31 @@
         </v-text-field>
       </v-col>
     </v-row>
+    <v-dialog v-model="deleteDialog" max-width="480">
+      <v-card>
+        <v-card-title class="text-h6">Delete session?</v-card-title>
+        <v-card-text>
+          <p class="mb-2">
+            This permanently deletes
+            <strong>{{ sessionPendingDelete?.label }}</strong>
+            and everything said in it.
+          </p>
+          <p class="text-medium-emphasis">This cannot be undone.</p>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer />
+          <v-btn variant="text" @click="deleteDialog = false">Cancel</v-btn>
+          <v-btn
+            color="error"
+            variant="flat"
+            :loading="deletingSessionId !== null"
+            @click="performDelete"
+          >
+            Delete
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-container>
 </template>
 
@@ -254,6 +299,7 @@ interface ADKSession {
   events: AgentEvent[];
   createTime?: number;
   title?: string;
+  model?: string;
 }
 
 interface SessionSummary {
@@ -261,6 +307,7 @@ interface SessionSummary {
   createTime: number;
   label: string;
   isNew: boolean;
+  model?: string;
 }
 
 export default {
@@ -275,10 +322,19 @@ export default {
       allCollapsed: false as boolean,
       userId: "yeti",
       sessionId: "session-" + Math.random().toString(36).substring(7),
-      availableSessions: [] as SessionSummary[]
+      availableSessions: [] as SessionSummary[],
+      availableModels: [] as string[],
+      defaultModel: "" as string,
+      // Empty until /models answers, so the first message cannot pin a session
+      // to a guess at what the deployment offers.
+      selectedModel: null as string | null,
+      deletingSessionId: null as string | null,
+      deleteDialog: false as boolean,
+      sessionPendingDelete: null as SessionSummary | null
     };
   },
   async mounted() {
+    await this.fetchModels();
     await this.fetchSessions();
     if (!this.availableSessions.some(s => s.id === this.sessionId)) {
       this.availableSessions.push(this.makeSessionSummary(this.sessionId));
@@ -288,18 +344,61 @@ export default {
     sessionId(newVal) {
       if (newVal) {
         this.fetchSessionHistory(newVal);
+        // Show what this conversation was answered with, rather than whatever
+        // was picked for the previous one. Falls back to the default for a
+        // session that predates the picker.
+        const entry = this.availableSessions.find(s => s.id === newVal);
+        this.selectedModel = entry?.model || this.defaultModel || null;
       }
     }
   },
   methods: {
-    makeSessionSummary(id: string, createTime?: number, title?: string): SessionSummary {
+    async fetchModels() {
+      try {
+        const response = await axios.get(`/api/v2/agents/models`);
+        this.availableModels = response.data.models || [];
+        this.defaultModel = response.data.default || "";
+        this.selectedModel = this.defaultModel || null;
+      } catch (err) {
+        // A picker that cannot be populated is hidden rather than shown empty;
+        // messages then go without a model and the service uses its default.
+        console.error("Failed to fetch models", err);
+        this.availableModels = [];
+      }
+    },
+    confirmDeleteSession(session: SessionSummary) {
+      this.sessionPendingDelete = session;
+      this.deleteDialog = true;
+    },
+    async performDelete() {
+      const session = this.sessionPendingDelete;
+      if (!session) return;
+      await this.deleteSession(session.id);
+      this.deleteDialog = false;
+      this.sessionPendingDelete = null;
+    },
+    async deleteSession(sessionId: string) {
+      this.deletingSessionId = sessionId;
+      try {
+        await axios.delete(`/api/v2/agents/sessions/${sessionId}`);
+        this.availableSessions = this.availableSessions.filter(s => s.id !== sessionId);
+        if (this.sessionId === sessionId) {
+          this.createNewSession();
+        }
+      } catch (err) {
+        console.error(`Failed to delete session ${sessionId}`, err);
+      } finally {
+        this.deletingSessionId = null;
+      }
+    },
+    makeSessionSummary(id: string, createTime?: number, title?: string, model?: string): SessionSummary {
       const time = createTime || Date.now() / 1000;
       const label =
         title ||
         (createTime
           ? `${new Date(createTime * 1000).toISOString().slice(0, 19).replace('T', ' ')} — ${id}`
           : id);
-      return { id, createTime: time, label, isNew: !createTime };
+      return { id, createTime: time, label, isNew: !createTime, model };
     },
     async fetchSessions() {
       try {
@@ -308,7 +407,7 @@ export default {
         const items = Array.isArray(data) ? data : (Array.isArray(data.sessions) ? data.sessions : []);
         this.availableSessions = items
           .map((s: string | ADKSession) =>
-            typeof s === 'string' ? this.makeSessionSummary(s) : this.makeSessionSummary(s.id, s.createTime, s.title)
+            typeof s === 'string' ? this.makeSessionSummary(s) : this.makeSessionSummary(s.id, s.createTime, s.title, s.model)
           )
           .sort((a: SessionSummary, b: SessionSummary) => a.createTime - b.createTime);
       } catch (err) {
@@ -355,6 +454,7 @@ export default {
       this.scrollToBottom();
     },
     createNewSession() {
+      this.selectedModel = this.defaultModel || null;
       this.sessionId = "session-" + Math.random().toString(36).substring(7);
       if (!this.availableSessions.some(s => s.id === this.sessionId)) {
         this.availableSessions.push(this.makeSessionSummary(this.sessionId));
@@ -432,6 +532,7 @@ export default {
       const entry = this.availableSessions.find(s => s.id === this.sessionId);
       if (entry) {
         entry.isNew = false;
+        entry.model = this.selectedModel || undefined;
       } else {
         this.fetchSessions();
       }
@@ -440,7 +541,8 @@ export default {
     async sendMessageStream(userText: string, agentMsgObject: ChatMessage) {
       const payload = {
         session_id: this.sessionId,
-        text: userText
+        text: userText,
+        model: this.selectedModel
       };
 
       try {
@@ -574,6 +676,10 @@ export default {
 </script>
 
 <style scoped>
+.model-select {
+  max-width: 220px;
+}
+
 .session-label {
   font-family: monospace;
 }
