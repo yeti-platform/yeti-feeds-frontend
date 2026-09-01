@@ -28,16 +28,6 @@
               <v-chip v-if="item.isNew" size="x-small" color="primary" variant="tonal" class="ml-2">New</v-chip>
             </template>
           </v-combobox>
-          <v-select
-            v-if="availableModels.length > 1"
-            v-model="selectedModel"
-            :items="availableModels"
-            label="Model"
-            density="compact"
-            variant="outlined"
-            hide-details
-            class="ml-2 model-select"
-          />
           <v-btn
             color="primary"
             class="ml-2"
@@ -171,19 +161,35 @@
             </v-btn>
         </v-toolbar>
 
-        <v-text-field
-          v-model="userInput"
-          label="Chat with the agent..."
-          prepend-inner-icon="mdi-chat"
-          variant="outlined"
-          :loading="loading"
-          :disabled="loading"
-          @keyup.enter="sendMessage"
-        >
-          <template v-slot:append-inner>
-            <v-icon @click="sendMessage" color="primary" class="cursor-pointer">mdi-send</v-icon>
-          </template>
-        </v-text-field>
+        <div class="d-flex align-start">
+          <!-- Beside the input rather than the session header: the model can be
+               changed at any point in a conversation, which is the whole reason
+               it is selectable -- throttling starts mid-conversation. -->
+          <v-select
+            v-if="availableModels.length > 1"
+            v-model="selectedModel"
+            :items="availableModels"
+            label="Model"
+            density="compact"
+            variant="outlined"
+            hide-details
+            class="mr-2 model-select"
+          />
+          <v-text-field
+            v-model="userInput"
+            label="Chat with the agent..."
+            prepend-inner-icon="mdi-chat"
+            variant="outlined"
+            :loading="loading"
+            :disabled="loading"
+            @keyup.enter="sendMessage"
+            class="flex-grow-1"
+          >
+            <template v-slot:append-inner>
+              <v-icon @click="sendMessage" color="primary" class="cursor-pointer">mdi-send</v-icon>
+            </template>
+          </v-text-field>
+        </div>
       </v-col>
     </v-row>
     <v-dialog v-model="deleteDialog" max-width="480">
