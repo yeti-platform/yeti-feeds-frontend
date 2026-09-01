@@ -59,7 +59,7 @@ test.describe("Agent Chat", () => {
     });
   });
 
-  test("auto-created draft session is tagged New and shown in monospace, alongside previous sessions sorted oldest first", async ({
+  test("auto-created draft session reads as New session, alongside previous sessions sorted oldest first", async ({
     page
   }) => {
     await page.goto("/chat");
@@ -71,8 +71,10 @@ test.describe("Agent Chat", () => {
     const fieldWrapper = page.locator(".v-field");
     await expect(fieldWrapper.getByText("New", { exact: true })).toBeVisible();
 
+    // The id is a key, not a name: it exists before there is anything to name
+    // the session after, and is replaced by a title from the first message.
     const selectedLabel = fieldWrapper.locator(".session-label");
-    await expect(selectedLabel).toHaveText(/^session-/);
+    await expect(selectedLabel).toHaveText("New session");
     await expect(selectedLabel).toHaveCSS("font-family", /monospace/);
 
     // Open the dropdown: previous sessions should be listed, oldest first,
@@ -157,5 +159,93 @@ test.describe("Agent Chat", () => {
     await combobox.click();
     await expect(page.locator(".v-list-item", { hasText: "What can you tell me about Sandworm Team?" })).toBeVisible();
     await expect(page.locator(".v-list-item", { hasText: "session-titled" })).toHaveCount(0);
+  });
+  test("the model selector offers what the service lists, defaulting to its default", async ({
+    page
+  }) => {
+    await page.route("**/api/v2/agents/models", async route => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          provider: "gemini",
+          models: ["model-a", "model-b", "model-c"],
+          default: "model-a"
+        })
+      });
+    });
+
+    await page.goto("/chat");
+
+    const selector = page.getByLabel("Model");
+    await expect(selector).toBeVisible();
+    // The service's default is preselected, so sending without touching the
+    // selector uses what the deployment configured.
+    await expect(selector).toHaveText(/model-a/);
+
+    await selector.click();
+    await expect(page.locator(".v-list-item", { hasText: "model-b" })).toBeVisible();
+    await expect(page.locator(".v-list-item", { hasText: "model-c" })).toBeVisible();
+  });
+
+  test("the model selector is hidden when the service offers one model", async ({ page }) => {
+    // Nothing to choose, so a picker would be a control that cannot do
+    // anything.
+    await page.route("**/api/v2/agents/models", async route => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ provider: "gemini", models: ["only-model"], default: "only-model" })
+      });
+    });
+
+    await page.goto("/chat");
+
+    await expect(page.getByLabel("Session ID")).toBeVisible();
+    await expect(page.getByLabel("Model")).toHaveCount(0);
+  });
+
+  test("the chat still works when the model list cannot be fetched", async ({ page }) => {
+    // The service applies its own default in that case, so failing to reach
+    // /models must not take the chat down with it.
+    await page.route("**/api/v2/agents/models", route => route.fulfill({ status: 503 }));
+
+    await page.goto("/chat");
+
+    await expect(page.getByLabel("Session ID")).toBeVisible();
+    await expect(page.getByLabel("Model")).toHaveCount(0);
+    await expect(page.getByLabel("Chat with the agent...")).toBeVisible();
+  });
+
+  test("delete is unavailable for a draft and deletes a real session after confirmation", async ({
+    page
+  }) => {
+    let deletedPath: string | null = null;
+    await page.route("**/api/v2/agents/sessions/*", async route => {
+      if (route.request().method() !== "DELETE") {
+        return route.continue();
+      }
+      deletedPath = new URL(route.request().url()).pathname;
+      await route.fulfill({ status: 204, body: "" });
+    });
+
+    await page.goto("/chat");
+
+    // A draft exists only in the browser, so there is nothing to delete.
+    const deleteButton = page.getByRole("button", { name: "Delete" });
+    await expect(deleteButton).toBeDisabled();
+
+    await page.getByLabel("Session ID").click();
+    await page.locator(".v-list-item", { hasText: "session-older" }).click();
+    await expect(deleteButton).toBeEnabled();
+
+    await deleteButton.click();
+    // Deleting a conversation cannot be undone, so it asks first.
+    await expect(page.getByText("Delete session?")).toBeVisible();
+    await page.getByRole("button", { name: "Delete", exact: true }).last().click();
+
+    await expect.poll(() => deletedPath).toBe("/api/v2/agents/sessions/session-older");
+    await page.getByLabel("Session ID").click();
+    await expect(page.locator(".v-list-item", { hasText: "session-older" })).toHaveCount(0);
   });
 });
