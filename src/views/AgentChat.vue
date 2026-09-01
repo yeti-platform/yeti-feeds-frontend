@@ -18,18 +18,8 @@
           >
             <template v-slot:item="{ item, props }">
               <v-list-item v-bind="props" class="session-label">
-                <template v-slot:append>
-                  <v-chip v-if="item.isNew" size="x-small" color="primary" variant="tonal">New</v-chip>
-                  <v-btn
-                    v-else
-                    icon="mdi-delete-outline"
-                    size="x-small"
-                    variant="text"
-                    density="comfortable"
-                    :loading="deletingSessionId === item.id"
-                    :title="`Delete session ${item.label}`"
-                    @click.stop="confirmDeleteSession(item)"
-                  />
+                <template v-if="item.isNew" v-slot:append>
+                  <v-chip size="x-small" color="primary" variant="tonal">New</v-chip>
                 </template>
               </v-list-item>
             </template>
@@ -55,6 +45,17 @@
             prepend-icon="mdi-plus"
           >
             New Session
+          </v-btn>
+          <v-btn
+            color="error"
+            variant="tonal"
+            class="ml-2"
+            prepend-icon="mdi-delete-outline"
+            :disabled="!currentSession || currentSession.isNew"
+            :loading="deletingSessionId !== null"
+            @click="confirmDeleteSession(currentSession)"
+          >
+            Delete
           </v-btn>
         </div>
         <div class="chat-container mb-4 border rounded-lg" ref="chatContainer">
@@ -340,6 +341,11 @@ export default {
       this.availableSessions.push(this.makeSessionSummary(this.sessionId));
     }
   },
+  computed: {
+    currentSession(): SessionSummary | null {
+      return this.availableSessions.find(s => s.id === this.sessionId) || null;
+    }
+  },
   watch: {
     sessionId(newVal) {
       if (newVal) {
@@ -366,7 +372,8 @@ export default {
         this.availableModels = [];
       }
     },
-    confirmDeleteSession(session: SessionSummary) {
+    confirmDeleteSession(session: SessionSummary | null) {
+      if (!session || session.isNew) return;
       this.sessionPendingDelete = session;
       this.deleteDialog = true;
     },
@@ -393,11 +400,14 @@ export default {
     },
     makeSessionSummary(id: string, createTime?: number, title?: string, model?: string): SessionSummary {
       const time = createTime || Date.now() / 1000;
-      const label =
-        title ||
-        (createTime
-          ? `${new Date(createTime * 1000).toISOString().slice(0, 19).replace('T', ' ')} — ${id}`
-          : id);
+      // The id is a key, not a name: it is generated before there is anything
+      // to name the session after, and is replaced by a title derived from the
+      // first message as soon as one is sent. Showing it in the meantime only
+      // offers the user a string that is about to change.
+      const label = !createTime
+        ? "New session"
+        : title ||
+          `${new Date(createTime * 1000).toISOString().slice(0, 19).replace('T', ' ')} — ${id}`;
       return { id, createTime: time, label, isNew: !createTime, model };
     },
     async fetchSessions() {
@@ -455,10 +465,12 @@ export default {
     },
     createNewSession() {
       this.selectedModel = this.defaultModel || null;
+      // Drop any previous draft. It was never sent, so it exists nowhere but
+      // this list, and keeping it would leave several identical "New session"
+      // entries with no way to tell them apart.
+      this.availableSessions = this.availableSessions.filter(s => !s.isNew);
       this.sessionId = "session-" + Math.random().toString(36).substring(7);
-      if (!this.availableSessions.some(s => s.id === this.sessionId)) {
-        this.availableSessions.push(this.makeSessionSummary(this.sessionId));
-      }
+      this.availableSessions.push(this.makeSessionSummary(this.sessionId));
       this.messages = [];
     },
     toggleAllCollapsed() {
