@@ -360,7 +360,10 @@ function updateGraph(neighbors: GraphSearchResponse, update: boolean) {
       if (graph.hasEdge(edge.source, edge.target)) {
         continue;
       }
-      graph.addEdge(edge.source, edge.target, { type: "curved", label: edge.type, size: 5 });
+      // This view only ever requests the "links" graph, but the response type
+      // also covers ACL edges, which carry a role instead of a type.
+      const label = "type" in edge ? edge.type : "";
+      graph.addEdge(edge.source, edge.target, { type: "curved", label: label, size: 5 });
     }
   }
   // force random layout

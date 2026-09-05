@@ -44,6 +44,9 @@
               Groups
             </v-list-item>
             <v-list-item :to="{ name: 'TagsAdmin' }" prepend-icon="mdi-tag"> Tags </v-list-item>
+            <v-list-item :to="{ name: 'PersonaAdmin' }" prepend-icon="mdi-robot-outline">
+              Agent personas
+            </v-list-item>
             <v-list-item :to="{ name: 'Status' }" prepend-icon="mdi-cog"> Status </v-list-item>
           </v-list>
         </v-menu>

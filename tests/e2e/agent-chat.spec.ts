@@ -27,6 +27,23 @@ test.describe("Agent Chat", () => {
       });
     });
 
+    // The view lists personas to populate its selector. Unmocked, this 401s
+    // through the dev proxy and the http interceptor sends the app to /login,
+    // which fails every assertion on this page. One persona, so the selector
+    // stays hidden unless a test says otherwise.
+    await page.route("**/api/v2/agentpersonas/search", async route => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          personas: [
+            { id: "p1", name: "Default", instruction: "x".repeat(30), tools: [], model: null, enabled: true, default: true, acls: {} }
+          ],
+          total: 1
+        })
+      });
+    });
+
     // Mock the sessions list: two previously-created sessions, oldest first.
     await page.route("**/api/v2/agents/sessions", async route => {
       if (route.request().method() !== "GET") {
@@ -251,5 +268,79 @@ test.describe("Agent Chat", () => {
     await expect.poll(() => deletedPath).toBe("/api/v2/agents/sessions/session-older");
     await page.getByLabel("Session ID").click();
     await expect(page.locator(".v-list-item", { hasText: "session-older" })).toHaveCount(0);
+  });
+  test("the persona selector offers the enabled personas and sends the choice", async ({ page }) => {
+    await page.route("**/api/v2/agentpersonas/search", async route => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          personas: [
+            { id: "p1", name: "Default", instruction: "x".repeat(30), tools: [], model: null, enabled: true, default: true, acls: {} },
+            { id: "p2", name: "SOC analyst", instruction: "x".repeat(30), tools: [], model: null, enabled: true, default: false, acls: {} }
+          ],
+          total: 2
+        })
+      });
+    });
+
+    const payloads: Array<Record<string, unknown>> = [];
+    await page.route("**/api/v2/agents/stream", async route => {
+      payloads.push(route.request().postDataJSON());
+      await route.fulfill({ status: 200, contentType: "text/event-stream", body: "" });
+    });
+
+    await page.goto("/chat");
+
+    const selector = page.getByLabel("Persona");
+    await expect(selector).toBeVisible();
+    // Left empty rather than preselected: the agent service resolves its own
+    // default, and guessing here would pin the session to the wrong one.
+    await expect(selector).toHaveValue("");
+
+    // Opened by its field, for the same reason as the model selector: a
+    // v-select's input sits behind the field overlay and never becomes
+    // actionable.
+    await page.locator(".persona-select .v-field").click();
+    await page.locator(".v-list-item", { hasText: "SOC analyst" }).click();
+
+    await page.getByLabel("Chat with the agent...").fill("hello");
+    await page.getByLabel("Chat with the agent...").press("Enter");
+
+    await expect.poll(() => payloads.length).toBeGreaterThan(0);
+    expect(payloads[0]).toMatchObject({ text: "hello", persona: "SOC analyst" });
+  });
+
+  test("the persona selector is hidden when only one persona exists", async ({ page }) => {
+    // The common case: a deployment that never customised anything has just the
+    // seeded default, so a picker would offer no choice.
+    await page.route("**/api/v2/agentpersonas/search", async route => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          personas: [
+            { id: "p1", name: "Default", instruction: "x".repeat(30), tools: [], model: null, enabled: true, default: true, acls: {} }
+          ],
+          total: 1
+        })
+      });
+    });
+
+    await page.goto("/chat");
+
+    await expect(page.getByLabel("Session ID")).toBeVisible();
+    await expect(page.getByLabel("Persona")).toHaveCount(0);
+  });
+
+  test("the chat still works when personas cannot be fetched", async ({ page }) => {
+    // Yeti falls back to its built-in instructions in that case, so an
+    // unreachable personas endpoint must not take the chat down.
+    await page.route("**/api/v2/agentpersonas/search", route => route.fulfill({ status: 503 }));
+
+    await page.goto("/chat");
+
+    await expect(page.getByLabel("Persona")).toHaveCount(0);
+    await expect(page.getByLabel("Chat with the agent...")).toBeVisible();
   });
 });
