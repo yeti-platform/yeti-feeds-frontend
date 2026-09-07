@@ -162,19 +162,31 @@
         </v-toolbar>
 
         <div class="d-flex align-start">
-          <!-- Beside the input rather than the session header: the model can be
+          <!-- Beside the input rather than the session header: both can be
                changed at any point in a conversation, which is the whole reason
-               it is selectable -- throttling starts mid-conversation. -->
-          <v-select
-            v-if="availableModels.length > 1"
-            v-model="selectedModel"
-            :items="availableModels"
-            label="Model"
-            density="compact"
-            variant="outlined"
-            hide-details
-            class="mr-2 model-select"
-          />
+               they are selectable -- throttling starts mid-conversation. -->
+          <div class="d-flex flex-column mr-2">
+            <v-select
+              v-if="availablePersonas.length > 1"
+              v-model="selectedPersona"
+              :items="availablePersonas"
+              label="Persona"
+              density="compact"
+              variant="outlined"
+              hide-details
+              class="mb-2 persona-select"
+            />
+            <v-select
+              v-if="availableModels.length > 1"
+              v-model="selectedModel"
+              :items="availableModels"
+              label="Model"
+              density="compact"
+              variant="outlined"
+              hide-details
+              class="model-select"
+            />
+          </div>
           <v-text-field
             v-model="userInput"
             label="Chat with the agent..."
@@ -222,6 +234,8 @@
 
 <script lang="ts">
 import axios from "axios";
+
+import * as personasApi from "@/services/personas";
 
 type MessagePartType = 'text' | 'thought' | 'functionCall' | 'functionResponse' | 'transfer' | 'error';
 
@@ -307,6 +321,7 @@ interface ADKSession {
   createTime?: number;
   title?: string;
   model?: string;
+  persona?: string;
 }
 
 interface SessionSummary {
@@ -315,6 +330,7 @@ interface SessionSummary {
   label: string;
   isNew: boolean;
   model?: string;
+  persona?: string;
 }
 
 export default {
@@ -335,6 +351,11 @@ export default {
       // Empty until /models answers, so the first message cannot pin a session
       // to a guess at what the deployment offers.
       selectedModel: null as string | null,
+      availablePersonas: [] as string[],
+      defaultPersona: "" as string,
+      // Empty until the personas endpoint answers. Never pinned to whichever
+      // persona happened to sort first: only to the one flagged default.
+      selectedPersona: null as string | null,
       deletingSessionId: null as string | null,
       deleteDialog: false as boolean,
       sessionPendingDelete: null as SessionSummary | null
@@ -346,6 +367,10 @@ export default {
     if (!this.availableSessions.some(s => s.id === this.sessionId)) {
       this.availableSessions.push(this.makeSessionSummary(this.sessionId));
     }
+    // Deliberately not awaited. Personas only populate a selector, and the
+    // agent service resolves its own default without one, so a slow or
+    // unreachable personas endpoint must not hold the conversation back.
+    this.fetchPersonas();
   },
   computed: {
     currentSession(): SessionSummary | null {
@@ -361,6 +386,7 @@ export default {
         // session that predates the picker.
         const entry = this.availableSessions.find(s => s.id === newVal);
         this.selectedModel = entry?.model || this.defaultModel || null;
+        this.selectedPersona = entry?.persona || this.defaultPersona || null;
       }
     }
   },
@@ -376,6 +402,21 @@ export default {
         // messages then go without a model and the service uses its default.
         console.error("Failed to fetch models", err);
         this.availableModels = [];
+      }
+    },
+    async fetchPersonas() {
+      try {
+        const response = await personasApi.search({ name: "", enabled: true, count: 100, page: 0 });
+        this.availablePersonas = response.personas.map(persona => persona.name);
+        // Mirrors what the agent service would resolve on its own, so the
+        // picker shows what an unattended message would actually have used.
+        this.defaultPersona = response.personas.find(persona => persona.default)?.name || "";
+        this.selectedPersona = this.defaultPersona || null;
+      } catch (err) {
+        // Same as the model picker: hidden rather than shown empty. Messages
+        // then name no persona and the agent service resolves its default.
+        console.error("Failed to fetch personas", err);
+        this.availablePersonas = [];
       }
     },
     confirmDeleteSession(session: SessionSummary | null) {
@@ -404,7 +445,7 @@ export default {
         this.deletingSessionId = null;
       }
     },
-    makeSessionSummary(id: string, createTime?: number, title?: string, model?: string): SessionSummary {
+    makeSessionSummary(id: string, createTime?: number, title?: string, model?: string, persona?: string): SessionSummary {
       const time = createTime || Date.now() / 1000;
       // The id is a key, not a name: it is generated before there is anything
       // to name the session after, and is replaced by a title derived from the
@@ -414,7 +455,7 @@ export default {
         ? "New session"
         : title ||
           `${new Date(createTime * 1000).toISOString().slice(0, 19).replace('T', ' ')} — ${id}`;
-      return { id, createTime: time, label, isNew: !createTime, model };
+      return { id, createTime: time, label, isNew: !createTime, model, persona };
     },
     async fetchSessions() {
       try {
@@ -423,7 +464,7 @@ export default {
         const items = Array.isArray(data) ? data : (Array.isArray(data.sessions) ? data.sessions : []);
         this.availableSessions = items
           .map((s: string | ADKSession) =>
-            typeof s === 'string' ? this.makeSessionSummary(s) : this.makeSessionSummary(s.id, s.createTime, s.title, s.model)
+            typeof s === 'string' ? this.makeSessionSummary(s) : this.makeSessionSummary(s.id, s.createTime, s.title, s.model, s.persona)
           )
           .sort((a: SessionSummary, b: SessionSummary) => a.createTime - b.createTime);
       } catch (err) {
@@ -471,6 +512,7 @@ export default {
     },
     createNewSession() {
       this.selectedModel = this.defaultModel || null;
+      this.selectedPersona = this.defaultPersona || null;
       // Drop any previous draft. It was never sent, so it exists nowhere but
       // this list, and keeping it would leave several identical "New session"
       // entries with no way to tell them apart.
@@ -551,6 +593,7 @@ export default {
       if (entry) {
         entry.isNew = false;
         entry.model = this.selectedModel || undefined;
+        entry.persona = this.selectedPersona || undefined;
       } else {
         this.fetchSessions();
       }
@@ -560,7 +603,8 @@ export default {
       const payload = {
         session_id: this.sessionId,
         text: userText,
-        model: this.selectedModel
+        model: this.selectedModel,
+        persona: this.selectedPersona
       };
 
       try {
@@ -694,7 +738,8 @@ export default {
 </script>
 
 <style scoped>
-.model-select {
+.model-select,
+.persona-select {
   max-width: 220px;
 }
 

@@ -89,6 +89,74 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v2/agentpersonas/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * New
+         * @description Creates a new agent persona.
+         */
+        post: operations["new_api_v2_agentpersonas__post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/agentpersonas/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Details
+         * @description Returns a single agent persona.
+         */
+        get: operations["details_api_v2_agentpersonas__id__get"];
+        put?: never;
+        post?: never;
+        /**
+         * Delete
+         * @description Deletes an agent persona. The default one cannot be deleted.
+         */
+        delete: operations["delete_api_v2_agentpersonas__id__delete"];
+        options?: never;
+        head?: never;
+        /**
+         * Patch
+         * @description Updates an agent persona.
+         */
+        patch: operations["patch_api_v2_agentpersonas__id__patch"];
+        trace?: never;
+    };
+    "/api/v2/agentpersonas/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Search
+         * @description Searches for agent personas.
+         */
+        post: operations["search_api_v2_agentpersonas_search_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v2/agents/sessions": {
         parameters: {
             query?: never;
@@ -121,6 +189,53 @@ export interface paths {
          * @description Proxies the request to retrieve a single session for a given user from the Agent Service.
          */
         get: operations["get_session_proxy_api_v2_agents_sessions__session_id__get"];
+        put?: never;
+        post?: never;
+        /**
+         * Delete Session Proxy
+         * @description Deletes one of the calling user's chat sessions.
+         *
+         *     The user id comes from the request rather than the caller, as it does for
+         *     reads, so a session can only be deleted by the user it belongs to.
+         */
+        delete: operations["delete_session_proxy_api_v2_agents_sessions__session_id__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/agents/models": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Models Proxy
+         * @description Proxies the list of models the Agent Service is configured to offer.
+         */
+        get: operations["list_models_proxy_api_v2_agents_models_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/agents/tools": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Tools Proxy
+         * @description Proxies the list of tools a persona may name.
+         */
+        get: operations["list_tools_proxy_api_v2_agents_tools_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -184,7 +299,14 @@ export interface paths {
         put?: never;
         /**
          * Semantic Search
-         * @description Performs a semantic search on Yeti objects.
+         * @description Performs a semantic search on Yeti objects, bucketed by type.
+         *
+         *     Results come from a nearest-neighbor lookup in ChromaDB, which knows
+         *     nothing about ACLs, so each candidate is checked individually against
+         *     the calling user's permissions before being returned. Pass root_type
+         *     to scope the search to just one type (e.g. "dfiq" for investigative
+         *     guidance rather than threat data); omit it to search every indexed
+         *     type, each independently bounded to `count`.
          */
         post: operations["semantic_search_api_v2_search_semantic_post"];
         delete?: never;
@@ -1700,6 +1822,30 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v2/system/types": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get System Types
+         * @description Lists every creatable object type, grouped by family.
+         *
+         *     Derived from each family's TYPE_MAPPING rather than a hand-maintained
+         *     list, so it automatically includes plugin-registered private/custom
+         *     types and can't drift from what the backend actually supports.
+         */
+        get: operations["get_system_types_api_v2_system_types_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v2/system/workers": {
         parameters: {
             query?: never;
@@ -1775,11 +1921,14 @@ export interface components {
              * @default 0
              */
             lastUpdateTime: number;
-            /**
-             * Createtime
-             * @default 0
-             */
-            createTime: number;
+            /** Createtime */
+            createTime?: number | null;
+            /** Title */
+            title?: string | null;
+            /** Model */
+            model?: string | null;
+            /** Persona */
+            persona?: string | null;
         };
         /** ASN */
         "ASN-Input": {
@@ -1888,6 +2037,112 @@ export interface components {
              * @default []
              */
             skip_compare: unknown[];
+        };
+        /**
+         * AgentPersona
+         * @description A configurable set of instructions for the conversational agent.
+         */
+        "AgentPersona-Input": {
+            /** Total Links */
+            total_links?: number | null;
+            /** Aggregated Links */
+            aggregated_links?: {
+                [key: string]: {
+                    [key: string]: number;
+                };
+            } | null;
+            /** Name */
+            name: string;
+            /**
+             * Description
+             * @default
+             */
+            description: string;
+            /** Instruction */
+            instruction: string;
+            /**
+             * Tools
+             * @default []
+             */
+            tools: string[];
+            /** Model */
+            model?: string | null;
+            /**
+             * Enabled
+             * @default true
+             */
+            enabled: boolean;
+            /**
+             * Default
+             * @default false
+             */
+            default: boolean;
+            /**
+             * Created
+             * Format: date-time
+             */
+            created?: string;
+            /**
+             * Modified
+             * Format: date-time
+             */
+            modified?: string;
+        };
+        /**
+         * AgentPersona
+         * @description A configurable set of instructions for the conversational agent.
+         */
+        "AgentPersona-Output": {
+            /** Total Links */
+            total_links?: number | null;
+            /** Aggregated Links */
+            aggregated_links?: {
+                [key: string]: {
+                    [key: string]: number;
+                };
+            } | null;
+            /** Name */
+            name: string;
+            /**
+             * Description
+             * @default
+             */
+            description: string;
+            /** Instruction */
+            instruction: string;
+            /**
+             * Tools
+             * @default []
+             */
+            tools: string[];
+            /** Model */
+            model?: string | null;
+            /**
+             * Enabled
+             * @default true
+             */
+            enabled: boolean;
+            /**
+             * Default
+             * @default false
+             */
+            default: boolean;
+            /**
+             * Created
+             * Format: date-time
+             */
+            created?: string;
+            /**
+             * Modified
+             * Format: date-time
+             */
+            modified?: string;
+            /** Id */
+            readonly id: string;
+            /** Acls */
+            readonly acls: {
+                [key: string]: components["schemas"]["RoleRelationship-Output"];
+            };
         };
         /** AnalysisRequest */
         AnalysisRequest: {
@@ -3517,7 +3772,6 @@ export interface components {
         DFIQValidateRequest: {
             /** Dfiq Yaml */
             dfiq_yaml: string;
-            dfiq_type: components["schemas"]["DFIQType"];
             /**
              * Update Indicators
              * @default false
@@ -4604,10 +4858,10 @@ export interface components {
         GraphSearchResponse: {
             /** Vertices */
             vertices: {
-                [key: string]: components["schemas"]["ASN-Output"] | components["schemas"]["AuthSecret-Output"] | components["schemas"]["BIC-Output"] | components["schemas"]["Certificate-Output"] | components["schemas"]["CIDR-Output"] | components["schemas"]["CommandLine-Output"] | components["schemas"]["ContainerImage-Output"] | components["schemas"]["DockerImage-Output"] | components["schemas"]["Email-Output"] | components["schemas"]["File-Output"] | components["schemas"]["Generic-Output"] | components["schemas"]["Hostname-Output"] | components["schemas"]["IBAN-Output"] | components["schemas"]["Imphash-Output"] | components["schemas"]["IPv4-Output"] | components["schemas"]["IPv6-Output"] | components["schemas"]["JA3-Output"] | components["schemas"]["JARM-Output"] | components["schemas"]["MacAddress-Output"] | components["schemas"]["MD5-Output"] | components["schemas"]["Mutex-Output"] | components["schemas"]["NamedPipe-Output"] | components["schemas"]["Package-Output"] | components["schemas"]["Path-Output"] | components["schemas"]["RegistryKey-Output"] | components["schemas"]["SHA1-Output"] | components["schemas"]["SHA256-Output"] | components["schemas"]["Ssdeep-Output"] | components["schemas"]["TLSH-Output"] | components["schemas"]["Url-Output"] | components["schemas"]["UserAccount-Output"] | components["schemas"]["UserAgent-Output"] | components["schemas"]["Wallet-Output"] | components["schemas"]["AttackPattern-Output"] | components["schemas"]["Campaign-Output"] | components["schemas"]["Company-Output"] | components["schemas"]["CourseOfAction-Output"] | components["schemas"]["Identity-Output"] | components["schemas"]["IntrusionSet-Output"] | components["schemas"]["Investigation-Output"] | components["schemas"]["Malware-Output"] | components["schemas"]["Note-Output"] | components["schemas"]["Phone-Output"] | components["schemas"]["ThreatActor-Output"] | components["schemas"]["Tool-Output"] | components["schemas"]["Vulnerability-Output"] | components["schemas"]["ForensicArtifact-Output"] | components["schemas"]["Query-Output"] | components["schemas"]["Regex-Output"] | components["schemas"]["Sigma-Output"] | components["schemas"]["Suricata-Output"] | components["schemas"]["Yara-Output"] | components["schemas"]["Tag"] | (components["schemas"]["DFIQScenario-Output"] | components["schemas"]["DFIQFacet-Output"] | components["schemas"]["DFIQQuestion-Output"]);
+                [key: string]: components["schemas"]["ASN-Output"] | components["schemas"]["AuthSecret-Output"] | components["schemas"]["BIC-Output"] | components["schemas"]["Certificate-Output"] | components["schemas"]["CIDR-Output"] | components["schemas"]["CommandLine-Output"] | components["schemas"]["ContainerImage-Output"] | components["schemas"]["DockerImage-Output"] | components["schemas"]["Email-Output"] | components["schemas"]["File-Output"] | components["schemas"]["Generic-Output"] | components["schemas"]["Hostname-Output"] | components["schemas"]["IBAN-Output"] | components["schemas"]["Imphash-Output"] | components["schemas"]["IPv4-Output"] | components["schemas"]["IPv6-Output"] | components["schemas"]["JA3-Output"] | components["schemas"]["JARM-Output"] | components["schemas"]["MacAddress-Output"] | components["schemas"]["MD5-Output"] | components["schemas"]["Mutex-Output"] | components["schemas"]["NamedPipe-Output"] | components["schemas"]["Package-Output"] | components["schemas"]["Path-Output"] | components["schemas"]["RegistryKey-Output"] | components["schemas"]["SHA1-Output"] | components["schemas"]["SHA256-Output"] | components["schemas"]["Ssdeep-Output"] | components["schemas"]["TLSH-Output"] | components["schemas"]["Url-Output"] | components["schemas"]["UserAccount-Output"] | components["schemas"]["UserAgent-Output"] | components["schemas"]["Wallet-Output"] | components["schemas"]["AttackPattern-Output"] | components["schemas"]["Campaign-Output"] | components["schemas"]["Company-Output"] | components["schemas"]["CourseOfAction-Output"] | components["schemas"]["Identity-Output"] | components["schemas"]["IntrusionSet-Output"] | components["schemas"]["Investigation-Output"] | components["schemas"]["Malware-Output"] | components["schemas"]["Note-Output"] | components["schemas"]["Phone-Output"] | components["schemas"]["ThreatActor-Output"] | components["schemas"]["Tool-Output"] | components["schemas"]["Vulnerability-Output"] | components["schemas"]["ForensicArtifact-Output"] | components["schemas"]["Query-Output"] | components["schemas"]["Regex-Output"] | components["schemas"]["Sigma-Output"] | components["schemas"]["Suricata-Output"] | components["schemas"]["Yara-Output"] | components["schemas"]["Tag"] | (components["schemas"]["DFIQScenario-Output"] | components["schemas"]["DFIQFacet-Output"] | components["schemas"]["DFIQQuestion-Output"]) | components["schemas"]["User"] | components["schemas"]["Group-Output"];
             };
             /** Paths */
-            paths: components["schemas"]["Relationship"][][];
+            paths: (components["schemas"]["Relationship"] | components["schemas"]["RoleRelationship-Output"])[][];
             /** Total */
             total: number;
         };
@@ -6090,6 +6344,18 @@ export interface components {
             merged: number;
             into: components["schemas"]["Tag"];
         };
+        /**
+         * ModelsResponse
+         * @description The models the agent service will accept for a chat request.
+         */
+        ModelsResponse: {
+            /** Provider */
+            provider: string;
+            /** Models */
+            models: string[];
+            /** Default */
+            default: string;
+        };
         /** Mutex */
         "Mutex-Input": {
             /**
@@ -6300,7 +6566,6 @@ export interface components {
         NewDFIQRequest: {
             /** Dfiq Yaml */
             dfiq_yaml: string;
-            dfiq_type: components["schemas"]["DFIQType"];
             /**
              * Update Indicators
              * @default false
@@ -6353,6 +6618,10 @@ export interface components {
             /** Value */
             value: string;
             type: components["schemas"]["ObservableType"];
+        };
+        /** NewPersonaRequest */
+        NewPersonaRequest: {
+            persona: components["schemas"]["AgentPersona-Input"];
         };
         /** NewRequest */
         NewRequest: {
@@ -6467,6 +6736,32 @@ export interface components {
              * @constant
              */
             readonly root_type: "entity";
+        };
+        /**
+         * ObjectSummary
+         * @description Enough of an object to judge a hit and fetch the rest by id.
+         *
+         *     Search returns this rather than the whole object because a hit is a
+         *     pointer, not the payload. For DFIQ the difference is an order of
+         *     magnitude, and half of what it saves is `dfiq_yaml` -- a verbatim copy
+         *     of fields already present here.
+         */
+        ObjectSummary: {
+            /** Id */
+            id: string;
+            /** Root Type */
+            root_type: string;
+            /** Type */
+            type: string;
+            /** Name */
+            name: string;
+            /** Description */
+            description?: string | null;
+            /**
+             * Tags
+             * @default []
+             */
+            tags: string[];
         };
         /** ObservableSearchRequest */
         ObservableSearchRequest: {
@@ -6689,7 +6984,6 @@ export interface components {
             dfiq_yaml?: string | null;
             /** Dfiq Object */
             dfiq_object?: (components["schemas"]["DFIQScenario-Input"] | components["schemas"]["DFIQFacet-Input"] | components["schemas"]["DFIQQuestion-Input"]) | null;
-            dfiq_type: components["schemas"]["DFIQType"];
             /**
              * Update Indicators
              * @default false
@@ -6718,6 +7012,10 @@ export interface components {
         PatchObservableRequest: {
             /** Observable */
             observable: components["schemas"]["ASN-Input"] | components["schemas"]["AuthSecret-Input"] | components["schemas"]["BIC-Input"] | components["schemas"]["Certificate-Input"] | components["schemas"]["CIDR-Input"] | components["schemas"]["CommandLine-Input"] | components["schemas"]["ContainerImage-Input"] | components["schemas"]["DockerImage-Input"] | components["schemas"]["Email-Input"] | components["schemas"]["File-Input"] | components["schemas"]["Generic-Input"] | components["schemas"]["Hostname-Input"] | components["schemas"]["IBAN-Input"] | components["schemas"]["Imphash-Input"] | components["schemas"]["IPv4-Input"] | components["schemas"]["IPv6-Input"] | components["schemas"]["JA3-Input"] | components["schemas"]["JARM-Input"] | components["schemas"]["MacAddress-Input"] | components["schemas"]["MD5-Input"] | components["schemas"]["Mutex-Input"] | components["schemas"]["NamedPipe-Input"] | components["schemas"]["Package-Input"] | components["schemas"]["Path-Input"] | components["schemas"]["RegistryKey-Input"] | components["schemas"]["SHA1-Input"] | components["schemas"]["SHA256-Input"] | components["schemas"]["Ssdeep-Input"] | components["schemas"]["TLSH-Input"] | components["schemas"]["Url-Input"] | components["schemas"]["UserAccount-Input"] | components["schemas"]["UserAgent-Input"] | components["schemas"]["Wallet-Input"];
+        };
+        /** PatchPersonaRequest */
+        PatchPersonaRequest: {
+            persona: components["schemas"]["AgentPersona-Input"];
         };
         /** PatchRoleRequest */
         PatchRoleRequest: {
@@ -6812,6 +7110,33 @@ export interface components {
             readonly root_type: "observable";
             /** Is Valid */
             readonly is_valid: boolean;
+        };
+        /** PersonaSearchRequest */
+        PersonaSearchRequest: {
+            /**
+             * Name
+             * @default
+             */
+            name: string;
+            /** Enabled */
+            enabled?: boolean | null;
+            /**
+             * Count
+             * @default 50
+             */
+            count: number;
+            /**
+             * Page
+             * @default 0
+             */
+            page: number;
+        };
+        /** PersonaSearchResponse */
+        PersonaSearchResponse: {
+            /** Personas */
+            personas: components["schemas"]["AgentPersona-Output"][];
+            /** Total */
+            total: number;
         };
         /** Phone */
         "Phone-Input": {
@@ -7656,18 +7981,6 @@ export interface components {
              */
             count_per_type: number;
         };
-        /** SearchResultSection */
-        SearchResultSection: {
-            /** Type */
-            type: string;
-            /** Results */
-            results: Record<string, never>[];
-            /**
-             * Total
-             * @default 0
-             */
-            total: number;
-        };
         /**
          * SearchResponse
          * @description Global search response message.
@@ -7677,10 +7990,12 @@ export interface components {
             sections: components["schemas"]["SearchResultSection"][];
         };
         /**
-         * SemanticSearchResponse
-         * @description Semantic Search Response.
+         * SearchResultSection
+         * @description One type's bucket of results in a grouped search response.
          */
-        SemanticSearchResponse: {
+        SearchResultSection: {
+            /** Type */
+            type: string;
             /** Results */
             results: Record<string, never>[];
             /**
@@ -7712,6 +8027,25 @@ export interface components {
             total: number;
         };
         /**
+         * SemanticMatch
+         * @description Which of an object's indexed documents matched.
+         *
+         *     An object is embedded as several documents (see
+         *     YetiBaseModel.semantic_documents), so a score belongs to one of them
+         *     rather than to the object as a whole. Returning the document that
+         *     matched is what makes the score explainable, and what keeps a
+         *     question's other approaches -- which did not match -- out of the
+         *     response.
+         */
+        SemanticMatch: {
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "self" | "approach";
+            approach?: components["schemas"]["DFIQApproach"] | null;
+        };
+        /**
          * SemanticSearchRequest
          * @description Semantic Search Request.
          */
@@ -7723,6 +8057,46 @@ export interface components {
              * @default 10
              */
             count: number;
+            /** Root Type */
+            root_type?: ("entity" | "indicator" | "dfiq") | null;
+        };
+        /**
+         * SemanticSearchResponse
+         * @description Semantic Search Response, bucketed by type like grouped exact-match
+         *     search: each type gets its own independently-bounded slice of nearest
+         *     neighbors, so results from one type can't crowd another out of a
+         *     shared page. `total` here is just how many were returned for that
+         *     type (not a corpus-wide count) -- ANN search doesn't have a cheap way
+         *     to count "everything within the top-K" beyond what was fetched.
+         */
+        SemanticSearchResponse: {
+            /** Sections */
+            sections: components["schemas"]["SemanticSearchResultSection"][];
+        };
+        /**
+         * SemanticSearchResult
+         * @description One hit: what matched, how well, and what it belongs to.
+         */
+        SemanticSearchResult: {
+            /** Score */
+            score: number;
+            matched: components["schemas"]["SemanticMatch"];
+            object_summary: components["schemas"]["ObjectSummary"];
+        };
+        /**
+         * SemanticSearchResultSection
+         * @description One type's bucket of semantic results.
+         */
+        SemanticSearchResultSection: {
+            /** Type */
+            type: string;
+            /** Results */
+            results: components["schemas"]["SemanticSearchResult"][];
+            /**
+             * Total
+             * @default 0
+             */
+            total: number;
         };
         /**
          * SeverityType
@@ -8156,6 +8530,20 @@ export interface components {
             rbac_enabled: boolean;
             /** Agents Enabled */
             agents_enabled: boolean;
+        };
+        /**
+         * SystemTypesResponse
+         * @description Available object types per family, for the frontend's creation UI.
+         */
+        SystemTypesResponse: {
+            /** Observables */
+            observables: components["schemas"]["TypeEntry"][];
+            /** Entities */
+            entities: components["schemas"]["TypeEntry"][];
+            /** Indicators */
+            indicators: components["schemas"]["TypeEntry"][];
+            /** Dfiq */
+            dfiq: components["schemas"]["TypeEntry"][];
         };
         /** TLSH */
         "TLSH-Input": {
@@ -8673,6 +9061,31 @@ export interface components {
              * @constant
              */
             readonly root_type: "entity";
+        };
+        /** ToolInfo */
+        ToolInfo: {
+            /** Name */
+            name: string;
+            /** Description */
+            description: string;
+        };
+        /**
+         * ToolsResponse
+         * @description The tools a persona may select from, as the agent service implements them.
+         */
+        ToolsResponse: {
+            /** Tools */
+            tools: components["schemas"]["ToolInfo"][];
+        };
+        /**
+         * TypeEntry
+         * @description A single creatable object type.
+         */
+        TypeEntry: {
+            /** Type */
+            type: string;
+            /** Label */
+            label: string;
         };
         /** UpdateACLRequest */
         UpdateACLRequest: {
@@ -9747,6 +10160,169 @@ export interface operations {
             };
         };
     };
+    new_api_v2_agentpersonas__post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["NewPersonaRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AgentPersona-Output"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    details_api_v2_agentpersonas__id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AgentPersona-Output"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_api_v2_agentpersonas__id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    patch_api_v2_agentpersonas__id__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PatchPersonaRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AgentPersona-Output"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    search_api_v2_agentpersonas_search_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PersonaSearchRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PersonaSearchResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     list_sessions_proxy_api_v2_agents_sessions_get: {
         parameters: {
             query?: never;
@@ -9794,6 +10370,75 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_session_proxy_api_v2_agents_sessions__session_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                session_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_models_proxy_api_v2_agents_models_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ModelsResponse"];
+                };
+            };
+        };
+    };
+    list_tools_proxy_api_v2_agents_tools_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ToolsResponse"];
                 };
             };
         };
@@ -12923,6 +13568,26 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["SystemConfigResponse"];
+                };
+            };
+        };
+    };
+    get_system_types_api_v2_system_types_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SystemTypesResponse"];
                 };
             };
         };

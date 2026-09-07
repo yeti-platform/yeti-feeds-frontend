@@ -125,6 +125,20 @@ export type AddContextRequest = Schemas["AddContextRequest"];
 export type ReplaceContextRequest = Schemas["ReplaceContextRequest"];
 export type DeleteContextRequest = Schemas["DeleteContextRequest"];
 
+// Agent personas
+export type PersonaSearchRequest = Schemas["PersonaSearchRequest"];
+export type PersonaSearchResponse = Schemas["PersonaSearchResponse"];
+export type AgentPersona = PersonaSearchResponse["personas"][number];
+/**
+ * A persona being written. `id` and `acls` are assigned by the server, so one
+ * that has not been created yet cannot satisfy AgentPersona.
+ */
+export type AgentPersonaDraft = Omit<AgentPersona, "id" | "acls"> & { id?: string };
+export type NewPersonaRequest = Schemas["NewPersonaRequest"];
+export type PatchPersonaRequest = Schemas["PatchPersonaRequest"];
+export type ToolsResponse = Schemas["ToolsResponse"];
+export type ToolInfo = Schemas["ToolInfo"];
+
 // DFIQ
 export type DFIQSearchResponse = Schemas["DFIQSearchResponse"];
 /** Scenario | Facet | Question. */

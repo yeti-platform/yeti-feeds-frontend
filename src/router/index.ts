@@ -19,6 +19,7 @@ import UserProfile from "@/views/UserProfile.vue";
 import UserAdmin from "@/views/UserAdmin.vue";
 import GroupAdmin from "@/views/GroupAdmin.vue";
 import TagsAdmin from "@/views/TagsAdmin.vue";
+import PersonaAdmin from "@/views/PersonaAdmin.vue";
 import System from "@/views/System.vue";
 
 const routes: RouteRecordRaw[] = [
@@ -213,6 +214,13 @@ const routes: RouteRecordRaw[] = [
         component: TagsAdmin,
         props: true,
         meta: { title: "Tags" }
+      },
+      {
+        path: "personas",
+        name: "PersonaAdmin",
+        component: PersonaAdmin,
+        props: true,
+        meta: { title: "Agent personas" }
       },
       {
         path: "status",
