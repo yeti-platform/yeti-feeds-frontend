@@ -136,6 +136,8 @@ export type AgentPersona = PersonaSearchResponse["personas"][number];
 export type AgentPersonaDraft = Omit<AgentPersona, "id" | "acls"> & { id?: string };
 export type NewPersonaRequest = Schemas["NewPersonaRequest"];
 export type PatchPersonaRequest = Schemas["PatchPersonaRequest"];
+export type ToolsResponse = Schemas["ToolsResponse"];
+export type ToolInfo = Schemas["ToolInfo"];
 
 // DFIQ
 export type DFIQSearchResponse = Schemas["DFIQSearchResponse"];

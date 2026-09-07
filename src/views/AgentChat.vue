@@ -162,29 +162,31 @@
         </v-toolbar>
 
         <div class="d-flex align-start">
-          <!-- Beside the input rather than the session header: the model can be
+          <!-- Beside the input rather than the session header: both can be
                changed at any point in a conversation, which is the whole reason
-               it is selectable -- throttling starts mid-conversation. -->
-          <v-select
-            v-if="availablePersonas.length > 1"
-            v-model="selectedPersona"
-            :items="availablePersonas"
-            label="Persona"
-            density="compact"
-            variant="outlined"
-            hide-details
-            class="mr-2 persona-select"
-          />
-          <v-select
-            v-if="availableModels.length > 1"
-            v-model="selectedModel"
-            :items="availableModels"
-            label="Model"
-            density="compact"
-            variant="outlined"
-            hide-details
-            class="mr-2 model-select"
-          />
+               they are selectable -- throttling starts mid-conversation. -->
+          <div class="d-flex flex-column mr-2">
+            <v-select
+              v-if="availablePersonas.length > 1"
+              v-model="selectedPersona"
+              :items="availablePersonas"
+              label="Persona"
+              density="compact"
+              variant="outlined"
+              hide-details
+              class="mb-2 persona-select"
+            />
+            <v-select
+              v-if="availableModels.length > 1"
+              v-model="selectedModel"
+              :items="availableModels"
+              label="Model"
+              density="compact"
+              variant="outlined"
+              hide-details
+              class="model-select"
+            />
+          </div>
           <v-text-field
             v-model="userInput"
             label="Chat with the agent..."
@@ -350,8 +352,9 @@ export default {
       // to a guess at what the deployment offers.
       selectedModel: null as string | null,
       availablePersonas: [] as string[],
-      // Left null so the service resolves its own default, rather than this
-      // pinning whichever persona happened to sort first.
+      defaultPersona: "" as string,
+      // Empty until the personas endpoint answers. Never pinned to whichever
+      // persona happened to sort first: only to the one flagged default.
       selectedPersona: null as string | null,
       deletingSessionId: null as string | null,
       deleteDialog: false as boolean,
@@ -383,10 +386,7 @@ export default {
         // session that predates the picker.
         const entry = this.availableSessions.find(s => s.id === newVal);
         this.selectedModel = entry?.model || this.defaultModel || null;
-        // Null rather than a guess: the service picks its own default persona,
-        // and pinning one here would misreport an older session as having used
-        // whichever happens to be default now.
-        this.selectedPersona = entry?.persona || null;
+        this.selectedPersona = entry?.persona || this.defaultPersona || null;
       }
     }
   },
@@ -408,6 +408,10 @@ export default {
       try {
         const response = await personasApi.search({ name: "", enabled: true, count: 100, page: 0 });
         this.availablePersonas = response.personas.map(persona => persona.name);
+        // Mirrors what the agent service would resolve on its own, so the
+        // picker shows what an unattended message would actually have used.
+        this.defaultPersona = response.personas.find(persona => persona.default)?.name || "";
+        this.selectedPersona = this.defaultPersona || null;
       } catch (err) {
         // Same as the model picker: hidden rather than shown empty. Messages
         // then name no persona and the agent service resolves its default.
@@ -508,6 +512,7 @@ export default {
     },
     createNewSession() {
       this.selectedModel = this.defaultModel || null;
+      this.selectedPersona = this.defaultPersona || null;
       // Drop any previous draft. It was never sent, so it exists nowhere but
       // this list, and keeping it would leave several identical "New session"
       // entries with no way to tell them apart.

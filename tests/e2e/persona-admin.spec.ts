@@ -60,6 +60,19 @@ test.describe("Persona admin", () => {
       });
     });
 
+    await page.route("**/api/v2/agents/tools", async route => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          tools: [
+            { name: "semantic_search", description: "Searches Yeti by meaning, not exact text." },
+            { name: "ioc_analyzer", description: "Extracts IOCs from web resources." }
+          ]
+        })
+      });
+    });
+
     await page.route("**/api/v2/agentpersonas/search", async route => {
       await route.fulfill({
         status: 200,
@@ -157,5 +170,31 @@ test.describe("Persona admin", () => {
     await page.getByRole("button", { name: "Cancel" }).click();
     await page.getByRole("cell", { name: "SOC analyst" }).getByText("SOC analyst").click();
     await expect(page.getByRole("button", { name: "Delete" })).toBeEnabled();
+  });
+
+  test("offers the tools the agent service implements, with what each one does", async ({ page }) => {
+    await page.goto("/system/personas");
+    await page.getByRole("cell", { name: "Default", exact: true }).getByText("Default").click();
+
+    await page.getByLabel("Tools").click();
+
+    // The name is what gets saved; the description is why someone would pick it.
+    await expect(page.getByRole("option", { name: /semantic_search/ })).toBeVisible();
+    await expect(page.getByText("Searches Yeti by meaning, not exact text.")).toBeVisible();
+    await expect(page.getByRole("option", { name: /ioc_analyzer/ })).toBeVisible();
+  });
+
+  test("still takes a hand-typed tool when the agent service is unreachable", async ({ page }) => {
+    // The names come from the agent service, but a persona has to stay
+    // editable without it -- the field is a combobox for exactly this.
+    await page.route("**/api/v2/agents/tools", route => route.fulfill({ status: 503 }));
+
+    await page.goto("/system/personas");
+    await page.getByRole("cell", { name: "Default", exact: true }).getByText("Default").click();
+
+    await page.getByLabel("Tools").fill("a_tool_typed_by_hand");
+    await page.getByLabel("Tools").press("Enter");
+
+    await expect(page.locator(".v-field").filter({ hasText: "a_tool_typed_by_hand" })).toBeVisible();
   });
 });

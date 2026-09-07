@@ -224,6 +224,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v2/agents/tools": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Tools Proxy
+         * @description Proxies the list of tools a persona may name.
+         */
+        get: operations["list_tools_proxy_api_v2_agents_tools_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v2/agents/stream": {
         parameters: {
             query?: never;
@@ -1905,6 +1925,10 @@ export interface components {
             createTime?: number | null;
             /** Title */
             title?: string | null;
+            /** Model */
+            model?: string | null;
+            /** Persona */
+            persona?: string | null;
         };
         /** ASN */
         "ASN-Input": {
@@ -9038,6 +9062,21 @@ export interface components {
              */
             readonly root_type: "entity";
         };
+        /** ToolInfo */
+        ToolInfo: {
+            /** Name */
+            name: string;
+            /** Description */
+            description: string;
+        };
+        /**
+         * ToolsResponse
+         * @description The tools a persona may select from, as the agent service implements them.
+         */
+        ToolsResponse: {
+            /** Tools */
+            tools: components["schemas"]["ToolInfo"][];
+        };
         /**
          * TypeEntry
          * @description A single creatable object type.
@@ -10380,6 +10419,26 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ModelsResponse"];
+                };
+            };
+        };
+    };
+    list_tools_proxy_api_v2_agents_tools_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ToolsResponse"];
                 };
             };
         };

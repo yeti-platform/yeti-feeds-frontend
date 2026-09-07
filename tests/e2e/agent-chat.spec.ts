@@ -37,7 +37,16 @@ test.describe("Agent Chat", () => {
         contentType: "application/json",
         body: JSON.stringify({
           personas: [
-            { id: "p1", name: "Default", instruction: "x".repeat(30), tools: [], model: null, enabled: true, default: true, acls: {} }
+            {
+              id: "p1",
+              name: "Default",
+              instruction: "x".repeat(30),
+              tools: [],
+              model: null,
+              enabled: true,
+              default: true,
+              acls: {}
+            }
           ],
           total: 1
         })
@@ -177,9 +186,7 @@ test.describe("Agent Chat", () => {
     await expect(page.locator(".v-list-item", { hasText: "What can you tell me about Sandworm Team?" })).toBeVisible();
     await expect(page.locator(".v-list-item", { hasText: "session-titled" })).toHaveCount(0);
   });
-  test("the model selector offers what the service lists, defaulting to its default", async ({
-    page
-  }) => {
+  test("the model selector offers what the service lists, defaulting to its default", async ({ page }) => {
     await page.route("**/api/v2/agents/models", async route => {
       await route.fulfill({
         status: 200,
@@ -238,9 +245,7 @@ test.describe("Agent Chat", () => {
     await expect(page.getByLabel("Chat with the agent...")).toBeVisible();
   });
 
-  test("delete is unavailable for a draft and deletes a real session after confirmation", async ({
-    page
-  }) => {
+  test("delete is unavailable for a draft and deletes a real session after confirmation", async ({ page }) => {
     let deletedPath: string | null = null;
     await page.route("**/api/v2/agents/sessions/*", async route => {
       if (route.request().method() !== "DELETE") {
@@ -276,8 +281,26 @@ test.describe("Agent Chat", () => {
         contentType: "application/json",
         body: JSON.stringify({
           personas: [
-            { id: "p1", name: "Default", instruction: "x".repeat(30), tools: [], model: null, enabled: true, default: true, acls: {} },
-            { id: "p2", name: "SOC analyst", instruction: "x".repeat(30), tools: [], model: null, enabled: true, default: false, acls: {} }
+            {
+              id: "p1",
+              name: "Default",
+              instruction: "x".repeat(30),
+              tools: [],
+              model: null,
+              enabled: true,
+              default: true,
+              acls: {}
+            },
+            {
+              id: "p2",
+              name: "SOC analyst",
+              instruction: "x".repeat(30),
+              tools: [],
+              model: null,
+              enabled: true,
+              default: false,
+              acls: {}
+            }
           ],
           total: 2
         })
@@ -294,9 +317,9 @@ test.describe("Agent Chat", () => {
 
     const selector = page.getByLabel("Persona");
     await expect(selector).toBeVisible();
-    // Left empty rather than preselected: the agent service resolves its own
-    // default, and guessing here would pin the session to the wrong one.
-    await expect(selector).toHaveValue("");
+    // Preselected to the persona flagged default, so the picker shows what an
+    // unattended message would actually have been answered with.
+    await expect(selector).toHaveValue("Default");
 
     // Opened by its field, for the same reason as the model selector: a
     // v-select's input sits behind the field overlay and never becomes
@@ -311,6 +334,46 @@ test.describe("Agent Chat", () => {
     expect(payloads[0]).toMatchObject({ text: "hello", persona: "SOC analyst" });
   });
 
+  test("the persona selector falls back to no selection when none is flagged default", async ({ page }) => {
+    // Nothing forces a default to exist -- every persona can be un-flagged.
+    // The picker then names none and the agent service resolves its own.
+    await page.route("**/api/v2/agentpersonas/search", async route => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          personas: [
+            {
+              id: "p1",
+              name: "One",
+              instruction: "x".repeat(30),
+              tools: [],
+              model: null,
+              enabled: true,
+              default: false,
+              acls: {}
+            },
+            {
+              id: "p2",
+              name: "Two",
+              instruction: "x".repeat(30),
+              tools: [],
+              model: null,
+              enabled: true,
+              default: false,
+              acls: {}
+            }
+          ],
+          total: 2
+        })
+      });
+    });
+
+    await page.goto("/chat");
+
+    await expect(page.getByLabel("Persona")).toHaveValue("");
+  });
+
   test("the persona selector is hidden when only one persona exists", async ({ page }) => {
     // The common case: a deployment that never customised anything has just the
     // seeded default, so a picker would offer no choice.
@@ -320,7 +383,16 @@ test.describe("Agent Chat", () => {
         contentType: "application/json",
         body: JSON.stringify({
           personas: [
-            { id: "p1", name: "Default", instruction: "x".repeat(30), tools: [], model: null, enabled: true, default: true, acls: {} }
+            {
+              id: "p1",
+              name: "Default",
+              instruction: "x".repeat(30),
+              tools: [],
+              model: null,
+              enabled: true,
+              default: true,
+              acls: {}
+            }
           ],
           total: 1
         })

@@ -72,8 +72,15 @@
             density="compact"
             class="mb-3"
           />
+          <!-- A combobox rather than a select: the agent service may be
+               unreachable, and a persona must stay editable when nothing can
+               be offered to pick from. -->
           <v-combobox
             v-model="editing.tools"
+            :items="availableTools"
+            item-title="name"
+            item-value="name"
+            :return-object="false"
             label="Tools"
             hint="Leave empty for every tool. Names the agent does not implement are ignored."
             persistent-hint
@@ -82,7 +89,18 @@
             class="mb-3"
             multiple
             chips
-          />
+          >
+            <!-- Keyed off the slot props rather than the slot's `item`, whose
+                 runtime shape (a wrapper carrying `raw`) and declared type
+                 disagree. The title is the tool name; item-title says so. -->
+            <template v-slot:item="{ props: itemProps }">
+              <v-list-item
+                v-bind="itemProps"
+                :subtitle="toolDescriptions[String(itemProps.title)]"
+                class="tool-option"
+              />
+            </template>
+          </v-combobox>
           <v-select
             v-model="editing.model"
             :items="modelOptions"
@@ -132,8 +150,9 @@ import _ from "lodash";
 import { computed, onMounted, ref, watch } from "vue";
 
 import { eventBus } from "@/plugins/eventbus";
+import * as agentsApi from "@/services/agents";
 import * as personasApi from "@/services/personas";
-import type { AgentPersona, AgentPersonaDraft } from "@/services/types";
+import type { AgentPersona, AgentPersonaDraft, ToolInfo } from "@/services/types";
 import http from "@/services/http";
 
 /** Vuetify's v-data-table-server hands its state to @update:options. */
@@ -165,6 +184,7 @@ const loading = ref(false);
 const personaFilter = ref("");
 const personaFilterDebounced = ref("");
 const availableModels = ref<string[]>([]);
+const availableTools = ref<ToolInfo[]>([]);
 
 // An editable copy, so the table row stays as it was until the save lands.
 const editing = ref<AgentPersonaDraft | null>(null);
@@ -174,6 +194,10 @@ const modelOptions = computed(() => [
   { title: "Service default", value: null },
   ...availableModels.value.map(model => ({ title: model, value: model }))
 ]);
+
+const toolDescriptions = computed<Record<string, string>>(() =>
+  Object.fromEntries(availableTools.value.map(tool => [tool.name, tool.description]))
+);
 
 const canSave = computed(
   () => !!editing.value?.name && (editing.value?.instruction?.trim().length ?? 0) >= MIN_INSTRUCTION_LENGTH
@@ -259,6 +283,13 @@ onMounted(async () => {
     // the model field just falls back to the service default.
     availableModels.value = [];
   }
+  try {
+    availableTools.value = (await agentsApi.listTools()).tools;
+  } catch {
+    // Same: the tools field stays a free-text combobox, which is what it was
+    // before the agent service could be asked what it implements.
+    availableTools.value = [];
+  }
 });
 
 watch(
@@ -268,3 +299,16 @@ watch(
   }, 200)
 );
 </script>
+
+<style scoped>
+/* Tool descriptions run to a few sentences; Vuetify truncates a subtitle to a
+   single line by default, which would cut every one of them off mid-sentence. */
+.tool-option :deep(.v-list-item-subtitle) {
+  white-space: normal;
+  opacity: 0.75;
+}
+
+.tool-option {
+  max-width: 40rem;
+}
+</style>
