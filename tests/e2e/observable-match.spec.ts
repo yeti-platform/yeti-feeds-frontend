@@ -102,6 +102,44 @@ test.describe("Observable Match", () => {
     await expect(page.getByText("hunter2.exe")).toBeVisible();
   });
 
+  test("links the selected known observables and refreshes the results", async ({ page }) => {
+    const graphAdds: Array<Record<string, unknown>> = [];
+    await page.route("**/api/v2/entities/search", route =>
+      route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ entities: [{ id: "e1", name: "Fancy Bear", type: "intrusion-set", root_type: "entity" }], total: 1 })
+      })
+    );
+    for (const family of ["indicators", "dfiq"]) {
+      await page.route(`**/api/v2/${family}/search`, route =>
+        route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ [family]: [], total: 0 }) })
+      );
+    }
+    await page.route("**/api/v2/graph/add", async route => {
+      graphAdds.push(route.request().postDataJSON());
+      await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ id: "edge1" }) });
+    });
+
+    await page.goto("/match");
+    await page.getByRole("textbox").first().fill("evil.com");
+    await page.getByRole("button", { name: "Launch search" }).click();
+    await expect.poll(() => matchRequests.length).toBe(1);
+
+    const knownCard = page.locator(".v-card").filter({ hasText: "Known observables" });
+    await knownCard.locator("tbody input[type=checkbox]").first().check();
+    const selector = knownCard.getByRole("combobox", { name: "Search for entities or indicators" });
+    await selector.fill("Fancy");
+    await page.getByRole("option").filter({ hasText: "Fancy Bear" }).first().click();
+    await knownCard.getByRole("button", { name: /^Link/ }).click();
+
+    await expect.poll(() => graphAdds.length).toBe(1);
+    // The view builds descriptors from root_type, so "observable/1" and "entity/e1".
+    expect(graphAdds[0]).toMatchObject({ source: "observable/1", target: "entity/e1", link_type: "match" });
+    // The results are searched again, as they are after tagging.
+    await expect.poll(() => matchRequests.length).toBe(2);
+  });
+
   test("tags the selected known observables", async ({ page }) => {
     const tagRequests: Array<Record<string, unknown>> = [];
     await page.route("**/api/v2/observables/tag", async route => {

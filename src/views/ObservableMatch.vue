@@ -410,6 +410,9 @@ async function linkKnown() {
     status: "success",
     message: `${selectedKnown.value.length} link requests sent`
   });
+  // Same as after tagging: refresh so "Related entities" shows the new links.
+  selectedKnown.value = [];
+  matchObservables();
 }
 
 async function linkKnownObservable(observable: LooseYetiObject, linkTarget: LooseYetiObject) {
