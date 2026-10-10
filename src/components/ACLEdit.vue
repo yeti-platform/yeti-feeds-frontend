@@ -43,6 +43,7 @@
               <template v-slot:item.remove="{ item }">
                 <v-btn
                   icon="mdi-link-off"
+                  aria-label="Remove access"
                   @click="removeMember(item)"
                   density="compact"
                   variant="tonal"

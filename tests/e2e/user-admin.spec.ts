@@ -136,10 +136,7 @@ test.describe("User admin", () => {
     await page.goto("/system/users");
 
     const aliceRow = page.getByRole("row").filter({ hasText: "alice" });
-    await aliceRow
-      .getByRole("button")
-      .filter({ has: page.locator(".mdi-delete") })
-      .click();
+    await aliceRow.getByRole("button", { name: "Delete user" }).click();
 
     const dialog = page.locator(".v-overlay--active");
     // The dialog names the user it is about — it used to be rendered once per
@@ -196,11 +193,7 @@ test.describe("User admin", () => {
     await bobRow.getByRole("button", { name: "Manage API keys" }).click();
 
     const keysDialog = page.locator(".v-overlay--active");
-    await keysDialog
-      .getByRole("button")
-      .filter({ has: page.locator(".mdi-delete") })
-      .first()
-      .click();
+    await keysDialog.getByRole("button", { name: "Delete API key" }).first().click();
 
     const confirm = page.locator(".v-overlay--active").last();
     await expect(confirm.getByText("Delete API key 'ci'?")).toBeVisible();

@@ -126,6 +126,7 @@
       <template v-slot:item.controls="{ item }">
         <v-btn
           icon="mdi-swap-horizontal"
+          aria-label="Swap link direction"
           @click="swapLink(item.id)"
           density="compact"
           variant="tonal"
@@ -135,7 +136,15 @@
         </v-btn>
         <v-dialog width="700">
           <template v-slot:activator="{ props }">
-            <v-btn icon="mdi-pencil" density="compact" variant="tonal" color="primary" class="me-2" v-bind="props">
+            <v-btn
+              icon="mdi-pencil"
+              density="compact"
+              variant="tonal"
+              color="primary"
+              class="me-2"
+              v-bind="props"
+              aria-label="Edit link"
+            >
             </v-btn>
           </template>
 
@@ -150,6 +159,7 @@
         </v-dialog>
         <v-btn
           icon="mdi-link-off"
+          aria-label="Unlink"
           @click="unlink(item.id)"
           density="compact"
           variant="tonal"

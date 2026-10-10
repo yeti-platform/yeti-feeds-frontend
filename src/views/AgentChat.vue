@@ -198,7 +198,7 @@
             class="flex-grow-1"
           >
             <template v-slot:append-inner>
-              <v-icon @click="sendMessage" color="primary" class="cursor-pointer">mdi-send</v-icon>
+              <v-icon @click="sendMessage" color="primary" class="cursor-pointer" aria-label="Send">mdi-send</v-icon>
             </template>
           </v-text-field>
         </div>

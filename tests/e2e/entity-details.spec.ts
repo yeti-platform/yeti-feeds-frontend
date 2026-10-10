@@ -181,13 +181,13 @@ test.describe('Entity Details', () => {
     await expect(page.locator('tbody tr:visible').filter({ hasText: '10.0.0.1' }).first()).toBeVisible();
 
     // Swap the link direction.
-    await page.locator('button:visible:has(.mdi-swap-horizontal)').first().click();
+    await page.getByRole('button', { name: 'Swap link direction' }).first().click();
     await expect.poll(() => swapRequests.length).toBe(1);
     expect(swapRequests[0].method).toBe('POST');
 
     // Unlink (the component asks for confirmation first).
     page.once('dialog', dialog => dialog.accept());
-    await page.locator('button:visible:has(.mdi-link-off)').first().click();
+    await page.getByRole('button', { name: 'Unlink' }).first().click();
     await expect.poll(() => deleteRequests.length).toBe(1);
     expect(deleteRequests[0].method).toBe('DELETE');
   });
@@ -280,7 +280,7 @@ test.describe('Entity Details', () => {
 
     // Open the EditLink dialog from the neighbor row's pencil (not the entity's
     // own Edit button, which also uses mdi-pencil).
-    await neighborRow.locator('button:has(.mdi-pencil)').click();
+    await neighborRow.getByRole('button', { name: 'Edit link' }).click();
 
     // Scope to the EditLink card (its title starts with "Edit:").
     const dialog = page.locator('.v-card').filter({ hasText: 'Edit:' });
