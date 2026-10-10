@@ -56,7 +56,7 @@
             {{ moment.duration(item.frequency).humanize() }}
           </td>
           <td v-if="displayColumn('last_run')">
-            {{ moment(item.last_run).format("YYYY-MM-DD HH:mm:ss") }}
+            {{ item.last_run ? moment(item.last_run).format("YYYY-MM-DD HH:mm:ss") : "never" }}
           </td>
           <td v-if="displayColumn('description')">{{ item.description }}</td>
 
