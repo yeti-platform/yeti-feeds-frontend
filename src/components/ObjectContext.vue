@@ -115,6 +115,11 @@ function ContextTreeView(): TreeItem[] {
   function treeify(root: TreeItem[], data: unknown) {
     if (Array.isArray(data)) {
       data.forEach((item, index) => {
+        if (item === null || typeof item !== "object") {
+          // A scalar has no children to recurse into, so it goes on the index node itself.
+          root.push({ id: id++, title: `${index}: ${item ?? "N/A"}` });
+          return;
+        }
         const element: TreeItem = { id: id++, title: String(index), children: [] };
         root.push(element);
         treeify(element.children!, item);
