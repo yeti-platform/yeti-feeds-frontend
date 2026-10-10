@@ -6,6 +6,9 @@
     trips it. Same false positive as in the other admin views.
   -->
   <v-container fluid>
+    <v-alert v-if="serviceWarning" type="warning" variant="tonal" density="compact" class="mb-4">
+      {{ serviceWarning }}
+    </v-alert>
     <v-data-table-server
       :items="personas"
       :items-length="totalPersonas"
@@ -185,6 +188,9 @@ const personaFilter = ref("");
 const personaFilterDebounced = ref("");
 const availableModels = ref<string[]>([]);
 const availableTools = ref<ToolInfo[]>([]);
+// Set when the agent service cannot be asked for models or tools; personas
+// stay editable, the user just loses the suggestions.
+const serviceWarning = ref("");
 
 // An editable copy, so the table row stays as it was until the save lands.
 const editing = ref<AgentPersonaDraft | null>(null);
@@ -274,6 +280,9 @@ async function deletePersona() {
   refresh();
 }
 
+const SERVICE_WARNING =
+  "Could not reach the agents service: model and tool suggestions are unavailable. Personas can still be edited.";
+
 onMounted(async () => {
   try {
     const { data } = await http.get<{ models: string[] }>("/agents/models");
@@ -282,6 +291,7 @@ onMounted(async () => {
     // The agent service being unreachable must not stop personas being edited;
     // the model field just falls back to the service default.
     availableModels.value = [];
+    serviceWarning.value = SERVICE_WARNING;
   }
   try {
     availableTools.value = (await agentsApi.listTools()).tools;
@@ -289,6 +299,7 @@ onMounted(async () => {
     // Same: the tools field stays a free-text combobox, which is what it was
     // before the agent service could be asked what it implements.
     availableTools.value = [];
+    serviceWarning.value = SERVICE_WARNING;
   }
 });
 
