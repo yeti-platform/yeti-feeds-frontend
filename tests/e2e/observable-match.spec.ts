@@ -164,4 +164,27 @@ test.describe("Observable Match", () => {
     });
     await expect(page.getByText("1 observables added")).toBeVisible();
   });
+  test("says so when the bloom check is unavailable", async ({ page }) => {
+    const pageErrors: string[] = [];
+    page.on("pageerror", error => pageErrors.push(error.message));
+    await page.route("**/api/v2/bloom/search", route =>
+      route.fulfill({
+        status: 503,
+        contentType: "application/json",
+        body: JSON.stringify({ detail: "Bloom check unavailable: cannot reach the bloomcheck service" })
+      })
+    );
+
+    await page.goto("/match");
+    await page.getByRole("textbox").first().fill("evil.com");
+    await page.getByRole("button", { name: "Launch search" }).click();
+
+    const bloomCard = page.locator(".v-card").filter({ hasText: "Bloom filter matches" });
+    await expect(bloomCard.getByText("Bloom check unavailable: cannot reach the bloomcheck service")).toBeVisible();
+    // The rest of the results still render, and the failure neither escapes
+    // nor reaches the global snackbar.
+    await expect(page.getByText("Known bad domain")).toBeVisible();
+    await expect(page.locator(".v-snackbar__content")).toHaveCount(0);
+    await expect.poll(() => pageErrors.filter(message => message.includes("503"))).toEqual([]);
+  });
 });
