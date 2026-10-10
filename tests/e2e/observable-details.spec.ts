@@ -80,6 +80,47 @@ test.describe("Observable Details", () => {
     await expect(page.getByText("alice").first()).toBeVisible();
   });
 
+  test("shows the values of scalar lists in the context tree", async ({ page }) => {
+    await page.route("**/api/v2/observables/789", async route => {
+      if (route.request().method() !== "GET") {
+        await route.fallback();
+        return;
+      }
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          id: "789",
+          value: "evil.example.com",
+          type: "hostname",
+          root_type: "observable",
+          tags: [],
+          context: [{ source: "seed", ports: [80, 443], seen_in: ["case-1"], nested: { asn: "AS64496" } }],
+          acls: {},
+          created: "2026-03-23T10:00:00Z",
+          modified: "2026-03-23T10:00:00Z"
+        })
+      });
+    });
+
+    await page.goto("/observables/789");
+
+    // Open the panel, then the source node and the list nodes (the tree opens on click).
+    await page.getByText("Context entries").click();
+    const tree = page.locator(".v-treeview");
+    await tree.getByText("seed", { exact: true }).click();
+    await tree.getByText("ports", { exact: true }).click();
+    await tree.getByText("seen_in", { exact: true }).click();
+
+    await expect(tree.getByText("0: 80", { exact: true })).toBeVisible();
+    await expect(tree.getByText("1: 443", { exact: true })).toBeVisible();
+    await expect(tree.getByText("0: case-1", { exact: true })).toBeVisible();
+
+    // Objects keep their expandable node.
+    await tree.getByText("nested", { exact: true }).click();
+    await expect(tree.getByText("asn: AS64496", { exact: true })).toBeVisible();
+  });
+
   test("renders and updates the object context", async ({ page }) => {
     const contextPuts: Array<Record<string, unknown>> = [];
 
