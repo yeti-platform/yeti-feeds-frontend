@@ -20,6 +20,9 @@ export default withVueTs(
     name: 'yeti/rules',
     rules: {
       'vue/multi-word-component-names': 'off',
+      // Vuetify names its data-table cell slots "item.<column>". The rule reads
+      // the dot as a modifier unless told that modifiers are allowed.
+      'vue/valid-v-slot': ['error', { allowModifiers: true }],
     },
   },
 )
