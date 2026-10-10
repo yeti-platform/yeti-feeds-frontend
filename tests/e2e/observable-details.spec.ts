@@ -138,6 +138,24 @@ test.describe("Observable Details", () => {
     expect(contextPuts[0].context).toEqual([{ source: "VirusTotal", malicious: 9 }]);
   });
 
+  test("keeps the new-link dialog usable when the object searches fail", async ({ page }) => {
+    const pageErrors: string[] = [];
+    page.on("pageerror", error => pageErrors.push(error.message));
+    for (const family of ["entities", "indicators", "dfiq"]) {
+      await page.route(`**/api/v2/${family}/search`, route => route.fulfill({ status: 503, contentType: "application/json", body: "{}" }));
+    }
+
+    await page.goto("/observables/789");
+    await expect(page.getByText("evil.example.com").first()).toBeVisible();
+
+    await page.getByRole("button", { name: "new link..." }).click();
+    await page.locator("button:visible", { hasText: "entities / indicators" }).click();
+
+    await expect(page.getByRole("dialog").last()).toBeVisible();
+    // The failed searches used to escape as unhandled rejections.
+    await expect.poll(() => pageErrors.filter(message => message.includes("503"))).toEqual([]);
+  });
+
   test("links the observable to an entity via the new-link dialog", async ({ page }) => {
     const graphAdds: Array<Record<string, unknown>> = [];
 
