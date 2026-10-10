@@ -137,6 +137,9 @@ test.describe("Export List", () => {
 
     await page.getByLabel("Name").fill("my-new-export");
     await page.getByLabel("Description").fill("a description");
+    // Every field in the drawer has a label, including the two selects.
+    await expect(page.getByLabel("Template")).toBeVisible();
+    await expect(page.getByLabel("Unit")).toBeVisible();
 
     await page.getByRole("button", { name: "Add new export" }).click();
 
