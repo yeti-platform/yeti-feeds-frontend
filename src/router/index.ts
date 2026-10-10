@@ -242,6 +242,20 @@ const routes: RouteRecordRaw[] = [
         meta: { title: "Agent Chat" }
       }
     ]
+  },
+  {
+    // Anything the routes above do not match renders the Not Found view inside
+    // the layout, instead of an empty page.
+    path: "/:pathMatch(.*)*",
+    component: Default,
+    children: [
+      {
+        path: "",
+        name: "NotFound",
+        component: () => import("@/views/NotFound.vue"),
+        meta: { title: "Not found" }
+      }
+    ]
   }
 ];
 
@@ -258,7 +272,7 @@ router.beforeEach((to, _from, next) => {
   document.title = "Yeti";
   if (to.meta.title) {
     document.title = `${to.meta.title} - Yeti`;
-  } else {
+  } else if (to.name) {
     document.title = `${String(to.name)} - Yeti`;
   }
   if (to.name === "Login") {
