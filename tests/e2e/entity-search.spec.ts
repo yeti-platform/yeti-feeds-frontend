@@ -95,4 +95,18 @@ test.describe("Entity Search", () => {
     const searchInput = page.getByRole("textbox", { name: /Search entities/ });
     await expect(searchInput).toHaveValue("Emotet");
   });
+
+  test("sends a date comparison as the value prefix the backend reads", async ({ page }) => {
+    // The hint suggests created>=2024-01-01. The backend expects the operator at
+    // the start of the value, so the box translates it.
+    await page.goto("/entities?q=created>=2024-01-01");
+    await expect.poll(() => searchRequests.some(request => request.query)).toBe(true);
+    expect(searchRequests.find(request => request.query)?.query).toEqual({ created: ">2024-01-01" });
+
+    // The backend's own form keeps working unchanged.
+    searchRequests.length = 0;
+    await page.goto("/entities?q=created=<2024-01-01");
+    await expect.poll(() => searchRequests.some(request => request.query)).toBe(true);
+    expect(searchRequests.find(request => request.query)?.query).toEqual({ created: "<2024-01-01" });
+  });
 });

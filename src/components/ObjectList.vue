@@ -138,7 +138,8 @@ const sortBy = ref<SortItem[]>([{ key: "name", order: "asc" }]);
 
 /**
  * Turns the free-text search box into a query object.
- * `key=a,b` becomes a list; a bare or quoted term searches `defaultKey`.
+ * `key=a,b` becomes a list; a bare or quoted term searches `defaultKey`;
+ * `created>=2024-01-01` becomes `{ created: ">2024-01-01" }`, the form the backend reads.
  */
 function extractParamsFromSearchQuery(searchTerm: string, defaultKey: string): Record<string, string | string[]> {
   const pattern =
@@ -151,6 +152,13 @@ function extractParamsFromSearchQuery(searchTerm: string, defaultKey: string): R
     const { key, keyed_terms: keyedTerms, isolated_term: isolatedTerm, quoted_term: quotedTerm } = groups;
 
     if (key && keyedTerms) {
+      // A trailing < or > on the key ("created>=2024-01-01") is the natural way to
+      // write a date comparison. The backend reads the operator from the first
+      // character of the value instead, so move it there.
+      if (key.endsWith("<") || key.endsWith(">")) {
+        result[key.slice(0, -1)] = key.slice(-1) + keyedTerms;
+        continue;
+      }
       const isList = key.startsWith("in__") || key.endsWith("__in") || key === "tags" || keyedTerms.includes(",");
       result[key] = isList ? keyedTerms.split(",").map(term => term.trim()) : keyedTerms;
     }

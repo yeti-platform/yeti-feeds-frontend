@@ -34,7 +34,7 @@
         label="Search indicators ↵"
         density="compact"
         class="mt-2"
-        hint="e.g. created>2024-01-01, supported_os=windows"
+        hint="e.g. created>=2024-01-01, supported_os=windows"
         @click:prepend-inner="submitSearch"
         @keyup.enter="submitSearch"
       />
