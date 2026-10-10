@@ -47,6 +47,19 @@ test.describe('Entity Details', () => {
     });
   });
 
+  test('shows a not-found page when the entity does not exist', async ({ page }) => {
+    await page.route('**/api/v2/entities/123', async route => {
+      await route.fulfill({ status: 404, contentType: 'application/json', body: JSON.stringify({ detail: 'not found' }) });
+    });
+
+    await page.goto('/entities/123');
+
+    await expect(page.getByRole('heading', { name: 'Entity not found' })).toBeVisible();
+    await expect(page).toHaveTitle('Not found - Yeti');
+    await page.getByRole('link', { name: 'Back to the list' }).click();
+    await expect(page).toHaveURL(/\/entities$/);
+  });
+
   test('should display entity details and related objects correctly', async ({ page }) => {
     // Catch console logs to debug
     page.on('console', msg => {

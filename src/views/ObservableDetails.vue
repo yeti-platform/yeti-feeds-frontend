@@ -1,6 +1,13 @@
 <template>
   <v-container fluid>
-    <v-row align="start" no-gutters>
+    <v-alert v-if="notFound" type="warning" variant="tonal" class="ma-2">
+      <h1 class="text-h6">Observable not found</h1>
+      <p class="mt-2">
+        No observable has the id <code>{{ id }}</code>. It may have been deleted, or the link may be stale.
+      </p>
+      <v-btn class="mt-4" variant="tonal" :to="{ name: 'ObservableSearch' }">Go to observables</v-btn>
+    </v-alert>
+    <v-row v-else align="start" no-gutters>
       <v-col cols="8">
         <v-card class="ma-2 break-title" variant="flat" :loading="!observable">
           <template v-slot:title>
@@ -275,6 +282,7 @@ const indicatorTypes = INDICATOR_TYPES;
 // Typed loosely for the same reason as ObjectDetails: the template indexes
 // fields dynamically (observable[field.field]) off the type definitions.
 const observable = ref<LooseYetiObject | null>(null);
+const notFound = ref(false);
 const observableTags = ref<string[]>([]);
 const activeTab = ref(0);
 const totalRelatedObservables = ref(0);
@@ -325,8 +333,19 @@ function updateContext(context: unknown[]) {
 }
 
 async function getObservableDetails() {
-  // Errors surface via the http interceptor's snackbar.
-  observable.value = await observablesApi.details(props.id);
+  notFound.value = false;
+  try {
+    observable.value = await observablesApi.details(props.id);
+  } catch (error) {
+    // Other errors surface via the http interceptor's snackbar; a missing
+    // object gets a page of its own instead of an empty shell.
+    if ((error as { response?: { status?: number } }).response?.status === 404) {
+      notFound.value = true;
+      document.title = "Not found - Yeti";
+      return;
+    }
+    throw error;
+  }
   observableTags.value = observable.value.tags?.map((tag: { name: string }) => tag.name) ?? [];
   // Switch back to the Context view when reloading the page.
   activeTab.value = 0;

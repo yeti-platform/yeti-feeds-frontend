@@ -1,6 +1,13 @@
 <template>
   <v-container fluid>
-    <v-row align="start" no-gutters>
+    <v-alert v-if="notFound" type="warning" variant="tonal" class="ma-2">
+      <h1 class="text-h6">{{ notFoundLabel }} not found</h1>
+      <p class="mt-2">
+        No {{ objectType }} has the id <code>{{ id }}</code>. It may have been deleted, or the link may be stale.
+      </p>
+      <v-btn class="mt-4" variant="tonal" :to="{ name: listRouteName }">Back to the list</v-btn>
+    </v-alert>
+    <v-row v-else align="start" no-gutters>
       <v-col>
         <v-card class="ma-2" variant="flat" :loading="!object">
           <template v-slot:title>
@@ -320,6 +327,11 @@ const HIDE_FIELDS_IN_INFO_BOX = ["name", "description", "tags", "pattern"];
 const typeToEndpointMapping = objectsApi.ENDPOINTS;
 
 const object = ref<LooseYetiObject | null>(null);
+const notFound = ref(false);
+const notFoundLabel = computed(() => props.objectType.charAt(0).toUpperCase() + props.objectType.slice(1));
+const listRouteName = computed(
+  () => ({ entity: "Entities", indicator: "Indicators", dfiq: "DFIQ" })[props.objectType] ?? "GlobalSearch"
+);
 const objectTags = ref<string[]>([]);
 const activeTab = ref("related-indicators");
 const autoTab = ref(true);
@@ -374,8 +386,19 @@ function navigateToFirstPopulatedTab() {
 }
 
 async function getObjectDetails() {
-  // Errors are surfaced by the http interceptor's snackbar.
-  object.value = await objectsApi.details(props.objectType, props.id);
+  notFound.value = false;
+  try {
+    object.value = await objectsApi.details(props.objectType, props.id);
+  } catch (error) {
+    // Other errors are surfaced by the http interceptor's snackbar; a missing
+    // object gets a page of its own instead of an empty shell.
+    if ((error as { response?: { status?: number } }).response?.status === 404) {
+      notFound.value = true;
+      document.title = "Not found - Yeti";
+      return;
+    }
+    throw error;
+  }
   objectTags.value = object.value.tags?.map((tag: { name: string }) => tag.name) ?? [];
   navigateToFirstPopulatedTab();
   appStore.setPageTitleFromObject(object.value);
