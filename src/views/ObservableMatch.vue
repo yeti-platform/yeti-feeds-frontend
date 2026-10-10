@@ -3,7 +3,7 @@
     <v-row>
       <v-col>
         <div class="text-h4 mb-4">Observable matching</div>
-        <v-textarea v-model="textSearch" auto-grow></v-textarea>
+        <v-textarea v-model="textSearch" label="Observables, one per line" auto-grow></v-textarea>
         <div class="d-flex pl-0">
           <v-btn @click="matchObservables" class="me-3" :disabled="observableList.length < 1">Launch search</v-btn>
           <v-checkbox-btn v-model="regexMatch" label="Regex search (expensive!)"></v-checkbox-btn>
@@ -14,6 +14,7 @@
             v-model="addTypeSearch"
             :items="observableTypes"
             density="compact"
+            label="Force type"
             placeholder="Force type"
             variant="outlined"
             hide-details
@@ -25,6 +26,7 @@
             multiple
             v-model="addTagsSearch"
             hide-details
+            label="Optional tags"
             placeholder="Optional tags"
             :delimiters="[',', ' ', ';']"
           ></v-combobox>
@@ -208,6 +210,7 @@
                 v-model="addTypeBloom"
                 :items="observableTypes"
                 density="compact"
+                label="Force type"
                 placeholder="Force type"
                 variant="outlined"
                 hide-details
@@ -218,6 +221,7 @@
                 multiple
                 v-model="addTagsBloom"
                 hide-details
+                label="Optional tags"
                 placeholder="Optional tags"
                 :delimiters="[',', ' ', ';']"
               ></v-combobox>
@@ -268,6 +272,7 @@
                 v-model="addTypeUnknown"
                 :items="observableTypes"
                 density="compact"
+                label="Force type"
                 placeholder="Force type"
                 variant="outlined"
                 hide-details
@@ -278,6 +283,7 @@
                 multiple
                 v-model="addTagsUnknown"
                 hide-details
+                label="Optional tags"
                 placeholder="Optional tags"
                 :delimiters="[',', ' ', ';']"
               ></v-combobox>
