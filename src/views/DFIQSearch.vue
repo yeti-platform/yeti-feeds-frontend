@@ -34,7 +34,7 @@
         label="Search DFIQ ↵"
         density="compact"
         class="mt-2"
-        hint="s1007, dfiq_tags=malware, created>2024-01-01"
+        hint="s1007, dfiq_tags=malware, created>=2024-01-01"
         @click:prepend-inner="submitSearch"
         @keyup.enter="submitSearch"
       />
