@@ -182,8 +182,9 @@
         <v-card class="mb-4">
           <v-card-title
             >Bloom filter matches
-            <v-chip density="comfortable" class="ml-3">{{ bloomResults.length }}</v-chip>
+            <v-chip v-if="!bloomError" density="comfortable" class="ml-3">{{ bloomResults.length }}</v-chip>
           </v-card-title>
+          <v-card-text v-if="bloomError" class="text-medium-emphasis">{{ bloomError }}</v-card-text>
           <v-card-subtitle v-if="bloomResults.length > 0">
             Values that match loaded bloom filters can be added to the database here. Type will be guessed unless
             specified.
@@ -313,6 +314,8 @@ import type { BloomHit, GraphMatchResponse, LooseYetiObject, ObservableType } fr
 const textSearch = ref("");
 const searchResults = ref<GraphMatchResponse | null>(null);
 const bloomResults = ref<BloomHit[]>([]);
+// Set when the bloom check could not run, so the card does not claim "0 matches".
+const bloomError = ref("");
 const selectedBloom = ref<string[]>([]);
 const regexMatch = ref(false);
 const addAndTag = ref(false);
@@ -363,7 +366,16 @@ const observableList = computed(() =>
 );
 
 async function bloomSearch() {
-  bloomResults.value = await bloomApi.search({ values: observableList.value });
+  bloomError.value = "";
+  try {
+    bloomResults.value = await bloomApi.search({ values: observableList.value });
+  } catch (error) {
+    // The bloom check is a separate, optional service. Say so in its card
+    // instead of showing "0 matches", and never let the failure escape.
+    bloomResults.value = [];
+    const detail = (error as { response?: { data?: { detail?: string } } }).response?.data?.detail;
+    bloomError.value = detail || "Bloom check unavailable";
+  }
 }
 
 async function matchObservables() {
@@ -376,7 +388,7 @@ async function matchObservables() {
     return;
   }
 
-  bloomSearch();
+  const bloomCheck = bloomSearch();
   searchResults.value = await graphApi.match({
     // split newlines, trim whitespace, remove empty lines
     observables: observableList.value,
@@ -386,6 +398,7 @@ async function matchObservables() {
     regex_match: regexMatch.value,
     fetch_neighbors: true
   });
+  await bloomCheck;
   loading.value = false;
 }
 
