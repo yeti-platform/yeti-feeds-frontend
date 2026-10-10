@@ -129,6 +129,9 @@ test.describe('Entity Details', () => {
   test('swaps and removes a link from the related-objects table', async ({ page }) => {
     const swapRequests: Array<{ method: string; url: string }> = [];
     const deleteRequests: Array<{ method: string; url: string }> = [];
+    // A link without a description used to make YetiMarkdown throw in render.
+    const pageErrors: string[] = [];
+    page.on('pageerror', error => pageErrors.push(error.message));
 
     await page.route('**/api/v2/graph/search', async route => {
       await route.fulfill({
@@ -151,7 +154,7 @@ test.describe('Entity Details', () => {
                 source: 'entities/123',
                 target: 'observables/456',
                 type: 'resolves',
-                description: 'a link',
+                // No description on purpose, see pageErrors below.
                 created: '2026-03-23T10:00:00Z',
                 modified: '2026-03-23T10:00:00Z',
                 count: 1
@@ -190,6 +193,8 @@ test.describe('Entity Details', () => {
     await page.locator('button:visible:has(.mdi-link-off)').first().click();
     await expect.poll(() => deleteRequests.length).toBe(1);
     expect(deleteRequests[0].method).toBe('DELETE');
+
+    expect(pageErrors.filter(message => message.includes('marked()'))).toEqual([]);
   });
 
   test('saves tags on the entity', async ({ page }) => {
