@@ -3,6 +3,7 @@
     <v-row>
       <v-col>
         <div class="mb-5 text-h4">Celery worker information</div>
+        <v-alert v-if="workerError" type="warning" variant="tonal" class="mb-4">{{ workerError }}</v-alert>
         <v-card variant="flat" :loading="infoLoading">
           <v-card-title>Worker status</v-card-title>
           <v-card-subtitle v-if="infoLoading">Loading...</v-card-subtitle>
@@ -60,6 +61,8 @@ export default {
       // /system/workers returns a free-form {registered, active, ...} blob.
       info: null as Record<string, any> | null,
       infoLoading: true,
+      // Set when /system/workers fails, so the page says so instead of loading forever.
+      workerError: "" as string,
       appStore: useAppStore(),
       restartDisabled: false
     };
@@ -73,14 +76,18 @@ export default {
   methods: {
     getWorkerInfo() {
       this.infoLoading = true;
+      this.workerError = "";
       axios
         .get(`/api/v2/system/workers`)
         .then(response => {
           this.info = response.data;
-          this.infoLoading = false;
         })
         .catch(error => {
-          console.log(error);
+          const reason = error.response?.data?.detail || error.message;
+          this.workerError = `Could not load worker information (${reason}). Is a Celery worker running?`;
+        })
+        .finally(() => {
+          this.infoLoading = false;
         });
     },
     restartWorker(workerName: string) {

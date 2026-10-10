@@ -243,6 +243,8 @@ test.describe("Agent Chat", () => {
     await expect(page.getByLabel("Session ID")).toBeVisible();
     await expect(page.getByLabel("Model")).toHaveCount(0);
     await expect(page.getByLabel("Chat with the agent...")).toBeVisible();
+    // And the page says why the picker is missing.
+    await expect(page.getByRole("alert").filter({ hasText: "Could not reach the agents service" })).toBeVisible();
   });
 
   test("delete is unavailable for a draft and deletes a real session after confirmation", async ({ page }) => {
