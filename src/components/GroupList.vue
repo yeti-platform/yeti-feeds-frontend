@@ -16,7 +16,14 @@
           <!-- delete -->
           <v-dialog max-width="420px" v-if="hasOwnerPerms(item)">
             <template v-slot:activator="{ props }">
-              <v-btn v-bind="props" class="ms-2" size="small" variant="outlined" color="error">
+              <v-btn
+                v-bind="props"
+                class="ms-2"
+                size="small"
+                variant="outlined"
+                color="error"
+                aria-label="Delete group"
+              >
                 <v-icon>mdi-delete</v-icon>
               </v-btn>
             </template>
@@ -42,6 +49,7 @@
                 size="small"
                 variant="outlined"
                 color="primary"
+                aria-label="Edit group"
                 @click="editGroup = { ...item }"
               >
                 <v-icon>mdi-pencil</v-icon>

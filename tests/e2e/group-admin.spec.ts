@@ -122,10 +122,7 @@ test.describe("Group admin", () => {
     await page.goto("/system/groups");
 
     const row = page.getByRole("row").filter({ hasText: "analysts" });
-    await row
-      .getByRole("button")
-      .filter({ has: page.locator(".mdi-pencil") })
-      .click();
+    await row.getByRole("button", { name: "Edit group" }).click();
 
     const dialog = page.locator(".v-overlay--active");
     await dialog.getByLabel("Description").fill("renamed");
@@ -151,10 +148,7 @@ test.describe("Group admin", () => {
     await page.goto("/system/groups");
 
     const row = page.getByRole("row").filter({ hasText: "analysts" });
-    await row
-      .getByRole("button")
-      .filter({ has: page.locator(".mdi-delete") })
-      .click();
+    await row.getByRole("button", { name: "Delete group" }).click();
 
     const dialog = page.locator(".v-overlay--active");
     await expect(dialog.getByText("Delete group analysts?")).toBeVisible();
@@ -299,10 +293,7 @@ test.describe("Group admin", () => {
     await expect(dialog.getByRole("cell", { name: "alice" })).toBeVisible();
 
     // The remove button deletes the ACL *edge* (edge-alice), not the user.
-    await dialog
-      .getByRole("button")
-      .filter({ has: page.locator(".mdi-link-off") })
-      .click();
+    await dialog.getByRole("button", { name: "Remove access" }).click();
 
     await expect.poll(() => removed.length).toBe(1);
     expect(removed[0]).toContain("/rbac/edge-alice");
