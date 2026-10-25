@@ -67,6 +67,7 @@
         placeholder="Add observable types"
       ></v-autocomplete>
       <v-autocomplete
+        label="Template"
         density="compact"
         variant="outlined"
         v-model="selectedExport.template_name"
@@ -83,7 +84,12 @@
           v-model="selectedExport.human_frequency"
         ></v-text-field>
         <!-- select hours, days, minutes, etc -->
-        <v-select density="compact" v-model="frequencyUnit" :items="['hours', 'days', 'minutes', 'seconds']"></v-select>
+        <v-select
+          density="compact"
+          label="Unit"
+          v-model="frequencyUnit"
+          :items="['hours', 'days', 'minutes', 'seconds']"
+        ></v-select>
       </div>
 
       <v-btn-group rounded="1" density="compact">

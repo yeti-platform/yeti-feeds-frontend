@@ -76,6 +76,15 @@ test.describe("Observable Match", () => {
     });
   });
 
+  test("labels the search box and the add-and-tag controls", async ({ page }) => {
+    await page.goto("/match");
+
+    await expect(page.getByLabel("Observables, one per line")).toBeVisible();
+    // Disabled until "Tag and add missing observables" is on, but named either way.
+    await expect(page.getByRole("combobox", { name: "Force type" }).first()).toBeAttached();
+    await expect(page.getByRole("combobox", { name: "Optional tags" }).first()).toBeAttached();
+  });
+
   test("launches a search and renders entity, indicator, known and unknown results", async ({ page }) => {
     await page.goto("/match");
     await page.getByRole("textbox").first().fill("evil.com\nmystery.value");

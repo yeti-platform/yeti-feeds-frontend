@@ -5,6 +5,9 @@
         <div class="mb-5 text-h4">Celery worker information</div>
         <v-alert v-if="workerError" type="warning" variant="tonal" class="mb-4">{{ workerError }}</v-alert>
         <v-card variant="flat" :loading="infoLoading">
+          <template v-slot:loader="{ isActive }">
+            <v-progress-linear :active="isActive" indeterminate height="4" aria-label="Loading worker status" />
+          </template>
           <v-card-title>Worker status</v-card-title>
           <v-card-subtitle v-if="infoLoading">Loading...</v-card-subtitle>
           <v-card-text>
@@ -22,6 +25,9 @@
         </v-card>
         <v-divider class="my-6"></v-divider>
         <v-card variant="flat" :loading="infoLoading">
+          <template v-slot:loader="{ isActive }">
+            <v-progress-linear :active="isActive" indeterminate height="4" aria-label="Loading active tasks" />
+          </template>
           <v-card-title>Active tasks</v-card-title>
           <v-card-subtitle v-if="infoLoading">Loading...</v-card-subtitle>
           <v-card-text>
