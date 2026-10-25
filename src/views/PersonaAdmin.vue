@@ -1,10 +1,4 @@
 <template>
-  <!--
-    eslint-disable vue/valid-v-slot --
-    Vuetify's data table names its cell slots "item.<column>". The rule reads
-    the dot as a modifier, which v-slot has none of, so every column template
-    trips it. Same false positive as in the other admin views.
-  -->
   <v-container fluid>
     <v-data-table-server
       :items="personas"
