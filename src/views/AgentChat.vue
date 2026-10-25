@@ -2,6 +2,9 @@
   <v-container fluid class="mx-10 mt-3">
     <v-row>
       <v-col>
+        <v-alert v-if="serviceError" type="warning" variant="tonal" density="compact" class="mb-4">
+          {{ serviceError }}
+        </v-alert>
         <div class="d-flex align-center mb-4">
           <h2 class="mr-4">Agent chat</h2>
           <v-combobox
@@ -347,6 +350,9 @@ export default {
       sessionId: "session-" + Math.random().toString(36).substring(7),
       availableSessions: [] as SessionSummary[],
       availableModels: [] as string[],
+      // Set when the agent service cannot be reached, so the page says so
+      // instead of only logging to the console.
+      serviceError: "" as string,
       defaultModel: "" as string,
       // Empty until /models answers, so the first message cannot pin a session
       // to a guess at what the deployment offers.
@@ -391,6 +397,11 @@ export default {
     }
   },
   methods: {
+    noteServiceError(err: unknown) {
+      const error = err as { response?: { data?: { detail?: string } }; message?: string };
+      const reason = error.response?.data?.detail || error.message || "unknown error";
+      this.serviceError = `Could not reach the agents service (${reason}). Sessions and models are unavailable until it is back.`;
+    },
     async fetchModels() {
       try {
         const response = await axios.get(`/api/v2/agents/models`);
@@ -402,6 +413,7 @@ export default {
         // messages then go without a model and the service uses its default.
         console.error("Failed to fetch models", err);
         this.availableModels = [];
+        this.noteServiceError(err);
       }
     },
     async fetchPersonas() {
@@ -469,6 +481,7 @@ export default {
           .sort((a: SessionSummary, b: SessionSummary) => a.createTime - b.createTime);
       } catch (err) {
         console.error("Failed to fetch sessions", err);
+        this.noteServiceError(err);
       }
     },
     async fetchSessionHistory(sessionId: string) {

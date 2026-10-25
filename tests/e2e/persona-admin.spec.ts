@@ -94,6 +94,17 @@ test.describe("Persona admin", () => {
     });
   });
 
+  test("warns when the agents service cannot be asked for models and tools", async ({ page }) => {
+    await page.route("**/api/v2/agents/models", route => route.fulfill({ status: 503 }));
+    await page.route("**/api/v2/agents/tools", route => route.fulfill({ status: 503 }));
+
+    await page.goto("/system/personas");
+
+    await expect(page.getByRole("alert").filter({ hasText: "Could not reach the agents service" })).toBeVisible();
+    // Personas themselves still load.
+    await expect(page.locator("tbody tr").first()).toBeVisible();
+  });
+
   test("lists personas, showing an empty tool list as every tool", async ({ page }) => {
     await page.goto("/system/personas");
     await expect(page.getByRole("cell", { name: "Default", exact: true })).toBeVisible();
