@@ -18,6 +18,11 @@ function isAuthRequest(url: string | undefined): boolean {
   return !!url && url.startsWith("/auth/");
 }
 
+/** The matching page shows a failed bloom check in its own card. */
+function isBloomRequest(url: string | undefined): boolean {
+  return Boolean(url && url.includes("/bloom/"));
+}
+
 /** Best-effort extraction of FastAPI's error body: {"detail": "..."} */
 function errorMessage(error: AxiosError): string {
   const detail = (error.response?.data as { detail?: unknown } | undefined)?.detail;
@@ -43,7 +48,7 @@ http.interceptors.response.use(
     // means "wrong password" (Login.vue says so), and a 401 from /auth/me is the
     // normal answer for a logged-out visitor — neither should redirect or raise
     // a snackbar.
-    if (isAuthRequest(error.config?.url)) {
+    if (isAuthRequest(error.config?.url) || isBloomRequest(error.config?.url)) {
       return Promise.reject(error);
     }
 
