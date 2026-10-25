@@ -126,7 +126,7 @@ test.describe("Export List", () => {
 
     // The refresh (run) button. The body must be a TaskParams envelope:
     // {"params": {...}}, not the params object on its own.
-    await page.locator("tbody tr").first().locator("button:has(.mdi-refresh)").click();
+    await page.locator("tbody tr").first().getByRole("button", { name: "Run now" }).click();
     await expect.poll(() => runRequests.length).toBe(1);
     expect(runRequests[0]).toHaveProperty("params");
   });

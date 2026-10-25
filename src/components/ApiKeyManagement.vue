@@ -17,7 +17,14 @@
         <template v-slot:item.actions="{ item }">
           <v-dialog max-width="420px">
             <template v-slot:activator="{ props }">
-              <v-btn v-bind="props" class="ms-2" size="small" variant="outlined" color="error">
+              <v-btn
+                v-bind="props"
+                class="ms-2"
+                size="small"
+                variant="outlined"
+                color="error"
+                aria-label="Delete API key"
+              >
                 <v-icon>mdi-delete</v-icon>
               </v-btn>
             </template>

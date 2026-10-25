@@ -54,7 +54,14 @@
           </template>
         </v-dialog>
 
-        <v-btn class="ms-2" size="small" variant="outlined" color="error" @click="showDeleteDialog(item)">
+        <v-btn
+          class="ms-2"
+          size="small"
+          variant="outlined"
+          color="error"
+          aria-label="Delete user"
+          @click="showDeleteDialog(item)"
+        >
           <v-icon>mdi-delete</v-icon>
         </v-btn>
       </template>

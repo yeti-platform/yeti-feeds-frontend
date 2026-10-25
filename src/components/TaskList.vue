@@ -85,13 +85,21 @@
           </td>
 
           <td v-if="displayColumn('refresh')">
-            <v-btn @click="refresh(item)" icon="mdi-refresh" size="x-small" variant="tonal" :disabled="!item.enabled">
+            <v-btn
+              @click="refresh(item)"
+              icon="mdi-refresh"
+              size="x-small"
+              variant="tonal"
+              :disabled="!item.enabled"
+              aria-label="Run now"
+            >
             </v-btn>
             <v-btn
               v-if="downloadableTasks"
               class="ml-2"
               @click="$emit('taskDownload', item)"
               icon="mdi-download"
+              aria-label="Download"
               size="x-small"
               variant="tonal"
               :disabled="!item.enabled"
