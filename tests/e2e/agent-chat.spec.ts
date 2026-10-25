@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./fixtures";
 
 test.describe("Agent Chat", () => {
   test.beforeEach(async ({ page }) => {
@@ -24,6 +24,17 @@ test.describe("Agent Chat", () => {
           rbac_enabled: true,
           agents_enabled: true
         })
+      });
+    });
+
+    // The view asks for the model list before the sessions; without a mock the
+    // request would go to the dev proxy, which is slow to fail on some hosts.
+    // Tests that care about models override this route.
+    await page.route("**/api/v2/agents/models", async route => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ provider: "mock", models: [], default: "" })
       });
     });
 
