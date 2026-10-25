@@ -59,6 +59,21 @@ test.describe("Observable Details", () => {
     });
   });
 
+  test("shows a not-found page when the observable does not exist", async ({ page }) => {
+    await page.route("**/api/v2/observables/789", async route => {
+      await route.fulfill({ status: 404, contentType: "application/json", body: JSON.stringify({ detail: "not found" }) });
+    });
+
+    await page.goto("/observables/789");
+
+    await expect(page.getByRole("heading", { name: "Observable not found" })).toBeVisible();
+    await expect(page).toHaveTitle("Not found - Yeti");
+    // The empty shell is gone: no Tags card for an object that is not there.
+    await expect(page.getByText("Tags", { exact: true })).toHaveCount(0);
+    await page.getByRole("link", { name: "Go to observables" }).click();
+    await expect(page).toHaveURL(/\/observables$/);
+  });
+
   test("shows the audit timeline in its dialog", async ({ page }) => {
     await page.route("**/api/v2/audit/timeline/**", async route => {
       // The route is /audit/timeline/{id:path}, so the id is the extended id.
