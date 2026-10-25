@@ -131,6 +131,62 @@ test.describe("Export List", () => {
     expect(runRequests[0]).toHaveProperty("params");
   });
 
+  test("shows never for a task that has not run yet", async ({ page }) => {
+    // Registered after beforeEach's route, so it wins for this test: two exports,
+    // one of which has never run (last_run: null).
+    await page.route("**/api/v2/tasks/search", async route => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          tasks: [
+            {
+              id: "e1",
+              name: "hostname-export",
+              type: "export",
+              enabled: true,
+              description: "All hostnames",
+              status: "idle",
+              status_message: "",
+              frequency: "PT1H",
+              last_run: "2026-03-23T10:00:00Z",
+              template_name: "hostnames",
+              acts_on: ["hostname"],
+              include_tags: ["malware"],
+              exclude_tags: [],
+              ignore_tags: []
+            },
+            {
+              id: "e2",
+              name: "fresh-export",
+              type: "export",
+              enabled: true,
+              description: "All hostnames",
+              status: "idle",
+              status_message: "",
+              frequency: "PT1H",
+              last_run: null,
+              template_name: "hostnames",
+              acts_on: ["hostname"],
+              include_tags: ["malware"],
+              exclude_tags: [],
+              ignore_tags: []
+            }
+          ],
+          total: 2
+        })
+      });
+    });
+
+    await page.goto("/exports");
+    await expect(page.locator("tbody tr")).toHaveCount(2);
+
+    await expect(page.getByRole("row").filter({ hasText: "fresh-export" })).toContainText("never");
+    // The hour depends on the browser's timezone; the date and minutes do not.
+    await expect(page.getByRole("row").filter({ hasText: "hostname-export" })).toContainText(/2026-03-23 \d{2}:00:00/);
+    await expect(page.getByText("Invalid date")).toHaveCount(0);
+  });
+
   test("creates a new export from the drawer", async ({ page }) => {
     await page.goto("/exports");
     await expect(page.locator("tbody tr")).toHaveCount(1);
