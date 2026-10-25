@@ -173,7 +173,7 @@
                 <v-chip v-for="ctx in item.context" color="green" :text="ctx.source" class="me-1" size="small"></v-chip>
               </template>
               <template v-slot:item.created="{ item }">
-                {{ moment(item.created).format("YYYY-MM-DD HH:mm:ss") }}
+                {{ moment.utc(item.created).format("YYYY-MM-DD HH:mm:ss") }}
               </template>
             </v-data-table>
           </v-card-text>

@@ -98,6 +98,9 @@ test.describe("Observable Match", () => {
     await expect(page.getByText("Fancy Bear")).toBeVisible();
     await expect(page.getByText("Known bad domain")).toBeVisible();
     await expect(knownCard.getByRole("cell", { name: "evil.com" })).toBeVisible();
+    // The column is headed "Created (UTC)", so the fixture's 10:00Z must not
+    // shift with the browser's timezone.
+    await expect(knownCard.getByRole("cell", { name: "2026-03-23 10:00:00" })).toBeVisible();
     await expect(unknownCard.getByRole("cell", { name: "mystery.value" })).toBeVisible();
     await expect(page.getByText("hunter2.exe")).toBeVisible();
   });
