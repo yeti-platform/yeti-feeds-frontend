@@ -38,6 +38,15 @@ test.describe("Login", () => {
     });
   }
 
+  test("marks the fields for password managers", async ({ page }) => {
+    await page.route("**/api/v2/auth/me", route => route.fulfill({ status: 401, contentType: "application/json", body: "{}" }));
+
+    await page.goto("/login");
+
+    await expect(page.getByLabel("Username")).toHaveAttribute("autocomplete", "username");
+    await expect(page.getByLabel("Password")).toHaveAttribute("autocomplete", "current-password");
+  });
+
   test("shows the login form and no error snackbar when logged out", async ({ page }) => {
     await anonymous(page, { value: false });
     await page.goto("/login");
