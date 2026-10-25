@@ -110,11 +110,19 @@ function detailsRouteName(rootType: string): string {
 async function loadObjects(searchQuery = "") {
   const request = { query: { name: searchQuery }, count: 20 };
   // These were three sequential awaits; they are independent.
-  const [entities, indicators, dfiq] = await Promise.all([
-    objectsApi.searchByEndpoint("entities", request),
-    objectsApi.searchByEndpoint("indicators", request),
-    objectsApi.searchByEndpoint("dfiq", request)
-  ]);
+  let entities, indicators, dfiq;
+  try {
+    [entities, indicators, dfiq] = await Promise.all([
+      objectsApi.searchByEndpoint("entities", request),
+      objectsApi.searchByEndpoint("indicators", request),
+      objectsApi.searchByEndpoint("dfiq", request)
+    ]);
+  } catch {
+    // The http interceptor has already reported the failure; an empty list is
+    // the honest state, and the dialog stays usable for typing a new search.
+    items.value = [];
+    return;
+  }
 
   let found = [...entities.items, ...indicators.items, ...dfiq.items].map(item => ({
     id: item.id,
