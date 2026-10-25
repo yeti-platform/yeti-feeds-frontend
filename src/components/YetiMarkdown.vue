@@ -10,9 +10,11 @@ import { marked } from "marked";
 <script lang="ts">
 export default {
   props: {
+    // Not required: a link or object with no description passes undefined,
+    // and marked() throws on anything but a string.
     text: {
       type: String,
-      required: true
+      default: ""
     },
     inline: {
       type: Boolean,
@@ -22,7 +24,7 @@ export default {
   computed: {
     renderedMarkdown() {
       // marked is used synchronously here; async:false pins the string overload.
-      const sanitizedHTML = DOMPurify.sanitize(marked.parse(this.text, { async: false }));
+      const sanitizedHTML = DOMPurify.sanitize(marked.parse(this.text ?? "", { async: false }));
       return sanitizedHTML;
     }
   }
