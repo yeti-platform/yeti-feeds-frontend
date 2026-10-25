@@ -156,7 +156,7 @@ test.describe('Entity Details', () => {
                 type: 'resolves',
                 // No description on purpose, see pageErrors below.
                 created: '2026-03-23T10:00:00Z',
-                modified: '2026-03-23T10:00:00Z',
+                modified: '2026-03-24T11:30:45Z',
                 count: 1
               }
             ]
@@ -181,7 +181,14 @@ test.describe('Entity Details', () => {
 
     // ObjectDetails renders one DirectNeighbors table per tab, so scope to the
     // visible (active) one.
-    await expect(page.locator('tbody tr:visible').filter({ hasText: '10.0.0.1' }).first()).toBeVisible();
+    const linkRow = page.locator('tbody tr:visible').filter({ hasText: '10.0.0.1' }).first();
+    await expect(linkRow).toBeVisible();
+
+    // First linked and Last linked come from the edge's created and modified
+    // timestamps. Only the date, minutes and seconds are asserted, since the
+    // hour depends on the browser's timezone.
+    await expect(linkRow).toContainText(/2026-03-23 \d{2}:00:00/);
+    await expect(linkRow).toContainText(/2026-03-24 \d{2}:30:45/);
 
     // Swap the link direction.
     await page.locator('button:visible:has(.mdi-swap-horizontal)').first().click();

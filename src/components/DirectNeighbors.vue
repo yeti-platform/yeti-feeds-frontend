@@ -59,7 +59,7 @@
       </template>
 
       <template v-slot:item.modified="{ item }">
-        {{ moment(item.created).format("YYYY-MM-DD HH:mm:ss") }}
+        {{ moment(item.modified).format("YYYY-MM-DD HH:mm:ss") }}
       </template>
 
       <template v-slot:item.relevant_node.type="{ item }">
