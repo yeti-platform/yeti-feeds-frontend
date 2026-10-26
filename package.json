@@ -47,6 +47,7 @@
     "@vue/eslint-config-typescript": "^14.9.0",
     "eslint": "^9.39.5",
     "eslint-plugin-vue": "^9.33.0",
+    "eslint-plugin-vuejs-accessibility": "^2.6.2",
     "openapi-typescript": "^7.13.0",
     "sass": "^1.101.0",
     "typescript": "^5.9.3",
