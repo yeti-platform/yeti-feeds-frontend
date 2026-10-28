@@ -101,10 +101,13 @@ test.describe("Observable Match", () => {
     await expect.poll(() => bloomRequests.length).toBe(1);
     expect(bloomRequests[0]).toEqual({ values: ["evil.com", "mystery.value"] });
 
+    const entitiesCard = page.locator(".v-card").filter({ hasText: "Related entities" });
     const knownCard = page.locator(".v-card").filter({ hasText: "Known observables" });
     const unknownCard = page.locator(".v-card").filter({ hasText: "Unknown observables" });
 
     await expect(page.getByText("Fancy Bear")).toBeVisible();
+    // Each related entity row names the looked-up value its link belongs to.
+    await expect(entitiesCard.getByRole("cell", { name: "evil.com" })).toBeVisible();
     await expect(page.getByText("Known bad domain")).toBeVisible();
     await expect(knownCard.getByRole("cell", { name: "evil.com" })).toBeVisible();
     // The column is headed "Created (UTC)", so the fixture's 10:00Z must not
