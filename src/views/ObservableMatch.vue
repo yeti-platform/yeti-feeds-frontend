@@ -49,7 +49,8 @@
                   :items="entityMatches"
                   :headers="[
                     { title: 'Entity', key: 'name' },
-                    { title: 'Link type', key: 'link' }
+                    { title: 'Link type', key: 'link' },
+                    { title: 'Observable', key: 'observable' }
                   ]"
                 >
                   <template v-slot:item.name="{ item }">
@@ -338,15 +339,20 @@ const selectedUnknown = ref<string[]>([]);
 const selectedKnown = ref<LooseYetiObject[]>([]);
 const loading = ref(false);
 
-const entityMatches = computed(
-  () =>
-    searchResults.value?.entities.map(entity => ({
-      name: entity[1].name,
-      type: entity[1].type,
-      id: entity[1].id,
-      link: entity[0].type
+// One row per link: an entity linked to several looked-up values is listed
+// for each, next to the value the link belongs to.
+const entityMatches = computed(() => {
+  const knownValues = new Map(searchResults.value?.known.map(obs => [`observables/${obs.id}`, obs.value]));
+  return (
+    searchResults.value?.entities.map(([link, entity]) => ({
+      name: entity.name,
+      type: entity.type,
+      id: entity.id,
+      link: link.type,
+      observable: knownValues.get(link.source) ?? knownValues.get(link.target) ?? ""
     })) ?? []
-);
+  );
+});
 
 const indicatorMatches = computed(
   () =>
