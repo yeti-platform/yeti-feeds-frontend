@@ -5,6 +5,10 @@ import { expect, test } from "./fixtures";
  * the "New Entity" menu, filling the type's editable fields, and saving through
  * services/objects.create (POST /entities/). NewObject is also reused by the
  * observable/indicator/dfiq search views and LinkObject.
+ *
+ * The "query type" cases use the same form for a Query indicator
+ * (/indicators): its Query type box is a combobox, so it offers the
+ * suggestions in QUERY_TYPES and also takes a typed value.
  */
 
 const admin = { username: "testadmin", admin: true, email: "test@example.com" };
@@ -116,5 +120,85 @@ test.describe("New object", () => {
     // with the offending field name (the global snackbar also shows it).
     await expect(dialog.getByText("Error saving Malware:")).toBeVisible();
     await expect(dialog.locator("li").filter({ hasText: "field required" })).toContainText("name");
+  });
+
+  test.describe("query type", () => {
+    let creates: Array<Record<string, unknown>>;
+
+    test.beforeEach(async ({ page }) => {
+      creates = [];
+
+      // ObjectList's per-type search on the indicator tabs — return an empty list.
+      await page.route("**/api/v2/indicators/search", async route => {
+        await route.fulfill({
+          status: 200,
+          contentType: "application/json",
+          body: JSON.stringify({ indicators: [], total: 0 })
+        });
+      });
+
+      await page.route("**/api/v2/indicators/", async route => {
+        if (route.request().method() !== "POST") {
+          await route.fallback();
+          return;
+        }
+        creates.push(route.request().postDataJSON());
+        await route.fulfill({
+          status: 200,
+          contentType: "application/json",
+          body: JSON.stringify({ id: "i42", name: "Hunt", type: "query", root_type: "indicator" })
+        });
+      });
+
+      // The details route the form redirects to on success.
+      await page.route("**/api/v2/indicators/i42", async route => {
+        await route.fulfill({
+          status: 200,
+          contentType: "application/json",
+          body: JSON.stringify({
+            id: "i42",
+            name: "Hunt",
+            type: "query",
+            root_type: "indicator",
+            pattern: "",
+            query_type: "",
+            target_systems: [],
+            relevant_tags: [],
+            tags: [],
+            context: [],
+            acls: {},
+            created: "2026-03-23T10:00:00Z",
+            modified: "2026-03-23T10:00:00Z"
+          })
+        });
+      });
+
+      await page.goto("/indicators");
+      await page.getByRole("button", { name: "New Indicator" }).click();
+      await page.getByRole("listitem").filter({ hasText: "Query" }).first().click();
+      await expect(page.getByRole("dialog").getByText("New Query")).toBeVisible();
+    });
+
+    test("saves a type picked from the suggestions", async ({ page }) => {
+      const dialog = page.getByRole("dialog");
+      await dialog.getByLabel("Name", { exact: true }).fill("Hunt");
+      await dialog.getByRole("combobox", { name: "Query type" }).click();
+      await page.getByRole("option", { name: "velociraptor", exact: true }).click();
+      await dialog.getByRole("button", { name: "Save" }).click();
+
+      await expect.poll(() => creates.length).toBe(1);
+      expect(creates[0]).toMatchObject({ indicator: { type: "query", name: "Hunt", query_type: "velociraptor" } });
+    });
+
+    test("saves a typed type that is not among the suggestions", async ({ page }) => {
+      const dialog = page.getByRole("dialog");
+      await dialog.getByLabel("Name", { exact: true }).fill("Hunt");
+      // The suggestions are a convenience, not a closed list.
+      await dialog.getByRole("combobox", { name: "Query type" }).fill("qradar");
+      await dialog.getByRole("button", { name: "Save" }).click();
+
+      await expect.poll(() => creates.length).toBe(1);
+      expect(creates[0]).toMatchObject({ indicator: { type: "query", name: "Hunt", query_type: "qradar" } });
+    });
   });
 });

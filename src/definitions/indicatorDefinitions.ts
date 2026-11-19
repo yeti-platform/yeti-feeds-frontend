@@ -2,7 +2,22 @@ import { PRIVATE_INDICATOR_TYPES } from "@/definitions/private/privateIndicatorD
 import type { ObjectTypeDefinition } from "@/definitions/types";
 
 export const DIAMOND_MODEL = ["adversary", "capability", "infrastructure", "victim"];
-export const QUERY_TYPES = ["opensearch", "osquery", "sql", "splunk", "censys", "shodan"];
+export const QUERY_TYPES = [
+  "opensearch",
+  "osquery",
+  "sql",
+  "splunk",
+  "censys",
+  "shodan",
+  "github",
+  "velociraptor",
+  "falcon",
+  "kql",
+  "sentinelone",
+  "elastic",
+  "secops",
+  "virustotal"
+];
 
 export const INDICATOR_TYPES: ObjectTypeDefinition[] = [
   {
