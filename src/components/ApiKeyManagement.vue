@@ -6,9 +6,6 @@
         <template v-slot:item.created="{ item }">
           {{ formatDate(item.created) }}
         </template>
-        <template v-slot:item.scopes="{ item }">
-          <v-chip v-for="scope in item.scopes" :key="scope" density="compact" color="green">{{ scope }}</v-chip>
-        </template>
         <template v-slot:item.last_used="{ item }">
           <span v-if="item.last_used">{{ formatDate(item.last_used) }}</span>
           <span v-else>Never</span>
@@ -62,16 +59,13 @@
         <v-card>
           <v-card-title class="text-h6">New API key</v-card-title>
           <v-card-text v-if="!newApiKeyToken">
-            <v-text-field density="compact" label="Key name" v-model="newApiKey.name"></v-text-field>
-            <v-combobox
-              v-model="newApiKey.scopes"
-              label="Scopes"
-              :items="['all']"
-              clearable
-              multiple
+            <v-text-field
               density="compact"
-              :delimiters="[',', ' ', ';']"
-            />
+              label="Key name"
+              v-model="newApiKey.name"
+              hint="API keys inherit all permissions of this user."
+              persistent-hint
+            ></v-text-field>
           </v-card-text>
           <v-card-text v-else>
             This is the only time your API key will be accessible. Please copy it to your clipboard now and store it in
@@ -121,14 +115,13 @@ const emit = defineEmits<{
 const apiKeyHeaders = [
   { title: "Created", value: "created" },
   { title: "Name", value: "name" },
-  { title: "Scopes", value: "scopes" },
   { title: "Last used", value: "last_used" },
   { title: "Enabled", value: "enabled" },
   { title: "Actions", value: "actions" }
 ];
 
 const newKeyDialog = ref(false);
-const newApiKey = reactive<{ name: string; scopes: string[] }>({ name: "", scopes: [] });
+const newApiKey = reactive<{ name: string }>({ name: "" });
 const newApiKeyToken = ref<string | null>(null);
 
 /**
@@ -140,7 +133,6 @@ watch(newKeyDialog, open => {
   if (!open) {
     newApiKeyToken.value = null;
     newApiKey.name = "";
-    newApiKey.scopes = [];
   }
 });
 
@@ -152,7 +144,7 @@ async function addApiKey() {
   const response = await usersApi.newApiKey({
     user_id: props.profileId,
     name: newApiKey.name,
-    scopes: newApiKey.scopes
+    scopes: ["all"]
   });
   newApiKeyToken.value = response.token;
   emit("apiKeyUpdate", response.api_keys);
